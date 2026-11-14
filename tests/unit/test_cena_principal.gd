@@ -14,6 +14,7 @@ func test_cena_principal_abre_e_monta_os_elementos() -> void:
 		return
 
 	tree.root.add_child(raiz)  # dispara _ready()
+	assert_true(raiz.is_node_ready(), "_ready() precisa ter rodado ao entrar na árvore")
 	for nome in ["Ambiente", "Sol", "Chao", "PipaDecorativa", "Camera", "Interface"]:
 		assert_not_null(raiz.get_node_or_null(nome), "faltou o nó %s" % nome)
 

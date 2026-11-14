@@ -20,6 +20,12 @@ var _mensagens: Array[String] = []
 
 
 func _initialize() -> void:
+	# Durante _initialize a raiz ainda não está pronta para receber cenas
+	# (_ready não seria chamado). Os testes rodam no primeiro quadro.
+	process_frame.connect(_rodar_tudo, CONNECT_ONE_SHOT)
+
+
+func _rodar_tudo() -> void:
 	print("PIPA BRASIL — testes automáticos")
 	var arquivos: Array[String] = []
 	for pasta in PASTAS_DE_TESTE:
