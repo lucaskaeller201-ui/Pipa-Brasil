@@ -167,9 +167,10 @@ func _atualizar_camera() -> void:
 		0:  # atrás do pipeiro, olhando a pipa
 			_camera.position = mao + Vector3(0.6, 0.5, 3.0)
 			_camera.look_at(alvo, Vector3.UP)
-		1:  # de lado, vendo a linha inteira
+		1:  # de lado, vendo a linha inteira (distância ajustada ao zoom)
 			var meio := (mao + alvo) * 0.5
-			_camera.position = meio + Vector3(_comprimento_linha * 1.1, 2.0, 0.0)
+			var distancia := (mao.distance_to(alvo) * 0.75 + 4.0) / tan(deg_to_rad(_camera.fov * 0.5))
+			_camera.position = meio + Vector3(distancia, 2.0, 0.0)
 			_camera.look_at(meio, Vector3.UP)
 		_:  # perto da pipa, entre ela e o pipeiro
 			var para_mao := (mao - alvo).normalized()
@@ -197,8 +198,10 @@ func texto_info() -> String:
 		"Física: %s ms/passo   FPS: %d" % [_num(_custo_ms, 2), Engine.get_frames_per_second()],
 		"Setas: azul vento · verde ar · laranja linha · roxo peso",
 		"Rabiola em rosa · Build %s" % BuildInfo.COMMIT,
-		"Teclado: W puxar · S afrouxar · A dar linha · Z largar · R recolher · Espaço puxão · Q arrancão · E desbicar",
 	])
+	if not OS.has_feature("mobile"):
+		linhas.append("Teclado: W puxar · S afrouxar · A dar linha · Z largar")
+		linhas.append("R recolher · Espaço puxão · Q arrancão · E desbicar")
 	return "\n".join(linhas)
 
 
@@ -272,7 +275,7 @@ func _criar_interface() -> void:
 	_slider(caixa, "zoom", 15.0, 75.0, 1.0, _camera.fov, _ao_mudar_zoom)
 	_slider(caixa, "sensibilidade", 0.5, 1.5, 0.1, _sensibilidade, _ao_mudar_sensibilidade)
 	_toggle(caixa, "Turbulência", _turbulencia, _ao_mudar_turbulencia)
-	_toggle(caixa, "Rabiola (desligada = raia sem rabiola)", true, _ao_mudar_rabiola)
+	_toggle(caixa, "Com rabiola", true, _ao_mudar_rabiola)
 	_toggle(caixa, "Mostrar forças", _mostrar_forcas, _ao_mudar_forcas)
 	_botao(caixa, "Rajada (3 s)", _ao_tocar_rajada)
 	_botao_camera = _botao(caixa, "Câmera: %s" % CAMERAS[_camera_modo], _ao_tocar_camera)
