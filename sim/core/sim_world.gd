@@ -6,8 +6,9 @@ extends RefCounted
 ## um, aplica forças, integra e resolve as restrições (XPBD com passos
 ## pequenos). Nada aqui depende de nós ou cenas do Godot.
 ##
-## Fase 1: a mão do pipeiro é um ponto fixo e a linha tem comprimento fixo.
-## A carretilha e os comandos entram na Fase 2.
+## Sem piloto (pilot == null) a mão é um ponto fixo e a linha não muda de
+## comprimento (laboratório da Fase 1). Com piloto, a mão e a carretilha
+## seguem os comandos em `input` e em Pilot.trigger() (Fase 2).
 
 const LINE_MASS_PER_METER := 0.0003   ## kg/m (linha de náilon fina)
 const LINE_STIFFNESS := 600.0         ## N: rigidez axial EA
@@ -22,6 +23,8 @@ var kite: KiteBody
 var line: ParticleChain
 var tail: ParticleChain  ## null se a pipa estiver sem rabiola
 var hand_position := Vector3(0.0, 1.2, 0.0)
+var pilot: Pilot  ## null = mão fixa
+var input := PilotInput.new()
 var substeps := 4
 var time := 0.0
 
@@ -36,12 +39,18 @@ var _attach_dl := 0.0
 
 ## Cria um voo pronto para começar: a linha esticada com o comprimento dado,
 ## na elevação e no azimute (graus) indicados, a pipa virada para o pipeiro.
+## Com with_pilot, a mão começa na posição de descanso do braço do pipeiro.
+## pre_tension (N) encurta a linha no lançamento para ela já sair esticada.
 static func create_flight(p_wind: WindField, definition: KiteDefinition, line_length := 30.0,
-		elevation_deg := 30.0, azimuth_deg := 0.0, p_substeps := 4) -> SimWorld:
+		elevation_deg := 30.0, azimuth_deg := 0.0, p_substeps := 4, with_pilot := false,
+		pre_tension := 0.0) -> SimWorld:
 	var w := SimWorld.new()
 	w.wind = p_wind
 	w.substeps = p_substeps
 	w.kite = KiteBody.new(definition)
+	if with_pilot:
+		w.pilot = Pilot.new()
+		w.hand_position = w.pilot.hand_position
 
 	var e := deg_to_rad(elevation_deg)
 	var az := deg_to_rad(azimuth_deg)
@@ -54,6 +63,8 @@ static func create_flight(p_wind: WindField, definition: KiteDefinition, line_le
 	w.line = ParticleChain.new(ParticleChain.Kind.LINE, w.hand_position, bridle, segments,
 		LINE_MASS_PER_METER * line_length, 1.0 / LINE_STIFFNESS, LINE_DIAMETER, LINE_DRAG_COEFFICIENT)
 	w.line.inv_mass[0] = 0.0  # presa na mão
+	if pre_tension > 0.0:
+		w.line.scale_rest(1.0 - pre_tension / LINE_STIFFNESS)
 
 	if definition.tail_enabled:
 		var ta := w.kite.world_point(definition.tail_attach)
@@ -74,6 +85,14 @@ func _substep(h: float) -> void:
 	var t := time
 	var k := kite
 	var d := k.definition
+
+	if pilot != null:
+		var dir := (bridle_position() - Pilot.SHOULDER).normalized()
+		var delta := pilot.update(h, t, input, dir, tension, line.rest_total())
+		if delta != 0.0:
+			line.change_length(delta)
+		hand_position = pilot.hand_position
+	k.update_flex(tension, h)
 
 	k.compute_aero(wind, t)
 	k.integrate(h)
@@ -165,6 +184,17 @@ func lateral_offset() -> float:
 ## Comprimento atual da linha dividido pelo comprimento de repouso.
 func line_stretch() -> float:
 	return line.current_length() / line.rest_total()
+
+
+## Comprimento de linha solto (m), o que a carretilha controla.
+func line_length() -> float:
+	return line.rest_total()
+
+
+## Dispara um comando de impulso (puxão, arrancão, desbicar).
+func trigger(impulse: Pilot.Impulse) -> void:
+	if pilot != null:
+		pilot.trigger(impulse, time)
 
 
 func is_finite_state() -> bool:

@@ -1,0 +1,29 @@
+class_name PilotInput
+extends RefCounted
+## Comandos do pipeiro num instante. É a ÚNICA forma de controlar a pipa,
+## para o jogador e para os bots (a mesma interface, sem atalhos).
+##
+## Comandos contínuos (enquanto o botão está apertado) ficam aqui. Os comandos
+## de impulso (puxão, arrancão, desbicar) são disparados com Pilot.trigger().
+
+var pull := 0.0         ## Puxar: 0..1, recua a mão (mais tensão)
+var slack := 0.0        ## Afrouxar: 0..1, leva a mão em direção à pipa (menos tensão)
+var pay_out := false    ## Dar linha: solta linha com freio (até 2 m/s)
+var free_spool := false ## Largar: carretilha livre, a pipa puxa a linha
+var reel_in := false    ## Recolher: enrola linha (1,2 m/s, se a força deixar)
+
+
+func clear() -> void:
+	pull = 0.0
+	slack = 0.0
+	pay_out = false
+	free_spool = false
+	reel_in = false
+
+
+func copy_from(other: PilotInput) -> void:
+	pull = other.pull
+	slack = other.slack
+	pay_out = other.pay_out
+	free_spool = other.free_spool
+	reel_in = other.reel_in

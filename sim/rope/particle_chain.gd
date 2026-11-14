@@ -18,8 +18,10 @@ var pos := PackedVector3Array()
 var prev := PackedVector3Array()
 var vel := PackedVector3Array()
 var inv_mass := PackedFloat64Array()
-var rest_length := 0.0      ## m por segmento
-var compliance := 0.0       ## m/N por segmento
+var rest := PackedFloat64Array()  ## m: comprimento de repouso de cada segmento
+var rest_length := 0.0      ## m: comprimento nominal de um segmento
+var compliance_per_meter := 0.0  ## m/N por metro de linha
+var mass_per_particle := 0.0
 var thickness := 0.0        ## m: diâmetro da linha ou largura da rabiola
 var drag_coefficient := 1.0
 
@@ -35,13 +37,17 @@ func _init(p_kind: Kind, start: Vector3, end: Vector3, segments: int, total_mass
 	vel.resize(n)
 	inv_mass.resize(n)
 	_forces.resize(n)
+	rest.resize(segments)
+	mass_per_particle = total_mass / segments
 	for i in n:
 		pos[i] = start.lerp(end, float(i) / segments)
 		prev[i] = pos[i]
 		vel[i] = Vector3.ZERO
 		inv_mass[i] = segments / total_mass
 	rest_length = start.distance_to(end) / segments
-	compliance = compliance_per_meter * rest_length
+	for i in segments:
+		rest[i] = rest_length
+	self.compliance_per_meter = compliance_per_meter
 	thickness = p_thickness
 	drag_coefficient = p_drag_coefficient
 
@@ -51,7 +57,45 @@ func size() -> int:
 
 
 func rest_total() -> float:
-	return rest_length * (pos.size() - 1)
+	var total := 0.0
+	for r in rest:
+		total += r
+	return total
+
+
+## Muda o comprimento da linha no segmento da mão (índice 0), como uma
+## carretilha: positivo solta linha, negativo recolhe. Cria ou remove nós
+## para manter os segmentos perto do comprimento nominal.
+func change_length(delta: float) -> void:
+	rest[0] += delta
+	while rest[0] > 1.5 * rest_length:
+		var a := pos[0]
+		var b := pos[1]
+		var r0 := rest[0]
+		var novo := a.lerp(b, (r0 - rest_length) / r0)
+		pos.insert(1, novo)
+		prev.insert(1, novo)
+		vel.insert(1, vel[1])
+		inv_mass.insert(1, 1.0 / mass_per_particle)
+		_forces.insert(1, Vector3.ZERO)
+		rest[0] = r0 - rest_length
+		rest.insert(1, rest_length)
+	while rest[0] < 0.3 * rest_length and pos.size() > 3:
+		rest[0] += rest[1]
+		rest.remove_at(1)
+		pos.remove_at(1)
+		prev.remove_at(1)
+		vel.remove_at(1)
+		inv_mass.remove_at(1)
+		_forces.remove_at(1)
+	rest[0] = maxf(rest[0], 0.05)
+
+
+## Encurta todos os segmentos por um fator (pré-tensão no lançamento).
+func scale_rest(factor: float) -> void:
+	for i in rest.size():
+		rest[i] *= factor
+	rest_length *= factor
 
 
 func current_length() -> float:
@@ -99,12 +143,13 @@ func integrate(h: float) -> void:
 ## Uma passada de Gauss-Seidel nas restrições de distância.
 ## Devolve o multiplicador do primeiro segmento (útil para medir tensão).
 func solve_segments(h: float) -> float:
-	var alpha_tilde := compliance / (h * h)
+	var alpha_per_meter := compliance_per_meter / (h * h)
 	var first_dl := 0.0
 	for i in pos.size() - 1:
 		var w1 := inv_mass[i]
 		var w2 := inv_mass[i + 1]
-		var wsum := w1 + w2 + alpha_tilde
+		var seg_rest := rest[i]
+		var wsum := w1 + w2 + alpha_per_meter * seg_rest
 		if wsum <= 0.0:
 			continue
 		var d := pos[i] - pos[i + 1]
@@ -112,7 +157,7 @@ func solve_segments(h: float) -> float:
 		if dist < 1e-9:
 			continue
 		var n := d / dist
-		var dl := -(dist - rest_length) / wsum
+		var dl := -(dist - seg_rest) / wsum
 		pos[i] += n * (w1 * dl)
 		pos[i + 1] -= n * (w2 * dl)
 		if i == 0:
@@ -125,10 +170,11 @@ func solve_segments(h: float) -> float:
 ## ela. Deixa a linha praticamente inextensível com custo baixo.
 func solve_max_reach() -> void:
 	var anchor := pos[0]
+	var limit := 0.0
 	for i in range(1, pos.size()):
+		limit += rest[i - 1]
 		var d := pos[i] - anchor
 		var dist := d.length()
-		var limit := i * rest_length
 		if dist > limit:
 			pos[i] = anchor + d * (limit / dist)
 

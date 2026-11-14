@@ -16,6 +16,21 @@ extends Resource
 @export var triangles := PackedVector3Array()          ## painéis: 3 vértices por triângulo
 @export var corners := PackedVector3Array()            ## pontos de contato com o chão
 
+@export_group("Vareta flexível e giro")
+## Vareta transversal que enverga com a tensão: diedro entre o mínimo (linha
+## frouxa) e o máximo (linha esticada). Desligado = diedro fixo da geometria.
+@export var flex_enabled := false
+@export var dihedral_min_deg := 2.0
+@export var dihedral_max_deg := 16.0
+@export var flex_reference_tension := 1.2  ## N: tensão em que a vareta enverga toda
+## Estabilidade direcional da vareta envergada (alinha a espinha com o fluxo).
+@export var bow_stability := 0.0
+## Amortecimento do giro no plano da pipa (arrasto das bordas e varetas).
+@export var spin_damping_quadratic := 0.0
+@export var spin_damping_linear := 0.0
+## Tendência de giro com a linha frouxa (sentido preferido da pipa; 0 = nenhum).
+@export var spin_bias := 0.0
+
 @export_group("Rabiola")
 @export var tail_enabled := true
 @export var tail_length := 2.0     ## m
@@ -28,6 +43,7 @@ extends Resource
 var panel_centers := PackedVector3Array()
 var panel_normals := PackedVector3Array()
 var panel_areas := PackedFloat64Array()
+var panel_sides := PackedFloat64Array()  ## -1 esquerda, +1 direita, 0 centro
 var total_area := 0.0
 
 
@@ -36,6 +52,7 @@ func rebuild() -> void:
 	panel_centers.clear()
 	panel_normals.clear()
 	panel_areas.clear()
+	panel_sides.clear()
 	total_area = 0.0
 	for i in range(0, triangles.size(), 3):
 		var a := triangles[i]
@@ -49,6 +66,8 @@ func rebuild() -> void:
 		panel_centers.append((a + b + c) / 3.0)
 		panel_normals.append(n)
 		panel_areas.append(area)
+		var cx := ((a + b + c) / 3.0).x
+		panel_sides.append(-1.0 if cx < -1e-6 else (1.0 if cx > 1e-6 else 0.0))
 		total_area += area
 
 
@@ -71,4 +90,20 @@ static func raia_laboratorio(dihedral_deg := 12.0) -> KiteDefinition:
 	])
 	d.corners = PackedVector3Array([top, bottom, left, right])
 	d.rebuild()
+	return d
+
+
+## Raia de combate sem rabiola, com vareta que enverga com a tensão.
+## Com a linha esticada voa para onde o bico aponta; com a linha frouxa a
+## vareta relaxa e ela gira, o que permite desbicar. EXPERIMENTAL: os
+## parâmetros de giro ainda serão calibrados com o bot piloto (Fase 4).
+static func raia_sem_rabiola() -> KiteDefinition:
+	var d := raia_laboratorio(0.0)
+	d.model_name = "Raia sem rabiola (experimental)"
+	d.flex_enabled = true
+	d.bow_stability = 0.5
+	d.spin_damping_quadratic = 1.0
+	d.spin_damping_linear = 0.3
+	d.spin_bias = 0.3
+	d.tail_enabled = false
 	return d

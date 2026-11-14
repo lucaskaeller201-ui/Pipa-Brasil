@@ -28,9 +28,35 @@ var last_aero_torque := Vector3.ZERO
 var last_aoa_deg := 0.0
 var last_wind := Vector3.ZERO
 
+## Diedro atual (rad) da vareta flexível. Estado da pipa, não da definição.
+var dihedral := 0.0
+
 
 func _init(p_definition: KiteDefinition) -> void:
 	definition = p_definition
+	dihedral = deg_to_rad(p_definition.dihedral_max_deg)
+
+
+## 0 = vareta relaxada (linha frouxa), 1 = totalmente envergada.
+func bow_factor() -> float:
+	var d := definition
+	if not d.flex_enabled:
+		return 1.0
+	var dmin := deg_to_rad(d.dihedral_min_deg)
+	var dmax := deg_to_rad(d.dihedral_max_deg)
+	return clampf((dihedral - dmin) / (dmax - dmin), 0.0, 1.0)
+
+
+## A vareta enverga rápido quando a linha estica e relaxa mais devagar.
+func update_flex(tension: float, h: float) -> void:
+	var d := definition
+	if not d.flex_enabled:
+		return
+	var dmin := deg_to_rad(d.dihedral_min_deg)
+	var dmax := deg_to_rad(d.dihedral_max_deg)
+	var alvo := dmin + (dmax - dmin) * minf(1.0, tension / d.flex_reference_tension)
+	var tau := 0.03 if alvo > dihedral else 0.4
+	dihedral += (alvo - dihedral) * minf(1.0, h / tau)
 
 
 func world_point(local_point: Vector3) -> Vector3:
@@ -88,9 +114,14 @@ func compute_aero(wind: WindField, t: float) -> void:
 	var area_acc := 0.0
 	var d := definition
 	last_wind = wind.sample(position, t)
+	var sin_dh := sin(dihedral)
+	var cos_dh := cos(dihedral)
 	for i in d.panel_areas.size():
 		var r := rotation * d.panel_centers[i]
-		var n := rotation * d.panel_normals[i]
+		var n_local := d.panel_normals[i]
+		if d.flex_enabled:
+			n_local = Vector3(d.panel_sides[i] * sin_dh, 0.0, cos_dh)
+		var n := rotation * n_local
 		var area := d.panel_areas[i]
 		var va := wind.sample(position + r, t) - (velocity + angular_velocity.cross(r))
 		var speed := va.length()
@@ -112,9 +143,40 @@ func compute_aero(wind: WindField, t: float) -> void:
 		torque += (r + shift).cross(f)
 		aoa_acc += rad_to_deg(asin(minf(1.0, absf(sin_aoa)))) * area
 		area_acc += area
+	torque += _spin_moments(wind, t)
 	last_aero_force = force
 	last_aero_torque = torque
 	last_aoa_deg = aoa_acc / area_acc if area_acc > 0.0 else 0.0
+
+
+## Momentos em torno da normal (giro no plano da pipa). Modelo empírico com
+## parâmetros por pipa: amortecimento das bordas, estabilidade direcional da
+## vareta envergada e tendência de giro com a linha frouxa. Zero para pipas
+## que não usam esses parâmetros (como a raia de laboratório).
+func _spin_moments(wind: WindField, t: float) -> Vector3:
+	var d := definition
+	if d.spin_damping_quadratic == 0.0 and d.spin_damping_linear == 0.0 and d.bow_stability == 0.0 and d.spin_bias == 0.0:
+		return Vector3.ZERO
+	var n := rotation * Vector3(0.0, 0.0, 1.0)
+	var area := d.total_area
+	var va := last_wind - velocity
+	var speed := va.length()
+	var wn := angular_velocity.dot(n)
+	var r := d.reference_chord * 0.5
+	var tau := -(d.spin_damping_quadratic * 0.5 * RHO * area * r * r * r * absf(wn) * wn
+		+ d.spin_damping_linear * 0.5 * RHO * maxf(speed, 1.0) * area * r * r * wn)
+	var b := bow_factor()
+	if d.bow_stability != 0.0 and speed > 0.5:
+		var vt := va - n * va.dot(n)
+		var vt_len := vt.length()
+		if vt_len > 1e-3:
+			var tail_dir := rotation * Vector3(0.0, -1.0, 0.0)
+			var s_th := n.dot(tail_dir.cross(vt / vt_len))
+			tau += d.bow_stability * b * 0.5 * RHO * speed * speed * area * d.reference_chord * s_th * (vt_len / speed)
+	if d.spin_bias != 0.0:
+		var vw := last_wind.length()
+		tau += d.spin_bias * (1.0 - b) * (1.0 - b) * 0.5 * RHO * vw * vw * area * d.reference_chord
+	return n * tau
 
 
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).

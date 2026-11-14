@@ -1,9 +1,10 @@
 extends Node3D
-## Fase 1 — Laboratório de voo.
+## Laboratório de voo (Fases 1 e 2).
 ##
-## Mostra a física da raia funcionando: vento, pipa, linha presa num ponto fixo
-## e rabiola, com setas das forças e números ao vivo. Os controles mudam o
-## vento e o cabresto. Ainda não há comandos do pipeiro (Fase 2).
+## Mostra a física funcionando: vento, pipa, linha, rabiola, mão do pipeiro e
+## carretilha, com setas das forças e números ao vivo. Os comandos do pipeiro
+## (botões na tela ou teclado) mexem a mão e a carretilha; a pipa responde só
+## pela física.
 
 const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
@@ -18,6 +19,17 @@ const CAMERAS := ["Pipeiro", "Lateral", "Perto da pipa"]
 
 var world: SimWorld
 var definicao: KiteDefinition
+var _def_com_rabiola: KiteDefinition
+var _def_sem_rabiola: KiteDefinition
+var _sensibilidade := 1.0
+var _segurando := {}  # comando contínuo -> apertado (botão na tela)
+var _ultimo_comando := "—"
+
+const COMANDOS_CONTINUOS := ["Puxar", "Afrouxar", "Dar linha", "Largar", "Recolher"]
+const TECLAS := {
+	"Puxar": KEY_W, "Afrouxar": KEY_S, "Dar linha": KEY_A, "Largar": KEY_Z, "Recolher": KEY_R,
+}
+const TECLAS_IMPULSO := {KEY_SPACE: Pilot.Impulse.PUXAO, KEY_Q: Pilot.Impulse.ARRANCAO, KEY_E: Pilot.Impulse.DESBICAR}
 
 var _vento := VENTO_PADRAO
 var _comprimento_linha := 30.0
@@ -36,7 +48,11 @@ var _botao_camera: Button
 
 
 func _ready() -> void:
-	definicao = KiteDefinition.raia_laboratorio()
+	_def_com_rabiola = KiteDefinition.raia_laboratorio()
+	_def_sem_rabiola = KiteDefinition.raia_sem_rabiola()
+	definicao = _def_com_rabiola
+	for c in COMANDOS_CONTINUOS:
+		_segurando[c] = false
 	Ambiente.criar_por_do_sol(self)
 	_criar_pipeiro()
 
@@ -67,8 +83,9 @@ func _ready() -> void:
 
 
 func reiniciar() -> void:
+	var pre_tensao := 0.0 if definicao.tail_enabled else 3.0
 	world = SimWorld.create_flight(WindField.new(_vento, TURBULENCIA if _turbulencia else 0.0, 1),
-		definicao, _comprimento_linha, 30.0)
+		definicao, _comprimento_linha, 30.0, 0.0, 4, true, pre_tensao)
 	_pipa.call("construir", definicao)
 	_atualizar_visual()
 
@@ -81,10 +98,39 @@ func avancar(segundos: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_ler_comandos()
 	var inicio := Time.get_ticks_usec()
 	world.step(delta)
 	var ms := (Time.get_ticks_usec() - inicio) / 1000.0
 	_custo_ms = lerpf(_custo_ms, ms, 0.05)
+
+
+func _apertado(comando: String) -> bool:
+	return _segurando.get(comando, false) or Input.is_physical_key_pressed(TECLAS[comando])
+
+
+func _ler_comandos() -> void:
+	var e := world.input
+	e.pull = _sensibilidade if _apertado("Puxar") else 0.0
+	e.slack = _sensibilidade if _apertado("Afrouxar") else 0.0
+	e.pay_out = _apertado("Dar linha")
+	e.free_spool = _apertado("Largar")
+	e.reel_in = _apertado("Recolher")
+	for c in COMANDOS_CONTINUOS:
+		if _apertado(c):
+			_ultimo_comando = c
+
+
+func disparar(impulso: Pilot.Impulse) -> void:
+	world.trigger(impulso)
+	_ultimo_comando = Pilot.impulse_name(impulso)
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if evento is InputEventKey and evento.pressed and not evento.echo:
+		var tecla: Key = (evento as InputEventKey).physical_keycode
+		if TECLAS_IMPULSO.has(tecla):
+			disparar(TECLAS_IMPULSO[tecla])
 
 
 func _process(_delta: float) -> void:
@@ -133,8 +179,16 @@ func _atualizar_camera() -> void:
 
 func texto_info() -> String:
 	var k := world.kite
+	var carretilha := "travada"
+	if world.input.free_spool:
+		carretilha = "livre"
+	elif world.input.pay_out:
+		carretilha = "soltando"
+	elif world.input.reel_in:
+		carretilha = "enrolando"
 	var linhas := PackedStringArray([
-		"PIPA BRASIL · Fase 1 · Laboratório de voo",
+		"PIPA BRASIL · Fase 2 · Laboratório de voo · %s" % definicao.model_name,
+		"Linha: %s m · carretilha %s · comando: %s" % [_num(world.line_length(), 1), carretilha, _ultimo_comando],
 		"Vento na pipa: %s m/s" % _num(k.last_wind.length(), 1),
 		"Elevação: %d°   Ângulo de ataque: %d°" % [roundi(world.elevation_deg()), roundi(k.last_aoa_deg)],
 		"Tensão da linha: %s N" % _num(world.tension, 2),
@@ -143,6 +197,7 @@ func texto_info() -> String:
 		"Física: %s ms/passo   FPS: %d" % [_num(_custo_ms, 2), Engine.get_frames_per_second()],
 		"Setas: azul vento · verde ar · laranja linha · roxo peso",
 		"Rabiola em rosa · Build %s" % BuildInfo.COMMIT,
+		"Teclado: W puxar · S afrouxar · A dar linha · Z largar · R recolher · Espaço puxão · Q arrancão · E desbicar",
 	])
 	return "\n".join(linhas)
 
@@ -215,12 +270,57 @@ func _criar_interface() -> void:
 	_slider(caixa, "cabresto", 0.04, 0.18, 0.01, definicao.tow_point.y, _ao_mudar_cabresto)
 	_slider(caixa, "linha", 10.0, 100.0, 5.0, _comprimento_linha, _ao_mudar_linha)
 	_slider(caixa, "zoom", 15.0, 75.0, 1.0, _camera.fov, _ao_mudar_zoom)
+	_slider(caixa, "sensibilidade", 0.5, 1.5, 0.1, _sensibilidade, _ao_mudar_sensibilidade)
 	_toggle(caixa, "Turbulência", _turbulencia, _ao_mudar_turbulencia)
-	_toggle(caixa, "Rabiola", definicao.tail_enabled, _ao_mudar_rabiola)
+	_toggle(caixa, "Rabiola (desligada = raia sem rabiola)", true, _ao_mudar_rabiola)
 	_toggle(caixa, "Mostrar forças", _mostrar_forcas, _ao_mudar_forcas)
 	_botao(caixa, "Rajada (3 s)", _ao_tocar_rajada)
 	_botao_camera = _botao(caixa, "Câmera: %s" % CAMERAS[_camera_modo], _ao_tocar_camera)
 	_botao(caixa, "Reiniciar voo", reiniciar)
+	_criar_comandos(raiz)
+
+
+## Botões grandes dos comandos do pipeiro, no canto inferior esquerdo.
+func _criar_comandos(raiz: Control) -> void:
+	var grade := GridContainer.new()
+	grade.name = "Comandos"
+	grade.columns = 4
+	grade.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	grade.offset_left = 12.0
+	grade.offset_bottom = -12.0
+	grade.offset_top = -148.0
+	grade.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	grade.add_theme_constant_override("h_separation", 8)
+	grade.add_theme_constant_override("v_separation", 8)
+	raiz.add_child(grade)
+	for c in COMANDOS_CONTINUOS:
+		var b := _botao_comando(grade, c, Color(0.15, 0.35, 0.65, 0.85))
+		b.button_down.connect(_ao_segurar.bind(c, true))
+		b.button_up.connect(_ao_segurar.bind(c, false))
+	for imp in [Pilot.Impulse.PUXAO, Pilot.Impulse.ARRANCAO, Pilot.Impulse.DESBICAR]:
+		var b := _botao_comando(grade, Pilot.impulse_name(imp), Color(0.75, 0.35, 0.10, 0.85))
+		b.pressed.connect(disparar.bind(imp))
+
+
+func _botao_comando(grade: GridContainer, texto: String, cor: Color) -> Button:
+	var b := Button.new()
+	b.text = texto
+	b.custom_minimum_size = Vector2(124.0, 64.0)
+	b.focus_mode = Control.FOCUS_NONE
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = cor
+	estilo.set_corner_radius_all(12)
+	b.add_theme_stylebox_override("normal", estilo)
+	var apertado := estilo.duplicate() as StyleBoxFlat
+	apertado.bg_color = cor.lightened(0.35)
+	b.add_theme_stylebox_override("pressed", apertado)
+	b.add_theme_stylebox_override("hover", estilo)
+	grade.add_child(b)
+	return b
+
+
+func _ao_segurar(comando: String, apertado: bool) -> void:
+	_segurando[comando] = apertado
 
 
 func _ao_mudar_vento(v: float) -> void:
@@ -248,8 +348,13 @@ func _ao_mudar_turbulencia(ligado: bool) -> void:
 
 
 func _ao_mudar_rabiola(ligado: bool) -> void:
-	definicao.tail_enabled = ligado
+	definicao = _def_com_rabiola if ligado else _def_sem_rabiola
+	_rotulos["cabresto"].get_parent().get_child(_rotulos["cabresto"].get_index() + 1).value = definicao.tow_point.y
 	reiniciar()
+
+
+func _ao_mudar_sensibilidade(v: float) -> void:
+	_sensibilidade = v
 
 
 func _ao_mudar_forcas(ligado: bool) -> void:
@@ -272,7 +377,9 @@ func _texto_slider(chave: String, v: float) -> String:
 		"cabresto":
 			return "Cabresto: %s m (↑ = perto do bico)" % _num(v, 2)
 		"linha":
-			return "Linha: %d m (reinicia o voo)" % roundi(v)
+			return "Linha inicial: %d m (reinicia o voo)" % roundi(v)
+		"sensibilidade":
+			return "Sensibilidade de puxar/afrouxar: %s" % _num(v, 1)
 		_:
 			return "Zoom (campo de visão): %d°" % roundi(v)
 
