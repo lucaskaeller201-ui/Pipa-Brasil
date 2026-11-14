@@ -16,8 +16,11 @@ var rotation := Quaternion.IDENTITY
 var velocity := Vector3.ZERO
 var angular_velocity := Vector3.ZERO  ## rad/s, no referencial do mundo
 
-var _prev_position := Vector3.ZERO
 var _prev_rotation := Quaternion.IDENTITY
+# Deslocamento acumulado no subpasso. Guardado à parte porque Vector3 usa
+# precisão simples: a 100 m de altura, (posição - posição anterior) perde
+# precisão e a velocidade derivada dela acumula erro.
+var _step_delta := Vector3.ZERO
 
 # Últimos valores calculados, para depuração e testes.
 var last_aero_force := Vector3.ZERO
@@ -62,7 +65,9 @@ func generalized_inv_mass(r: Vector3, n: Vector3) -> float:
 
 ## Aplica uma correção de posição (impulso posicional P) no ponto de offset r.
 func apply_position_impulse(r: Vector3, impulse: Vector3) -> void:
-	position += impulse / definition.mass
+	var dx := impulse / definition.mass
+	position += dx
+	_step_delta += dx
 	var dtheta := inv_inertia_world(r.cross(impulse))
 	var dq := Quaternion(dtheta.x, dtheta.y, dtheta.z, 0.0) * rotation
 	rotation = Quaternion(
@@ -119,9 +124,9 @@ func integrate(h: float) -> void:
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
-	_prev_position = position
 	_prev_rotation = rotation
-	position += velocity * h
+	_step_delta = velocity * h
+	position += _step_delta
 	var dq := Quaternion(angular_velocity.x, angular_velocity.y, angular_velocity.z, 0.0) * rotation
 	rotation = Quaternion(
 		rotation.x + 0.5 * h * dq.x,
@@ -133,7 +138,7 @@ func integrate(h: float) -> void:
 
 ## Recalcula as velocidades a partir do deslocamento do subpasso.
 func update_velocities(h: float) -> void:
-	velocity = (position - _prev_position) / h
+	velocity = _step_delta / h
 	var dq := rotation * _prev_rotation.inverse()
 	var s := 2.0 / h if dq.w >= 0.0 else -2.0 / h
 	angular_velocity = Vector3(dq.x, dq.y, dq.z) * s
@@ -145,5 +150,5 @@ func reset_pose(p_position: Vector3, p_rotation: Quaternion) -> void:
 	rotation = p_rotation.normalized()
 	velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
-	_prev_position = position
+	_step_delta = Vector3.ZERO
 	_prev_rotation = rotation
