@@ -12,6 +12,7 @@ extends SceneTree
 const PASTAS_DE_TESTE: Array[String] = [
 	"res://tests/unit",
 	"res://tests/scenarios",
+	"res://tests/benchmarks",
 ]
 
 var _aprovados := 0
