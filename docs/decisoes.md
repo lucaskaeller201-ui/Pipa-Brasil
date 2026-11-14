@@ -22,6 +22,29 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-011 — Capturas de tela no CI (2026-11-14)
+O CI grava quadros do laboratório com renderização por software (Xvfb + Mesa,
+renderizador Compatibility) e publica no ramo `capturas`. Motivo: o Claude não
+roda o Godot na sessão e precisa conferir o visual sem depender do celular.
+As capturas não medem desempenho (o FPS ali é de software).
+
+### D-010 — Critério de estiramento da linha (2026-11-14)
+O náilon estica de verdade (T/EA; com EA = 600 N, cerca de 1,5% a 9 N). O
+teste da linha longa mede o excesso de estiramento além disso, que seria erro
+numérico, e exige menos de 1,2%. Substitui o critério "menor que 2%" do plano
+inicial, que confundia o estiramento físico com o numérico.
+
+### D-009 — Precisão simples nas posições (2026-11-14)
+Vector3 no Godot usa precisão simples. A 100 m de altura, calcular a velocidade
+como (posição − posição anterior) / passo acumula erro. O KiteBody guarda o
+deslocamento do subpasso à parte e calcula a velocidade a partir dele.
+
+### D-008 — Rabiola e diedro já na Fase 1 (2026-11-14)
+No protótipo, a raia plana sem rabiola é instável e cai (o que é realista), e
+sem diedro (vareta envergada) ela deriva para o lado e não volta. A Fase 1
+inclui uma rabiola simples e 12° de diedro para permitir os experimentos de voo
+estável. A rabiola completa (comprimento, peso, aparagem) segue na Fase 2.
+
 ### D-007 — Ordem das fases (2026-11-14)
 Bot piloto antecipado para a Fase 4 e fatia vertical (1x1 contra bot) na Fase 5,
 antes de cenários e personagens. Motivo: um bot que empina usando só os comandos

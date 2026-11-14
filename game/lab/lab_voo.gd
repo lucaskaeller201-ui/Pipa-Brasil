@@ -52,7 +52,7 @@ func _ready() -> void:
 
 	_camera = Camera3D.new()
 	_camera.name = "Camera"
-	_camera.fov = 55.0
+	_camera.fov = 35.0
 	_camera.far = 1000.0
 	_camera.current = true
 	add_child(_camera)
@@ -99,7 +99,7 @@ func _atualizar_visual() -> void:
 	_linhas.call("limpar")
 	_linhas.call("desenhar_cadeia", world.line.pos, Color(0.97, 0.97, 0.97))
 	if world.tail != null:
-		_linhas.call("desenhar_cadeia", world.tail.pos, Color(0.10, 0.55, 1.0))
+		_linhas.call("desenhar_cadeia", world.tail.pos, Color(1.0, 0.30, 0.60))
 
 	_forcas.call("limpar")
 	if _mostrar_forcas:
@@ -133,16 +133,24 @@ func _atualizar_camera() -> void:
 
 func texto_info() -> String:
 	var k := world.kite
-	var vento_pipa := k.last_wind.length()
-	return "PIPA BRASIL · Fase 1 · Laboratório de voo\n" + \
-		"Vento na pipa: %.1f m/s\n" % vento_pipa + \
-		"Elevação: %.0f°   Ângulo de ataque: %.0f°\n" % [world.elevation_deg(), k.last_aoa_deg] + \
-		"Tensão da linha: %.2f N\n" % world.tension + \
-		"Altura: %.1f m   Lateral: %.1f m\n" % [k.position.y, world.lateral_offset()] + \
-		"Velocidade da pipa: %.1f m/s\n" % k.velocity.length() + \
-		"Física: %.2f ms/passo   FPS: %d\n" % [_custo_ms, Engine.get_frames_per_second()] + \
-		"Setas: azul vento · verde ar · laranja linha · roxo peso\n" + \
-		"Build %s" % BuildInfo.COMMIT
+	var linhas := PackedStringArray([
+		"PIPA BRASIL · Fase 1 · Laboratório de voo",
+		"Vento na pipa: %s m/s" % _num(k.last_wind.length(), 1),
+		"Elevação: %d°   Ângulo de ataque: %d°" % [roundi(world.elevation_deg()), roundi(k.last_aoa_deg)],
+		"Tensão da linha: %s N" % _num(world.tension, 2),
+		"Altura: %s m   Lateral: %s m" % [_num(k.position.y, 1), _num(world.lateral_offset(), 1)],
+		"Velocidade da pipa: %s m/s" % _num(k.velocity.length(), 1),
+		"Física: %s ms/passo   FPS: %d" % [_num(_custo_ms, 2), Engine.get_frames_per_second()],
+		"Setas: azul vento · verde ar · laranja linha · roxo peso",
+		"Rabiola em rosa · Build %s" % BuildInfo.COMMIT,
+	])
+	return "\n".join(linhas)
+
+
+## Número com vírgula decimal, como se escreve no Brasil.
+static func _num(valor: float, casas: int) -> String:
+	var formato := "%." + str(casas) + "f"
+	return (formato % valor).replace(".", ",")
 
 
 # ---------------- cenário e interface ----------------
@@ -171,7 +179,7 @@ func _criar_interface() -> void:
 	raiz.set_anchors_preset(Control.PRESET_FULL_RECT)
 	raiz.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var tema := Theme.new()
-	tema.default_font_size = 20
+	tema.default_font_size = 19
 	raiz.theme = tema
 	camada.add_child(raiz)
 
@@ -200,7 +208,7 @@ func _criar_interface() -> void:
 	painel.add_child(rolagem)
 	var caixa := VBoxContainer.new()
 	caixa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	caixa.add_theme_constant_override("separation", 8)
+	caixa.add_theme_constant_override("separation", 4)
 	rolagem.add_child(caixa)
 
 	_slider(caixa, "vento", 0.0, 14.0, 0.5, _vento, _ao_mudar_vento)
@@ -260,11 +268,11 @@ func _ao_tocar_camera() -> void:
 func _texto_slider(chave: String, v: float) -> String:
 	match chave:
 		"vento":
-			return "Vento (a 10 m): %.1f m/s" % v
+			return "Vento (a 10 m): %s m/s" % _num(v, 1)
 		"cabresto":
-			return "Cabresto: %.2f m (maior = mais perto do bico)" % v
+			return "Cabresto: %s m (↑ = perto do bico)" % _num(v, 2)
 		"linha":
-			return "Linha: %d m (reinicia)" % roundi(v)
+			return "Linha: %d m (reinicia o voo)" % roundi(v)
 		_:
 			return "Zoom (campo de visão): %d°" % roundi(v)
 
@@ -281,7 +289,7 @@ func _slider(caixa: VBoxContainer, chave: String, minimo: float, maximo: float, 
 	s.max_value = maximo
 	s.step = passo
 	s.value = valor
-	s.custom_minimum_size = Vector2(300.0, 44.0)
+	s.custom_minimum_size = Vector2(300.0, 36.0)
 	s.value_changed.connect(_ao_mudar_slider.bind(chave, rotulo, ao_mudar))
 	caixa.add_child(s)
 
@@ -295,7 +303,7 @@ func _toggle(caixa: VBoxContainer, texto: String, ligado: bool, ao_mudar: Callab
 	var c := CheckButton.new()
 	c.text = texto
 	c.button_pressed = ligado
-	c.custom_minimum_size = Vector2(0.0, 44.0)
+	c.custom_minimum_size = Vector2(0.0, 40.0)
 	c.toggled.connect(ao_mudar)
 	caixa.add_child(c)
 
@@ -303,7 +311,7 @@ func _toggle(caixa: VBoxContainer, texto: String, ligado: bool, ao_mudar: Callab
 func _botao(caixa: VBoxContainer, texto: String, ao_tocar: Callable) -> Button:
 	var b := Button.new()
 	b.text = texto
-	b.custom_minimum_size = Vector2(0.0, 52.0)
+	b.custom_minimum_size = Vector2(0.0, 46.0)
 	b.pressed.connect(ao_tocar)
 	caixa.add_child(b)
 	return b

@@ -29,13 +29,15 @@ static func criar_por_do_sol(pai: Node3D) -> void:
 	mundo.environment = env
 	pai.add_child(mundo)
 
-	# Sol baixo, à frente do pipeiro (na direção para onde o vento sopra).
+	# Sol baixo, de lado e um pouco atrás do pipeiro: ilumina a face da pipa.
+	# (Com o sol bem à frente, a pipa vira silhueta escura contra o céu; esse
+	# efeito de cinema fica para a direção de arte da Fase 7.)
 	var sol := DirectionalLight3D.new()
 	sol.name = "Sol"
 	sol.light_color = Color(1.0, 0.74, 0.42)
-	sol.light_energy = 1.3
+	sol.light_energy = 1.4
 	sol.shadow_enabled = true
-	sol.rotation_degrees = Vector3(-12.0, 160.0, 0.0)
+	sol.rotation_degrees = Vector3(-14.0, 60.0, 0.0)
 	pai.add_child(sol)
 
 	var malha := PlaneMesh.new()
