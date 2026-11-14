@@ -11,11 +11,11 @@ Portão para avançar: um APK gerado na nuvem instalado e aberto no celular do L
 | Repositório privado `pipa-brasil` | Feito |
 | Especificação original em `docs/especificacao/` | Feito |
 | Decisões, arquitetura, progresso, changelog | Feito |
-| Projeto Godot mínimo com tela de teste | Feito, aguardando confirmação no CI |
-| Executor de testes próprio + primeiros testes | Feito, aguardando confirmação no CI |
-| GitHub Actions: testes, APK, Windows, Web | Feito, aguardando confirmação no CI |
-| Release `ultima-versao` com os builds | Aguardando primeira execução |
-| Lucas instala e abre no celular | Pendente |
+| Projeto Godot 4.7 mínimo com tela de teste | Feito |
+| Executor de testes próprio + 5 testes | Feito, todos passando no CI |
+| GitHub Actions: testes, APK, Windows, Web | Feito (cerca de 2 min por execução) |
+| Release `ultima-versao` com os builds | Feito: APK 27 MB, Windows 36 MB, Web 10 MB |
+| Lucas instala e abre no celular | Pendente (confirmar se o celular é Android ou iPhone) |
 
 ## Próxima tarefa
 
