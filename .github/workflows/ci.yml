@@ -1,0 +1,194 @@
+# Testes e builds automáticos do PIPA BRASIL.
+# A cada envio de código: baixa o Godot, roda os testes sem tela e, se passarem
+# no ramo main, gera Android (APK), Windows e Web e publica na release
+# "ultima-versao".
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7"
+  GODOT_STATUS: "stable"
+
+jobs:
+  testes:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_STATUS }}-linux
+
+      - name: Baixar o Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          V="${GODOT_VERSION}-${GODOT_STATUS}"
+          mkdir -p ~/godot-bin
+          curl -fsSL --retry 3 -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${V}_linux.x86_64 ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+
+      - name: Preparar o Godot
+        run: |
+          echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+          ~/godot-bin/godot --version
+
+      - name: Importar o projeto
+        run: |
+          timeout 300 godot --headless --path . --import 2>&1 | tee import.log || true
+          test -d .godot || (echo "A importação não criou a pasta .godot" && exit 1)
+
+      - name: Rodar os testes
+        run: |
+          set -o pipefail
+          timeout 600 godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee testes.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" testes.log; then
+            echo "::error::Erro de script durante os testes (veja acima)."
+            exit 1
+          fi
+
+  builds:
+    name: Builds (Android, Windows, Web)
+    needs: testes
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do Godot e modelos de exportação
+        id: cache-templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/godot-templates
+          key: godot-export-${{ env.GODOT_VERSION }}-${{ env.GODOT_STATUS }}
+
+      - name: Baixar o Godot e os modelos de exportação
+        if: steps.cache-templates.outputs.cache-hit != 'true'
+        run: |
+          V="${GODOT_VERSION}-${GODOT_STATUS}"
+          mkdir -p ~/godot-bin ~/godot-templates
+          curl -fsSL --retry 3 -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${V}_linux.x86_64 ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+          curl -fsSL --retry 3 -o templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_export_templates.tpz"
+          unzip -q templates.tpz -d ~/godot-templates
+
+      - name: Instalar os modelos de exportação
+        run: |
+          echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+          TV=$(head -n1 ~/godot-templates/templates/version.txt | tr -d '[:space:]')
+          echo "Versão dos modelos: $TV"
+          mkdir -p ~/.local/share/godot/export_templates
+          ln -sfn ~/godot-templates/templates ~/.local/share/godot/export_templates/$TV
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Android (SDK e chave de depuração)
+        run: |
+          KS="$HOME/debug.keystore"
+          keytool -genkeypair -v -keystore "$KS" -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "SDK Android: $SDK"
+          mkdir -p ~/.config/godot
+          for f in editor_settings-4.tres "editor_settings-${GODOT_VERSION}.tres"; do
+            cat > ~/.config/godot/$f <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$SDK"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$KS"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+          done
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$KS" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+
+      - name: Marcar o build com o commit
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          sed -i "s/const COMMIT := \"dev\"/const COMMIT := \"${SHORT}\"/" game/main/build_info.gd
+          cat game/main/build_info.gd
+
+      - name: Importar o projeto
+        run: |
+          timeout 300 godot --headless --path . --import 2>&1 | tee import.log || true
+          test -d .godot
+
+      - name: Exportar Android
+        run: |
+          mkdir -p build/android
+          timeout 600 godot --headless --path . --export-debug "Android" build/android/pipa-brasil.apk 2>&1 | tee android.log
+          test -s build/android/pipa-brasil.apk
+
+      - name: Exportar Windows
+        run: |
+          mkdir -p build/windows
+          timeout 600 godot --headless --path . --export-release "Windows Desktop" build/windows/pipa-brasil.exe 2>&1 | tee windows.log
+          test -s build/windows/pipa-brasil.exe
+          (cd build/windows && zip -q -r ../pipa-brasil-windows.zip .)
+
+      - name: Exportar Web
+        run: |
+          mkdir -p build/web
+          timeout 600 godot --headless --path . --export-release "Web" build/web/index.html 2>&1 | tee web.log
+          test -s build/web/index.html
+          (cd build/web && zip -q -r ../pipa-brasil-web.zip .)
+
+      - name: Guardar os builds no Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipa-brasil-builds
+          retention-days: 7
+          path: |
+            build/android/pipa-brasil.apk
+            build/pipa-brasil-windows.zip
+            build/pipa-brasil-web.zip
+
+      - name: Publicar na release "ultima-versao"
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          gh release delete ultima-versao --yes --cleanup-tag || true
+          gh release create ultima-versao \
+            build/android/pipa-brasil.apk \
+            build/pipa-brasil-windows.zip \
+            build/pipa-brasil-web.zip \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Última versão (automática)" \
+            --notes "Build automático do commit ${SHORT}, gerado depois que todos os testes passaram. Android: pipa-brasil.apk. Windows: pipa-brasil-windows.zip. Como instalar: docs/como-testar.md."

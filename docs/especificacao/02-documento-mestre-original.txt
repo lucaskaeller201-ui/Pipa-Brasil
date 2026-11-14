@@ -1,0 +1,199 @@
+PIPA BRASIL — DOCUMENTO MESTRE DO PROJETO
+
+1. Visão geral
+
+Desenvolver um simulador brasileiro de pipas em 3D, para Windows e Android, utilizando Godot 4 e GDScript.
+
+O jogo deve representar a cultura brasileira de soltar pipas, com cenários autênticos, modelos variados, personagens, carretilhas, rabiolas, vento dinâmico e física avançada.
+
+A prioridade máxima é a qualidade da simulação da pipa, da linha e da resposta aos comandos do jogador.
+
+Não desenvolver uma cópia de Pipa Combate ou de qualquer outro jogo. Criar identidade visual, código, modelos e mecânicas próprias, utilizando referências culturais apenas como inspiração.
+
+2. Plataformas e desempenho
+
+* Windows e Android.
+* Primeira e terceira pessoa.
+* Controles de teclado, mouse e toque.
+* Gráficos realistas otimizados.
+* Sistema de qualidade gráfica configurável.
+* Física independente da taxa de quadros.
+* Meta inicial de 60 FPS em computadores e 30–60 FPS em celulares compatíveis.
+* Carregamento eficiente de cenários e modelos.
+
+3. Sistema de física da pipa
+
+Criar um modelo de voo com:
+
+* Sustentação aerodinâmica.
+* Arrasto.
+* Massa e inércia.
+* Centro de massa.
+* Centro de pressão.
+* Pressão do vento.
+* Direção e intensidade do vento.
+* Rajadas e turbulência.
+* Estabilidade e instabilidade.
+* Influência da geometria e do cabresto.
+* Resposta a impulsos da linha.
+
+Cada pipa deve possuir parâmetros individuais.
+
+4. Sistema de linha
+
+Desenvolver uma linha 3D com simulação por Verlet Integration e restrições de distância.
+
+Implementar:
+
+* Curvatura.
+* Tensão.
+* Folga.
+* Oscilação.
+* Vibração.
+* Colisões.
+* Emaranhamento.
+* Segmentos independentes.
+* Ruptura virtual.
+* Animação visual de segmentos soltos.
+
+Evitar linhas rígidas e movimentos artificiais.
+
+5. Comandos do pipeiro
+
+Implementar controles físicos para:
+
+* Puxão: impulso rápido de tensão.
+* Largada: liberação rápida de linha.
+* Afrouxar: redução de tensão.
+* Arrancão: impulso mais intenso.
+* Dar linha: liberação gradual.
+* Desbicar: mudança da trajetória.
+* Recolher: recuperação de linha.
+
+Cada comando deve afetar a física, não apenas reproduzir animações.
+
+6. Modelos de pipa
+
+Criar famílias de modelos:
+
+* Raia.
+* Peixinho.
+* Veloster.
+* Flechinha.
+* Carrapeta.
+* Maranhão.
+* Suru.
+* Morcego.
+* Pião.
+* Caixote.
+* Modelos tradicionais e experimentais.
+
+Cada modelo deve ter geometria, materiais, dimensões, massa e estabilidade próprios.
+
+Permitir diferentes armações, velas, estampas e tamanhos.
+
+7. Materiais
+
+Representar visual e fisicamente:
+
+* Papel de seda.
+* Plástico.
+* Tecidos sintéticos.
+* Bambu.
+* Fibra.
+* Materiais compostos.
+* Rabiolas de papel, plástico, algodão e fitas.
+
+Não ensinar fabricação de cerol, linha chilena ou materiais cortantes. Qualquer combate deve utilizar exclusivamente mecânicas virtuais.
+
+8. Rabiolas
+
+Criar simulação dinâmica para:
+
+* Comprimento.
+* Peso.
+* Arrasto.
+* Flexibilidade.
+* Oscilação.
+* Atraso nas curvas.
+* Movimento de cada segmento.
+* Desprendimento visual em eventos de combate.
+
+9. Cenários
+
+Criar cinco mapas iniciais:
+
+1. Comunidade brasileira: casas, lajes, vielas, antenas, caixas d’água e morros.
+2. Praia: areia, mar, coqueiros e vento marítimo.
+3. Campo de futebol: gramado, traves, arquibancadas e espectadores.
+4. Morro e mirante: terreno elevado e vento exposto.
+5. Terreno aberto: espaço para treinamento e experimentação.
+
+Cada mapa deve possuir condições ambientais diferentes.
+
+10. Personagens
+
+Criar personagens personalizáveis, animações de primeira e terceira pessoa, mãos, braços, roupas, NPCs e interações ambientais.
+
+11. Câmeras
+
+Primeira pessoa:
+
+* Mãos visíveis.
+* Carretilha.
+* Linha.
+* Movimento corporal.
+* Resposta sincronizada com os comandos.
+
+Terceira pessoa:
+
+* Personagem completo.
+* Animações de puxar e soltar.
+* Câmera acompanhando a pipa.
+* Alternância de enquadramento.
+
+12. Áudio
+
+Criar áudio ambiental e efeitos para vento, linha, carretilha, passos, praia, campo, comunidade e interação entre personagens.
+
+13. Arquitetura e qualidade
+
+Separar os sistemas em módulos independentes.
+
+Criar testes automatizados e cenas de depuração para física, linha, rabiola e controles.
+
+Manter documentação técnica, histórico de alterações e cópias de segurança com Git.
+
+Não substituir sistemas funcionais sem testes de regressão.
+
+Não avançar para multiplayer antes de validar a simulação offline.
+
+14. Ordem de desenvolvimento
+
+FASE 1 — Estrutura e protótipo de voo.
+
+FASE 2 — Aerodinâmica e controle.
+
+FASE 3 — Linha física e rabiola.
+
+FASE 4 — Variações de pipas e materiais.
+
+FASE 5 — Cenários e personagens.
+
+FASE 6 — Câmeras, controles e interface.
+
+FASE 7 — Combate virtual.
+
+FASE 8 — Otimização e testes.
+
+FASE 9 — Multiplayer.
+
+15. Regra principal
+
+A qualidade da física deve prevalecer sobre a quantidade de funcionalidades.
+
+Não criar funcionalidades falsas ou simulações apenas visuais quando a especificação exigir comportamento físico.
+
+Construir, executar, testar, corrigir e documentar cada etapa antes de avançar.
+
+O projeto deve permanecer organizado, executável e recuperável durante todo o desenvolvimento.

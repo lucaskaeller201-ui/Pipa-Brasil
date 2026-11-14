@@ -1,0 +1,31 @@
+; Configuração do projeto PIPA BRASIL.
+; Valores importantes são verificados por tests/unit/test_configuracao.gd.
+
+config_version=5
+
+[application]
+
+config/name="PIPA BRASIL"
+config/description="Simulador brasileiro de pipas em 3D"
+config/version="0.0.1"
+run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=6
+
+[physics]
+
+common/physics_ticks_per_second=120
+common/max_physics_steps_per_frame=8
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

@@ -1,0 +1,13 @@
+# Cache do Godot
+.godot/
+*.tmp
+*.translation
+
+# Builds gerados (ficam no GitHub Actions e na release)
+build/
+/android/
+
+# Credenciais de exportação nunca vão para o repositório
+export_credentials.cfg
+*.keystore
+*.jks

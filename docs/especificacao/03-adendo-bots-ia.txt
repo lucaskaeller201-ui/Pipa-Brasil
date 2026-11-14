@@ -1,0 +1,206 @@
+ADENDO OFICIAL — SISTEMA DE BOTS E INTELIGÊNCIA ARTIFICIAL
+
+PIPA BRASIL
+
+1. Objetivo
+
+O PIPA BRASIL deverá possuir bots controlados por inteligência artificial capazes de participar de todas as modalidades de combate.
+
+Os bots deverão simular pipeiros com diferentes níveis de habilidade, estilos de voo, comportamentos e capacidade de reação.
+
+Eles não podem parecer objetos programados para seguir trajetórias repetitivas. Devem apresentar comportamentos naturais, cometer erros, aprender padrões durante a partida e reagir às condições do ambiente.
+
+2. Modalidades com bots
+
+1 contra 1
+
+* Jogador contra bot.
+* Bot contra bot para demonstrações e testes.
+* Possibilidade de escolher dificuldade.
+* Possibilidade de escolher personalidade do adversário.
+
+Combate livre
+
+* Jogador contra vários bots.
+* Bots competindo entre si.
+* Partidas com jogadores e bots simultaneamente.
+* Quantidade configurável de participantes.
+* Bots ocupando vagas disponíveis em partidas offline.
+
+3. Personalidades dos bots
+
+Criar perfis distintos:
+
+Iniciante
+
+* Comete erros de controle.
+* Tem dificuldade para manter estabilidade.
+* Reage mais lentamente.
+* Apresenta movimentos menos consistentes.
+
+Intermediário
+
+* Controla melhor a pipa.
+* Reage às mudanças do vento.
+* Demonstra capacidade de recuperação.
+* Alterna comportamentos.
+
+Experiente
+
+* Mantém maior estabilidade.
+* Controla melhor a tensão virtual da linha.
+* Interpreta situações da partida.
+* Apresenta movimentos mais precisos.
+
+Profissional
+
+* Possui excelente controle.
+* Reage rapidamente.
+* Adapta decisões às condições da disputa.
+* Comete menos erros, mas não é invencível.
+
+4. Personalidades comportamentais
+
+Além da dificuldade, cada bot deverá possuir uma personalidade:
+
+* Defensivo.
+* Agressivo.
+* Técnico.
+* Estratégico.
+* Imprevisível.
+* Equilibrado.
+
+A dificuldade determina a capacidade de execução; a personalidade determina o estilo de comportamento.
+
+Essas características devem ser independentes, permitindo combinações diferentes.
+
+5. Inteligência artificial integrada à física
+
+Os bots não podem controlar a pipa por meio de movimentos artificiais ou teletransporte.
+
+Eles devem utilizar os mesmos comandos e sistemas físicos disponíveis ao jogador.
+
+Arquitetura proposta:
+
+BotAI
+├── BotController
+├── BotPersonality
+├── BotDifficulty
+├── BotDecisionMaker
+├── BotPerception
+├── BotMovementController
+├── BotFlightController
+├── BotLineController
+├── BotCombatBehavior
+├── BotNavigation
+├── BotLearningSystem
+└── BotPerformanceMonitor
+
+A inteligência artificial deverá interpretar informações do ambiente e tomar decisões compatíveis com os limites físicos da simulação.
+
+6. Percepção e tomada de decisão
+
+Os bots deverão acompanhar:
+
+* Posição da própria pipa.
+* Posição dos adversários.
+* Direção do vento.
+* Intensidade das rajadas.
+* Velocidade e estabilidade.
+* Estado da própria linha.
+* Situação dos outros participantes.
+* Obstáculos.
+* Eventos recentes da partida.
+
+A partir dessas informações, deverão escolher ações e ajustar seus comandos.
+
+7. Sistema de adaptação
+
+Implementar uma adaptação controlada durante a partida.
+
+Exemplos:
+
+* Reconhecer padrões repetidos de movimento do jogador.
+* Alterar o próprio comportamento quando necessário.
+* Evitar repetir erros.
+* Adaptar decisões às condições do vento.
+* Reagir de maneira diferente conforme a situação da partida.
+
+Não permitir que os bots trapaceiem, leiam informações ocultas do jogador ou ultrapassem os limites físicos da simulação.
+
+8. Bots com identidade visual
+
+Cada bot poderá possuir:
+
+* Nome fictício.
+* Apelido.
+* Personagem próprio.
+* Roupa e aparência.
+* Pipa favorita.
+* Estilo de voo.
+* Personalidade.
+* Nível de habilidade.
+* Estatísticas.
+* Histórico de partidas.
+
+Criar pipeiros controlados por IA que transmitam a sensação de uma comunidade de jogadores dentro do mundo do jogo.
+
+9. Bots nos cenários
+
+Os bots deverão aparecer também fora das partidas competitivas.
+
+Exemplos:
+
+* Pipeiros empinando pipas em lajes.
+* Grupos de personagens em campos de futebol.
+* Adversários treinando em terrenos abertos.
+* NPCs participando de festivais.
+* Bots realizando voos livres.
+* Personagens observando disputas.
+
+A movimentação deverá ser otimizada para não prejudicar o desempenho.
+
+10. Dificuldade configurável
+
+Oferecer pelo menos quatro níveis:
+
+1. Fácil.
+2. Normal.
+3. Difícil.
+4. Profissional.
+
+A dificuldade deverá modificar parâmetros de percepção, tempo de reação, precisão, estabilidade e qualidade de decisão, sem alterar artificialmente as leis da física.
+
+11. Desempenho
+
+A IA deverá funcionar em Windows e Android.
+
+Implementar:
+
+* Atualização de decisões em frequências controladas.
+* Redução de processamento para bots distantes.
+* Limites configuráveis de participantes.
+* Otimização de percepção e detecção de eventos.
+* Testes com vários bots simultâneos.
+
+12. Testes obrigatórios
+
+Testar:
+
+* Jogador contra bot.
+* Bot contra bot.
+* Vários bots em combate livre.
+* Personalidades diferentes.
+* Dificuldades diferentes.
+* Bots em diferentes condições de vento.
+* Comportamento em situações de emaranhamento.
+* Recuperação após erros.
+* Desempenho com diferentes quantidades de bots.
+
+13. Regra definitiva
+
+Os bots devem participar de toda a experiência do PIPA BRASIL: treinamento, voo livre, desafios, campeonatos, combate 1 contra 1 e combate livre.
+
+Eles devem usar o mesmo núcleo físico dos jogadores, respeitar as mesmas limitações e produzir partidas variadas, naturais e competitivas.
+
+Não queremos bots que apenas movimentem pipas. Queremos adversários virtuais que pareçam pipeiros de verdade dentro do universo do jogo.

@@ -1,0 +1,754 @@
+PROJETO PIPA BRASIL — DOCUMENTO MESTRE PARA DESENVOLVIMENTO NO CLAUDE CODE
+
+1. VISÃO GERAL DO PROJETO
+
+Quero desenvolver um jogo brasileiro de pipas em 3D chamado PIPA BRASIL.
+
+O objetivo é criar um simulador de pipas muito bonito, realista, completo e divertido, inspirado na cultura brasileira de soltar pipas, nos encontros de pipeiros e nas disputas tradicionais.
+
+O jogo deve oferecer uma experiência de voo livre, treinamento, desafios, campeonatos e combate entre pipas.
+
+Não quero um jogo simples com pipas flutuando artificialmente. Quero uma simulação em que o jogador sinta que está realmente controlando uma pipa, com vento, física, linha, rabiola, movimentos naturais e respostas precisas aos comandos.
+
+Plataformas:
+
+* Windows (PC).
+* Android (celulares).
+
+Tecnologias preferenciais:
+
+* Godot 4.
+* GDScript.
+* Blender para modelos 3D.
+* Krita para texturas.
+* Git para controle de versões.
+
+Priorizar ferramentas gratuitas e manter o custo inicial do desenvolvimento o mais próximo possível de zero.
+
+2. GRÁFICOS E IDENTIDADE VISUAL
+
+A qualidade gráfica é uma das prioridades máximas do projeto.
+
+Quero um jogo visualmente bonito, com aparência realista e cinematográfica, especialmente nos cenários e na iluminação.
+
+Uma das identidades visuais mais importantes será o pôr do sol dourado e amarelado.
+
+Implementar:
+
+* Céu amarelo-dourado e alaranjado.
+* Sol baixo no horizonte.
+* Nuvens iluminadas.
+* Sombras longas e naturais.
+* Reflexos dourados nos objetos.
+* Iluminação cinematográfica.
+* Materiais realistas.
+* Texturas detalhadas.
+* Reflexos naturais.
+* Efeitos atmosféricos.
+* Árvores e vegetação movimentadas pelo vento.
+* Pássaros e elementos de ambientação.
+
+Pisos e superfícies
+
+Quero pisos com acabamento de verniz, especialmente em terraços e ambientes que combinem com essa estética.
+
+Os materiais devem apresentar:
+
+* Brilho realista.
+* Reflexos do céu e do sol.
+* Aparência de superfície polida.
+* Variações de rugosidade.
+* Imperfeições naturais.
+* Marcas de uso.
+
+Não deixar todos os materiais artificialmente espelhados. Cada superfície deve ter características próprias.
+
+Ciclo de dia e noite
+
+Implementar:
+
+1. Amanhecer.
+2. Manhã.
+3. Meio-dia.
+4. Tarde.
+5. Pôr do sol.
+6. Crepúsculo.
+7. Noite.
+
+Cada período deve possuir iluminação, cores, sombras e atmosfera próprias.
+
+Otimização gráfica
+
+Criar três perfis:
+
+* Baixo: celulares de entrada.
+* Médio: celulares intermediários.
+* Alto: celulares potentes e computadores.
+
+O jogo precisa ser bonito mesmo no perfil médio.
+
+Utilizar PBR, mapas de normal, mapas de rugosidade, sombras dinâmicas e reflexos de acordo com a capacidade do dispositivo.
+
+3. FÍSICA REALISTA DAS PIPAS
+
+Esta é uma das partes mais importantes do projeto.
+
+Criar um núcleo central chamado KitePhysicsCore.
+
+A física deve considerar:
+
+* Sustentação.
+* Arrasto aerodinâmico.
+* Massa.
+* Inércia.
+* Centro de massa.
+* Centro de pressão.
+* Direção do vento.
+* Intensidade do vento.
+* Rajadas.
+* Turbulência.
+* Estabilidade.
+* Rotação.
+* Aceleração.
+* Geometria de cada modelo.
+* Rigidez da armação.
+* Cabresto.
+
+Cada modelo de pipa deverá apresentar comportamento físico próprio.
+
+Não utilizar apenas animações para simular os movimentos. A pipa precisa responder de verdade às forças físicas.
+
+O sistema deverá trabalhar com passo fixo de física, independente da taxa de quadros.
+
+4. FÍSICA DA LINHA
+
+Criar um módulo chamado RopePhysics.
+
+A linha precisa parecer uma linha real, flexível e dinâmica.
+
+Utilizar integração de Verlet ou outra técnica adequada para simular uma cadeia flexível de segmentos.
+
+Implementar:
+
+* Segmentos e nós.
+* Tensão.
+* Folga.
+* Curvatura.
+* Vibração.
+* Oscilação.
+* Colisões.
+* Emaranhamento.
+* Deformação.
+* Ruptura virtual.
+* Pedaços de linha soltos após a ruptura.
+
+Não fazer a linha parecer uma mangueira rígida ou um simples traço reto.
+
+A linha deve reagir às mudanças de direção, velocidade, vento e movimentos da pipa.
+
+5. FÍSICA DA RABIOLA
+
+Criar um módulo TailPhysics.
+
+A rabiola precisa apresentar:
+
+* Peso.
+* Flexibilidade.
+* Arrasto.
+* Oscilação.
+* Atraso nas curvas.
+* Movimento independente da pipa.
+* Reação às rajadas.
+* Desprendimento visual quando necessário.
+
+A rabiola deve acompanhar a física da pipa e não ser apenas uma animação repetitiva.
+
+6. CONTROLES DO JOGADOR
+
+Implementar comandos inspirados na cultura pipeira brasileira:
+
+* Puxar.
+* Dar linha.
+* Recolher linha.
+* Afrouxar.
+* Largar.
+* Puxão.
+* Desbicar.
+* Arrancão ou rancão.
+
+Os comandos precisam alterar a simulação física de maneira coerente.
+
+Não basta animar a mão do personagem: a pipa, a linha e a rabiola precisam responder aos comandos.
+
+Criar controles adaptados para:
+
+* Tela de celular.
+* Teclado e mouse.
+* Possivelmente controle externo.
+
+Permitir ajustes de sensibilidade.
+
+7. MODELOS DE PIPAS
+
+Criar uma coleção variada de pipas brasileiras.
+
+Modelos e famílias a pesquisar e representar:
+
+* Raia.
+* Peixinho.
+* Veloster.
+* Flechinha.
+* Carrapeta.
+* Maranhão.
+* Suru.
+* Morcego.
+* Pião.
+* Caixote.
+* Modelos tradicionais e experimentais.
+
+Cada modelo deverá ter:
+
+* Geometria própria.
+* Aparência visual.
+* Materiais.
+* Peso.
+* Características aerodinâmicas.
+* Estabilidade.
+* Comportamento de voo.
+
+Não assumir que todos os modelos têm a mesma física.
+
+Permitir personalização de cores, estampas, materiais, rabiolas e aparência.
+
+8. CENÁRIOS BRASILEIROS
+
+Criar ambientes ricos em detalhes e com identidade brasileira.
+
+Cenários prioritários:
+
+Comunidade e favela
+
+* Lajes.
+* Vielas.
+* Casas.
+* Antenas.
+* Caixas d’água.
+* Varais.
+* Morros.
+* Prédios.
+* Obstáculos.
+* Vento turbulento.
+
+Praia
+
+* Areia.
+* Mar.
+* Vento marítimo.
+* Coqueiros.
+* Barracas.
+* Pessoas.
+* Horizonte amplo.
+
+Campo de futebol
+
+* Gramado.
+* Traves.
+* Arquibancadas ou construções próximas.
+* Pessoas observando.
+* Espaço para empinar.
+
+Morro e mirante
+
+* Paisagens amplas.
+* Vento variável.
+* Vegetação.
+* Vista da cidade.
+
+Terreno aberto
+
+* Área para treinamento.
+* Espaço para campeonatos.
+* Poucos obstáculos.
+
+Cada cenário deverá possuir características ambientais e físicas próprias.
+
+9. PERSONAGENS E MUNDO VIVO
+
+Criar personagens personalizáveis.
+
+Implementar:
+
+* Diferentes aparências.
+* Roupas.
+* Cabelos.
+* Animações.
+* Mãos e braços.
+* Posição de empinar.
+* Animações de puxar e recolher linha.
+* Carretilhas.
+* Interações com o ambiente.
+
+Adicionar NPCs pipeiros que empinem pipas, conversem, observem disputas e participem de eventos.
+
+O mundo não deve parecer vazio.
+
+10. CÂMERAS
+
+Implementar duas câmeras principais:
+
+Primeira pessoa
+
+* Visão do personagem.
+* Mãos.
+* Carretilha.
+* Linha.
+* Movimentos naturais.
+
+Terceira pessoa
+
+* Personagem completo.
+* Pipa visível no céu.
+* Linha e rabiola.
+* Câmera acompanhando o voo.
+
+Permitir alternar entre as câmeras.
+
+Criar também câmera de replay para registrar momentos importantes das partidas.
+
+11. SISTEMA DE COMBATE REALISTA
+
+O PIPA BRASIL terá combate realista baseado em física.
+
+O combate não pode ser uma sequência de animações ou golpes automáticos.
+
+Deve utilizar o mesmo núcleo físico do voo normal.
+
+O resultado deverá considerar:
+
+* Física da pipa.
+* Física da linha.
+* Vento.
+* Rajadas.
+* Trajetória.
+* Velocidade.
+* Estabilidade.
+* Posicionamento relativo.
+* Tensão e folga da linha.
+* Tempo de reação.
+* Características de cada modelo.
+* Eventos físicos registrados.
+
+Criar um módulo KiteCombatSystem.
+
+Modalidades oficiais
+
+1 contra 1
+
+* Jogador contra jogador.
+* Jogador contra bot.
+* Bot contra bot.
+* Partidas rápidas.
+* Campeonatos.
+* Estatísticas.
+
+Combate livre — todos contra todos
+
+* Vários participantes.
+* Jogadores e bots simultaneamente.
+* Múltiplas pipas e linhas.
+* Emaranhamentos envolvendo vários participantes.
+* Eliminações virtuais.
+* Classificação dinâmica.
+* Resultado final.
+
+A quantidade de participantes deverá ser configurável e testada progressivamente.
+
+Interações entre linhas
+
+Implementar:
+
+* Detecção de proximidade.
+* Colisões entre segmentos.
+* Emaranhamento.
+* Alterações de tensão.
+* Vibração.
+* Deformação.
+* Ruptura virtual.
+* Separação dos segmentos.
+
+O combate deverá ser convincente e imprevisível, mas inteiramente virtual. Não criar tutoriais de fabricação ou utilização de cerol, linha chilena ou técnicas reais de corte.
+
+12. BOTS E INTELIGÊNCIA ARTIFICIAL
+
+Os bots são obrigatórios e fundamentais para o projeto.
+
+O jogo deve permitir jogar offline contra adversários controlados por inteligência artificial.
+
+Os bots deverão participar de:
+
+* Treinamento.
+* Voo livre.
+* Desafios.
+* Combate 1 contra 1.
+* Combate livre.
+* Campeonatos.
+* Eventos e cenários.
+
+Níveis de dificuldade
+
+1. Fácil.
+2. Normal.
+3. Difícil.
+4. Profissional.
+
+Personalidades
+
+* Defensivo.
+* Agressivo.
+* Técnico.
+* Estratégico.
+* Imprevisível.
+* Equilibrado.
+
+A dificuldade representa a capacidade de execução. A personalidade representa o estilo de comportamento.
+
+Cada bot deverá possuir:
+
+* Nome.
+* Apelido.
+* Aparência.
+* Pipa favorita.
+* Habilidade.
+* Personalidade.
+* Estatísticas.
+* Histórico de partidas.
+
+Inteligência dos bots
+
+Os bots deverão:
+
+* Interpretar o vento.
+* Controlar suas pipas.
+* Reagir às mudanças ambientais.
+* Observar adversários.
+* Tomar decisões.
+* Cometer erros de acordo com a dificuldade.
+* Adaptar o comportamento durante a partida.
+* Respeitar as mesmas limitações físicas do jogador.
+
+Não permitir trapaças, teletransporte ou movimentos fisicamente impossíveis.
+
+Criar um módulo BotAI integrado ao KitePhysicsCore e ao KiteCombatSystem.
+
+13. INTERFACE E EXPERIÊNCIA DO JOGADOR
+
+Criar uma interface bonita, moderna e intuitiva.
+
+Menu principal:
+
+* Jogar.
+* Voo livre.
+* Treinamento.
+* Combate.
+* Campeonatos.
+* Personalização.
+* Configurações.
+
+Interface durante a partida:
+
+* Informações dos participantes.
+* Tempo.
+* Classificação.
+* Eventos recentes.
+* Estado da partida.
+* Indicadores físicos opcionais.
+
+A interface deve funcionar bem tanto em celulares quanto em computadores.
+
+14. ÁUDIO E AMBIENTAÇÃO
+
+Criar áudio imersivo:
+
+* Vento.
+* Linha vibrando.
+* Carretilha.
+* Movimento da pipa.
+* Rabiola.
+* Ruptura virtual.
+* Pássaros.
+* Pessoas conversando.
+* Sons de comunidade.
+* Praia.
+* Campo.
+* Ambiente noturno.
+
+Os sons devem responder aos eventos do jogo.
+
+15. ARQUITETURA DO PROJETO
+
+Organizar o projeto em módulos independentes e integrados.
+
+Arquitetura inicial sugerida:
+
+PIPA_BRASIL/
+│
+├── project.godot
+├── scenes/
+│   ├── main/
+│   ├── characters/
+│   ├── kites/
+│   ├── environments/
+│   ├── menus/
+│   └── combat/
+│
+├── scripts/
+│   ├── core/
+│   │   ├── kite_physics_core.gd
+│   │   ├── wind_system.gd
+│   │   └── game_manager.gd
+│   │
+│   ├── physics/
+│   │   ├── kite_aerodynamics.gd
+│   │   ├── rope_physics.gd
+│   │   └── tail_physics.gd
+│   │
+│   ├── combat/
+│   │   ├── kite_combat_system.gd
+│   │   ├── combat_manager.gd
+│   │   ├── one_vs_one_mode.gd
+│   │   └── free_for_all_mode.gd
+│   │
+│   ├── ai/
+│   │   ├── bot_ai.gd
+│   │   ├── bot_controller.gd
+│   │   ├── bot_personality.gd
+│   │   └── bot_difficulty.gd
+│   │
+│   ├── player/
+│   ├── camera/
+│   ├── interface/
+│   └── audio/
+│
+├── assets/
+│   ├── models/
+│   ├── textures/
+│   ├── materials/
+│   ├── sounds/
+│   └── animations/
+│
+├── documentation/
+└── tests/
+
+Esta estrutura é uma proposta inicial. Adaptar conforme as necessidades técnicas reais, mantendo organização e separação de responsabilidades.
+
+16. DESEMPENHO E OTIMIZAÇÃO
+
+O jogo deverá ser desenvolvido pensando em Windows e Android desde o início.
+
+Metas iniciais:
+
+* 60 FPS no PC quando o hardware permitir.
+* 30 a 60 FPS em Android, conforme o dispositivo.
+* Física independente do FPS.
+* Controle de qualidade gráfica.
+* Otimização de modelos e texturas.
+* LOD para objetos distantes.
+* Redução de processamento de NPCs distantes.
+* Limites configuráveis de participantes.
+* Testes de desempenho contínuos.
+
+Utilizar renderer Mobile como ponto de partida para a versão Android e avaliar configurações específicas para PC.
+
+17. MULTIPLAYER
+
+O multiplayer online deverá ser implementado depois que o modo offline estiver estável.
+
+Etapas:
+
+1. Voo livre offline.
+2. Treinamento.
+3. Bots.
+4. Combate offline.
+5. Validação da física.
+6. Otimização.
+7. Multiplayer online.
+8. Salas privadas.
+9. Partidas públicas.
+10. Campeonatos e ranking.
+
+Preparar a arquitetura para sincronização multiplayer sem construir uma infraestrutura complexa prematuramente.
+
+18. TESTES E QUALIDADE
+
+Não prometer ausência absoluta de bugs. O projeto deverá ter testes frequentes e correções antes de avançar.
+
+Criar testes para:
+
+* Voo.
+* Física.
+* Linha.
+* Rabiola.
+* Vento.
+* Colisões.
+* Combate.
+* Bots.
+* Modalidades.
+* Interface.
+* Desempenho.
+* Windows.
+* Android.
+
+Criar ferramentas de depuração para visualizar:
+
+* Vetores de vento.
+* Tensão.
+* Velocidade.
+* Trajetória.
+* Segmentos da linha.
+* Colisões.
+* Estados dos bots.
+* Eventos de combate.
+
+19. ORDEM DE DESENVOLVIMENTO
+
+Desenvolver por etapas:
+
+Fase 1 — Fundação
+
+* Criar projeto Godot.
+* Configurar renderização.
+* Organizar pastas.
+* Criar documentação.
+* Criar protótipo de voo.
+
+Fase 2 — Física
+
+* Aerodinâmica.
+* Vento.
+* Controle.
+* Estabilidade.
+* Testes.
+
+Fase 3 — Linha e rabiola
+
+* Simulação flexível.
+* Tensão.
+* Curvatura.
+* Vibração.
+* Colisões.
+
+Fase 4 — Modelos de pipas
+
+* Geometrias.
+* Materiais.
+* Aerodinâmica específica.
+
+Fase 5 — Mundo
+
+* Cenários.
+* Personagens.
+* NPCs.
+* Iluminação.
+* Áudio.
+
+Fase 6 — Câmeras e interface
+
+* Primeira pessoa.
+* Terceira pessoa.
+* Controles.
+* Menus.
+
+Fase 7 — Bots
+
+* Inteligência artificial.
+* Personalidades.
+* Dificuldades.
+* Treinamento.
+
+Fase 8 — Combate
+
+* 1 contra 1.
+* Combate livre.
+* Interação entre linhas.
+* Regras.
+* Pontuação.
+
+Fase 9 — Polimento
+
+* Gráficos.
+* Efeitos.
+* Otimização.
+* Testes em dispositivos.
+
+Fase 10 — Multiplayer
+
+* Sincronização.
+* Salas.
+* Partidas online.
+* Campeonatos.
+
+20. INSTRUÇÕES OBRIGATÓRIAS PARA O CLAUDE CODE
+
+Você será o programador responsável por implementar este projeto dentro do ambiente de desenvolvimento.
+
+Antes de escrever código:
+
+1. Analise os arquivos e a estrutura existente.
+2. Leia este documento inteiro.
+3. Identifique dependências e riscos técnicos.
+4. Proponha uma arquitetura detalhada.
+5. Apresente um plano de implementação por fases.
+6. Identifique o que precisa ser prototipado antes de avançar.
+
+Durante o desenvolvimento:
+
+* Trabalhe em etapas pequenas.
+* Crie arquivos completos e organizados.
+* Não produza scripts desconectados.
+* Integre os módulos corretamente.
+* Teste cada funcionalidade.
+* Corrija erros antes de avançar.
+* Documente decisões.
+* Preserve funcionalidades que já funcionam.
+* Não substitua sistemas físicos por animações falsas.
+* Não implemente recursos complexos antes de validar seus fundamentos.
+
+Não tente criar o jogo inteiro em uma única execução.
+
+Ao concluir cada fase, informe:
+
+* O que foi implementado.
+* Quais arquivos foram criados ou modificados.
+* Quais testes foram executados.
+* Quais problemas foram encontrados.
+* O que falta.
+* Qual será a próxima etapa.
+
+Se alguma funcionalidade for tecnicamente inviável ou pesada para Android, explique o motivo e apresente uma alternativa.
+
+IMPORTANTE: não quero apenas um protótipo descartável. Quero construir uma base organizada, escalável e preparada para se tornar um jogo completo.
+
+21. RESULTADO FINAL DESEJADO
+
+O PIPA BRASIL deverá ser um simulador brasileiro de pipas com:
+
+* Gráficos bonitos e realistas.
+* Pôr do sol dourado marcante.
+* Pisos com acabamento de verniz.
+* Cenários brasileiros detalhados.
+* Física realista das pipas.
+* Linha e rabiola com simulação física.
+* Vários modelos de pipas.
+* Personagens personalizáveis.
+* Primeira e terceira pessoa.
+* Voo livre.
+* Treinamento.
+* Bots inteligentes.
+* Combate realista.
+* Modo 1 contra 1.
+* Combate livre.
+* Campeonatos.
+* Futuro multiplayer online.
+* Versões para Windows e Android.
+
+A prioridade absoluta é construir uma experiência de voo convincente, com física de qualidade, identidade brasileira, beleza visual e adversários virtuais inteligentes.

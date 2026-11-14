@@ -1,0 +1,166 @@
+PIPA BRASIL — DIREÇÃO ARTÍSTICA E QUALIDADE GRÁFICA
+
+1. Identidade visual
+
+O PIPA BRASIL deverá ter gráficos muito bonitos, com aparência realista e cinematográfica, valorizando a beleza dos cenários brasileiros.
+
+A qualidade visual deverá ser uma das principais características do jogo, sem abandonar a otimização para Android e Windows.
+
+2. Pôr do sol dourado — característica marcante
+
+Criar um sistema de iluminação capaz de produzir pores do sol especialmente bonitos.
+
+Características:
+
+* Sol baixo no horizonte.
+* Luz amarela e dourada.
+* Céu alaranjado com transições suaves.
+* Nuvens iluminadas pelo sol.
+* Reflexos dourados nos objetos.
+* Sombras longas e naturais.
+* Luz volumétrica, quando suportada.
+* Graduação de cores cinematográfica.
+* Silhuetas de prédios, montanhas e pipas contra o céu.
+
+O pôr do sol deverá ser um dos momentos visuais mais bonitos do jogo.
+
+Criar variações de entardecer: amarelo-dourado, laranja intenso, tons rosados e céu parcialmente nublado.
+
+3. Piso com acabamento de verniz
+
+Criar superfícies com aparência de piso envernizado e polido.
+
+Características:
+
+* Brilho perceptível.
+* Reflexos do céu e do sol.
+* Reflexos de luz nas superfícies.
+* Variação de rugosidade.
+* Texturas detalhadas.
+* Pequenas imperfeições naturais.
+* Marcas de uso e desgaste.
+* Aparência convincente de materiais reais.
+
+O acabamento deve transmitir a sensação de um piso bem tratado, com verniz, sem parecer plástico artificial.
+
+Implementar materiais diferentes para:
+
+* Pisos de terraços.
+* Pisos de quadras.
+* Pisos internos.
+* Calçadas.
+* Concreto.
+* Cerâmica.
+* Madeira.
+* Superfícies molhadas.
+
+O brilho deve variar de acordo com o material. Não transformar todos os pisos em superfícies espelhadas.
+
+4. Reflexos e iluminação
+
+Utilizar recursos adequados da Godot 4:
+
+* PBR (renderização baseada em física).
+* Mapas de rugosidade.
+* Mapas de normal.
+* Reflexos conforme a capacidade da plataforma.
+* Ambient Occlusion.
+* Sombras dinâmicas.
+* Iluminação indireta, quando viável.
+* Tonemapping.
+* Bloom controlado.
+* Ajustes de exposição.
+
+Os reflexos do sol no piso devem ser especialmente bonitos durante o entardecer.
+
+5. Ciclo de iluminação
+
+Implementar ciclo de dia e noite:
+
+1. Amanhecer.
+2. Manhã.
+3. Meio-dia.
+4. Tarde.
+5. Pôr do sol.
+6. Crepúsculo.
+7. Noite.
+
+Cada período deve alterar iluminação, sombras, cores do céu e atmosfera.
+
+O jogador deverá poder aproveitar voos durante todos esses horários.
+
+6. Atmosfera dos cenários
+
+Adicionar elementos que deem vida ao mundo:
+
+* Nuvens em movimento.
+* Pássaros distantes.
+* Árvores movimentadas pelo vento.
+* Roupas em varais.
+* Bandeiras tremulando.
+* Antenas e caixas d’água.
+* Luzes acendendo ao anoitecer.
+* Prédios e montanhas ao horizonte.
+* Pessoas e pipeiros nos cenários.
+* Sons ambientes brasileiros.
+
+7. Materiais das pipas e personagens
+
+Utilizar materiais com aparência realista:
+
+* Papel de seda com transparência adequada.
+* Estrutura de bambu.
+* Linhas flexíveis.
+* Rabiolas movimentadas fisicamente.
+* Roupas com tecido e dobras.
+* Pele e cabelo com materiais apropriados.
+* Carretilhas com madeira, plástico ou metal.
+
+A pipa deverá receber iluminação coerente com o ambiente e apresentar movimento natural.
+
+8. Câmera cinematográfica
+
+Implementar:
+
+* Profundidade de campo opcional.
+* Exposição adaptativa.
+* Efeitos sutis de lente.
+* Movimento natural de câmera.
+* Transições suaves.
+* Replays com enquadramentos cinematográficos.
+
+Evitar exageros que atrapalhem a jogabilidade.
+
+9. Qualidade gráfica e desempenho
+
+Criar três perfis gráficos:
+
+Baixo
+
+* Android de entrada.
+* Sombras simplificadas.
+* Reflexos reduzidos.
+* Menor distância de renderização.
+
+Médio
+
+* Android intermediário.
+* Texturas melhores.
+* Sombras dinâmicas controladas.
+* Reflexos seletivos.
+
+Alto
+
+* Android potente e Windows.
+* Maior qualidade de sombras.
+* Materiais mais detalhados.
+* Reflexos melhores.
+* Efeitos atmosféricos aprimorados.
+
+Não depender de efeitos pesados para conseguir beleza visual. A direção de arte, as cores, os materiais e a iluminação devem produzir um resultado bonito mesmo no perfil médio.
+
+10. Critério de qualidade
+
+O resultado desejado é um jogo visualmente marcante, com cenários brasileiros bonitos, iluminação cinematográfica, pores do sol dourados, pisos envernizados e reflexos naturais.
+
+A qualidade visual deve ser construída em conjunto com a otimização, e não sacrificando completamente o desempenho dos celulares.
