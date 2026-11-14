@@ -192,3 +192,64 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "Última versão (automática)" \
             --notes "Build automático do commit ${SHORT}, gerado depois que todos os testes passaram. Android: pipa-brasil.apk. Windows: pipa-brasil-windows.zip. Como instalar: docs/como-testar.md."
+
+  capturas:
+    name: Capturas de tela (para conferir o visual)
+    needs: testes
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_STATUS }}-linux
+
+      - name: Baixar o Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          V="${GODOT_VERSION}-${GODOT_STATUS}"
+          mkdir -p ~/godot-bin
+          curl -fsSL --retry 3 -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${V}_linux.x86_64 ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+
+      - name: Preparar renderização por software
+        run: |
+          echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri >/dev/null
+
+      - name: Importar o projeto
+        run: |
+          timeout 300 godot --headless --path . --import 2>&1 | tail -5 || true
+
+      - name: Gravar quadros do laboratório
+        run: |
+          mkdir -p capturas
+          for cam in 0 1 2; do
+            mkdir -p "quadros$cam"
+            timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
+              --rendering-method gl_compatibility --resolution 1280x720 \
+              --fixed-fps 15 --quit-after 120 --write-movie "quadros$cam/q.png" \
+              -- --camera=$cam 2>&1 | tail -5 || true
+            ls "quadros$cam" | head -3
+            for n in 00000030 00000119; do
+              if [ -f "quadros$cam/q$n.png" ]; then cp "quadros$cam/q$n.png" "capturas/camera${cam}_quadro${n}.png"; fi
+            done
+          done
+          ls -la capturas
+
+      - name: Guardar as capturas
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-de-tela
+          retention-days: 7
+          path: capturas/

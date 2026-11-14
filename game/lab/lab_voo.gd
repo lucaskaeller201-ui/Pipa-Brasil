@@ -58,6 +58,11 @@ func _ready() -> void:
 	add_child(_camera)
 
 	_criar_interface()
+	# Permite escolher a câmera pela linha de comando (usado nas capturas do CI).
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--camera="):
+			_camera_modo = clampi(arg.trim_prefix("--camera=").to_int(), 0, CAMERAS.size() - 1)
+			_botao_camera.text = "Câmera: %s" % CAMERAS[_camera_modo]
 	reiniciar()
 
 
