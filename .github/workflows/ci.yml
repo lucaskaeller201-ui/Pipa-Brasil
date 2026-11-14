@@ -200,6 +200,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     continue-on-error: true
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -253,3 +255,15 @@ jobs:
           name: capturas-de-tela
           retention-days: 7
           path: capturas/
+
+      - name: Publicar as capturas no ramo "capturas"
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd capturas
+          git init -q -b capturas
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          echo "Capturas automáticas do commit ${GITHUB_SHA::7}" > LEIA-ME.txt
+          git add -A
+          git commit -q -m "Capturas do commit ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" capturas
