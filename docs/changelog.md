@@ -1,5 +1,17 @@
 # Histórico de alterações
 
+## 0.2.0 — 2026-11-14
+
+- Fase 2: mão do pipeiro e carretilha em `sim/pilot/`; linha com comprimento
+  variável; 8 comandos (puxar, afrouxar, dar linha, largar, recolher, puxão,
+  arrancão, desbicar) que só movem a mão e a carretilha.
+- `PilotInput`: interface única de comandos para jogador e bots.
+- Vareta flexível e raia sem rabiola experimental (modelo de giro empírico).
+- Laboratório: 8 botões de comando, teclado no PC, sensibilidade, escolha entre
+  raia com e sem rabiola, câmera lateral ajustada ao zoom.
+- Testes: 16 novos e regressão por trajetórias de referência (`tests/golden/`),
+  com geração automática no CI (ramo `referencias-novas`).
+
 ## 0.1.0 — 2026-11-14
 
 - Fase 1: núcleo físico em `sim/` (vento, raia com corpo rígido e painéis de

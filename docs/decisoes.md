@@ -22,6 +22,38 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-014 — Trajetórias de referência (2026-11-14)
+Os testes de regressão comparam trajetórias (posição da pipa, tensão e linha a
+cada 0,5 s) com arquivos em `tests/golden/`. Quando um arquivo não existe, o CI
+o gera e publica no ramo `referencias-novas`; ele só passa a valer depois de
+revisado e guardado no repositório. Mudança intencional na física = apagar o
+arquivo, gerar de novo e registrar o motivo aqui.
+
+### D-013 — Mão e carretilha (2026-11-14)
+A mão se move ao longo da linha com uma mola criticamente amortecida
+(30 rad/s) e velocidade máxima por movimento (puxão 4,5 m/s, arrancão 7 m/s).
+A carretilha muda o comprimento no segmento da mão: "dar linha" é a carretilha
+com freio (a tensão puxa a linha até 2 m/s), "largar" é a carretilha livre e
+"recolher" enrola a 1,2 m/s enquanto a tensão for menor que 35 N. Desbicar é
+um movimento composto: folga rápida de 0,3 s e depois um puxão. "Puxar" foi
+incluído como comando contínuo (o Documento Mestre para o Claude Code lista 8
+comandos; o original, 7).
+
+### D-012 — Raia sem rabiola: modelo de giro empírico (2026-11-14)
+No protótipo, a raia sem rabiola com só a aerodinâmica de placa plana entrava
+em autorrotação (9 voltas/s, mesmo com a linha esticada). Pipas reais não
+fazem isso por causa do arrasto das bordas e da vareta envergada. Foram
+incluídos três momentos em torno da normal, com parâmetros por pipa:
+amortecimento do giro, estabilidade direcional proporcional à curvatura da
+vareta e uma tendência de giro (sentido preferido) quando a vareta relaxa. São
+forças da simulação, aplicadas igualmente a jogador e bots, não animações. O
+resultado reproduz o comportamento de pipa de combate (voa para onde o bico
+aponta com a linha esticada, gira com a linha frouxa), mas um controlador
+automático simples ainda não consegue mantê-la no ar com turbulência. Por
+isso ela é experimental; a calibração final virá com o bot piloto (Fase 4) e
+com o teste do Lucas. A raia de laboratório (com rabiola) não usa esse modelo
+e continua idêntica à da Fase 1.
+
 ### D-011 — Capturas de tela no CI (2026-11-14)
 O CI grava quadros do laboratório com renderização por software (Xvfb + Mesa,
 renderizador Compatibility) e publica no ramo `capturas`. Motivo: o Claude não

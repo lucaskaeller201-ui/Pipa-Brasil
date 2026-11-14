@@ -39,6 +39,12 @@ sempre em português, com instruções passo a passo para iniciante.
   `godot --headless --path . --import` e depois
   `godot --headless --path . --script res://tests/run_tests.gd`.
 - Os builds para o usuário ficam na release `ultima-versao` do GitHub.
+- Capturas de tela do laboratório: `git fetch --depth 1 origin capturas` e
+  `git show FETCH_HEAD:<arquivo>.png` (o download de artefatos do Actions é
+  bloqueado na sessão).
+- Regressão: trajetórias em `tests/golden/`. Referência nova é gerada pelo CI no
+  ramo `referencias-novas`; revise antes de guardar (veja D-014).
+- Protótipos Python da física em `tools/prototipo/` (rodar com `python3`).
 
 ## Estilo de código
 
