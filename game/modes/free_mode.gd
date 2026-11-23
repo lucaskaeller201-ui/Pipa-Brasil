@@ -135,7 +135,7 @@ func _lancar(i: int) -> void:
 	if velha != null:
 		velha.tag = -1           # vira avoada de ninguém
 		velha.line = null        # o pedaço que ficou na mão vai junto com o pipeiro
-	var f := world.add_flyer(KiteDefinition.raia_sem_rabiola(), p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
+	var f := world.add_flyer(KiteDefinition.pipa_rio(), p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
 	f.tag = i
 	p["flyer"] = f
 	p["respawn"] = -1.0
@@ -161,6 +161,11 @@ func _evento(e: Dictionary) -> void:
 				_messages.append("%s cortou %s!" % [_nome(autor), _nome_obj(vitima)])
 			else:
 				_messages.append("A linha de %s rompeu!" % _nome_obj(vitima))
+		"lacou":
+			var x := _dono(int(e["flyer"]))
+			var y := _dono(int(e["other"]))
+			if x >= 0 and y >= 0:
+				_messages.append("Laçou! %s × %s" % [_nome(x), _nome(y)])
 		"enroscou":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:

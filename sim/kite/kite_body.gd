@@ -144,6 +144,11 @@ func compute_aero(wind: WindField, t: float) -> void:
 		aoa_acc += rad_to_deg(asin(minf(1.0, absf(sin_aoa)))) * area
 		area_acc += area
 	torque += _spin_moments(wind, t)
+	if d.side_force_coefficient > 0.0:
+		# Contra a derrapagem: ar ao longo da envergadura empurra de volta.
+		var x := rotation * Vector3(1.0, 0.0, 0.0)
+		var vx := (last_wind - velocity).dot(x)
+		force += x * (d.side_force_coefficient * 0.5 * RHO * d.total_area * absf(vx) * vx)
 	last_aero_force = force
 	last_aero_torque = torque
 	last_aoa_deg = aoa_acc / area_acc if area_acc > 0.0 else 0.0
@@ -192,6 +197,12 @@ func integrate(h: float) -> void:
 		var n := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn := angular_velocity.dot(n)
 		angular_velocity -= n * (wn * (1.0 - exp(-definition.spin_damping_taut * b * b * h)))
+	if definition.spin_rate_max_deg > 0.0:
+		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
+		var wn2 := angular_velocity.dot(n2)
+		var lim := deg_to_rad(definition.spin_rate_max_deg)
+		if absf(wn2) > lim:
+			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
 	_prev_rotation = rotation
 	_step_delta = velocity * h
 	position += _step_delta

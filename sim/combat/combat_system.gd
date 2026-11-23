@@ -34,6 +34,13 @@ const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considera
 ## material de cchain), "captured": bool}
 var links: Array = []
 
+## Linhas laçadas (D-027): depois que duas linhas em voo se encostam, ficam
+## juntas até uma romper. Cada uma: {"a": Flyer, "b": Flyer, "ma": float,
+## "mb": float} (coordenadas no material das linhas, a partir da pipa).
+var engagements: Array = []
+## Pontos de encontro das linhas laçadas (para a tela mostrar faísca).
+var contact_points: PackedVector3Array = PackedVector3Array()
+
 var _pairs: Array = []
 var _chains: Array = []
 var _groups := PackedInt32Array()
@@ -76,7 +83,9 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 				a.last_contact = _owners[p[2]]
 				b.last_contact = _owners[p[0]]
 				_maybe_snag(p[0], p[1], p[2], p[3])
+				_maybe_engage(p[0], p[1], p[2], p[3])
 		_solve_links()
+		_solve_engagements(h, wear_rate if it == 0 else 0.0)
 
 
 ## Se uma das cadeias é de uma pipa avoada livre e a outra é a linha ou a
@@ -177,6 +186,11 @@ func check_breaks(flyers: Array, loose: Array) -> void:
 			var seg := fl.line.weakest_segment()
 			var onde := fl.line.pos[seg].lerp(fl.line.pos[seg + 1], 0.5)
 			var quem: Flyer = fl.line.last_contact as Flyer
+			for e in engagements:
+				if e["a"] == fl:
+					quem = e["b"]
+				elif e["b"] == fl:
+					quem = e["a"]
 			fl.cut_line(seg)
 			events.append({"type": "ruptura", "flyer": fl.id, "segment": seg, "position": onde,
 				"by": quem.id if quem != null else -1})
@@ -198,6 +212,9 @@ func take_events() -> Array:
 
 ## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
 func forget(f: Flyer) -> void:
+	for e in engagements.duplicate():
+		if e["a"] == f or e["b"] == f:
+			engagements.erase(e)
 	for l in links.duplicate():
 		if l["avoada"] == f or l["catcher"] == f:
 			links.erase(l)
@@ -205,3 +222,52 @@ func forget(f: Flyer) -> void:
 				(l["catcher"] as Flyer).holding = maxi(0, (l["catcher"] as Flyer).holding - 1)
 			if l["avoada"] != f:
 				(l["avoada"] as Flyer).caught_by = null
+
+
+func _maybe_engage(ia: int, i: int, ib: int, j: int) -> void:
+	var fa: Flyer = _owners[ia]
+	var fb: Flyer = _owners[ib]
+	if fa == null or fb == null or fa == fb or fa.cut or fb.cut:
+		return
+	var a: ParticleChain = _chains[ia]
+	var b: ParticleChain = _chains[ib]
+	if a != fa.line or b != fb.line:
+		return
+	for e in engagements:
+		if (e["a"] == fa and e["b"] == fb) or (e["a"] == fb and e["b"] == fa):
+			return
+	var st := LineContact.closest_params(a.pos[i], a.pos[i + 1], b.pos[j], b.pos[j + 1])
+	engagements.append({"a": fa, "b": fb, "ma": a.material_coordinate(i, st.x), "mb": b.material_coordinate(j, st.y)})
+	events.append({"type": "lacou", "flyer": fa.id, "other": fb.id})
+
+
+## Acha de novo o ponto de encontro perto do anterior e segura as linhas juntas.
+func _solve_engagements(h: float, wear_k: float) -> void:
+	contact_points.clear()
+	for e in engagements.duplicate():
+		var fa: Flyer = e["a"]
+		var fb: Flyer = e["b"]
+		if fa.cut or fb.cut or fa.line == null or fb.line == null:
+			engagements.erase(e)
+			continue
+		var a := fa.line
+		var b := fb.line
+		var ia := int(a.locate_material(float(e["ma"])).x)
+		var ib := int(b.locate_material(float(e["mb"])).x)
+		var melhor := INF
+		var bi := ia
+		var bj := ib
+		var bst := Vector2.ZERO
+		for i in range(maxi(0, ia - 3), mini(a.size() - 1, ia + 4)):
+			for j in range(maxi(0, ib - 3), mini(b.size() - 1, ib + 4)):
+				var st := LineContact.closest_params(a.pos[i], a.pos[i + 1], b.pos[j], b.pos[j + 1])
+				var d := a.pos[i].lerp(a.pos[i + 1], st.x).distance_squared_to(b.pos[j].lerp(b.pos[j + 1], st.y))
+				if d < melhor:
+					melhor = d
+					bi = i
+					bj = j
+					bst = st
+		e["ma"] = a.material_coordinate(bi, bst.x)
+		e["mb"] = b.material_coordinate(bj, bst.y)
+		LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, wear_k)
+		contact_points.append(a.pos[bi].lerp(a.pos[bi + 1], bst.x))

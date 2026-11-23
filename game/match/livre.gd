@@ -3,9 +3,10 @@ extends Node3D
 ##
 ## Sem botões de comando: os gestos são os do pipeiro.
 ##   • Deslizar o dedo para BAIXO: puxa linha com a mão ("abraçar"); rápido = puxada forte.
-##   • Deslizar para CIMA: dá linha; soltando o dedo no embalo, a carretilha
-##     continua girando um pouco.
-##   • TOQUES rápidos: desbica (pequenas folgas; o bico gira a cada toque).
+##   • Deslizar para CIMA: dá linha (até 3 m/s); a pipa descarrega e gira num
+##     ritmo constante, mostrando o bico para todos os lados.
+##   • TOQUE rápido: desbica — um puxão curto que trava o giro; a pipa arranca
+##     reta para onde o bico parou (D-026).
 ## No PC: W/↓ puxa, S/↑ dá linha, Espaço desbica, arrastar com o mouse também vale.
 ## A física é a mesma do laboratório: os gestos viram comandos do PilotInput.
 
@@ -17,7 +18,8 @@ const LinesView := preload("res://game/views/lines_view.gd")
 
 const BOTS := 3
 const LINHA_POR_TELA := 1.6     ## m de linha por altura de tela deslizada
-const EMBALO := 0.9             ## s: quanto dura o giro da carretilha depois de soltar o dedo
+const EMBALO := 0.35            ## s: quanto a carretilha ainda gira depois de soltar o dedo
+const DAR_LINHA_MAX := 3.0      ## m/s: o mais rápido que se dá linha
 const TOQUE_MAX_S := 0.25
 const TOQUE_MAX_PX := 18.0
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
@@ -103,7 +105,7 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 	var v := _velocidade_mao + teclado
 	if _dedos.is_empty() and v == 0.0:
 		v = -_embalo
-	e.haul_speed = clampf(v, -Pilot.HAUL_MAX_SPEED, Pilot.HAUL_MAX_SPEED)
+	e.haul_speed = clampf(v, -DAR_LINHA_MAX, Pilot.HAUL_MAX_SPEED)
 
 
 func _process(delta: float) -> void:
@@ -125,6 +127,8 @@ func _process(delta: float) -> void:
 			_linhas.call("desenhar_cadeia", fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012)
 		if fl.trailing_line != null:
 			_linhas.call("desenhar_cadeia", fl.trailing_line.pos, cor, 0.0012)
+		if fl.tail != null:
+			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(1.0, 0.30, 0.60) if fl.tag <= 0 else cor.darkened(0.1), 0.02)
 	var eu := modo.you()
 	_giro_carretilha += eu.input.haul_speed * delta * 3.0
 	_atualizar_textos(eu)
@@ -215,7 +219,7 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 	if agora - float(d["t0"]) < TOQUE_MAX_S and posicao.distance_to(d["ini"]) < TOQUE_MAX_PX:
 		_desbicar()
 	elif _velocidade_mao < -0.5:
-		_embalo = -_velocidade_mao  # soltou no embalo de dar linha: a carretilha segue girando
+		_embalo = minf(-_velocidade_mao, DAR_LINHA_MAX)  # a carretilha ainda gira um instante
 
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
@@ -229,7 +233,7 @@ func _desbicar() -> void:
 	var eu := modo.you()
 	if _automatico or eu.cut or eu.pilot == null:
 		return
-	eu.pilot.trigger(Pilot.Impulse.DESBICAR, modo.world.time)
+	eu.pilot.trigger(Pilot.Impulse.PUXAO, modo.world.time)
 
 
 func _sobre_botao(posicao: Vector2) -> bool:
@@ -276,6 +280,17 @@ func _desenhar_sobreposicao() -> void:
 		c.draw_line(centro + Vector2.from_angle(a) * 24.0, centro + Vector2.from_angle(a) * 68.0, Color(0.6, 0.55, 0.5, 0.8), 3.0)
 	var cabo := centro + Vector2.from_angle(_giro_carretilha) * 58.0
 	c.draw_circle(cabo, 11.0, Color(0.25, 0.15, 0.08))
+
+	# Faísca nos pontos em que as linhas estão laçadas.
+	for p in modo.world.combat.contact_points:
+		if _camera.is_position_behind(p):
+			continue
+		var s := _camera.unproject_position(p)
+		var brilho := 0.6 + 0.4 * sin(Time.get_ticks_msec() * 0.03)
+		for k in 6:
+			var a := k * PI / 3.0 + Time.get_ticks_msec() * 0.005
+			c.draw_line(s, s + Vector2.from_angle(a) * (10.0 + 6.0 * brilho), Color(1.0, 0.85, 0.3, brilho), 2.0)
+		c.draw_circle(s, 4.0, Color(1.0, 1.0, 0.8, brilho))
 
 	var eu := modo.you()
 	for f in modo.world.flyers:
@@ -363,7 +378,7 @@ func _criar_interface() -> void:
 	_aviso.offset_top = 70.0
 	_aviso.offset_bottom = 160.0
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para BAIXO: puxa · para CIMA: dá linha · TOQUES: desbica"
+	_dica.text = "Deslize para BAIXO: puxa · para CIMA: dá linha (a pipa gira) · TOQUE: desbica e ela arranca"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

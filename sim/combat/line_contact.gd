@@ -94,11 +94,53 @@ static func solve_pair(a: ParticleChain, i: int, b: ParticleChain, j: int, radiu
 	if wear_k > 0.0:
 		var va := a.vel[i].lerp(a.vel[i + 1], s)
 		var vb := b.vel[j].lerp(b.vel[j + 1], t)
-		var vrel := va - vb
-		var slide := (vrel - n * vrel.dot(n)).length()
-		var desgaste := wear_k * force * slide * h
-		a.add_wear(i, s, desgaste)
-		b.add_wear(j, t, desgaste)
+		_saw(a, i, s, b, j, t, va - vb, force, wear_k, h)
+	return force
+
+
+## Desgaste virtual do "relo" (D-027): a linha que CORRE no ponto de encontro
+## (o material dela passa pelo ponto) gasta a outra. Quem dá linha ou puxa
+## rápido contra uma linha parada leva vantagem.
+static func _saw(a: ParticleChain, i: int, s: float, b: ParticleChain, j: int, t: float, vrel: Vector3, force: float, wear_k: float, h: float) -> void:
+	var ta := (a.pos[i + 1] - a.pos[i]).normalized()
+	var tb := (b.pos[j + 1] - b.pos[j]).normalized()
+	var corre_a := absf(vrel.dot(ta))   # A desliza ao longo de si mesma
+	var corre_b := absf(vrel.dot(tb))
+	var base := 0.15 * (vrel.length())  # um pouco para os dois, sempre
+	a.add_wear(i, s, wear_k * force * (corre_b + base) * h)
+	b.add_wear(j, t, wear_k * force * (corre_a + base) * h)
+
+
+## Linhas laçadas (D-027): mantém os pontos mais próximos das duas linhas
+## encostados (distância = raio). Devolve a "força" de contato.
+static func hold_pair(a: ParticleChain, i: int, b: ParticleChain, j: int, radius: float, h: float, wear_k: float) -> float:
+	var p1 := a.pos[i]
+	var q1 := a.pos[i + 1]
+	var p2 := b.pos[j]
+	var q2 := b.pos[j + 1]
+	var st := closest_params(p1, q1, p2, q2)
+	var s := st.x
+	var t := st.y
+	var d := p1.lerp(q1, s) - p2.lerp(q2, t)
+	var dist := d.length()
+	if dist <= radius or dist < 1e-9:
+		return 0.0
+	var n := d / dist
+	var wa := a.inv_mass[i] * (1.0 - s) * (1.0 - s) + a.inv_mass[i + 1] * s * s
+	var wb := b.inv_mass[j] * (1.0 - t) * (1.0 - t) + b.inv_mass[j + 1] * t * t
+	var wsum := wa + wb
+	if wsum < 1e-12:
+		return 0.0
+	var dl := -(dist - radius) / wsum
+	a.pos[i] += n * (a.inv_mass[i] * (1.0 - s) * dl)
+	a.pos[i + 1] += n * (a.inv_mass[i + 1] * s * dl)
+	b.pos[j] -= n * (b.inv_mass[j] * (1.0 - t) * dl)
+	b.pos[j + 1] -= n * (b.inv_mass[j + 1] * t * dl)
+	var force := absf(dl) / (h * h)
+	if wear_k > 0.0:
+		var va := a.vel[i].lerp(a.vel[i + 1], s)
+		var vb := b.vel[j].lerp(b.vel[j + 1], t)
+		_saw(a, i, s, b, j, t, va - vb, force, wear_k, h)
 	return force
 
 

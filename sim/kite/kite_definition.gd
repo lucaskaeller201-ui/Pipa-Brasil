@@ -34,6 +34,12 @@ extends Resource
 ## onde ele está, e a pipa vai reta para onde aponta (D-024). Multiplica o
 ## quadrado do quanto a vareta está envergada; com a linha frouxa, some.
 @export var spin_damping_taut := 0.0
+## Giro máximo no plano da pipa (graus/s); 0 = sem limite. Com a linha frouxa
+## a pipa gira num ritmo que dá para acompanhar (D-026).
+@export var spin_rate_max_deg := 0.0
+## Força lateral contra a derrapagem (ar ao longo da envergadura): a pipa não
+## anda de lado; vai na direção da espinha, como uma flecha (D-026).
+@export var side_force_coefficient := 0.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true
@@ -94,6 +100,25 @@ static func raia_laboratorio(dihedral_deg := 12.0) -> KiteDefinition:
 	])
 	d.corners = PackedVector3Array([top, bottom, left, right])
 	d.rebuild()
+	return d
+
+
+## Pipa do Rio (D-026): losango com vareta que enverga, rabiola de 2 m.
+## Com a linha esticada segura o bico e vai reta para onde ele aponta; dando
+## linha, gira num ritmo constante; um toque (puxão) trava o giro.
+## Calibrada no protótipo (tools/prototipo/fase4/sim2_fase5.py, exp8/exp9).
+static func pipa_rio() -> KiteDefinition:
+	var d := raia_laboratorio(0.0)
+	d.model_name = "Pipa do Rio"
+	d.flex_enabled = true
+	d.bow_stability = 0.0
+	d.spin_damping_quadratic = 1.0
+	d.spin_damping_linear = 0.3
+	d.spin_bias = 1.5
+	d.spin_damping_taut = 40.0
+	d.spin_rate_max_deg = 170.0
+	d.side_force_coefficient = 4.0
+	d.tail_enabled = true
 	return d
 
 
