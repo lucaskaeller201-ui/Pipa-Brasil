@@ -211,7 +211,7 @@ func _posicionar_camera(imediato: bool) -> void:
 	else:
 		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.08)
 	_carretilha.visible = _primeira_pessoa
-	_mao.visible = _primeira_pessoa
+	_mao.visible = not _primeira_pessoa  # na 1ª pessoa a linha sai do pé da tela
 	_meu_corpo.visible = not _primeira_pessoa
 
 
@@ -220,8 +220,9 @@ func _criar_carretilha_e_mao() -> void:
 	_carretilha = Node3D.new()
 	_carretilha.name = "Carretilha"
 	_camera.add_child(_carretilha)
-	_carretilha.position = Vector3(-0.10, -0.15, -0.42)
-	_carretilha.rotation_degrees = Vector3(70.0, 35.0, 0.0)
+	_carretilha.position = Vector3(-0.09, -0.105, -0.40)
+	_carretilha.rotation_degrees = Vector3(65.0, 40.0, 0.0)
+	_carretilha.scale = Vector3.ONE * 0.6
 	var corpo := MeshInstance3D.new()
 	var cil := CylinderMesh.new()
 	cil.top_radius = 0.065
@@ -240,7 +241,7 @@ func _criar_carretilha_e_mao() -> void:
 	rolo.height = 0.056
 	linha_enrolada.mesh = rolo
 	var branco := StandardMaterial3D.new()
-	branco.albedo_color = Color(0.95, 0.95, 0.92)
+	branco.albedo_color = Color(0.78, 0.76, 0.72)
 	branco.roughness = 0.6
 	linha_enrolada.material_override = branco
 	_carretilha.add_child(linha_enrolada)
