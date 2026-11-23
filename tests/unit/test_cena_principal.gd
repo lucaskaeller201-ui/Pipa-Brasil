@@ -50,8 +50,9 @@ func test_modo_livre_abre_e_as_pipas_voam() -> void:
 	var raiz := cena.instantiate()
 	raiz.set("_automatico", true)  # um bot pilota a sua pipa no teste
 	tree.root.add_child(raiz)
-	for nome in ["Linhas", "Camera", "Interface", "Interface/Sobreposicao"]:
+	for nome in ["Linhas", "Camera", "Interface"]:
 		assert_not_null(raiz.get_node_or_null(nome), "faltou o nó %s" % nome)
+	assert_not_null(raiz.find_child("Sobreposicao", true, false), "faltou a sobreposição (carretilha e setas)")
 	var modo: FreeMode = raiz.get("modo")
 	assert_not_null(modo)
 	assert_eq(modo.players.size(), 4, "você e 3 bots")
