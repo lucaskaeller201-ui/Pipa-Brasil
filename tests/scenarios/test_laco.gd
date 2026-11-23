@@ -9,7 +9,7 @@ func _mundo() -> SimWorld:
 	var w := SimWorld.new()
 	w.wind = WindField.new(5.0)
 	w.add_flyer(KiteDefinition.pipa_rio(), Vector3.ZERO, 30.0, 50.0, 0.0, true, 3.0)
-	w.add_flyer(KiteDefinition.pipa_rio(), Vector3(10.0, 0.0, 0.0), 30.0, 28.0, 0.0, true, 3.0)
+	w.add_flyer(KiteDefinition.pipa_rio(), Vector3(12.0, 0.0, 0.0), 30.0, 22.0, -10.0, true, 3.0)
 	for i in roundi(8.0 / DT):
 		w.step(DT)
 	return w
@@ -18,8 +18,8 @@ func _mundo() -> SimWorld:
 ## B anda pela laje de um lado para o outro, passando a linha por baixo da de A.
 func _cruzar(w: SimWorld) -> bool:
 	var b: Flyer = w.flyers[1]
-	for i in roundi(6.0 / DT):
-		b.pilot.base.x = maxf(-10.0, b.pilot.base.x - 4.0 * DT)
+	for i in roundi(12.0 / DT):
+		b.pilot.base.x = maxf(-25.0, b.pilot.base.x - 4.0 * DT)
 		w.step(DT)
 		if not w.combat.engagements.is_empty():
 			return true

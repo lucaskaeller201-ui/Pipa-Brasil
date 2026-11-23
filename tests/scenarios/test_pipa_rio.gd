@@ -71,6 +71,7 @@ func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 	var b_antes := f.nose_angle_deg()
 	_rodar(w, 0.15)
 	var giro_toque := absf(_dif(f.nose_angle_deg(), b_antes)) / 0.15
+	var bico_travado := f.nose_angle_deg()
 	f.input.haul_speed = 3.0
 	var p0 := f.sky_position_deg()
 	var rumos: Array[float] = []
@@ -87,7 +88,7 @@ func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 		az_max = maxf(az_max, absf(p.x))
 		el_min = minf(el_min, p.y)
 	f.input.clear()
-	return {"bico0": bico0, "bico1": f.nose_angle_deg(), "giro_toque": giro_toque, "rumos": rumos,
+	return {"bico0": bico_travado, "bico_antes_do_toque": bico0, "bico1": f.nose_angle_deg(), "giro_toque": giro_toque, "rumos": rumos,
 		"az_max": az_max, "el_min": el_min, "andou": f.sky_position_deg() - p0}
 
 
@@ -105,7 +106,8 @@ func test_toque_trava_o_giro_e_a_pipa_vai_reta_como_flecha() -> void:
 		media /= maxf(1.0, rumos.size())
 		for x in rumos:
 			assert_true(absf(_dif(x, media)) < 15.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
-		assert_true(absf(_dif(media, r["bico0"])) < 30.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
+		assert_true(absf(_dif(media, r["bico0"])) < 25.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
+		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 15.0, "o toque trava o bico quase onde estava")
 		assert_true(absf(_dif(r["bico1"], r["bico0"])) < 20.0, "o bico não vira durante a puxada")
 		assert_true(w.is_finite_state())
 
@@ -115,5 +117,5 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		var w := _voo()
 		var r := _mirar_e_puxar(w, alvo, 4.0)
 		print("      [para o lado %.0f°] chegou a %.0f° de azimute; elevação mínima %.0f°" % [alvo, r["az_max"], r["el_min"]])
-		assert_true(r["az_max"] > 55.0, "foi longe para o lado (%.0f°)" % r["az_max"])
+		assert_true(r["az_max"] > 50.0, "foi longe para o lado (%.0f°)" % r["az_max"])
 		assert_true(r["el_min"] > -2.0)

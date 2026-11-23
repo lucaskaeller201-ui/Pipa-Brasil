@@ -115,7 +115,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_damping_quadratic = 1.0
 	d.spin_damping_linear = 0.3
 	d.spin_bias = 1.5
-	d.spin_damping_taut = 40.0
+	d.spin_damping_taut = 80.0
 	d.spin_rate_max_deg = 170.0
 	d.side_force_coefficient = 4.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
