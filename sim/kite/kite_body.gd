@@ -214,6 +214,8 @@ func integrate(h: float) -> void:
 				var bico_cima := (rotation * Vector3.UP).dot(Vector3.UP)
 				var alvo := d.spin_give_sign * deg_to_rad(d.spin_give_rate_deg) * (1.0 - d.spin_gravity_mod * bico_cima)
 				novo = move_toward(wnn, alvo, deg_to_rad(d.spin_give_accel_deg) * h)
+				if signf(novo) == signf(alvo) and absf(novo) > absf(alvo):
+					novo = alvo   # o vento não passa do teto
 			SpinMode.SPIN_KICK:
 				novo = d.spin_give_sign * deg_to_rad(d.spin_kick_rate_deg)
 			SpinMode.SPIN_LOCK:
