@@ -22,6 +22,37 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-017 — Linha desenhada como fita (2026-11-23)
+A linha real tem 0,6 mm e some na tela a poucos metros. Linhas e rabiolas são
+desenhadas como fitas viradas para a câmera, com largura mínima de cerca de
+2 pixels na resolução atual. Só muda o desenho; a física usa o diâmetro real.
+
+### D-016 — Testes de contato com linha fixa (2026-11-23)
+Entre duas pipas soltas, as linhas engancharem ou não depende de centímetros:
+a mesma linha passa por cima ou por baixo da outra (no protótipo, deslocar uma
+linha 35 cm muda de "encostam por 2,2 s" para "não encostam"). Isso é física
+real e vai virar jogo (o pipeiro manobra para enganchar), mas não serve para
+teste automático. Os testes com resultado certo usam uma linha fixa entre
+postes, que a linha da pipa encosta por baixo com metros de margem; entre
+pipas soltas, o teste só exige que nada atravesse.
+
+### D-015 — Desgaste virtual por ponto da linha (2026-11-23)
+O desgaste é guardado por ponto do material da linha, em faixas de 5 cm
+contadas a partir da ponta de fora (essa coordenada não muda quando a
+carretilha solta ou enrola linha). Cada contato soma
+`taxa × força de contato × deslizamento × tempo` no ponto de contato das duas
+linhas; a linha rompe quando um ponto chega à resistência (1,0). Por isso a
+linha que corre pelo ponto de contato espalha o desgaste e a que fica parada
+no ponto o concentra. Com desgaste somado por segmento de 1,25 m, o resultado
+saía quase empatado e dependia da ordem de cálculo.
+
+Consequência que precisa do teste do Lucas: no protótipo, numa disputa entre
+duas pipas, quem dá linha costuma carregar o cruzamento (o contato fica no
+mesmo ponto da linha dele) e é quem rompe. Pode ser o contrário do que o
+pipeiro espera. A regra pode ser ajustada (é uma grandeza do jogo), mas só
+depois de jogar. São grandezas do jogo, sem relação com materiais cortantes
+reais.
+
 ### D-014 — Trajetórias de referência (2026-11-14)
 Os testes de regressão comparam trajetórias (posição da pipa, tensão e linha a
 cada 0,5 s) com arquivos em `tests/golden/`. Quando um arquivo não existe, o CI

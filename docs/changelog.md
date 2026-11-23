@@ -1,5 +1,16 @@
 # Histórico de alterações
 
+## 0.3.0 — 2026-11-23
+
+- Fase 3: vários pipeiros no mesmo mundo (`Flyer`); contato entre linhas e
+  rabiolas com detecção de travessia e grade espacial; `KiteCombatSystem` com
+  desgaste virtual por ponto da linha, ruptura e pipa avoada; linha fixa entre
+  postes.
+- A ruptura divide o segmento rompido ao meio, sem perder comprimento.
+- Laboratório: linha fixa, pipa rival parada, linha que fica vermelha com o
+  desgaste, aviso de ruptura e linhas desenhadas como fita visível de longe.
+- Testes: 500 cruzamentos aleatórios sem travessia, 7 cenários de combate.
+
 ## 0.2.0 — 2026-11-14
 
 - Fase 2: mão do pipeiro e carretilha em `sim/pilot/`; linha com comprimento

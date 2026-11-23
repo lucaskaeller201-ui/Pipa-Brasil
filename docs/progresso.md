@@ -1,48 +1,44 @@
 # Progresso
 
-Atualizado em 2026-11-14.
+Atualizado em 2026-11-23.
 
-## Fase atual: 2 — Controle e rabiola
+## Fase atual: 3 — Linha avançada e combate (núcleo)
 
-Portão para avançar: o Lucas empina e direciona no celular só com folga e
-puxão. Os testes automáticos da fase passam no GitHub Actions.
+Portão para avançar: zero linhas atravessadas e custo de CPU dentro do
+orçamento (cumprido no CI). Falta medir no celular.
 
 | Item | Situação |
 | --- | --- |
-| Mão do pipeiro com braço (mola criticamente amortecida, velocidade máxima) | Feito |
-| Carretilha: dar linha (com freio, até 2 m/s), largar (livre), recolher (1,2 m/s) | Feito |
-| Linha com comprimento variável na ponta da mão (cria e remove nós) | Feito |
-| 8 comandos como movimentos da mão e da carretilha (D-003) | Feito |
-| `PilotInput`: a mesma interface para jogador e bots | Feito |
-| Vareta flexível (diedro depende da tensão) | Feito |
-| Raia sem rabiola com modelo de giro | Experimental (D-012) |
-| Controles na tela (8 botões grandes) e teclado no PC, sensibilidade | Feito |
-| Testes dos comandos (10) e do modelo da raia sem rabiola (6) | Feito, passando |
-| Trajetórias de referência (regressão) | Feito: 3 cenários em `tests/golden/` |
-| Lucas testa no celular: empinar e direcionar | Pendente |
-| Toque com vários dedos ao mesmo tempo | Pendente (os botões atuais aceitam um toque por vez) |
+| Vários pipeiros no mesmo mundo (`Flyer`) | Feito; voo das Fases 1 e 2 idêntico (regressão 0,0000) |
+| Contato linha × linha e linha × rabiola, sem atravessar | Feito: 500 cruzamentos aleatórios, 0 travessias |
+| Grade espacial (só testa pares próximos) | Feito |
+| Desgaste virtual por ponto da linha (faixas de 5 cm) | Feito (D-015) |
+| Ruptura sem perder comprimento; pipa avoada com o pedaço de linha | Feito |
+| Linha fixa entre postes (obstáculo) | Feito |
+| Linha desenhada como fita com largura mínima na tela | Feito (D-017) |
+| Laboratório: linha fixa, pipa rival parada, linha vermelha com desgaste, aviso de ruptura | Feito |
+| Aparagem (prender uma pipa avoada com a linha ou a rabiola) | Pendente |
+| Emaranhamento com nó (linhas que enroscam e não deslizam) | Pendente: hoje o contato não tem atrito, as linhas sempre deslizam |
+| Colisão da linha com prédios, árvores e antenas | Pendente (entra com os cenários, Fase 7) |
+| Medir o FPS no celular com duas pipas | Pendente |
 
-### Comandos medidos no CI (raia com rabiola, vento 5 m/s, linha 30 m, tensão parada 2,9 N)
+### Medido no CI (raia com rabiola, vento 5 m/s, linha 30 m)
 
-| Comando | Efeito medido |
+| Situação | Resultado |
 | --- | --- |
-| Puxão | tensão até 11,7 N, pipa a 4,9 m/s |
-| Arrancão | tensão até 17,7 N, pipa a 7,9 m/s |
-| Desbicar | linha frouxa (0 N) e depois puxão de 15 N |
-| Dar linha 3 s | +5,9 m, pipa se afasta e desce de 48° para 35° |
-| Largar 3 s | +7,8 m, tensão média 0,35 N |
-| Recolher 3 s | −3,6 m, pipa sobe de 48° para 56° |
-| Afrouxar 1 s | tensão média 2,4 N |
-| Puxar 1 s | tensão média 3,9 N, pipa sobe |
+| Linha da pipa sobe e encosta na linha fixa (9,5 m de altura, 10 m à frente) | encostada a 0,020 m por 6,9 s de 10; dobrada a 9,4 m (livre: cerca de 12 m) |
+| Enganchada e parada, 10 s | desgaste máx 0,018 (pipa) e 0,025 (fixa); rompe em 1,0 |
+| Recolhendo enganchada, 4 s | desgaste 0,020 (pipa, que corre pelo contato) × 0,700 (fixa, parada no ponto) |
+| Linha fixa fraca rompe | 2 pedaços, nenhum comprimento perdido, a pipa volta a subir |
+| Linha da pipa rompe | pipa avoada desce de 22 m para 12 m e vai 45 m vento abaixo em 8 s |
+| Duas pipas soltas com as linhas cruzadas | 0 travessias |
+| Custo, 2 pipas + linha fixa enganchada | 208 ms de CPU por segundo simulado no servidor do CI |
 
 ## Próxima tarefa
 
-Fase 3 — Linha avançada: colisão da linha com o cenário, contato entre linhas
-(dobra), emaranhamento, ruptura virtual e pedaços soltos, linha desenhada como
-fita com largura mínima na tela.
-
-Antes disso, se o teste no celular mostrar que a raia sem rabiola é difícil
-demais, ajustar os parâmetros de giro (`spin_bias`, `bow_stability`).
+Fase 4 — Bot piloto: um bot que empina a raia usando só os comandos do
+`PilotInput`, mantendo a pipa no ar 5 minutos com rajadas. Depois, um bot que
+procura enganchar e disputar a linha. Antes ou junto: aparagem.
 
 ## Fases
 
@@ -51,8 +47,8 @@ demais, ajustar os parâmetros de giro (`spin_bias`, `bow_stability`).
 | 0 | Infraestrutura | Concluída (falta o teste no celular) |
 | 1 | Laboratório de física | Concluída (falta o teste no celular) |
 | 2 | Controle e rabiola | Concluída no CI; falta o teste no celular |
-| 3 | Linha avançada | Próxima |
-| 4 | Bot piloto | — |
+| 3 | Linha avançada | Núcleo concluído no CI; faltam aparagem e nó |
+| 4 | Bot piloto | Próxima |
 | 5 | Fatia vertical: 1x1 contra bot | — |
 | 6 | Modelos de pipa e materiais | — |
 | 7 | Mundo | — |

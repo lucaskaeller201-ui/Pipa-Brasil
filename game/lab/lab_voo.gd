@@ -1,10 +1,12 @@
 extends Node3D
-## Laboratório de voo (Fases 1 e 2).
+## Laboratório de voo (Fases 1 a 3).
 ##
 ## Mostra a física funcionando: vento, pipa, linha, rabiola, mão do pipeiro e
 ## carretilha, com setas das forças e números ao vivo. Os comandos do pipeiro
 ## (botões na tela ou teclado) mexem a mão e a carretilha; a pipa responde só
-## pela física.
+## pela física. Opcionalmente há uma linha fixa entre postes e uma pipa rival
+## parada, para treinar o contato entre linhas (a linha fica vermelha com o
+## desgaste e pode romper).
 
 const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
@@ -31,6 +33,11 @@ const TECLAS := {
 }
 const TECLAS_IMPULSO := {KEY_SPACE: Pilot.Impulse.PUXAO, KEY_Q: Pilot.Impulse.ARRANCAO, KEY_E: Pilot.Impulse.DESBICAR}
 
+var _linha_fixa := true
+var _rival := false
+var _mensagem := ""
+var _mensagem_ate := 0.0
+
 var _vento := VENTO_PADRAO
 var _comprimento_linha := 30.0
 var _turbulencia := true
@@ -39,6 +46,9 @@ var _camera_modo := 0
 var _custo_ms := 0.0
 
 var _pipa: Node3D
+var _pipa_rival: Node3D
+var _pipeiro_rival: Node3D
+var _postes: Node3D
 var _linhas: MeshInstance3D
 var _forcas: MeshInstance3D
 var _camera: Camera3D
@@ -59,6 +69,13 @@ func _ready() -> void:
 	_pipa = KiteView.new()
 	_pipa.name = "Pipa"
 	add_child(_pipa)
+	_pipa_rival = KiteView.new()
+	_pipa_rival.name = "PipaRival"
+	add_child(_pipa_rival)
+	_pipeiro_rival = _criar_boneco("PipeiroRival", Color(0.70, 0.20, 0.20))
+	_postes = Node3D.new()
+	_postes.name = "Postes"
+	add_child(_postes)
 	_linhas = LinesView.new()
 	_linhas.name = "Linhas"
 	add_child(_linhas)
@@ -87,6 +104,23 @@ func reiniciar() -> void:
 	world = SimWorld.create_flight(WindField.new(_vento, TURBULENCIA if _turbulencia else 0.0, 1),
 		definicao, _comprimento_linha, 30.0, 0.0, 4, true, pre_tensao)
 	_pipa.call("construir", definicao)
+	# Linha fixa atravessada no vento, a 1/3 da linha: a linha da pipa sobe e
+	# encosta nela por baixo.
+	for filho in _postes.get_children():
+		filho.queue_free()
+	if _linha_fixa:
+		var z := -_comprimento_linha / 3.0
+		var y := 1.2 + 0.83 * _comprimento_linha / 3.0
+		world.add_fixed_line(Vector3(-15.0, y, z), Vector3(15.0, y, z))
+		for x in [-15.0, 15.0]:
+			_postes.add_child(_criar_poste(Vector3(x, 0.0, z), y))
+	_pipa_rival.visible = _rival
+	_pipeiro_rival.visible = _rival
+	if _rival:
+		world.add_flyer(_def_com_rabiola, Vector3(6.0, 0.0, 0.0), _comprimento_linha, 30.0, -18.0, true)
+		_pipa_rival.call("construir", _def_com_rabiola)
+		_pipeiro_rival.position = Vector3(6.0, 0.8, 0.25)
+	_mensagem = ""
 	_atualizar_visual()
 
 
@@ -134,6 +168,12 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
+	for e in world.combat.take_events():
+		if e["type"] == "ruptura":
+			_mensagem = "A SUA LINHA ROMPEU! Pipa avoada." if e["flyer"] == 0 else "A linha do rival rompeu!"
+		else:
+			_mensagem = "A linha fixa rompeu."
+		_mensagem_ate = Time.get_ticks_msec() / 1000.0 + 5.0
 	_atualizar_visual()
 	_atualizar_camera()
 	_info.text = texto_info()
@@ -141,11 +181,22 @@ func _process(_delta: float) -> void:
 
 func _atualizar_visual() -> void:
 	_pipa.call("atualizar", world.kite)
+	if _rival and world.flyers.size() > 1:
+		_pipa_rival.call("atualizar", (world.flyers[1] as Flyer).kite)
 
+	_linhas.set("camera_position", _camera.global_position)
+	_linhas.set("min_width_per_meter", 2.0 * 2.0 * tan(deg_to_rad(_camera.fov * 0.5)) / maxf(1.0, get_viewport().get_visible_rect().size.y))
 	_linhas.call("limpar")
-	_linhas.call("desenhar_cadeia", world.line.pos, Color(0.97, 0.97, 0.97))
-	if world.tail != null:
-		_linhas.call("desenhar_cadeia", world.tail.pos, Color(1.0, 0.30, 0.60))
+	for f in world.flyers:
+		var fl: Flyer = f
+		var base := Color(0.97, 0.97, 0.97) if fl.id == 0 else Color(1.0, 0.85, 0.35)
+		for c in [fl.line, fl.trailing_line]:
+			if c != null:
+				_linhas.call("desenhar_cadeia", (c as ParticleChain).pos, _cor_desgaste(c, base))
+		if fl.tail != null:
+			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(1.0, 0.30, 0.60), 0.02)
+	for c in world.loose_chains:
+		_linhas.call("desenhar_cadeia", (c as ParticleChain).pos, _cor_desgaste(c, Color(0.15, 0.15, 0.15)))
 
 	_forcas.call("limpar")
 	if _mostrar_forcas:
@@ -158,6 +209,11 @@ func _atualizar_visual() -> void:
 		]
 		var cores := [Color(0.3, 0.8, 1.0), Color(0.2, 0.95, 0.3), Color(1.0, 0.55, 0.1), Color(0.75, 0.4, 1.0)]
 		_forcas.call("desenhar_setas", setas, cores)
+
+
+## A linha vai ficando vermelha conforme o ponto mais gasto se aproxima da ruptura.
+func _cor_desgaste(c: ParticleChain, base: Color) -> Color:
+	return base.lerp(Color(1.0, 0.1, 0.05), clampf(c.max_wear() / c.strength, 0.0, 1.0))
 
 
 func _atualizar_camera() -> void:
@@ -187,9 +243,12 @@ func texto_info() -> String:
 		carretilha = "soltando"
 	elif world.input.reel_in:
 		carretilha = "enrolando"
+	var meu: Flyer = world.flyers[0]
+	var desgaste := meu.line.max_wear() / meu.line.strength * 100.0 if not meu.cut else 100.0
 	var linhas := PackedStringArray([
-		"PIPA BRASIL · Fase 2 · Laboratório de voo · %s" % definicao.model_name,
+		"PIPA BRASIL · Fase 3 · Laboratório de voo · %s" % definicao.model_name,
 		"Linha: %s m · carretilha %s · comando: %s" % [_num(world.line_length(), 1), carretilha, _ultimo_comando],
+		"Desgaste da sua linha: %d%% · linhas encostadas: %s" % [roundi(desgaste), "sim" if world.combat.contacts_last_step > 0 else "não"],
 		"Vento na pipa: %s m/s" % _num(k.last_wind.length(), 1),
 		"Elevação: %d°   Ângulo de ataque: %d°" % [roundi(world.elevation_deg()), roundi(k.last_aoa_deg)],
 		"Tensão da linha: %s N" % _num(world.tension, 2),
@@ -199,6 +258,8 @@ func texto_info() -> String:
 		"Setas: azul vento · verde ar · laranja linha · roxo peso",
 		"Rabiola em rosa · Build %s" % BuildInfo.COMMIT,
 	])
+	if not _mensagem.is_empty() and Time.get_ticks_msec() / 1000.0 < _mensagem_ate:
+		linhas.insert(1, ">>> %s <<<" % _mensagem)
 	if not OS.has_feature("mobile"):
 		linhas.append("Teclado: W puxar · S afrouxar · A dar linha · Z largar")
 		linhas.append("R recolher · Espaço puxão · Q arrancão · E desbicar")
@@ -215,17 +276,36 @@ static func _num(valor: float, casas: int) -> String:
 
 func _criar_pipeiro() -> void:
 	# Marcador simples do pipeiro (o personagem de verdade vem na Fase 7).
+	var corpo := _criar_boneco("Pipeiro", Color(0.15, 0.35, 0.65))
+	corpo.position = Vector3(0.0, 0.8, 0.25)
+
+
+func _criar_boneco(nome: String, cor: Color) -> MeshInstance3D:
 	var corpo := MeshInstance3D.new()
-	corpo.name = "Pipeiro"
+	corpo.name = nome
 	var capsula := CapsuleMesh.new()
 	capsula.radius = 0.22
 	capsula.height = 1.6
 	corpo.mesh = capsula
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.15, 0.35, 0.65)
+	material.albedo_color = cor
 	corpo.material_override = material
-	corpo.position = Vector3(0.0, 0.8, 0.25)
 	add_child(corpo)
+	return corpo
+
+
+func _criar_poste(base: Vector3, altura: float) -> MeshInstance3D:
+	var poste := MeshInstance3D.new()
+	var malha := CylinderMesh.new()
+	malha.top_radius = 0.1
+	malha.bottom_radius = 0.14
+	malha.height = altura
+	poste.mesh = malha
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.55, 0.55, 0.52)
+	poste.material_override = material
+	poste.position = base + Vector3(0.0, altura * 0.5, 0.0)
+	return poste
 
 
 func _criar_interface() -> void:
@@ -277,6 +357,8 @@ func _criar_interface() -> void:
 	_toggle(caixa, "Turbulência", _turbulencia, _ao_mudar_turbulencia)
 	_toggle(caixa, "Com rabiola", true, _ao_mudar_rabiola)
 	_toggle(caixa, "Mostrar forças", _mostrar_forcas, _ao_mudar_forcas)
+	_toggle(caixa, "Linha fixa entre postes", _linha_fixa, _ao_mudar_linha_fixa)
+	_toggle(caixa, "Pipa rival (parada)", _rival, _ao_mudar_rival)
 	_botao(caixa, "Rajada (3 s)", _ao_tocar_rajada)
 	_botao_camera = _botao(caixa, "Câmera: %s" % CAMERAS[_camera_modo], _ao_tocar_camera)
 	_botao(caixa, "Reiniciar voo", reiniciar)
@@ -353,6 +435,16 @@ func _ao_mudar_turbulencia(ligado: bool) -> void:
 func _ao_mudar_rabiola(ligado: bool) -> void:
 	definicao = _def_com_rabiola if ligado else _def_sem_rabiola
 	_rotulos["cabresto"].get_parent().get_child(_rotulos["cabresto"].get_index() + 1).value = definicao.tow_point.y
+	reiniciar()
+
+
+func _ao_mudar_linha_fixa(ligado: bool) -> void:
+	_linha_fixa = ligado
+	reiniciar()
+
+
+func _ao_mudar_rival(ligado: bool) -> void:
+	_rival = ligado
 	reiniciar()
 
 
