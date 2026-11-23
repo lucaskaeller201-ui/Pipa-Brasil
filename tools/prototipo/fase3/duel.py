@@ -146,10 +146,10 @@ def step(worlds, dt, wear_k, strength=1.0, events=None):
         for w in worlds: part2(w,h)
         for w in worlds: w.t+=h
         for gi,w in enumerate(worlds):
-            if w.cut: continue
+            if w.cut or getattr(w,'fixed',False): continue
             L=w.line
             val,b=worst(L)
-            if val>=strength:
+            if val>=getattr(w,'strength',strength):
                 # segmento que contém a faixa
                 m=(b+0.5)*BIN; acc=0.0; seg=L.n-2
                 for i in range(L.n-2,-1,-1):

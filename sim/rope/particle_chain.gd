@@ -138,32 +138,41 @@ func weakest_segment() -> int:
 	return 0
 
 
-## Rompe a cadeia no segmento `segment`: esta cadeia fica com as partículas
-## 0..segment (ponta solta) e a cadeia devolvida fica com segment+1..fim
-## (ponta solta no começo). Velocidades e desgaste são preservados.
+## Rompe a cadeia no segmento `segment`. O segmento rompido é dividido ao meio
+## (um ponto novo em cada pedaço), para nenhum comprimento de linha sumir.
+## Esta cadeia fica com o lado da partícula 0 (a mão, na linha de um pipeiro)
+## e a cadeia devolvida fica com o resto, com a ponta solta no começo.
 func split(segment: int) -> ParticleChain:
 	var n := pos.size()
 	var corte := clampi(segment, 0, n - 2)
-	var resto := ParticleChain.new(kind, pos[corte + 1], pos[n - 1], maxi(1, n - 2 - corte),
-		mass_per_particle * maxi(1, n - 2 - corte), compliance_per_meter, thickness, drag_coefficient)
+	var meio := pos[corte].lerp(pos[corte + 1], 0.5)
+	var vel_meio := vel[corte].lerp(vel[corte + 1], 0.5)
+	var metade := rest[corte] * 0.5
+
+	var resto := ParticleChain.new(kind, meio, pos[n - 1], 1, mass_per_particle, compliance_per_meter, thickness, drag_coefficient)
 	resto.strength = strength
 	resto.rest_length = rest_length
-	resto.pos = pos.slice(corte + 1)
-	resto.prev = prev.slice(corte + 1)
-	resto.vel = vel.slice(corte + 1)
-	resto.inv_mass = inv_mass.slice(corte + 1)
-	resto.rest = rest.slice(corte + 1)
+	resto.mass_per_particle = mass_per_particle
+	resto.pos = PackedVector3Array([meio]) + pos.slice(corte + 1)
+	resto.prev = PackedVector3Array([meio]) + prev.slice(corte + 1)
+	resto.vel = PackedVector3Array([vel_meio]) + vel.slice(corte + 1)
+	resto.inv_mass = PackedFloat64Array([1.0 / mass_per_particle]) + inv_mass.slice(corte + 1)
+	resto.rest = PackedFloat64Array([metade]) + rest.slice(corte + 1)
 	resto._forces.resize(resto.pos.size())
-	if resto.inv_mass.size() > 0 and resto.inv_mass[0] == 0.0:
-		resto.inv_mass[0] = 1.0 / mass_per_particle
+
 	pos = pos.slice(0, corte + 1)
+	pos.append(meio)
 	prev = prev.slice(0, corte + 1)
+	prev.append(meio)
 	vel = vel.slice(0, corte + 1)
+	vel.append(vel_meio)
 	inv_mass = inv_mass.slice(0, corte + 1)
+	inv_mass.append(1.0 / mass_per_particle)
 	rest = rest.slice(0, corte)
+	rest.append(metade)
+	_forces.resize(pos.size())
 	# Depois da ruptura o desgaste deixa de importar: os dois pedaços recomeçam.
 	wear_bins.clear()
-	_forces.resize(pos.size())
 	return resto
 
 

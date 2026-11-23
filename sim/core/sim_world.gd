@@ -106,6 +106,18 @@ func add_flyer(definition: KiteDefinition, ground_position: Vector3, line_length
 	return f
 
 
+## Linha presa entre dois pontos fixos (um fio entre postes, uma linha de outra
+## pipa enroscada num obstáculo). Colide com as linhas e rabiolas dos
+## pipeiros, pode ser desgastada e romper. Devolve a cadeia criada.
+func add_fixed_line(a: Vector3, b: Vector3, segments := 24) -> ParticleChain:
+	var c := ParticleChain.new(ParticleChain.Kind.LINE, a, b, segments,
+		LINE_MASS_PER_METER * a.distance_to(b), 1.0 / LINE_STIFFNESS, LINE_DIAMETER, LINE_DRAG_COEFFICIENT)
+	c.inv_mass[0] = 0.0
+	c.inv_mass[segments] = 0.0
+	loose_chains.append(c)
+	return c
+
+
 func step(dt: float) -> void:
 	var h := dt / substeps
 	for i in substeps:
