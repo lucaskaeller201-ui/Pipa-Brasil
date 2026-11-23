@@ -17,6 +17,13 @@ var input := PilotInput.new()
 var cut := false
 var trailing_line: ParticleChain  ## pedaço de linha que ficou preso à pipa depois do corte
 
+## Aparagem ("manda busca").
+var caught_by: Flyer      ## quem enroscou esta pipa avoada (null = livre)
+var captured := false     ## a avoada chegou na mão de quem aparou
+var lost := false         ## a avoada caiu no chão sem ninguém aparar
+var holding := 0          ## quantas avoadas estão enroscadas na linha deste pipeiro
+var catches := 0          ## pipas aparadas por este pipeiro
+
 ## Tensão da linha no cabresto (N), medida no último subpasso.
 var tension := 0.0
 ## Direção da força da linha sobre a pipa (unitária).

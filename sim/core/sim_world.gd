@@ -146,6 +146,7 @@ func _substep(h: float) -> void:
 	for c in loose_chains:
 		(c as ParticleChain).update_velocities(h)
 	combat.check_breaks(flyers, loose_chains)
+	combat.check_snags(flyers)
 
 
 # ---------------- medidas (primeiro pipeiro) ----------------

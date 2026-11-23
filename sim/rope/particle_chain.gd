@@ -106,6 +106,17 @@ func material_coordinate(i: int, s: float) -> float:
 	return total
 
 
+## Inverso de material_coordinate: devolve Vector2(segmento, s) do ponto que
+## está a `m` metros da ponta de fora. Satura nas pontas.
+func locate_material(m: float) -> Vector2:
+	var acumulado := 0.0
+	for i in range(rest.size() - 1, -1, -1):
+		if acumulado + rest[i] >= m:
+			return Vector2(i, clampf(1.0 - (m - acumulado) / rest[i], 0.0, 1.0))
+		acumulado += rest[i]
+	return Vector2(0, 0.0)
+
+
 func add_wear(i: int, s: float, amount: float) -> void:
 	var faixa := floori(material_coordinate(i, s) / WEAR_BIN)
 	wear_bins[faixa] = float(wear_bins.get(faixa, 0.0)) + amount

@@ -46,6 +46,9 @@ func update(flyer: Flyer, t: float) -> void:
 	if t >= _next_decision:
 		_next_decision = t + 1.0 / difficulty.decisions_per_second
 		_decision = _decide(o, t)
+		# Manda busca: sentiu uma pipa enroscada na linha, recolhe para trazer.
+		if flyer.holding > 0 and absf(float(o["nose"])) < 110.0:
+			_decision = {"reel_in": true}
 	_apply(flyer.input, _decision)
 
 
