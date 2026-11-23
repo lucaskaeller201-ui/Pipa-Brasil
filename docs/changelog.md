@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.9.0 — 2026-11-23
+
+- Segurar o dedo descarrega: a linha corre e a pipa gira acelerando aos
+  poucos, mais rápido com o bico para baixo. Soltar: o giro freia e ela firma.
+- Toque desbica de verdade: o bico dá um pulo de direção e fica; cada toque,
+  outro pulo. O toque não puxa mais (não decepa avoada sem querer).
+- A pipa faz curvas em arco (derrapa um pouco).
+
 ## 0.8.0 — 2026-11-23
 
 - Giro de dois estados: mandando linha o bico gira 2 a 3 voltas por segundo

@@ -32,6 +32,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-030 — Descarregar redondo e desbico de verdade (2026-11-23)
+O Lucas achou o giro "quadrado" (velocidade constante, como hélice), que só
+girava enquanto deslizava o dedo, e o toque não mudava o bico. Agora:
+segurar o dedo = descarregar (linha corre 2,5 m/s); o giro acelera aos poucos
+(2500°/s²) até o teto (720°/s, ajustável), e varia com o bico: até 40% mais
+rápido com o bico para baixo, mais devagar com ele para cima. Soltar o dedo:
+freio do giro proporcional à vareta envergada (a linha volta a esticar).
+Deslizar para baixo: puxa e freia o giro forte. Toque: desbico — o bico dá um
+pulo de uns 60° (400°/s por 0,2 s) e firma; cada toque, outro pulo. A força
+lateral caiu para 2: a pipa derrapa um pouco e faz curvas em arco. O
+bombeamento automático e o balanço senoidal sugeridos nos textos que o Lucas
+mandou ficaram de fora por ora: a linha (barriga, atraso) e o vento já são
+físicos no jogo.
+
 ### D-029 — Aparar: embolar, decepar e rebocar (2026-11-23)
 Regras pedidas pelo Lucas. A linha solta e a rabiola da avoada colidem. Só
 encostar não prende: o embolo se forma enquanto quem apara está mandando linha
