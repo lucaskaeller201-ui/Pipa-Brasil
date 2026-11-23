@@ -1,5 +1,16 @@
 # Histórico de alterações
 
+## 0.7.0 — 2026-11-23
+
+Depois do segundo teste do Lucas:
+- Pipa do Rio com rabiola em todos os pipeiros do modo livre.
+- Não anda de lado: com a linha esticada vai para onde o bico aponta.
+- Dando linha (deslizar para cima, até 3 m/s) a pipa gira num ritmo constante;
+  um toque trava o giro e ela arranca reta para onde o bico parou.
+- Linhas que se cruzam ficam laçadas até alguém cortar; quem está dando ou
+  puxando linha leva vantagem; faísca no ponto de encontro; aviso "Laçou!".
+- Rabiola não corta linha.
+
 ## 0.6.0 — 2026-11-23
 
 Depois do primeiro teste do Lucas no iPhone:

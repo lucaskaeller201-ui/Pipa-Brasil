@@ -13,6 +13,8 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-23 | Modo de jogo | Modo livre sem tempo, até cansar, com placar de quem cortou mais (substitui a partida cronometrada) |
 | 2026-11-23 | Controles | Sem botões: deslizar para baixo puxa ("abraçar"), para cima dá linha, toques desbicam |
 | 2026-11-23 | Pipa reta | A pipa não pode "dar de lado" (ficar pensa): com a linha esticada vai reta |
+| 2026-11-23 | Pipa do Rio | Com rabiola ("tabula"); dando linha ela gira num ritmo constante; um toque trava o giro e ela arranca reta |
+| 2026-11-23 | Relo | Linhas que se cruzam ficam laçadas até alguém cortar; quem está dando ou puxando linha leva vantagem sobre a linha parada |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
 | 2026-11-14 | Câmera | Primeira e terceira pessoa |
@@ -27,6 +29,29 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-027 — Laço e relo (2026-11-23)
+Pedido do Lucas: linhas que se cruzam não podem se soltar do nada; alguém
+sempre corta. Quando duas linhas em voo se encostam, ficam laçadas: a cada
+subpasso o ponto de encontro é procurado de novo perto do anterior e as linhas
+são mantidas encostadas até uma romper. Cada linha tem a sua integridade no
+laço. Regra do relo: a linha que corre (quem está dando ou puxando linha, medido
+na mão) gasta a outra; um pouco de desgaste para as duas sempre. A rabiola não
+desgasta linha (só enrosca). A linha rompe no ponto de encontro e o corte conta
+para o dono da outra linha. Tipos de linha com nomes reais de material cortante
+não entram no jogo (regra do projeto); combate é só virtual.
+
+### D-026 — Pipa do Rio (2026-11-23)
+Regras pedidas pelo Lucas, feitas na física (não em animação):
+rabiola de 2 m; força lateral contra a derrapagem (`side_force_coefficient`):
+com a linha esticada a pipa vai na direção da espinha, como flecha; dando
+linha (descarregando) a vareta relaxa (`flex_reference_tension` 2,5 N) e a
+pipa gira num ritmo constante, limitado a 170°/s (`spin_rate_max_deg`); um
+toque é um puxão curto: a tensão volta, a vareta enverga e o amortecimento
+firme (`spin_damping_taut` 80/s) trava o bico; a pipa arranca reta. Calibrada
+no protótipo (`tools/prototipo/fase4/exp8.py` a `exp11.py`). Testes:
+`tests/scenarios/test_pipa_rio.gd`. Limite conhecido: puxando para o lado por
+4 s ela chega a uns 55° de azimute (o Lucas quer 90° ou mais).
 
 ### D-025 — Gestos do pipeiro e modo livre (2026-11-23)
 Pedido do Lucas depois de testar no iPhone: nada de botões. Deslizar o dedo

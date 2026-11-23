@@ -13,7 +13,11 @@ Atualizado em 2026-11-23.
 | Pipa reta: com a linha esticada vai para onde o bico aponta | Feito (D-024) |
 | Câmera com zoom na sua pipa, seta do bico, setas e nomes dos rivais | Feito |
 | Jogar no iPhone pelo Safari (GitHub Pages) | Feito (D-022) |
-| Bots disputando de propósito (hoje quase não se encontram) | Pendente |
+| Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
+| Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |
+| Bots disputando | Melhorou: em 3 min de teste houve vários laços e cortes |
+| Ir a 90° ou mais para os lados | Parcial: uns 55° em 4 s de puxada |
+| Vento girando 360° no modo livre; estirante que corta; grossura do fio | Pendente (ideias do Manda Busca 1.0.12) |
 | Cenário bonito | Pendente (Fase 7); o Lucas achou o atual feio |
 | Teste do Lucas com a versão nova | Pendente |
 
@@ -29,7 +33,7 @@ Atualizado em 2026-11-23.
 
 ## Próxima tarefa
 
-Lucas testar a 0.6.0 no iPhone (gestos, pipa reta, modo livre). Depois: bots
+Lucas testar a 0.7.0 no iPhone (pipa do Rio, toque que trava, laço). Depois: bots
 que vão atrás das pipas para disputar, emendar a pipa aparada, cenário.
 
 ## Fases

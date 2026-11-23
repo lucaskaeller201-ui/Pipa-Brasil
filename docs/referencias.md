@@ -15,6 +15,27 @@ Vídeos enviados pelo Lucas em 2026-11-23 (atualizações oficiais do jogo).
 | Modos | Torneio com chaves (quartas, melhor de 3) contra adversários com apelido ("Zé da Laje", "Marquinhos"); jogos de "suba a pipa" (sem pipa no alto por 10 s, o ponto vai para o adversário) e "sem corte, leva a pipa mais alta"; prêmio em moeda do jogo e XP; passe com pipas |
 | Mecânica nova | "Emendar": depois de uma linha cortada, pegar a linha com a mão e amarrar na linha da carretilha; a linha emendada aparece com outra cor |
 
+### Notas da atualização 1.0.12 do Manda Busca (vídeo enviado em 2026-11-23)
+
+Lidas nos cartões do vídeo (o áudio não pôde ser transcrito aqui):
+- Mãos novas: palma de lado com 3 dedos fechando a linha; dando linha, a mão
+  abre "em conchinha" e a linha escorrega pela palma. Braço mais fino, manga de
+  pano, marcas na pele; mão da lata (carretilha) travada, sem entrar no rolo.
+- Física da linha: curva suave, sem pontas retas; árvores e coqueiros seguram a
+  linha; depois do corte, sem congelar nem ricochetear.
+- Fio 24 x fio 4 (grossura): fio 24 mais fino, fio 4 faz mais barriga; os nós
+  diminuem com a distância; online a linha não trava nem salta no relo.
+- Combate: pegar 1 fio do estirante (cabresto) já corta; rabiola presa
+  escorrega pela linha; corrigida linha que atravessava o cruzamento.
+- Balanceamento: rabiola cortada deixa a pipa estável até 50% do tamanho e
+  girando a partir de 85% cortada; enrolar e puxar ao mesmo tempo não somam
+  velocidade; subir a pipa exige no mínimo 15 m (30 m "nas costas").
+- Vento 360° no jogo livre: o vento gira para todos os lados, até para trás;
+  pipa pesada sofre no vento fraco; raia e peixinho com velocidade e freio
+  próprios; bico firme na direção durante o puxão.
+- Ranking: cada corte vale pontos pela força do rival; temporada mensal;
+  campeonato com aviso na tela da pipa mandada.
+
 ## Jogo do Raangelzera / Maquininha Pipas
 
 | Aspecto | O que se vê |
