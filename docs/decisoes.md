@@ -9,7 +9,10 @@ topo da seção correspondente. A especificação original fica em
 | Data | Tema | Decisão |
 | --- | --- | --- |
 | 2026-11-23 | Celular de teste | iPhone: joga pela página web; repositório passa a ser público |
-| 2026-11-23 | Tela | Celular em pé (retrato), como no Manda Busca. Aceito pelo Lucas ("Faça") |
+| 2026-11-23 | Tela | Celular DEITADO (paisagem). O retrato dos vídeos do Manda Busca era recorte para o TikTok (D-023) |
+| 2026-11-23 | Modo de jogo | Modo livre sem tempo, até cansar, com placar de quem cortou mais (substitui a partida cronometrada) |
+| 2026-11-23 | Controles | Sem botões: deslizar para baixo puxa ("abraçar"), para cima dá linha, toques desbicam |
+| 2026-11-23 | Pipa reta | A pipa não pode "dar de lado" (ficar pensa): com a linha esticada vai reta |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
 | 2026-11-14 | Câmera | Primeira e terceira pessoa |
@@ -24,6 +27,37 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-025 — Gestos do pipeiro e modo livre (2026-11-23)
+Pedido do Lucas depois de testar no iPhone: nada de botões. Deslizar o dedo
+para baixo puxa linha com a mão no ritmo do dedo (1,6 m de linha por altura de
+tela, até 6 m/s); para cima dá linha, e soltando o dedo no embalo a carretilha
+continua girando por quase 1 s; toques rápidos disparam o desbicar (folga
+curta). Os gestos viram `PilotInput.haul_speed` (movimento da mão, D-003) e o
+impulso de desbicar, a mesma interface dos bots. O modo livre (`FreeMode`) não
+tem tempo: placar de cortes e aparadas, pipa nova 3 s depois do corte, a cortada
+fica no céu como avoada para quem aparar. A ruptura agora informa quem cortou
+(último pipeiro cuja linha encostou na linha rompida). A partida cronometrada
+(D-021) foi removida.
+
+### D-024 — Pipa reta: a vareta envergada segura o bico (2026-11-23)
+A raia sem rabiola girava fácil demais e, ao puxar, voltava a apontar para
+cima no meio do caminho (a trajetória fazia curva). Novo parâmetro
+`spin_damping_taut` (20/s na raia sem rabiola): amortecimento do giro no plano
+da pipa proporcional ao quadrado do quanto a vareta está envergada, aplicado de
+forma implícita (decaimento exato, estável). Com a linha esticada o bico fica
+onde está e a pipa vai reta para onde ele aponta; com a linha frouxa o efeito
+some e o bico gira (cada toque gira uns 15° a 30°, sempre para o mesmo lado,
+como antes). Testado no protótipo com 4 valores (0, 10, 20 e 40/s) e com
+alternativas descartadas: estabilidade pelo fluxo (derruba a pipa no
+lançamento, nos dois sinais) e tranco lateral da mão (a linha não transmite).
+Experimento no CI: `tests/scenarios/test_pipa_reta.gd`. Referência de
+regressão da raia sem rabiola regenerada e revisada.
+
+### D-023 — Celular deitado (2026-11-23)
+Revoga a tela em pé da D-021. Os vídeos do Manda Busca estavam em pé porque
+eram recortes para o TikTok; o jogo é deitado. Tela 1280×720, orientação
+paisagem com sensor.
 
 ### D-022 — iPhone pelo navegador (2026-11-23)
 O celular do Lucas é iPhone. App nativo de iOS exige Mac, Xcode e a conta paga

@@ -159,9 +159,12 @@ func _posicionar_camera(imediato: bool) -> void:
 	_corpos[0].visible = not _primeira_pessoa
 	var alvo := eu.kite.position - olho
 	var dist := alvo.length()
-	# Zoom: a pipa ocupa uns 5% da altura da tela, sem fechar demais.
-	var envergadura := 0.9
-	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.05, 22.0, 60.0)
+	# Zoom (1ª pessoa): a pipa ocupa uns 6% da altura da tela. Na 3ª pessoa,
+	# visão aberta para ver as lajes e as outras pipas.
+	var envergadura := 0.6
+	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.06, 14.0, 55.0)
+	if not _primeira_pessoa:
+		fov = 50.0
 	var guinada := atan2(-alvo.x, -alvo.z)
 	var elevacao := rad_to_deg(atan2(alvo.y, Vector2(alvo.x, alvo.z).length()))
 	# A pipa fica um pouco acima do meio; com pouca linha aparece o horizonte.

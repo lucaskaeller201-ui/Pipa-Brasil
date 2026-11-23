@@ -9,7 +9,7 @@ Vídeos enviados pelo Lucas em 2026-11-23 (atualizações oficiais do jogo).
 
 | Aspecto | O que se vê |
 | --- | --- |
-| Tela | Celular em pé (retrato) |
+| Tela | Celular deitado (os vídeos estavam em pé por serem recortes para o TikTok) |
 | Câmera | Primeira pessoa fixa: carretilha grande no canto de baixo à esquerda, mão segurando a linha à direita, a linha sai da mão para o céu |
 | Visual | Estilizado (desenho), bairro com casas e árvores, praia com coqueiros, nuvens que se mexem, sol com brilho, noite estrelada |
 | Modos | Torneio com chaves (quartas, melhor de 3) contra adversários com apelido ("Zé da Laje", "Marquinhos"); jogos de "suba a pipa" (sem pipa no alto por 10 s, o ponto vai para o adversário) e "sem corte, leva a pipa mais alta"; prêmio em moeda do jogo e XP; passe com pipas |
@@ -30,8 +30,8 @@ Inspiração distante: a pipa vira um ponto e não dá para sentir o controle.
 
 ## O que isso muda no PIPA BRASIL
 
-- A apresentação principal passa a ser a de primeira pessoa com a carretilha e a
-  mão em primeiro plano. Em retrato ou paisagem: decisão pendente do Lucas.
+- A apresentação principal passa a ser a de primeira pessoa com a carretilha em
+  primeiro plano, com o celular deitado (D-023).
 - Modos curtos contra bots com apelido: "suba a pipa", "a mais alta sem corte",
   torneio melhor de 3. Os bots com nome e apelido já estão no Adendo de Bots.
 - Emendar: depois de aparar, amarrar a linha da pipa aparada na sua carretilha e

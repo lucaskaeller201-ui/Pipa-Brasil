@@ -9,7 +9,10 @@ Por isso a versão para iPhone é a página web, publicada pelo CI a cada entreg
 1. No iPhone, abra no Safari: https://lucaskaeller201-ui.github.io/Pipa-Brasil/
 2. Espere carregar (na primeira vez demora mais; depois fica guardado).
 3. Para ocupar a tela toda: botão Compartilhar → **Adicionar à Tela de Início**,
-   e abra pelo ícone criado.
+   e abra pelo ícone criado. Jogue com o celular deitado.
+
+Comandos (gestos): deslize o dedo para baixo para puxar, para cima para dar
+linha, e dê toques rápidos para desbicar.
 
 ## Android (celular)
 

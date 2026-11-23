@@ -1,5 +1,18 @@
 # Histórico de alterações
 
+## 0.6.0 — 2026-11-23
+
+Depois do primeiro teste do Lucas no iPhone:
+- Celular deitado de novo.
+- Modo livre: sem tempo, solta até cansar; placar de cortes e aparadas contra
+  3 bots com apelido; pipa nova depois do corte. A partida cronometrada saiu.
+- Sem botões de comando: deslizar para baixo puxa, para cima dá linha,
+  toques desbicam. No PC: W/S ou setas e Espaço.
+- Pipa reta: com a linha esticada ela vai para onde o bico aponta, sem virar
+  no caminho (D-024).
+- Câmera com zoom na sua pipa, seta mostrando o bico, setas e nomes das pipas
+  dos rivais; carretilha que gira com a linha.
+
 ## 0.5.0 — 2026-11-23
 
 - Fase 5, primeira versão da partida: o jogo abre direto numa partida melhor

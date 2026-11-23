@@ -2,22 +2,20 @@
 
 Atualizado em 2026-11-23.
 
-## Fase atual: 5 — Partida 1 contra 1 na laje (primeira versão)
+## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
 | Item | Situação |
 | --- | --- |
-| Celular em pé (retrato), tela 720×1280 | Feito (D-021) |
-| Regras da partida melhor de 3 (`MatchRules`): suba a pipa, a mais alta sem corte, valendo corte | Feito |
-| Bairro com duas lajes, caixas d'água, antenas, postes, pôr do sol | Feito (provisório, só visual) |
-| Primeira pessoa com carretilha e mão; botão para 3ª pessoa | Feito |
-| Placar, jogo, tempo, alturas e avisos (corte, enrosco, manda busca) | Feito |
-| 6 botões grandes embaixo, vários dedos ao mesmo tempo | Feito |
-| Rival bot com apelido; vai atrás da sua pipa no valendo corte | Feito |
-| Laboratório aberto pelo botão "Lab" | Feito |
-| Partida inteira bot contra bot termina com vencedor (teste) | Feito |
-| Lajes e casas com colisão para linha e pipa | Pendente (Fase 7) |
-| Página para jogar no iPhone (GitHub Pages) | Feito no CI; falta o Lucas ligar o Pages (D-022) |
-| Teste no celular (FPS e sensação dos botões) | Pendente: depende do Lucas |
+| Celular deitado | Feito (D-023) |
+| Modo livre sem tempo, placar de cortes e aparadas, 3 bots com apelido | Feito (D-025) |
+| Pipa nova 3 s depois do corte; a cortada vira avoada para quem aparar | Feito |
+| Gestos: deslizar para baixo puxa, para cima dá linha (com embalo), toques desbicam | Feito (D-025) |
+| Pipa reta: com a linha esticada vai para onde o bico aponta | Feito (D-024) |
+| Câmera com zoom na sua pipa, seta do bico, setas e nomes dos rivais | Feito |
+| Jogar no iPhone pelo Safari (GitHub Pages) | Feito (D-022) |
+| Bots disputando de propósito (hoje quase não se encontram) | Pendente |
+| Cenário bonito | Pendente (Fase 7); o Lucas achou o atual feio |
+| Teste do Lucas com a versão nova | Pendente |
 
 ### Fase 4 — Bot piloto (concluída no CI)
 
@@ -31,10 +29,8 @@ Atualizado em 2026-11-23.
 
 ## Próxima tarefa
 
-Lucas testar a versão 0.5.0 no celular e contar o FPS e a sensação. Depois:
-melhorar a mira do bot, emendar a pipa aparada na carretilha, combate livre
-offline com até 8 bots. Ainda falta a opinião do Lucas sobre a regra do
-desgaste (D-015).
+Lucas testar a 0.6.0 no iPhone (gestos, pipa reta, modo livre). Depois: bots
+que vão atrás das pipas para disputar, emendar a pipa aparada, cenário.
 
 ## Fases
 
