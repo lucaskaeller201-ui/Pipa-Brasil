@@ -27,19 +27,16 @@ func test_linhas_lacadas_nao_se_soltam_ate_alguem_cortar() -> void:
 	b.input.haul_speed = -1.5   # B descarrega; A fica parada
 	var t := 0.0
 	var soltou := false
-	var dist_max := 0.0
 	while not a.cut and not b.cut and t < 30.0:
 		w.step(DT)
 		t += DT
 		if w.combat.engagements.is_empty() and not a.cut and not b.cut:
 			soltou = true
 			break
-		if t > 1.0 and not w.combat.contact_points.is_empty():
-			var p := w.combat.contact_points[0]
-			dist_max = maxf(dist_max, p.distance_to(b.line.pos[b.line.locate_material(float(w.combat.engagements[0]["mb"])).x]))
 	var quem := "A" if a.cut else ("B" if b.cut else "ninguém")
 	print("      [laço] %.1f s até o corte; cortada: %s" % [t, quem])
 	assert_false(soltou, "as linhas não se soltaram sem corte")
 	assert_true(a.cut or b.cut, "alguém foi cortado")
 	assert_true(a.cut, "quem descarrega (B) gasta a linha parada (A)")
+	assert_true(t > 0.5, "o laço leva um tempo até cortar (%.1f s)" % t)
 	assert_true(w.is_finite_state())
