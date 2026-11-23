@@ -36,9 +36,17 @@ func _embolar(w: SimWorld) -> bool:
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
 	b.cut_line(12)
-	a.input.haul_speed = -1.0
+	# Espera encostar; aí manda linha (gira) enquanto está encostado.
+	var mandando := 0.0
 	for i in roundi(15.0 / DT):
 		w.step(DT)
+		if w.combat.contacts_last_step > 0 and mandando <= 0.0:
+			mandando = 1.0
+		if mandando > 0.0:
+			a.input.haul_speed = -1.0
+			mandando -= DT
+		else:
+			a.input.clear()
 		if b.caught_by != null:
 			break
 	a.input.clear()
