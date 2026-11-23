@@ -5,7 +5,13 @@ extends RefCounted
 ## Só visual: a física ainda não colide com casas (o chão da física é y = 0).
 
 const ALTURA_LAJE := 6.0
-const LAJE_RIVAL := Vector3(14.0, 0.0, 0.0)
+## Lajes de onde se solta pipa (a primeira é a sua). O vento sopra para -Z.
+const LAJES := [Vector3(0.0, 0.0, 0.0), Vector3(16.0, 0.0, -4.0), Vector3(-16.0, 0.0, -2.0),
+	Vector3(30.0, 0.0, 6.0), Vector3(-30.0, 0.0, 8.0), Vector3(8.0, 0.0, 18.0),
+	Vector3(-8.0, 0.0, 20.0), Vector3(44.0, 0.0, -6.0)]
+const CORES_LAJE := [Color(0.93, 0.78, 0.55), Color(0.55, 0.70, 0.80), Color(0.85, 0.45, 0.35),
+	Color(0.70, 0.80, 0.55), Color(0.95, 0.92, 0.85), Color(0.80, 0.62, 0.75),
+	Color(0.62, 0.58, 0.55), Color(0.93, 0.78, 0.55)]
 
 const CORES_PAREDE := [
 	Color(0.93, 0.78, 0.55), Color(0.85, 0.45, 0.35), Color(0.55, 0.70, 0.80),
@@ -14,17 +20,22 @@ const CORES_PAREDE := [
 ]
 
 
-static func criar(pai: Node3D, semente := 7) -> void:
+static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = semente
-	_laje(pai, Vector3.ZERO, Color(0.93, 0.78, 0.55))
-	_laje(pai, LAJE_RIVAL, Color(0.55, 0.70, 0.80))
+	for i in mini(lajes, LAJES.size()):
+		_laje(pai, LAJES[i], CORES_LAJE[i])
 	# Casas em volta, deixando livre o corredor do vento à frente das lajes.
 	for i in 70:
 		var x := rng.randf_range(-70.0, 80.0)
 		var z := rng.randf_range(-90.0, 40.0)
-		if absf(x - 7.0) < 16.0 and z > -8.0 and z < 14.0:
-			continue  # espaço das duas lajes
+		var perto := false
+		for i in mini(lajes, LAJES.size()):
+			var l: Vector3 = LAJES[i]
+			if absf(x - l.x) < 9.0 and absf(z - l.z) < 10.0:
+				perto = true
+		if perto:
+			continue  # espaço das lajes
 		var largura := rng.randf_range(5.0, 9.0)
 		var fundo := rng.randf_range(6.0, 11.0)
 		var altura := rng.randf_range(3.0, 9.5)

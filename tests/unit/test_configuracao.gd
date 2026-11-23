@@ -23,6 +23,6 @@ func test_cena_principal_definida() -> void:
 	assert_true(ResourceLoader.exists(cena), "o arquivo da cena principal precisa existir")
 
 
-func test_celular_em_pe() -> void:
-	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), 1, "retrato (D-021)")
-	assert_true(ProjectSettings.get_setting("display/window/size/viewport_height") > ProjectSettings.get_setting("display/window/size/viewport_width"))
+func test_celular_deitado() -> void:
+	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), 4, "paisagem com sensor (D-023)")
+	assert_true(ProjectSettings.get_setting("display/window/size/viewport_width") > ProjectSettings.get_setting("display/window/size/viewport_height"))

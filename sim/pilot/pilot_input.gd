@@ -11,6 +11,9 @@ var slack := 0.0        ## Afrouxar: 0..1, leva a mão em direção à pipa (men
 var pay_out := false    ## Dar linha: solta linha com freio (até 2 m/s)
 var free_spool := false ## Largar: carretilha livre, a pipa puxa a linha
 var reel_in := false    ## Recolher: enrola linha (1,2 m/s, se a força deixar)
+## Linha pela mão (m/s): + = puxa linha para si ("abraçar"), - = dá linha com a
+## mão. É o gesto de deslizar o dedo; tem prioridade sobre a carretilha.
+var haul_speed := 0.0
 
 
 func clear() -> void:
@@ -19,6 +22,7 @@ func clear() -> void:
 	pay_out = false
 	free_spool = false
 	reel_in = false
+	haul_speed = 0.0
 
 
 func copy_from(other: PilotInput) -> void:
@@ -27,3 +31,4 @@ func copy_from(other: PilotInput) -> void:
 	pay_out = other.pay_out
 	free_spool = other.free_spool
 	reel_in = other.reel_in
+	haul_speed = other.haul_speed

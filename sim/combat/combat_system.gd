@@ -73,6 +73,8 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 			if force > 0.0 and it == 0:
 				contacts_last_step += 1
 				max_contact_force = maxf(max_contact_force, force)
+				a.last_contact = _owners[p[2]]
+				b.last_contact = _owners[p[0]]
 				_maybe_snag(p[0], p[1], p[2], p[3])
 		_solve_links()
 
@@ -174,8 +176,10 @@ func check_breaks(flyers: Array, loose: Array) -> void:
 		if fl.line.max_wear() >= fl.line.strength:
 			var seg := fl.line.weakest_segment()
 			var onde := fl.line.pos[seg].lerp(fl.line.pos[seg + 1], 0.5)
+			var quem: Flyer = fl.line.last_contact as Flyer
 			fl.cut_line(seg)
-			events.append({"type": "ruptura", "flyer": fl.id, "segment": seg, "position": onde})
+			events.append({"type": "ruptura", "flyer": fl.id, "segment": seg, "position": onde,
+				"by": quem.id if quem != null else -1})
 	# Rabiolas e pedaços soltos também podem romper (menos importante por ora).
 	for c in loose.duplicate():
 		var ch: ParticleChain = c
@@ -190,3 +194,14 @@ func take_events() -> Array:
 	var e := events
 	events = []
 	return e
+
+
+## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
+func forget(f: Flyer) -> void:
+	for l in links.duplicate():
+		if l["avoada"] == f or l["catcher"] == f:
+			links.erase(l)
+			if l["catcher"] != f and not bool(l["captured"]):
+				(l["catcher"] as Flyer).holding = maxi(0, (l["catcher"] as Flyer).holding - 1)
+			if l["avoada"] != f:
+				(l["avoada"] as Flyer).caught_by = null

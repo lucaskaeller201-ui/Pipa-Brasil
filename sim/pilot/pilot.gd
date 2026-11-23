@@ -22,6 +22,7 @@ const SPOOL_FRICTION := 0.3      ## N
 const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
+const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
 
 var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)
@@ -79,7 +80,11 @@ func update(h: float, t: float, input: PilotInput, dir_to_kite: Vector3, tension
 
 	# Carretilha.
 	var delta := 0.0
-	if input.free_spool:
+	if input.haul_speed != 0.0:
+		# Linha pela mão: puxar (abraçar) ou dar linha no ritmo do gesto.
+		spool_speed = 0.0
+		delta = -clampf(input.haul_speed, -HAUL_MAX_SPEED, HAUL_MAX_SPEED) * h
+	elif input.free_spool:
 		spool_speed = maxf(0.0, spool_speed + (tension - SPOOL_FRICTION) / SPOOL_INERTIA * h)
 		delta = spool_speed * h
 	elif input.pay_out:

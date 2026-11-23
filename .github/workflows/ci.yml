@@ -279,23 +279,23 @@ jobs:
       - name: Gravar quadros da partida e do laboratório
         run: |
           mkdir -p capturas
-          # Partida (cena principal), celular em pé: um bot pilota a sua pipa.
+          # Modo livre (cena principal), celular deitado: um bot pilota a sua pipa.
           for vista in primeira terceira; do
             mkdir -p "quadros_$vista"
             extra=""
             if [ "$vista" = terceira ]; then extra="--terceira"; fi
-            timeout 300 xvfb-run -a -s "-screen 0 720x1280x24" godot --path . \
-              --rendering-method gl_compatibility --resolution 720x1280 \
+            timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
+              --rendering-method gl_compatibility --resolution 1280x720 \
               --fixed-fps 15 --quit-after 330 --write-movie "quadros_$vista/q.png" \
               -- --auto $extra 2>&1 | tail -5 || true
             for n in 00000030 00000150 00000329; do
-              if [ -f "quadros_$vista/q$n.png" ]; then cp "quadros_$vista/q$n.png" "capturas/partida_${vista}_quadro${n}.png"; fi
+              if [ -f "quadros_$vista/q$n.png" ]; then cp "quadros_$vista/q$n.png" "capturas/livre_${vista}_quadro${n}.png"; fi
             done
           done
           # Laboratório de voo (agora aberto pelo botão "Lab").
           mkdir -p quadros_lab
-          timeout 300 xvfb-run -a -s "-screen 0 720x1280x24" godot --path . \
-            --rendering-method gl_compatibility --resolution 720x1280 \
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
+            --rendering-method gl_compatibility --resolution 1280x720 \
             --fixed-fps 15 --quit-after 120 --write-movie "quadros_lab/q.png" \
             res://scenes/lab/lab.tscn -- --camera=1 --rival --auto 2>&1 | tail -5 || true
           if [ -f quadros_lab/q00000119.png ]; then cp quadros_lab/q00000119.png capturas/laboratorio_quadro00000119.png; fi

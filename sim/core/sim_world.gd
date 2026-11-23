@@ -118,6 +118,15 @@ func add_fixed_line(a: Vector3, b: Vector3, segments := 24) -> ParticleChain:
 	return c
 
 
+## Tira um pipeiro do mundo (por exemplo, uma avoada já aparada ou perdida).
+## Os índices (id) dos outros são renumerados.
+func remove_flyer(f: Flyer) -> void:
+	combat.forget(f)
+	flyers.erase(f)
+	for i in flyers.size():
+		(flyers[i] as Flyer).id = i
+
+
 func step(dt: float) -> void:
 	var h := dt / substeps
 	for i in substeps:

@@ -7,6 +7,8 @@ extends RefCounted
 const GROUND_KITE_DAMPING := 0.9  ## atrito simples da pipa encostada no chão
 
 var id := 0
+## Marca livre para o jogo (por exemplo, o índice do jogador dono da pipa).
+var tag := -1
 var kite: KiteBody
 var line: ParticleChain          ## linha presa à mão; depois de cortada, o pedaço que ficou na mão
 var tail: ParticleChain          ## null se a pipa estiver sem rabiola

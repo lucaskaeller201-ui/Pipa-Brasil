@@ -13,6 +13,8 @@ const GRAVITY := Vector3(0.0, -9.81, 0.0)
 const RHO := 1.2
 const GROUND_FRICTION := 0.5  ## fração do deslizamento mantida ao tocar o chão
 
+## Último pipeiro (Flyer) cuja linha encostou nesta cadeia; diz quem cortou.
+var last_contact: RefCounted
 var kind: Kind = Kind.LINE
 var pos := PackedVector3Array()
 var prev := PackedVector3Array()
