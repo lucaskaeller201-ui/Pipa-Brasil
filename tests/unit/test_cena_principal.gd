@@ -56,10 +56,14 @@ func test_modo_livre_abre_e_as_pipas_voam() -> void:
 	var modo: FreeMode = raiz.get("modo")
 	assert_not_null(modo)
 	assert_eq(modo.players.size(), 4, "você e 3 bots")
-	raiz.call("avancar", 6.0)
-	for p in modo.players:
-		var f: Flyer = p["flyer"]
-		assert_true(f.kite.position.y > 8.0, "%s com a pipa no ar (y = %.1f m)" % [p["name"], f.kite.position.y])
+	var alto := {}
+	for k in 20:
+		raiz.call("avancar", 1.0)
+		for p in modo.players:
+			var f: Flyer = p["flyer"]
+			alto[p["name"]] = maxf(float(alto.get(p["name"], 0.0)), f.kite.position.y)
+	for nome in alto:
+		assert_true(float(alto[nome]) > 15.0, "%s subiu a pipa (máx %.1f m)" % [nome, alto[nome]])
 	assert_true(modo.world.is_finite_state())
 	raiz.call("_process", 0.016)
 	raiz.queue_free()

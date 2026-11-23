@@ -54,7 +54,7 @@ class Wind:
 
 # ---------------- aerodinâmica de placa plana ----------------
 A_LIFT=2.2; CN90=1.2; CF=0.02
-SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5; BOW_MODE='wind'; K_TAUT=0.0; DESB=None; AXIS=False; YAW_TAUT=0.0; LONG=[]; LAT=[]
+SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5; BOW_MODE='wind'; K_TAUT=0.0; DESB=None; AXIS=False; YAW_TAUT=0.0; K_SIDE=0.0; SPIN_MAX=0.0; LONG=[]; LAT=[]
 def cn(sin_a):
     s=abs(sin_a); c=math.sqrt(max(0.0,1-s*s))
     return A_LIFT*s*c + CN90*s*s
@@ -166,6 +166,9 @@ class Kite:
             dmin,dmax,_=d.flex; b=max(0.0,min(1.0,(d.delta-dmin)/(dmax-dmin)))
             Vw=length(wind.sample(self.x,t))
             T=add(T, mul(n, d.spin_bias*(1-b)**2*0.5*RHO*Vw*Vw*A*d.c_ref))
+        if K_SIDE>0:
+            X=qrot(self.q,(1,0,0)); vas=sub(wind.sample(self.x,t), self.v); vx=dot(vas,X)
+            F=add(F, mul(X, K_SIDE*0.5*RHO*A*abs(vx)*vx))
         return F,T
 
 # ---------------- cadeia de partículas (linha / rabiola) ----------------
@@ -328,6 +331,9 @@ class World:
             dmin_,dmax_,_=k.d.flex; bt=max(0.0,min(1.0,(k.d.delta-dmin_)/(dmax_-dmin_)))
             nn=qrot(k.q,(0,0,1)); wn_=dot(k.w,nn)
             k.w=sub(k.w, mul(nn, wn_*(1-math.exp(-YAW_TAUT*bt**2*h))))
+        if SPIN_MAX>0:
+            nn=qrot(k.q,(0,0,1)); wn_=dot(k.w,nn)
+            if abs(wn_)>SPIN_MAX: k.w=sub(k.w, mul(nn, wn_-math.copysign(SPIN_MAX,wn_)))
         k.xp=k.x; k.qp=k.q
         k.x=add(k.x,mul(k.v,h))
         dq=qmul((0.0,k.w[0],k.w[1],k.w[2]),k.q)
