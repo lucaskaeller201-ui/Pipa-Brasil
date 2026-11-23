@@ -17,7 +17,7 @@ var velocity := Vector3.ZERO
 var angular_velocity := Vector3.ZERO  ## rad/s, no referencial do mundo
 ## Estado do giro (D-028): SPIN_FREE = física normal; SPIN_GIVE = mandando
 ## linha (gira direto); SPIN_LOCK = puxando (giro zerado).
-enum SpinMode { SPIN_FREE, SPIN_GIVE, SPIN_LOCK }
+enum SpinMode { SPIN_FREE, SPIN_GIVE, SPIN_LOCK, SPIN_KICK }
 var spin_mode: SpinMode = SpinMode.SPIN_FREE
 ## Pipa avoada embolada na linha de alguém: rebocada com muito arrasto, sem girar.
 var towed := false
@@ -203,13 +203,24 @@ func integrate(h: float) -> void:
 		var n := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn := angular_velocity.dot(n)
 		angular_velocity -= n * (wn * (1.0 - exp(-definition.spin_damping_taut * b * b * h)))
-	if definition.spin_give_rate_deg > 0.0 and spin_mode != SpinMode.SPIN_FREE:
+	if definition.spin_give_rate_deg > 0.0:
+		# Giro controlado (D-028, D-030), no plano da pipa.
+		var d := definition
 		var nn := rotation * Vector3(0.0, 0.0, 1.0)
 		var wnn := angular_velocity.dot(nn)
-		var alvo := 0.0
-		if spin_mode == SpinMode.SPIN_GIVE:
-			alvo = definition.spin_give_sign * deg_to_rad(definition.spin_give_rate_deg)
-		angular_velocity += nn * (alvo - wnn)
+		var novo := wnn
+		match spin_mode:
+			SpinMode.SPIN_GIVE:
+				var bico_cima := (rotation * Vector3.UP).dot(Vector3.UP)
+				var alvo := d.spin_give_sign * deg_to_rad(d.spin_give_rate_deg) * (1.0 - d.spin_gravity_mod * bico_cima)
+				novo = move_toward(wnn, alvo, deg_to_rad(d.spin_give_accel_deg) * h)
+			SpinMode.SPIN_KICK:
+				novo = d.spin_give_sign * deg_to_rad(d.spin_kick_rate_deg)
+			SpinMode.SPIN_LOCK:
+				novo = wnn * exp(-d.spin_pull_drag * h)
+			_:
+				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
+		angular_velocity += nn * (novo - wnn)
 	elif definition.spin_rate_max_deg > 0.0:
 		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn2 := angular_velocity.dot(n2)

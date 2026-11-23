@@ -37,63 +37,84 @@ func test_tem_rabiola_e_fica_parada_com_o_bico_para_cima() -> void:
 	assert_true(f.elevation_deg() > 35.0)
 
 
-func test_mandando_linha_gira_rapido_e_constante() -> void:
+func _taxas(w: SimWorld, f: Flyer, n: int, passo := 0.05) -> Array[float]:
+	var out: Array[float] = []
+	for i in n:
+		var a := f.nose_angle_deg()
+		_rodar(w, passo)
+		out.append(absf(_dif(f.nose_angle_deg(), a)) / passo)
+	return out
+
+
+func test_descarregar_gira_redondo() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
-	var el0 := f.elevation_deg()
-	f.input.haul_speed = -3.0
-	var taxas: Array[float] = []
-	for i in 20:
-		var a := f.nose_angle_deg()
-		_rodar(w, 0.05)
-		taxas.append(_dif(f.nose_angle_deg(), a) / 0.05)
+	f.input.haul_speed = -2.5
+	var taxas := _taxas(w, f, 24)
 	f.input.clear()
-	print("      [mandando linha] giro (°/s) a cada 0,05 s: %s; elevação %.0f° → %.0f°" % [taxas.map(func(x): return roundi(x)), el0, f.elevation_deg()])
+	print("      [descarregando] giro (°/s) a cada 0,05 s: %s" % [taxas.map(func(x): return roundi(x))])
+	assert_true(taxas[0] < 0.6 * 720.0, "começa devagar e acelera (%.0f°/s no início)" % taxas[0])
 	var soma := 0.0
-	for x in taxas:
-		soma += absf(x)
-	var media := soma / taxas.size()
-	assert_true(media > 700.0 and media < 1000.0, "gira 2 a 3 voltas por segundo (média %.0f°/s)" % media)
+	var menor := INF
+	var maior := 0.0
+	for k in range(8, 24):
+		soma += taxas[k]
+		menor = minf(menor, taxas[k])
+		maior = maxf(maior, taxas[k])
+	var media := soma / 16.0
+	assert_true(media > 450.0 and media < 1050.0, "umas 2 voltas por segundo (média %.0f°/s)" % media)
+	assert_true(maior > 1.15 * menor, "ritmo orgânico: varia com o bico (%.0f a %.0f°/s)" % [menor, maior])
 	assert_true(w.is_finite_state())
 
 
-func test_puxar_zera_o_giro_na_hora() -> void:
+func test_soltar_o_dedo_freia_o_giro_em_fracao_de_segundo() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
-	f.input.haul_speed = -3.0
-	_rodar(w, 0.6)
-	f.input.haul_speed = 3.0
-	w.step(DT)
+	f.input.haul_speed = -2.5
+	_rodar(w, 1.0)
+	var antes := _taxas(w, f, 1)[0]
+	f.input.clear()
+	var depois := _taxas(w, f, 12)
+	print("      [soltou] antes %.0f°/s; depois (a cada 0,05 s): %s" % [antes, depois.map(func(x): return roundi(x))])
+	assert_true(depois[0] > 0.25 * antes, "não para seco: freia")
+	var fim := (depois[8] + depois[9] + depois[10] + depois[11]) / 4.0
+	assert_true(fim < 0.3 * antes, "em meio segundo quase parou (%.0f°/s)" % fim)
+
+
+func test_toque_desbica_o_bico_e_ele_fica() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
 	var b0 := f.nose_angle_deg()
-	_rodar(w, 0.3)
-	var giro := _dif(f.nose_angle_deg(), b0)
-	print("      [trava seca] bico andou %.1f° em 0,3 s de puxada" % giro)
-	assert_true(absf(giro) < 10.0, "o bico fica onde estava")
+	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
+	_rodar(w, 0.7)
+	var b1 := f.nose_angle_deg()
+	_rodar(w, 0.6)
+	var b2 := f.nose_angle_deg()
+	print("      [desbico] bico %.0f° → %.0f° → %.0f°" % [b0, b1, b2])
+	assert_true(absf(_dif(b1, b0)) > 25.0 and absf(_dif(b1, b0)) < 110.0, "o toque muda a direção do bico (%.0f°)" % _dif(b1, b0))
+	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
+	_rodar(w, 0.7)
+	var b3 := f.nose_angle_deg()
+	print("      [desbico 2] bico %.0f° → %.0f°" % [b2, b3])
+	assert_true(absf(_dif(b3, b2)) > 25.0, "outro toque, outro pulo")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.
 func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 	var f: Flyer = w.flyers[0]
-	f.input.haul_speed = -3.0
+	# Descarrega até o bico chegar perto do alvo (soltando um pouco antes, porque
+	# o giro freia em fração de segundo) e puxa.
+	f.input.haul_speed = -2.5
 	var t := 0.0
-	while absf(_dif(f.nose_angle_deg(), alvo)) > 6.0 and t < 8.0:
+	while absf(_dif(f.nose_angle_deg(), alvo - 25.0 * f.kite.definition.spin_give_sign)) > 8.0 and t < 8.0:
 		w.step(DT)
 		t += DT
-	f.input.clear()
 	var bico0 := f.nose_angle_deg()
-	# Toque como no jogo: puxão curto e a mão recolhe a folga até esticar.
-	f.pilot.trigger(Pilot.Impulse.PUXAO, w.time)
-	var b_antes := f.nose_angle_deg()
-	f.input.haul_speed = Pilot.HAUL_MAX_SPEED
-	var tt := 0.0
-	while tt < 0.5 and f.tension < 2.5:
-		w.step(DT)
-		tt += DT
-	f.input.clear()
-	_rodar(w, 0.1)
-	var giro_toque := absf(_dif(f.nose_angle_deg(), b_antes)) / (tt + 0.1)
-	var bico_travado := f.nose_angle_deg()
 	f.input.haul_speed = 3.0
+	var b_antes := f.nose_angle_deg()
+	_rodar(w, 0.3)
+	var giro_toque := absf(_dif(f.nose_angle_deg(), b_antes)) / 0.3
+	var bico_travado := f.nose_angle_deg()
 	var p0 := f.sky_position_deg()
 	var rumos: Array[float] = []
 	var az_max := 0.0
@@ -114,7 +135,7 @@ func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 		"az_max": az_max, "el_min": el_min, "andou": f.sky_position_deg() - p0}
 
 
-func test_toque_trava_o_giro_e_a_pipa_vai_reta_como_flecha() -> void:
+func test_puxando_a_pipa_vai_para_onde_o_bico_parou() -> void:
 	for alvo in [-60.0, 50.0, 0.0]:
 		var w := _voo()
 		var r := _mirar_e_puxar(w, alvo, 2.0)
@@ -129,7 +150,7 @@ func test_toque_trava_o_giro_e_a_pipa_vai_reta_como_flecha() -> void:
 		for x in rumos:
 			assert_true(absf(_dif(x, media)) < 15.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
 		assert_true(absf(_dif(media, r["bico0"])) < 45.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
-		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 15.0, "o toque trava o bico onde estava")
+		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 60.0, "puxando, o giro freia logo")
 		# (o "para cima" do céu muda com a posição da pipa, por isso a folga)
 		assert_true(absf(_dif(r["bico1"], r["bico0"])) < 35.0, "o bico não vira durante a puxada")
 		assert_true(w.is_finite_state())

@@ -46,6 +46,16 @@ extends Resource
 @export var spin_give_rate_deg := 0.0
 ## Sentido do giro mandando linha (+1 ou -1).
 @export var spin_give_sign := -1.0
+## Descarregar "redondo" (D-030): o giro acelera aos poucos (graus/s²) até o
+## teto; com o bico para baixo gira mais rápido, para cima mais devagar.
+@export var spin_give_accel_deg := 2500.0
+@export var spin_gravity_mod := 0.4
+## Freio do giro (1/s): ao soltar o dedo (linha volta a esticar) e ao puxar.
+@export var spin_release_drag := 12.0
+@export var spin_pull_drag := 25.0
+## Desbico (toque): o bico dá um pulo de direção nesta velocidade (graus/s)
+## enquanto dura o toque na mão (Pilot.DESBICO_TIME).
+@export var spin_kick_rate_deg := 300.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true
@@ -121,10 +131,10 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_damping_quadratic = 1.0
 	d.spin_damping_linear = 0.3
 	d.spin_bias = 2.5
-	d.spin_damping_taut = 150.0
+	d.spin_damping_taut = 12.0
 	d.spin_rate_max_deg = 240.0
-	d.side_force_coefficient = 4.0
-	d.spin_give_rate_deg = 900.0
+	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
+	d.spin_give_rate_deg = 720.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
 	return d

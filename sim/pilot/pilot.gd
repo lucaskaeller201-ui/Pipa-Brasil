@@ -23,12 +23,14 @@ const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
 const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
+const DESBICO_TIME := 0.2        ## s: duração do toque de desbicar (folga curta)
 
 var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)
 var arm_offset := 0.0            ## m ao longo da linha (+ = para a pipa)
 var arm_velocity := 0.0
 var spool_speed := 0.0           ## m/s de linha saindo
+var _desbico_ate := -1.0
 
 # Movimentos agendados: [início (s), duração (s), alvo do braço (m), velocidade máx (m/s)]
 var _moves: Array = []
@@ -42,8 +44,15 @@ func trigger(impulse: Impulse, t: float) -> void:
 		Impulse.ARRANCAO:
 			_moves = [[t, 0.22, -0.7, 7.0], [t + 0.22, 0.6, 0.0, 1.5]]
 		Impulse.DESBICAR:
-			# folga curta e rápida, depois um puxão: o bico gira na folga
+			# folga curta e rápida, depois um puxão: o bico gira na folga; na
+			# pipa com giro controlado, dá um pulo de direção (D-030)
 			_moves = [[t, 0.30, 0.40, 5.0], [t + 0.30, 0.15, -0.40, 5.0], [t + 0.45, 0.4, 0.0, 1.5]]
+			_desbico_ate = t + DESBICO_TIME
+
+
+## Verdadeiro durante a folga curta do desbico.
+func is_desbicando(t: float) -> bool:
+	return t < _desbico_ate
 
 
 ## Verdadeiro se a mão está no meio de um puxão (puxão, arrancão, toque).

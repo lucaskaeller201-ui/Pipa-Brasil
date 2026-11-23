@@ -19,15 +19,14 @@ const LinesView := preload("res://game/views/lines_view.gd")
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
 ## que a mão recolhe no toque e no máximo ao deslizar para baixo).
-@export var velocidade_giro_mandando_linha := 900.0
+@export var velocidade_giro_mandando_linha := 720.0
 @export var forca_puxada := 6.0
 
 const BOTS := 3
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
-const EMBALO := 0.15            ## s: quanto a carretilha ainda gira depois de soltar o dedo
-const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha
-const TOQUE_RECOLHE := 0.5      ## s: no toque, a mão recolhe a folga até a linha esticar
-const TOQUE_TENSAO := 2.5       ## N: tensão que indica a linha esticada de novo
+const DESCARREGAR := 2.5        ## m/s de linha saindo com o dedo segurado
+const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
+const PUXOU_PX := 14.0          ## px para baixo que transformam o toque em puxada
 const TOQUE_MAX_S := 0.25
 const TOQUE_MAX_PX := 18.0
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
@@ -47,9 +46,7 @@ var _corpos: Array = []         # boneco de cada participante
 var _dedos := {}                # índice -> {"ini": Vector2, "t0": float, "ult": Vector2}
 var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo)
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
-var _embalo := 0.0              # m/s de linha saindo depois de soltar o dedo
 var _giro_carretilha := 0.0
-var _toque_ate := -1.0          # até quando a mão recolhe a folga do toque (s de simulação)
 
 # interface
 var _placar: Label
@@ -105,23 +102,20 @@ func _physics_process(delta: float) -> void:
 		_avisar(msg)
 
 
-func _ler_comandos(eu: Flyer, delta: float) -> void:
+func _ler_comandos(eu: Flyer, _delta: float) -> void:
 	var e := eu.input
-	var teclado := 0.0
+	var agora := Time.get_ticks_msec() / 1000.0
+	var v := _velocidade_mao   # + = puxando (deslizar para baixo)
 	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_DOWN):
-		teclado += 3.0
-	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_UP):
-		teclado -= 3.0
-	_embalo = move_toward(_embalo, 0.0, absf(_embalo) * delta / EMBALO + 0.05 * delta)
-	var v := _velocidade_mao + teclado
-	if _dedos.is_empty() and v == 0.0:
-		v = -_embalo
-	# Toque (desbico): a mão recolhe a folga depressa até a linha esticar.
-	if modo.world.time < _toque_ate:
-		if eu.tension < TOQUE_TENSAO:
-			v = maxf(v, forca_puxada)
-		else:
-			_toque_ate = -1.0
+		v = maxf(v, 3.0)
+	# Descarregar: dedo segurado (sem puxar para baixo) ou tecla S/↑.
+	var descarregando := Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_UP)
+	for k in _dedos:
+		var d: Dictionary = _dedos[k]
+		if not bool(d.get("puxou", false)) and agora - float(d["t0"]) >= TOQUE_MAX_S:
+			descarregando = true
+	if v <= 0.5 and descarregando:
+		v = minf(v, -DESCARREGAR)   # deslizar para cima junto manda ainda mais rápido
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
@@ -226,8 +220,7 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 		return
 	var agora := Time.get_ticks_msec() / 1000.0
 	if apertou:
-		_dedos[indice] = {"ini": posicao, "t0": agora, "ult": posicao}
-		_embalo = 0.0
+		_dedos[indice] = {"ini": posicao, "t0": agora, "ult": posicao, "puxou": false}
 		return
 	if not _dedos.has(indice):
 		return
@@ -235,24 +228,23 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 	_dedos.erase(indice)
 	if agora - float(d["t0"]) < TOQUE_MAX_S and posicao.distance_to(d["ini"]) < TOQUE_MAX_PX:
 		_desbicar()
-	elif _velocidade_mao < -0.5:
-		_embalo = minf(-_velocidade_mao, DAR_LINHA_MAX)  # a carretilha ainda gira um instante
 
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 	if not _dedos.has(indice):
 		return
 	_dy_quadro += relativo.y
-	(_dedos[indice] as Dictionary)["ult"] = posicao
+	var d: Dictionary = _dedos[indice]
+	d["ult"] = posicao
+	if posicao.y - (d["ini"] as Vector2).y > PUXOU_PX:
+		d["puxou"] = true   # este dedo é de puxar (enquanto estiver na tela)
 
 
 func _desbicar() -> void:
 	var eu := modo.you()
 	if _automatico or eu.cut or eu.pilot == null:
 		return
-	eu.pilot.trigger(Pilot.Impulse.PUXAO, modo.world.time)
-	_toque_ate = modo.world.time + TOQUE_RECOLHE
-	_embalo = 0.0
+	eu.pilot.trigger(Pilot.Impulse.DESBICAR, modo.world.time)
 
 
 func _sobre_botao(posicao: Vector2) -> bool:
@@ -397,7 +389,7 @@ func _criar_interface() -> void:
 	_aviso.offset_top = 70.0
 	_aviso.offset_bottom = 160.0
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para BAIXO: puxa · para CIMA: dá linha (a pipa gira) · TOQUE: desbica e ela arranca"
+	_dica.text = "SEGURE o dedo: descarrega (a pipa gira) · SOLTE: ela firma · Deslize para BAIXO: puxa · TOQUE: desbica"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
