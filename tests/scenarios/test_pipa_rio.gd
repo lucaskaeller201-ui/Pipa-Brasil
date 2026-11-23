@@ -83,7 +83,8 @@ func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 		var p := f.sky_position_deg()
 		var d := p - anterior
 		if d.length() > 0.5:
-			rumos.append(rad_to_deg(atan2(d.x, d.y)))
+			# azimute vale menos no alto do céu: corrige por cos(elevação)
+			rumos.append(rad_to_deg(atan2(d.x * cos(deg_to_rad(p.y)), d.y)))
 		anterior = p
 		az_max = maxf(az_max, absf(p.x))
 		el_min = minf(el_min, p.y)

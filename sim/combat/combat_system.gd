@@ -70,13 +70,25 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 		contacts_last_step = 0
 		return
 	_pairs = LineContact.find_pairs(_chains, _groups, CONTACT_RADIUS * 2.0)
+	var lacadas := {}
+	for e in engagements:
+		var fa: Flyer = e["a"]
+		var fb: Flyer = e["b"]
+		if fa.line != null and fb.line != null:
+			lacadas[Vector2i(fa.line.get_instance_id(), fb.line.get_instance_id())] = e
+			lacadas[Vector2i(fb.line.get_instance_id(), fa.line.get_instance_id())] = e
+		e["f"] = 0.0
 	contacts_last_step = 0
 	max_contact_force = 0.0
 	for it in CONTACT_ITERATIONS:
 		for p in _pairs:
 			var a: ParticleChain = _chains[p[0]]
 			var b: ParticleChain = _chains[p[2]]
-			var force := LineContact.solve_pair(a, p[1], b, p[3], CONTACT_RADIUS, h, wear_rate if it == 0 else 0.0)
+			var laco = lacadas.get(Vector2i(a.get_instance_id(), b.get_instance_id()))
+			# Linhas laçadas: o desgaste é calculado no laço (quem corre gasta a outra).
+			var force := LineContact.solve_pair(a, p[1], b, p[3], CONTACT_RADIUS, h, (wear_rate if it == 0 else 0.0) if laco == null else 0.0)
+			if laco != null and it == 0:
+				laco["f"] = maxf(float(laco["f"]), force)
 			if force > 0.0 and it == 0:
 				contacts_last_step += 1
 				max_contact_force = maxf(max_contact_force, force)
@@ -267,7 +279,19 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 					bi = i
 					bj = j
 					bst = st
-		e["ma"] = a.material_coordinate(bi, bst.x)
-		e["mb"] = b.material_coordinate(bj, bst.y)
-		LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, wear_k)
+		var ma := a.material_coordinate(bi, bst.x)
+		var mb := b.material_coordinate(bj, bst.y)
+		e["ma"] = ma
+		e["mb"] = mb
+		var f := LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, 0.0) + float(e.get("f", 0.0))
+		if wear_k > 0.0:
+			# Relo (D-027): quanto do material de cada linha passou pelo ponto de
+			# encontro. A linha que corre gasta a outra; um pouco para as duas sempre.
+			var corre_a := absf(ma - float(e.get("ma0", ma))) / h
+			var corre_b := absf(mb - float(e.get("mb0", mb))) / h
+			var base := 0.15 * (corre_a + corre_b) + 0.05
+			a.add_wear(bi, bst.x, wear_k * f * (corre_b + base) * h)
+			b.add_wear(bj, bst.y, wear_k * f * (corre_a + base) * h)
+			e["ma0"] = ma
+			e["mb0"] = mb
 		contact_points.append(a.pos[bi].lerp(a.pos[bi + 1], bst.x))
