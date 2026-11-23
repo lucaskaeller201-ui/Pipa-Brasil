@@ -17,6 +17,8 @@ Atualizado em 2026-11-23.
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |
 | Bots disputando | Melhorou: em 3 min de teste houve vários laços e cortes |
 | Ir a 90° ou mais para os lados | Parcial: uns 55° em 4 s de puxada |
+| Giro de dois estados (900°/s mandando linha, trava seca puxando) | Feito (D-028) |
+| Aparar com embolar, decepar e rebocar; estoque | Feito (D-029) |
 | Vento girando 360° no modo livre; estirante que corta; grossura do fio | Pendente (ideias do Manda Busca 1.0.12) |
 | Cenário bonito | Pendente (Fase 7); o Lucas achou o atual feio |
 | Teste do Lucas com a versão nova | Pendente |
@@ -33,7 +35,7 @@ Atualizado em 2026-11-23.
 
 ## Próxima tarefa
 
-Lucas testar a 0.7.0 no iPhone (pipa do Rio, toque que trava, laço). Depois: bots
+Lucas testar a 0.8.0 no iPhone (giro rápido, trava seca, aparar novo). Depois: bots
 que vão atrás das pipas para disputar, emendar a pipa aparada, cenário.
 
 ## Fases

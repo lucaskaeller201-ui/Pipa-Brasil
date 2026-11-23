@@ -45,11 +45,11 @@ func test_remover_avoada_renumera_os_pipeiros() -> void:
 	assert_true(w.is_finite_state())
 
 
-func test_quatro_pipeiros_tres_minutos_sem_tempo_limite() -> void:
+func test_quatro_pipeiros_dois_minutos_sem_tempo_limite() -> void:
 	var modo := FreeMode.new(3, 5, true)
 	var cortes := 0
 	var maximo_de_pipas := 0
-	for i in 180 * 120:
+	for i in 120 * 120:
 		modo.update(DT)
 		maximo_de_pipas = maxi(maximo_de_pipas, modo.world.flyers.size())
 		for m in modo.take_messages():

@@ -1,5 +1,15 @@
 # Histórico de alterações
 
+## 0.8.0 — 2026-11-23
+
+- Giro de dois estados: mandando linha o bico gira 2 a 3 voltas por segundo
+  na hora; puxando, trava seco. Botão "Ajustes" com a velocidade do giro e a
+  força da puxada.
+- Aparar refeito: só encostar não prende; girando em contato por 0,4 s
+  embola; puxada rápida decepa a linha solta ou a rabiola da avoada; puxando
+  devagar ela vem rebocada, sem girar, até a mão e entra no estoque.
+- Placar mostra o estoque de pipas aparadas.
+
 ## 0.7.1 — 2026-11-23
 
 - Mais rápido: a pipa gira até 240°/s dando linha (era 170°/s); dar linha vai

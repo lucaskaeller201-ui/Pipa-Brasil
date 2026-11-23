@@ -14,6 +14,8 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-23 | Controles | Sem botões: deslizar para baixo puxa ("abraçar"), para cima dá linha, toques desbicam |
 | 2026-11-23 | Pipa reta | A pipa não pode "dar de lado" (ficar pensa): com a linha esticada vai reta |
 | 2026-11-23 | Pipa do Rio | Com rabiola ("tabula"); dando linha ela gira num ritmo constante; um toque trava o giro e ela arranca reta |
+| 2026-11-23 | Giro | Mandando linha: 2 a 3 voltas por segundo (900°/s), imediato; puxando: trava seca. Valores ajustáveis na tela |
+| 2026-11-23 | Aparar | Só embola girando em contato; puxada rápida decepa a linha solta ou a rabiola; devagar traz rebocada até a mão, para o estoque |
 | 2026-11-23 | Relo | Linhas que se cruzam ficam laçadas até alguém cortar; quem está dando ou puxando linha leva vantagem sobre a linha parada |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
@@ -29,6 +31,27 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-029 — Aparar: embolar, decepar e rebocar (2026-11-23)
+Regras pedidas pelo Lucas. A linha solta e a rabiola da avoada colidem. Só
+encostar não prende: o embolo se forma enquanto quem apara está mandando linha
+(girando) com contato recente (até 0,3 s atrás), e embola ao somar 0,4 s.
+Puxando rápido (linha correndo na mão acima de 3 m/s) em contato ou com a
+avoada já embolada, decepa a linha solta ou a rabiola no ponto de contato: o
+pedaço cai solto e a avoada escapa (no máximo um decepar a cada 0,5 s).
+Embolada, a avoada é rebocada como pêndulo amortecido: folga de 0,3 m no ponto
+embolado, força do ar reduzida, muito arrasto e giro limitado a 120°/s. Puxando
+devagar chega à mão: aparada, entra no estoque de quem aparou.
+
+### D-028 — Giro de dois estados (2026-11-23)
+Pedido explícito do Lucas, como mecânica de jogo (exceção consciente ao modelo
+puramente aerodinâmico do giro da D-026): mandando linha com a mão, a
+velocidade de giro no plano da pipa é imposta direto (`spin_give_rate_deg`,
+padrão 900°/s, ajustável na tela em "Ajustes"); puxando (deslizar para baixo,
+toque, puxão), o giro é zerado na hora a cada subpasso (trava seca). Sem
+comando, a física normal (rabiola, vareta) segura o bico. Translação, linha,
+vento e colisões continuam 100% físicos. Os bots não usam o gesto de mandar
+linha com a mão e continuam com o giro físico.
 
 ### D-027 — Laço e relo (2026-11-23)
 Pedido do Lucas: linhas que se cruzam não podem se soltar do nada; alguém
