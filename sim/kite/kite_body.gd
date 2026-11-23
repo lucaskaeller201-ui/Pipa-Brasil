@@ -238,6 +238,11 @@ func update_velocities(h: float) -> void:
 	var dq := rotation * _prev_rotation.inverse()
 	var s := 2.0 / h if dq.w >= 0.0 else -2.0 / h
 	angular_velocity = Vector3(dq.x, dq.y, dq.z) * s
+	if towed:
+		# Rebocada: sem giro de furacão, mesmo com os trancos do reboque.
+		var lim := deg_to_rad(120.0)
+		if angular_velocity.length() > lim:
+			angular_velocity = angular_velocity.normalized() * lim
 
 
 ## Começa o estado do zero (sem velocidade), na pose dada.

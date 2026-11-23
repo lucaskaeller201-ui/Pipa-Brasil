@@ -48,6 +48,7 @@ var contact_points: PackedVector3Array = PackedVector3Array()
 var _pairs: Array = []
 var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
 var _clock := 0.0
+var _last_cut := {}            ## avoada -> instante do último decepar
 var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
 var _h := 0.0
 var _chains: Array = []
@@ -116,12 +117,11 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 		var ct: Flyer = l["catcher"]
 		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
 			_pending_cuts.append([l["avoada"], l["chain"], maxi(0, int(l["idx"]) - 1), ct])
-	var feitos := {}
 	for c in _pending_cuts:
 		var av: Flyer = c[0]
-		if feitos.has(av) or (c[1] != av.trailing_line and c[1] != av.tail):
+		if _clock - float(_last_cut.get(av, -10.0)) < 0.5 or (c[1] != av.trailing_line and c[1] != av.tail):
 			continue
-		feitos[av] = true
+		_last_cut[av] = _clock
 		_decepar(av, c[1], int(c[2]), c[3], loose)
 	_pending_cuts.clear()
 
@@ -330,6 +330,7 @@ func take_events() -> Array:
 
 ## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
 func forget(f: Flyer) -> void:
+	_last_cut.erase(f)
 	for e in engagements.duplicate():
 		if e["a"] == f or e["b"] == f:
 			engagements.erase(e)
