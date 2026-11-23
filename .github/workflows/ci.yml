@@ -259,7 +259,7 @@ jobs:
             timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
               --rendering-method gl_compatibility --resolution 1280x720 \
               --fixed-fps 15 --quit-after 120 --write-movie "quadros$cam/q.png" \
-              -- --camera=$cam 2>&1 | tail -5 || true
+              -- --camera=$cam --rival --auto 2>&1 | tail -5 || true
             ls "quadros$cam" | head -3
             for n in 00000030 00000119; do
               if [ -f "quadros$cam/q$n.png" ]; then cp "quadros$cam/q$n.png" "capturas/camera${cam}_quadro${n}.png"; fi

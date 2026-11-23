@@ -1,5 +1,16 @@
 # Histórico de alterações
 
+## 0.4.0 — 2026-11-23
+
+- Fase 4: bot piloto em `game/ai/` (`BotDifficulty`, `BotPerception`,
+  `BotPilot`) que empina usando só os comandos do pipeiro.
+- Raia sem rabiola corrigida: deixa de virar o bico para baixo parada, fica no
+  ar sozinha e é dirigível por folga e puxão (D-018). Referência de regressão
+  regenerada.
+- Laboratório: pipa rival pilotada por bot (persegue a sua), nível escolhível e
+  piloto automático na sua pipa.
+- Testes: 7 novos, incluindo 5 minutos de voo do bot com rajadas.
+
 ## 0.3.0 — 2026-11-23
 
 - Fase 3: vários pipeiros no mesmo mundo (`Flyer`); contato entre linhas e

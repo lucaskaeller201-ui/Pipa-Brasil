@@ -30,4 +30,13 @@ func test_laboratorio_abre_e_a_pipa_voa() -> void:
 	assert_true(texto.contains("PIPA BRASIL"), "o painel mostra o nome do jogo")
 	assert_true(texto.contains("Tensão"), "o painel mostra a tensão da linha")
 
+	# Liga a pipa rival (bot) e o piloto automático: o mundo passa a ter 2 pipeiros.
+	raiz.call("_ao_mudar_rival", true)
+	raiz.call("_ao_mudar_piloto", true)
+	world = raiz.get("world")
+	assert_eq(world.flyers.size(), 2, "a rival entra no mundo")
+	for i in 120:
+		raiz.call("_physics_process", 1.0 / 120.0)
+	assert_true(world.is_finite_state())
+
 	raiz.queue_free()

@@ -5,8 +5,9 @@ extends Node3D
 ## carretilha, com setas das forças e números ao vivo. Os comandos do pipeiro
 ## (botões na tela ou teclado) mexem a mão e a carretilha; a pipa responde só
 ## pela física. Opcionalmente há uma linha fixa entre postes e uma pipa rival
-## parada, para treinar o contato entre linhas (a linha fica vermelha com o
-## desgaste e pode romper).
+## pilotada por um bot (que persegue a sua pipa), para treinar o contato entre
+## linhas (a linha fica vermelha com o desgaste e pode romper). O piloto
+## automático põe um bot para pilotar a sua pipa.
 
 const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
@@ -35,6 +36,11 @@ const TECLAS_IMPULSO := {KEY_SPACE: Pilot.Impulse.PUXAO, KEY_Q: Pilot.Impulse.AR
 
 var _linha_fixa := true
 var _rival := false
+var _nivel_rival: BotDifficulty.Level = BotDifficulty.Level.NORMAL
+var _bot_rival: BotPilot
+var _piloto_automatico := false
+var _bot_meu: BotPilot
+var _botao_nivel: Button
 var _mensagem := ""
 var _mensagem_ate := 0.0
 
@@ -96,6 +102,10 @@ func _ready() -> void:
 		if arg.begins_with("--camera="):
 			_camera_modo = clampi(arg.trim_prefix("--camera=").to_int(), 0, CAMERAS.size() - 1)
 			_botao_camera.text = "Câmera: %s" % CAMERAS[_camera_modo]
+		elif arg == "--rival":
+			_rival = true
+		elif arg == "--auto":
+			_piloto_automatico = true
 	reiniciar()
 
 
@@ -116,10 +126,15 @@ func reiniciar() -> void:
 			_postes.add_child(_criar_poste(Vector3(x, 0.0, z), y))
 	_pipa_rival.visible = _rival
 	_pipeiro_rival.visible = _rival
+	_bot_rival = null
 	if _rival:
-		world.add_flyer(_def_com_rabiola, Vector3(6.0, 0.0, 0.0), _comprimento_linha, 30.0, -18.0, true)
-		_pipa_rival.call("construir", _def_com_rabiola)
+		world.add_flyer(_def_sem_rabiola, Vector3(6.0, 0.0, 0.0), _comprimento_linha, 30.0, 0.0, true, 3.0)
+		_pipa_rival.call("construir", _def_sem_rabiola)
 		_pipeiro_rival.position = Vector3(6.0, 0.8, 0.25)
+		_bot_rival = BotPilot.new(BotDifficulty.create(_nivel_rival), 11)
+		_bot_rival.line_target = _comprimento_linha
+	_bot_meu = BotPilot.new(BotDifficulty.create(BotDifficulty.Level.PROFISSIONAL), 12)
+	_bot_meu.line_target = _comprimento_linha
 	_mensagem = ""
 	_atualizar_visual()
 
@@ -132,7 +147,19 @@ func avancar(segundos: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_ler_comandos()
+	var meu: Flyer = world.flyers[0]
+	if _piloto_automatico and not meu.cut:
+		_bot_meu.target_azimuth = 0.0
+		_bot_meu.update(meu, world.time)
+		_ultimo_comando = "piloto automático"
+	else:
+		_ler_comandos()
+	if _bot_rival != null and world.flyers.size() > 1 and not (world.flyers[1] as Flyer).cut:
+		var rival: Flyer = world.flyers[1]
+		# O rival persegue a sua pipa: mira o azimute dela visto do lugar dele.
+		var alvo := meu.kite.position - rival.hand_position
+		_bot_rival.target_azimuth = rad_to_deg(atan2(alvo.x, -alvo.z))
+		_bot_rival.update(rival, world.time)
 	var inicio := Time.get_ticks_usec()
 	world.step(delta)
 	var ms := (Time.get_ticks_usec() - inicio) / 1000.0
@@ -246,7 +273,7 @@ func texto_info() -> String:
 	var meu: Flyer = world.flyers[0]
 	var desgaste := meu.line.max_wear() / meu.line.strength * 100.0 if not meu.cut else 100.0
 	var linhas := PackedStringArray([
-		"PIPA BRASIL · Fase 3 · Laboratório de voo · %s" % definicao.model_name,
+		"PIPA BRASIL · Fase 4 · Laboratório de voo · %s" % definicao.model_name,
 		"Linha: %s m · carretilha %s · comando: %s" % [_num(world.line_length(), 1), carretilha, _ultimo_comando],
 		"Desgaste da sua linha: %d%% · linhas encostadas: %s" % [roundi(desgaste), "sim" if world.combat.contacts_last_step > 0 else "não"],
 		"Vento na pipa: %s m/s" % _num(k.last_wind.length(), 1),
@@ -358,7 +385,9 @@ func _criar_interface() -> void:
 	_toggle(caixa, "Com rabiola", true, _ao_mudar_rabiola)
 	_toggle(caixa, "Mostrar forças", _mostrar_forcas, _ao_mudar_forcas)
 	_toggle(caixa, "Linha fixa entre postes", _linha_fixa, _ao_mudar_linha_fixa)
-	_toggle(caixa, "Pipa rival (parada)", _rival, _ao_mudar_rival)
+	_toggle(caixa, "Pipa rival (bot)", _rival, _ao_mudar_rival)
+	_botao_nivel = _botao(caixa, "Nível do rival: %s" % BotDifficulty.level_name(_nivel_rival), _ao_tocar_nivel)
+	_toggle(caixa, "Piloto automático na minha", _piloto_automatico, _ao_mudar_piloto)
 	_botao(caixa, "Rajada (3 s)", _ao_tocar_rajada)
 	_botao_camera = _botao(caixa, "Câmera: %s" % CAMERAS[_camera_modo], _ao_tocar_camera)
 	_botao(caixa, "Reiniciar voo", reiniciar)
@@ -446,6 +475,18 @@ func _ao_mudar_linha_fixa(ligado: bool) -> void:
 func _ao_mudar_rival(ligado: bool) -> void:
 	_rival = ligado
 	reiniciar()
+
+
+func _ao_tocar_nivel() -> void:
+	_nivel_rival = ((_nivel_rival + 1) % 4) as BotDifficulty.Level
+	_botao_nivel.text = "Nível do rival: %s" % BotDifficulty.level_name(_nivel_rival)
+	if _rival:
+		reiniciar()
+
+
+func _ao_mudar_piloto(ligado: bool) -> void:
+	_piloto_automatico = ligado
+	world.input.clear()
 
 
 func _ao_mudar_sensibilidade(v: float) -> void:

@@ -22,6 +22,31 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-018 — Raia sem rabiola sem estabilidade direcional da vareta (2026-11-23)
+O termo de estabilidade direcional criado na D-012 alinhava a espinha da pipa
+com o fluxo de ar no plano da vela. Com a pipa parada no céu, esse fluxo vem do
+lado da base para o bico, então o termo virava o bico para baixo e a pipa
+mergulhava em 2 s mesmo sem vento turbulento: nenhum controle conseguiria
+pilotá-la, e foi por isso que o controlador da Fase 2 falhou. Testei o termo
+com o sinal oposto e com o fluxo só do movimento da pipa; os dois pioravam.
+Sem o termo (`bow_stability = 0`), a raia sem rabiola fica parada a 60° com o
+bico para cima, gira com a linha frouxa e corre para onde o bico aponta quando
+puxada, e volta a apontar para cima em cerca de 0,5 s. O mecanismo continua no
+código para outros modelos.
+
+Consequência: como ela só gira para um lado (`spin_bias`) e se endireita
+rápido, atravessar o céu de lado exige girar e arrancar várias vezes. O bot da
+Fase 4 mantém a pipa no ar com segurança, mas acerta o lado do céu pedido só
+cerca de metade das vezes. Melhorar a mira é a primeira tarefa antes da
+Fase 5.
+
+### D-019 — Bot: percepção limitada e mesma interface (2026-11-23)
+O bot lê do próprio pipeiro só posição da pipa no céu, ângulo do bico, tensão
+na mão e comprimento de linha, com atraso de reação e ruído que dependem da
+dificuldade. Não lê o vento, velocidades exatas nem nada do adversário além
+do que se vê. Escreve só no `PilotInput`, como o jogador. A dificuldade muda
+só a percepção e a precisão, nunca a física.
+
 ### D-017 — Linha desenhada como fita (2026-11-23)
 A linha real tem 0,6 mm e some na tela a poucos metros. Linhas e rabiolas são
 desenhadas como fitas viradas para a câmera, com largura mínima de cerca de

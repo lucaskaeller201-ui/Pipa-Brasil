@@ -2,43 +2,41 @@
 
 Atualizado em 2026-11-23.
 
-## Fase atual: 3 — Linha avançada e combate (núcleo)
+## Fase atual: 4 — Bot piloto
 
-Portão para avançar: zero linhas atravessadas e custo de CPU dentro do
-orçamento (cumprido no CI). Falta medir no celular.
+Portão para avançar: o bot mantém a pipa no ar 5 minutos com rajadas
+(cumprido no CI com a raia sem rabiola, a mais difícil).
 
 | Item | Situação |
 | --- | --- |
-| Vários pipeiros no mesmo mundo (`Flyer`) | Feito; voo das Fases 1 e 2 idêntico (regressão 0,0000) |
-| Contato linha × linha e linha × rabiola, sem atravessar | Feito: 500 cruzamentos aleatórios, 0 travessias |
-| Grade espacial (só testa pares próximos) | Feito |
-| Desgaste virtual por ponto da linha (faixas de 5 cm) | Feito (D-015) |
-| Ruptura sem perder comprimento; pipa avoada com o pedaço de linha | Feito |
-| Linha fixa entre postes (obstáculo) | Feito |
-| Linha desenhada como fita com largura mínima na tela | Feito (D-017) |
-| Laboratório: linha fixa, pipa rival parada, linha vermelha com desgaste, aviso de ruptura | Feito |
-| Aparagem (prender uma pipa avoada com a linha ou a rabiola) | Pendente |
-| Emaranhamento com nó (linhas que enroscam e não deslizam) | Pendente: hoje o contato não tem atrito, as linhas sempre deslizam |
-| Colisão da linha com prédios, árvores e antenas | Pendente (entra com os cenários, Fase 7) |
-| Medir o FPS no celular com duas pipas | Pendente |
+| Raia sem rabiola corrigida: fica no ar sozinha e é dirigível | Feito (D-018) |
+| `BotDifficulty`: 4 níveis (atraso, ruído, precisão, frequência de decisão) | Feito |
+| `BotPerception`: só o que o pipeiro vê e sente, com atraso e ruído | Feito |
+| `BotPilot`: empina usando só o `PilotInput` | Feito |
+| 5 minutos no ar com rajadas, sem tocar o chão, linha controlada | Feito: fácil e profissional |
+| Todos os níveis, 1 minuto, 2 ventos diferentes | Feito: nenhum toque no chão |
+| Bot contra bot | Feito: as linhas se encostaram e uma rompeu, sem ninguém programar a disputa |
+| Laboratório: rival pilotado por bot (persegue a sua pipa), nível escolhível, piloto automático | Feito |
+| Mirar um lado do céu com precisão | Pendente: o bot chega ao lado certo só metade das vezes (D-018) |
+| Bot que procura enganchar e disputar de propósito | Pendente (Fase 8) |
+| Personalidades (defensivo, agressivo etc.) | Pendente (Fase 8) |
 
-### Medido no CI (raia com rabiola, vento 5 m/s, linha 30 m)
+### Medido no CI
 
 | Situação | Resultado |
 | --- | --- |
-| Linha da pipa sobe e encosta na linha fixa (9,5 m de altura, 10 m à frente) | encostada a 0,020 m por 6,9 s de 10; dobrada a 9,4 m (livre: cerca de 12 m) |
-| Enganchada e parada, 10 s | desgaste máx 0,018 (pipa) e 0,025 (fixa); rompe em 1,0 |
-| Recolhendo enganchada, 4 s | desgaste 0,020 (pipa, que corre pelo contato) × 0,700 (fixa, parada no ponto) |
-| Linha fixa fraca rompe | 2 pedaços, nenhum comprimento perdido, a pipa volta a subir |
-| Linha da pipa rompe | pipa avoada desce de 22 m para 12 m e vai 45 m vento abaixo em 8 s |
-| Duas pipas soltas com as linhas cruzadas | 0 travessias |
-| Custo, 2 pipas + linha fixa enganchada | 208 ms de CPU por segundo simulado no servidor do CI |
+| Raia sem rabiola sozinha, turbulência, 3 ventos | sobe e fica parada a 60–63° com o bico para cima; nunca abaixo de 58° |
+| Folga 0,5 s (carretilha livre) e puxar 1,5 s | bico gira 79°; a pipa corre 32° para o lado e desce 14° |
+| Bot fácil, 5 min, rajadas de 7–10 m/s a cada 20 s | mínimo 12,8°, nunca no chão, linha 42 m (máx 49), 264 giros |
+| Bot profissional, 5 min | mínimo 24,2°, nunca no chão, linha 36 m (máx 43), 286 giros |
+| Bot contra bot, 1 min | linhas encostadas 3,2 s; uma linha rompeu |
 
 ## Próxima tarefa
 
-Fase 4 — Bot piloto: um bot que empina a raia usando só os comandos do
-`PilotInput`, mantendo a pipa no ar 5 minutos com rajadas. Depois, um bot que
-procura enganchar e disputar a linha. Antes ou junto: aparagem.
+Fase 5 — Fatia vertical: partida 1 contra 1 contra o bot, no terreno aberto,
+com pôr do sol básico, câmera em 3ª pessoa e aparagem. Antes, melhorar a mira
+do bot (ele precisa conseguir ir atrás da sua pipa de propósito) e decidir com
+o Lucas a regra do desgaste (D-015).
 
 ## Fases
 
@@ -48,8 +46,8 @@ procura enganchar e disputar a linha. Antes ou junto: aparagem.
 | 1 | Laboratório de física | Concluída (falta o teste no celular) |
 | 2 | Controle e rabiola | Concluída no CI; falta o teste no celular |
 | 3 | Linha avançada | Núcleo concluído no CI; faltam aparagem e nó |
-| 4 | Bot piloto | Próxima |
-| 5 | Fatia vertical: 1x1 contra bot | — |
+| 4 | Bot piloto | Concluída no CI; falta a mira precisa |
+| 5 | Fatia vertical: 1x1 contra bot | Próxima |
 | 6 | Modelos de pipa e materiais | — |
 | 7 | Mundo | — |
 | 8 | Bots completos e combate livre | — |

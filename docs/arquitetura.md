@@ -45,8 +45,10 @@ Jogador (toque, teclado, mouse)      BotAI (percepção com ruído e atraso)
   desgaste virtual acumulado por pressão e deslizamento; ruptura ao atingir o
   limite; linha e pipa soltas viram corpos livres; encostar numa pipa avoada
   cria uma ligação (aparagem).
-- **Bots:** mesma interface de comandos. Dificuldade muda ruído, atraso e
-  precisão; personalidade muda os pesos das decisões.
+- **Bots** (`game/ai/`): `BotPerception` (só o que o pipeiro vê e sente, com
+  atraso e ruído), `BotDifficulty` (4 níveis), `BotPilot` (decide e escreve no
+  `PilotInput`, a mesma interface do jogador). Personalidade muda os pesos das
+  decisões (Fase 8).
 
 ## Desempenho
 
