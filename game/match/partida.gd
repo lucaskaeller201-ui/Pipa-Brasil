@@ -38,6 +38,7 @@ var _mao: MeshInstance3D
 var _pipa: Node3D
 var _pipa_rival: Node3D
 var _rival_corpo: MeshInstance3D
+var _meu_corpo: MeshInstance3D
 var _linhas: MeshInstance3D
 
 var _placar: Label
@@ -63,6 +64,8 @@ func _ready() -> void:
 
 	_rival_corpo = _boneco(Color(0.75, 0.20, 0.18))
 	_rival_corpo.position = Bairro.LAJE_RIVAL + Vector3(0.0, Bairro.ALTURA_LAJE + 0.8, 0.25)
+	_meu_corpo = _boneco(Color(0.15, 0.45, 0.85))
+	_meu_corpo.position = Vector3(0.0, Bairro.ALTURA_LAJE + 0.8, 0.25)
 
 	_pipa = KiteView.new()
 	_pipa.name = "Pipa"
@@ -76,7 +79,7 @@ func _ready() -> void:
 
 	_camera = Camera3D.new()
 	_camera.name = "Camera"
-	_camera.fov = 70.0
+	_camera.fov = 62.0
 	_camera.near = 0.05
 	_camera.far = 1500.0
 	_camera.current = true
@@ -191,24 +194,25 @@ func _desenhar_pipeiro(f: Flyer, cor: Color) -> void:
 
 func _posicionar_camera(imediato: bool) -> void:
 	var eu: Flyer = regras.world.flyers[0]
-	var alvo := eu.kite.position
 	var olho: Vector3
 	if _primeira_pessoa:
 		olho = eu.pilot.shoulder_position() + Vector3(0.0, 0.22, 0.12)
 	else:
-		olho = eu.pilot.shoulder_position() + Vector3(1.2, 0.8, 4.5)
-	# Olha um pouco abaixo da pipa, para a mão e a carretilha entrarem na tela.
-	var dir := (alvo - olho).normalized()
-	var lado := dir.cross(Vector3.UP).normalized()
-	dir = dir.rotated(lado, deg_to_rad(-14.0 if _primeira_pessoa else -6.0))
-	var desejada := Transform3D.IDENTITY.looking_at(dir, Vector3.UP)
-	desejada.origin = olho
+		olho = eu.pilot.shoulder_position() + Vector3(1.4, 1.4, 6.5)
+	# Vira para a pipa, mas inclina menos que ela: a pipa fica no alto da tela
+	# e o horizonte com as casas aparece acima dos botões.
+	var alvo := eu.kite.position - olho
+	var guinada := atan2(-alvo.x, -alvo.z)
+	var elevacao := rad_to_deg(atan2(alvo.y, Vector2(alvo.x, alvo.z).length()))
+	var inclinacao := clampf(elevacao - 22.0, 4.0 if _primeira_pessoa else -4.0, 40.0)
+	var desejada := Transform3D(Basis.from_euler(Vector3(deg_to_rad(inclinacao), guinada, 0.0)), olho)
 	if imediato:
 		_camera.global_transform = desejada
 	else:
-		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.12)
+		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.08)
 	_carretilha.visible = _primeira_pessoa
 	_mao.visible = _primeira_pessoa
+	_meu_corpo.visible = not _primeira_pessoa
 
 
 func _criar_carretilha_e_mao() -> void:
@@ -216,13 +220,13 @@ func _criar_carretilha_e_mao() -> void:
 	_carretilha = Node3D.new()
 	_carretilha.name = "Carretilha"
 	_camera.add_child(_carretilha)
-	_carretilha.position = Vector3(-0.16, -0.24, -0.42)
-	_carretilha.rotation_degrees = Vector3(0.0, 35.0, 90.0)
+	_carretilha.position = Vector3(-0.10, -0.15, -0.42)
+	_carretilha.rotation_degrees = Vector3(70.0, 35.0, 0.0)
 	var corpo := MeshInstance3D.new()
 	var cil := CylinderMesh.new()
-	cil.top_radius = 0.11
-	cil.bottom_radius = 0.11
-	cil.height = 0.09
+	cil.top_radius = 0.065
+	cil.bottom_radius = 0.065
+	cil.height = 0.05
 	corpo.mesh = cil
 	var madeira := StandardMaterial3D.new()
 	madeira.albedo_color = Color(0.55, 0.33, 0.16)
@@ -231,22 +235,32 @@ func _criar_carretilha_e_mao() -> void:
 	_carretilha.add_child(corpo)
 	var linha_enrolada := MeshInstance3D.new()
 	var rolo := CylinderMesh.new()
-	rolo.top_radius = 0.085
-	rolo.bottom_radius = 0.085
-	rolo.height = 0.095
+	rolo.top_radius = 0.05
+	rolo.bottom_radius = 0.05
+	rolo.height = 0.056
 	linha_enrolada.mesh = rolo
 	var branco := StandardMaterial3D.new()
 	branco.albedo_color = Color(0.95, 0.95, 0.92)
 	branco.roughness = 0.6
 	linha_enrolada.material_override = branco
 	_carretilha.add_child(linha_enrolada)
+	# Cabo (manivela) da carretilha.
+	var cabo := MeshInstance3D.new()
+	var cabo_malha := CylinderMesh.new()
+	cabo_malha.top_radius = 0.009
+	cabo_malha.bottom_radius = 0.009
+	cabo_malha.height = 0.06
+	cabo.mesh = cabo_malha
+	cabo.material_override = madeira
+	cabo.position = Vector3(0.04, 0.05, 0.0)
+	_carretilha.add_child(cabo)
 
 	# Mão que segura a linha: fica na posição da mão da simulação.
 	_mao = MeshInstance3D.new()
 	_mao.name = "Mao"
 	var palma := CapsuleMesh.new()
-	palma.radius = 0.035
-	palma.height = 0.16
+	palma.radius = 0.03
+	palma.height = 0.11
 	_mao.mesh = palma
 	var pele := StandardMaterial3D.new()
 	pele.albedo_color = Color(0.55, 0.36, 0.24)
