@@ -1,11 +1,11 @@
 extends "res://tests/test_case.gd"
-## Testes de fumaça: a cena principal (laboratório de voo) abre, monta o que
-## deveria e a pipa voa usando o núcleo físico.
+## Testes de fumaça: a partida (cena principal) e o laboratório de voo abrem,
+## montam o que deveriam e as pipas voam usando o núcleo físico.
 
 
 func test_laboratorio_abre_e_a_pipa_voa() -> void:
-	var cena: PackedScene = load("res://scenes/main/main.tscn")
-	assert_not_null(cena, "a cena principal precisa carregar")
+	var cena: PackedScene = load("res://scenes/lab/lab.tscn")
+	assert_not_null(cena, "o laboratório precisa carregar")
 	if cena == null:
 		return
 
@@ -39,4 +39,31 @@ func test_laboratorio_abre_e_a_pipa_voa() -> void:
 		raiz.call("_physics_process", 1.0 / 120.0)
 	assert_true(world.is_finite_state())
 
+	raiz.queue_free()
+
+
+func test_partida_abre_e_as_duas_pipas_voam() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	assert_not_null(cena, "a cena principal precisa carregar")
+	if cena == null:
+		return
+	var raiz := cena.instantiate()
+	raiz.set("_automatico", true)  # um bot pilota a sua pipa no teste
+	tree.root.add_child(raiz)
+	for nome in ["Pipa", "PipaRival", "Linhas", "Camera", "Interface", "Mao"]:
+		assert_not_null(raiz.get_node_or_null(nome), "faltou o nó %s" % nome)
+	assert_not_null(raiz.get_node_or_null("Camera/Carretilha"), "a carretilha fica presa à câmera")
+	assert_not_null(raiz.get_node_or_null("Interface"))
+	var regras: MatchRules = raiz.get("regras")
+	assert_not_null(regras)
+	assert_eq(regras.mode(), MatchRules.Mode.SUBA, "a partida começa pelo suba a pipa")
+	assert_true(String(raiz.get("apelido_rival")).length() > 2, "o rival tem apelido")
+	raiz.call("avancar", 6.0)
+	regras = raiz.get("regras")
+	assert_eq(regras.state, MatchRules.State.PLAYING, "depois da contagem, valendo")
+	for i in 2:
+		var f: Flyer = regras.world.flyers[i]
+		assert_true(f.kite.position.y > 8.0, "pipa %d no ar acima da laje (y = %.1f m)" % [i, f.kite.position.y])
+	assert_true(regras.world.is_finite_state())
+	raiz.call("_process", 0.016)
 	raiz.queue_free()

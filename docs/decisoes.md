@@ -8,6 +8,7 @@ topo da seção correspondente. A especificação original fica em
 
 | Data | Tema | Decisão |
 | --- | --- | --- |
+| 2026-11-23 | Tela | Celular em pé (retrato), como no Manda Busca. Aceito pelo Lucas ("Faça") |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
 | 2026-11-14 | Câmera | Primeira e terceira pessoa |
@@ -22,6 +23,18 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-021 — Partida melhor de 3, em pé, na laje (2026-11-23)
+A cena principal passa a ser a partida (`game/match/partida.gd`); o
+laboratório vira `scenes/lab/lab.tscn`, aberto pelo botão "Lab". Tela em
+retrato (720×1280). A partida tem 3 jogos, inspirados no formato do Manda
+Busca: suba a pipa (começa com 8 m de linha; ganha quem chegar a 30 m acima da
+laje), a mais alta sem corte (o contato existe, mas não desgasta) e valendo
+corte (cortou, manda busca). As regras ficam em `MatchRules`, separadas da
+tela, para testar partidas inteiras entre bots sem gráficos. As lajes são
+só visuais por enquanto: a física ainda usa o chão em y = 0 (colisão com
+lajes e casas fica para a Fase 7). Controles: 6 botões grandes embaixo, com
+vários dedos ao mesmo tempo; teclado no PC.
 
 ### D-020 — Aparagem ("manda busca") e nova prioridade (2026-11-23)
 Quando um contato acontece entre a linha (pedaço que ficou com a pipa) ou a

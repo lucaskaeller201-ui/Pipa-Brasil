@@ -405,6 +405,7 @@ func _criar_interface() -> void:
 	_botao(caixa, "Rajada (3 s)", _ao_tocar_rajada)
 	_botao_camera = _botao(caixa, "Câmera: %s" % CAMERAS[_camera_modo], _ao_tocar_camera)
 	_botao(caixa, "Reiniciar voo", reiniciar)
+	_botao(caixa, "Voltar à partida", _ao_voltar_partida)
 	_criar_comandos(raiz)
 
 
@@ -572,3 +573,7 @@ func _botao(caixa: VBoxContainer, texto: String, ao_tocar: Callable) -> Button:
 	b.pressed.connect(ao_tocar)
 	caixa.add_child(b)
 	return b
+
+
+func _ao_voltar_partida() -> void:
+	get_tree().change_scene_to_file("res://scenes/main/main.tscn")

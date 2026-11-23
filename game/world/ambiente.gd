@@ -3,7 +3,7 @@ extends RefCounted
 ## Versão simples da identidade visual; o ciclo de dia e noite vem na Fase 7.
 
 
-static func criar_por_do_sol(pai: Node3D) -> void:
+static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
 	var ceu_material := ProceduralSkyMaterial.new()
 	ceu_material.sky_top_color = Color(0.20, 0.30, 0.55)
 	ceu_material.sky_horizon_color = Color(1.00, 0.62, 0.30)
@@ -51,6 +51,8 @@ static func criar_por_do_sol(pai: Node3D) -> void:
 	chao.material_override = material
 	pai.add_child(chao)
 
+	if not com_marcos:
+		return
 	# Postes de referência a cada 10 m, para dar noção de distância e altura.
 	var marcos := Node3D.new()
 	marcos.name = "Marcos"

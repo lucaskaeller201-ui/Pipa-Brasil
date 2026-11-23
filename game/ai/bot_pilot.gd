@@ -96,6 +96,9 @@ func _decide(o: Dictionary, t: float) -> Dictionary:
 			d = {"reel_in": true}
 		if not d.has("reel_in") and absf(nose) < 100.0 and line > line_target + 6.0:
 			d = {"reel_in": true}
+		# Falta linha (por exemplo, para subir mais): dá linha com o bico para cima.
+		if d.is_empty() and absf(nose) < 30.0 and line < line_target - 4.0:
+			d = {"pay_out": true}
 	# Emergência: bico para baixo, solta a carretilha para parar o mergulho.
 	if absf(nose) > 110.0 and el < 40.0 and line < line_target + 25.0:
 		d = {"slack": 1.0, "free_spool": true}
@@ -108,3 +111,4 @@ func _apply(input: PilotInput, d: Dictionary) -> void:
 	input.slack = float(d.get("slack", 0.0))
 	input.free_spool = bool(d.get("free_spool", false))
 	input.reel_in = bool(d.get("reel_in", false))
+	input.pay_out = bool(d.get("pay_out", false))

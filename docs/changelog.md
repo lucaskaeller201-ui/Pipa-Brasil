@@ -1,5 +1,17 @@
 # Histórico de alterações
 
+## 0.5.0 — 2026-11-23
+
+- Fase 5, primeira versão da partida: o jogo abre direto numa partida melhor
+  de 3 contra um bot com apelido, na laje de um bairro ao pôr do sol.
+  Jogos: suba a pipa, a mais alta sem corte e valendo corte (com manda busca).
+- Celular em pé (retrato). Visão em primeira pessoa com carretilha e mão, e
+  botão para a terceira pessoa. Seis botões grandes que aceitam vários dedos.
+- O laboratório de voo continua disponível pelo botão "Lab".
+- O bot dá linha quando precisa subir.
+- Testes: partida inteira entre bots, suba a pipa, desgaste por jogo, cena
+  da partida e orientação da tela.
+
 ## 0.4.1 — 2026-11-23
 
 - Manda busca: a linha ou a rabiola de uma pipa avoada enrosca na linha ou na

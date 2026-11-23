@@ -21,3 +21,8 @@ func test_cena_principal_definida() -> void:
 	var cena: String = ProjectSettings.get_setting("application/run/main_scene", "")
 	assert_eq(cena, "res://scenes/main/main.tscn")
 	assert_true(ResourceLoader.exists(cena), "o arquivo da cena principal precisa existir")
+
+
+func test_celular_em_pe() -> void:
+	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), 1, "retrato (D-021)")
+	assert_true(ProjectSettings.get_setting("display/window/size/viewport_height") > ProjectSettings.get_setting("display/window/size/viewport_width"))
