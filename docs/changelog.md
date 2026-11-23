@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.7.1 — 2026-11-23
+
+- Mais rápido: a pipa gira até 240°/s dando linha (era 170°/s); dar linha vai
+  até 4 m/s e rende mais por deslizada; o toque recolhe a folga na hora e
+  trava o bico.
+
 ## 0.7.0 — 2026-11-23
 
 Depois do segundo teste do Lucas:

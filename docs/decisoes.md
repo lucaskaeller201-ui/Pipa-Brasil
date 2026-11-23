@@ -46,9 +46,11 @@ Regras pedidas pelo Lucas, feitas na física (não em animação):
 rabiola de 2 m; força lateral contra a derrapagem (`side_force_coefficient`):
 com a linha esticada a pipa vai na direção da espinha, como flecha; dando
 linha (descarregando) a vareta relaxa (`flex_reference_tension` 2,5 N) e a
-pipa gira num ritmo constante, limitado a 170°/s (`spin_rate_max_deg`); um
-toque é um puxão curto: a tensão volta, a vareta enverga e o amortecimento
-firme (`spin_damping_taut` 80/s) trava o bico; a pipa arranca reta. Calibrada
+pipa gira num ritmo constante, limitado a 240°/s (`spin_rate_max_deg`; era
+170°/s, o Lucas achou lento); um toque é um puxão curto em que a mão recolhe
+a folga até a linha esticar (até 0,5 s): a vareta enverga e o amortecimento
+firme (`spin_damping_taut` 150/s) trava o bico; a pipa arranca reta. Dar
+linha vai até 4 m/s, 2,5 m por altura de tela deslizada. Calibrada
 no protótipo (`tools/prototipo/fase4/exp8.py` a `exp11.py`). Testes:
 `tests/scenarios/test_pipa_rio.gd`. Limite conhecido: puxando para o lado por
 4 s ela chega a uns 55° de azimute (o Lucas quer 90° ou mais).

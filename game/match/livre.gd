@@ -3,7 +3,7 @@ extends Node3D
 ##
 ## Sem botões de comando: os gestos são os do pipeiro.
 ##   • Deslizar o dedo para BAIXO: puxa linha com a mão ("abraçar"); rápido = puxada forte.
-##   • Deslizar para CIMA: dá linha (até 3 m/s); a pipa descarrega e gira num
+##   • Deslizar para CIMA: dá linha (até 4 m/s); a pipa descarrega e gira num
 ##     ritmo constante, mostrando o bico para todos os lados.
 ##   • TOQUE rápido: desbica — um puxão curto que trava o giro; a pipa arranca
 ##     reta para onde o bico parou (D-026).
@@ -17,9 +17,11 @@ const KiteView := preload("res://game/views/kite_view.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
 
 const BOTS := 3
-const LINHA_POR_TELA := 1.6     ## m de linha por altura de tela deslizada
-const EMBALO := 0.35            ## s: quanto a carretilha ainda gira depois de soltar o dedo
-const DAR_LINHA_MAX := 3.0      ## m/s: o mais rápido que se dá linha
+const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
+const EMBALO := 0.15            ## s: quanto a carretilha ainda gira depois de soltar o dedo
+const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha
+const TOQUE_RECOLHE := 0.5      ## s: no toque, a mão recolhe a folga até a linha esticar
+const TOQUE_TENSAO := 2.5       ## N: tensão que indica a linha esticada de novo
 const TOQUE_MAX_S := 0.25
 const TOQUE_MAX_PX := 18.0
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
@@ -41,6 +43,7 @@ var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
 var _embalo := 0.0              # m/s de linha saindo depois de soltar o dedo
 var _giro_carretilha := 0.0
+var _toque_ate := -1.0          # até quando a mão recolhe a folga do toque (s de simulação)
 
 # interface
 var _placar: Label
@@ -105,6 +108,12 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 	var v := _velocidade_mao + teclado
 	if _dedos.is_empty() and v == 0.0:
 		v = -_embalo
+	# Toque (desbico): a mão recolhe a folga depressa até a linha esticar.
+	if modo.world.time < _toque_ate:
+		if eu.tension < TOQUE_TENSAO:
+			v = maxf(v, Pilot.HAUL_MAX_SPEED)
+		else:
+			_toque_ate = -1.0
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, Pilot.HAUL_MAX_SPEED)
 
 
@@ -234,6 +243,8 @@ func _desbicar() -> void:
 	if _automatico or eu.cut or eu.pilot == null:
 		return
 	eu.pilot.trigger(Pilot.Impulse.PUXAO, modo.world.time)
+	_toque_ate = modo.world.time + TOQUE_RECOLHE
+	_embalo = 0.0
 
 
 func _sobre_botao(posicao: Vector2) -> bool:

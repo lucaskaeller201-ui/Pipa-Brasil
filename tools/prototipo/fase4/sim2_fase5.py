@@ -54,7 +54,7 @@ class Wind:
 
 # ---------------- aerodinâmica de placa plana ----------------
 A_LIFT=2.2; CN90=1.2; CF=0.02
-SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5; BOW_MODE='wind'; K_TAUT=0.0; DESB=None; AXIS=False; YAW_TAUT=0.0; K_SIDE=0.0; SPIN_MAX=0.0; LONG=[]; LAT=[]
+SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5; BOW_MODE='wind'; K_TAUT=0.0; DESB=None; AXIS=False; YAW_TAUT=0.0; K_SIDE=0.0; SPIN_MAX=0.0; GIVE_FRIC=0.3; GIVE_TENSION=False; LONG=[]; LAT=[]
 def cn(sin_a):
     s=abs(sin_a); c=math.sqrt(max(0.0,1-s*s))
     return A_LIFT*s*c + CN90*s*s
@@ -272,8 +272,12 @@ class Pilot:
         self.hand=add(add(base, mul(dir_kite, 0.35+self.offset)), mul(side,self.lat))
         # carretilha
         M_EFF=0.05; FRIC=0.3
-        if inp.get('haul',0.0)!=0.0:
+        if inp.get('haul',0.0)>0.0 or (inp.get('haul',0.0)<0.0 and not GIVE_TENSION):
             self.spool_speed=0.0; dL=-inp['haul']*h
+        elif inp.get('haul',0.0)<0.0 and GIVE_TENSION:
+            # dar linha: a linha escorrega pela mão quando a pipa puxa (até o limite do gesto)
+            self.spool_speed=max(0.0, min(-inp['haul'], self.spool_speed+(tension-GIVE_FRIC)/0.02*h))
+            dL=self.spool_speed*h
         elif inp.get('largar'):
             self.spool_speed=max(0.0, self.spool_speed+(tension-FRIC)/M_EFF*h)
             dL=self.spool_speed*h
