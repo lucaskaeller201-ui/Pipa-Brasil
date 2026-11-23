@@ -86,7 +86,9 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 			var b: ParticleChain = _chains[p[2]]
 			var laco = lacadas.get(Vector2i(a.get_instance_id(), b.get_instance_id()))
 			# Linhas laçadas: o desgaste é calculado no laço (quem corre gasta a outra).
-			var force := LineContact.solve_pair(a, p[1], b, p[3], CONTACT_RADIUS, h, (wear_rate if it == 0 else 0.0) if laco == null else 0.0)
+			# Rabiola não corta linha (só enrosca); linhas laçadas gastam no laço.
+			var gasta := it == 0 and laco == null and a.kind != ParticleChain.Kind.TAIL and b.kind != ParticleChain.Kind.TAIL
+			var force := LineContact.solve_pair(a, p[1], b, p[3], CONTACT_RADIUS, h, wear_rate if gasta else 0.0)
 			if laco != null and it == 0:
 				laco["f"] = maxf(float(laco["f"]), force)
 			if force > 0.0 and it == 0:
