@@ -308,6 +308,8 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		e["ma"] = ma
 		e["mb"] = mb
 		var f := LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, 0.0) + float(e.get("f", 0.0))
+		# A força no ponto de encontro não passa muito da tensão das linhas.
+		f = minf(f, 2.0 * (fa.tension + fb.tension) + 1.0)
 		if wear_k > 0.0:
 			# Relo (D-027): a linha que corre (quem está dando ou puxando linha)
 			# gasta a outra; um pouco para as duas sempre.
