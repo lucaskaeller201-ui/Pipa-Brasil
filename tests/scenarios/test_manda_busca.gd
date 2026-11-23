@@ -42,9 +42,9 @@ func _embolar(w: SimWorld) -> bool:
 	for i in roundi(15.0 / DT):
 		w.step(DT)
 		if w.combat.contacts_last_step > 0 and mandando <= 0.0:
-			mandando = 1.0
+			mandando = 3.0
 		if mandando > 0.0:
-			a.input.haul_speed = -1.0
+			a.input.haul_speed = -0.3   # manda pouca linha: a pipa gira e a linha continua encostada
 			mandando -= DT
 			if w.combat.contacts_last_step > 0:
 				em_contato_mandando += 1
