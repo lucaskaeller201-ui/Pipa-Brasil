@@ -177,11 +177,18 @@ func _evento(e: Dictionary) -> void:
 		"enroscou":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:
-				_messages.append("Embolou na linha de %s!" % _nome_obj(quem) if quem > 0 else "EMBOLOU! Puxe devagar para trazer.")
+				if quem > 0:
+					_messages.append("Embolou na linha de %s!" % _nome_obj(quem))
+				else:
+					_messages.append("EMBOLOU! Puxe devagar para trazer.")
 		"decepou":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:
-				_messages.append(("%s decepou a %s da avoada." % [_nome(quem), "rabiola" if bool(e["tail"]) else "linha"]) if quem > 0 else ("Decepou a %s! A avoada escapou." % ("rabiola" if bool(e["tail"]) else "linha")))
+				var parte := "rabiola" if bool(e["tail"]) else "linha"
+				if quem > 0:
+					_messages.append("%s decepou a %s da avoada." % [_nome(quem), parte])
+				else:
+					_messages.append("Decepou a %s! A avoada escapou." % parte)
 		"aparada":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:
