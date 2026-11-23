@@ -1,5 +1,16 @@
 # Como testar no seu aparelho
 
+## iPhone (navegador Safari)
+
+O iPhone não instala APK, e um app de iPhone exige Mac e conta paga da Apple.
+Por isso a versão para iPhone é a página web, publicada pelo CI a cada entrega
+(D-022):
+
+1. No iPhone, abra no Safari: https://lucaskaeller201-ui.github.io/Pipa-Brasil/
+2. Espere carregar (na primeira vez demora mais; depois fica guardado).
+3. Para ocupar a tela toda: botão Compartilhar → **Adicionar à Tela de Início**,
+   e abra pelo ícone criado.
+
 ## Android (celular)
 
 1. No celular, abra a página do repositório no GitHub, logado na sua conta.

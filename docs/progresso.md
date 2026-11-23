@@ -16,6 +16,7 @@ Atualizado em 2026-11-23.
 | Laboratório aberto pelo botão "Lab" | Feito |
 | Partida inteira bot contra bot termina com vencedor (teste) | Feito |
 | Lajes e casas com colisão para linha e pipa | Pendente (Fase 7) |
+| Página para jogar no iPhone (GitHub Pages) | Feito no CI; falta o Lucas ligar o Pages (D-022) |
 | Teste no celular (FPS e sensação dos botões) | Pendente: depende do Lucas |
 
 ### Fase 4 — Bot piloto (concluída no CI)

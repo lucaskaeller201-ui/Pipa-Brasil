@@ -8,6 +8,7 @@ topo da seção correspondente. A especificação original fica em
 
 | Data | Tema | Decisão |
 | --- | --- | --- |
+| 2026-11-23 | Celular de teste | iPhone: joga pela página web; repositório passa a ser público |
 | 2026-11-23 | Tela | Celular em pé (retrato), como no Manda Busca. Aceito pelo Lucas ("Faça") |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
@@ -23,6 +24,13 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-022 — iPhone pelo navegador (2026-11-23)
+O celular do Lucas é iPhone. App nativo de iOS exige Mac, Xcode e a conta paga
+da Apple (US$ 99/ano), fora do custo zero. Caminho escolhido: a exportação Web
+(Compatibility, sem threads) publicada no GitHub Pages a cada entrega no main.
+O Pages gratuito exige repositório público; o Lucas escolheu tornar o
+repositório público. Desempenho no Safari do iPhone ainda a medir.
 
 ### D-021 — Partida melhor de 3, em pé, na laje (2026-11-23)
 A cena principal passa a ser a partida (`game/match/partida.gd`); o

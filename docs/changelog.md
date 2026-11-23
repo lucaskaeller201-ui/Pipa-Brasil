@@ -9,6 +9,7 @@
   botão para a terceira pessoa. Seis botões grandes que aceitam vários dedos.
 - O laboratório de voo continua disponível pelo botão "Lab".
 - O bot dá linha quando precisa subir.
+- Página web publicada automaticamente para jogar no iPhone pelo Safari.
 - Testes: partida inteira entre bots, suba a pipa, desgaste por jogo, cena
   da partida e orientação da tela.
 

@@ -185,6 +185,12 @@ jobs:
           test -s build/web/index.html
           (cd build/web && zip -q -r ../pipa-brasil-web.zip .)
 
+      - name: Preparar a página para jogar no navegador (iPhone)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
       - name: Guardar os builds no Actions
         uses: actions/upload-artifact@v4
         with:
@@ -210,6 +216,25 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "Última versão (automática)" \
             --notes "Build automático do commit ${SHORT}, gerado depois que todos os testes passaram. Android: pipa-brasil.apk. Windows: pipa-brasil-windows.zip. Como instalar: docs/como-testar.md."
+
+  pagina:
+    name: Publicar a página para jogar (GitHub Pages)
+    needs: builds
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Só funciona com o repositório público e o Pages ligado em
+    # Settings > Pages > Source: GitHub Actions. Sem isso, falha sem travar o resto.
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publicar.outputs.page_url }}
+    steps:
+      - name: Publicar
+        id: publicar
+        uses: actions/deploy-pages@v4
 
   capturas:
     name: Capturas de tela (para conferir o visual)
