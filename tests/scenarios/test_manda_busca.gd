@@ -170,8 +170,12 @@ func test_quem_aparou_e_cortado_a_avoada_se_solta() -> void:
 	var w := _montagem()
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
-	assert_true(_embolar(w))
+	var embolou := _embolar(w)
+	print("      [quem aparou é cortado] embolou: %s" % embolou)
+	assert_true(embolou)
 	a.cut_line(2)
+	print("      [quem aparou é cortado] linha de A cortada; passo seguinte…")
 	w.step(DT)
+	print("      [quem aparou é cortado] passo feito")
 	assert_true(b.caught_by == null, "sem a linha de A, nada segura a avoada")
 	assert_eq(w.combat.links.size(), 0)
