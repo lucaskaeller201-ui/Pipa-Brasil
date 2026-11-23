@@ -104,6 +104,9 @@ func update(dt: float) -> void:
 			_remocoes.append([fl, world.time + SOME_PERDIDA])
 		elif Vector2(fl.kite.position.x, fl.kite.position.z).length() > RAIO_MAXIMO:
 			_remocoes.append([fl, world.time])
+	# Pedaços de linha soltos (cortes e decepadas): guarda só os mais novos.
+	while world.loose_chains.size() > 10:
+		world.loose_chains.remove_at(0)
 	for r in _remocoes.duplicate():
 		if world.time >= float(r[1]):
 			world.remove_flyer(r[0])

@@ -52,6 +52,8 @@ func test_quatro_pipeiros_dois_minutos_sem_tempo_limite() -> void:
 	for i in 120 * 120:
 		modo.update(DT)
 		maximo_de_pipas = maxi(maximo_de_pipas, modo.world.flyers.size())
+		if i % (20 * 120) == 0:
+			print("      [livre · %5.1f s] pipas %d, pedaços soltos %d, laços %d, enroscos %d" % [modo.world.time, modo.world.flyers.size(), modo.world.loose_chains.size(), modo.world.combat.engagements.size(), modo.world.combat.links.size()])
 		for m in modo.take_messages():
 			print("      [livre · %5.1f s] %s" % [modo.world.time, m])
 	for p in modo.players:
