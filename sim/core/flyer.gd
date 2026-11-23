@@ -154,5 +154,22 @@ func elevation_deg() -> float:
 	return rad_to_deg(atan2(d.y, Vector2(d.x, d.z).length()))
 
 
+## Posição da pipa no céu vista pelo pipeiro: azimute (graus, + = direita de
+## quem olha vento abaixo) e elevação (graus). Só o que dá para ver.
+func sky_position_deg() -> Vector2:
+	var d := bridle_position() - hand_position
+	return Vector2(rad_to_deg(atan2(d.x, -d.z)), rad_to_deg(atan2(d.y, Vector2(d.x, d.z).length())))
+
+
+## Para onde o bico aponta no céu, visto do pipeiro: 0 = para cima,
+## + = para a direita, ±180 = para baixo (graus).
+func nose_angle_deg() -> float:
+	var bico := kite.rotation * Vector3.UP
+	var linha := (kite.position - hand_position).normalized()
+	var cima := (Vector3.UP - linha * Vector3.UP.dot(linha)).normalized()
+	var direita := linha.cross(cima).normalized()
+	return rad_to_deg(atan2(bico.dot(direita), bico.dot(cima)))
+
+
 func line_length() -> float:
 	return line.rest_total() if line != null else 0.0

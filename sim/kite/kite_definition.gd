@@ -94,14 +94,16 @@ static func raia_laboratorio(dihedral_deg := 12.0) -> KiteDefinition:
 
 
 ## Raia de combate sem rabiola, com vareta que enverga com a tensão.
-## Com a linha esticada voa para onde o bico aponta; com a linha frouxa a
-## vareta relaxa e ela gira, o que permite desbicar. EXPERIMENTAL: os
-## parâmetros de giro ainda serão calibrados com o bot piloto (Fase 4).
+## Com a linha esticada fica parada no céu com o bico para cima e, puxada,
+## avança para onde o bico aponta; com a linha frouxa a vareta relaxa e ela
+## gira, o que permite desbicar. Calibrada com o bot piloto na Fase 4 (D-018):
+## a estabilidade direcional da vareta ficou desligada, porque virava o bico
+## para baixo com a pipa parada.
 static func raia_sem_rabiola() -> KiteDefinition:
 	var d := raia_laboratorio(0.0)
-	d.model_name = "Raia sem rabiola (experimental)"
+	d.model_name = "Raia sem rabiola"
 	d.flex_enabled = true
-	d.bow_stability = 0.5
+	d.bow_stability = 0.0
 	d.spin_damping_quadratic = 1.0
 	d.spin_damping_linear = 0.3
 	d.spin_bias = 0.3

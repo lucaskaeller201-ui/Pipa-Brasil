@@ -39,7 +39,7 @@ class Wind:
             self.modes.append(((rng.uniform(-1,1),rng.uniform(-0.3,0.3),rng.uniform(-1,1)), w, rng.uniform(0,6.283), (rng.uniform(-.05,.05),rng.uniform(-.05,.05),rng.uniform(-.05,.05))))
         self.gust_t0=None; self.gust_speed=0.0
     def base_speed(self,t):
-        if self.gust_t0 is not None and t>=self.gust_t0: return self.gust_speed
+        if self.gust_t0 is not None and t>=self.gust_t0 and t<self.gust_t0+getattr(self,'gust_dur',1e9): return self.gust_speed
         return self.speed
     def sample(self,p,t):
         h=max(p[1],0.5)
@@ -54,7 +54,7 @@ class Wind:
 
 # ---------------- aerodinâmica de placa plana ----------------
 A_LIFT=2.2; CN90=1.2; CF=0.02
-SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5
+SPIN_Q=1.0; SPIN_L=0.3; K_BOW=0.5; BOW_MODE='wind'
 def cn(sin_a):
     s=abs(sin_a); c=math.sqrt(max(0.0,1-s*s))
     return A_LIFT*s*c + CN90*s*s
@@ -141,7 +141,10 @@ class Kite:
         damp=-(SPIN_Q*0.5*RHO*A*R**3*abs(wn)*wn + SPIN_L*0.5*RHO*max(V,1.0)*A*R*R*wn)
         T=add(T, mul(n,damp))
         # estabilidade direcional da vareta envergada: alinha a espinha com o fluxo no plano
-        if V>0.5:
+        vb=va if BOW_MODE=='wind' else mul(self.v,-1.0)   # 'motion': só o movimento da pipa
+        Vb=length(vb)
+        if Vb>0.5:
+            V=Vb; va=vb
             vt=sub(va, mul(n,dot(va,n))); vtl=length(vt)
             if vtl>1e-3:
                 b=1.0

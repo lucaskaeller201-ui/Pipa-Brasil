@@ -32,7 +32,10 @@ func test_raia_de_laboratorio_nao_usa_o_modelo_novo() -> void:
 
 
 func test_vareta_envergada_alinha_a_pipa_com_o_fluxo() -> void:
+	# O mecanismo continua disponível para outros modelos (a raia sem rabiola
+	# não usa mais, veja D-018).
 	var def := KiteDefinition.raia_sem_rabiola()
+	def.bow_stability = 0.5
 	def.spin_bias = 0.0
 	var a := _pipa_inclinada(def, 25.0)
 	var b := _pipa_inclinada(def, -25.0)
