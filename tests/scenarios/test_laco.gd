@@ -9,7 +9,7 @@ func _mundo() -> SimWorld:
 	var w := SimWorld.new()
 	w.wind = WindField.new(5.0)
 	w.add_flyer(KiteDefinition.pipa_rio(), Vector3.ZERO, 30.0, 50.0, 0.0, true, 3.0)
-	w.add_flyer(KiteDefinition.pipa_rio(), Vector3(12.0, 0.0, 0.0), 30.0, 22.0, -10.0, true, 3.0)
+	w.add_flyer(KiteDefinition.pipa_rio(), Vector3(12.0, 0.0, 0.0), 25.0, 40.0, -10.0, true, 3.0)
 	for i in roundi(8.0 / DT):
 		w.step(DT)
 	return w
@@ -23,6 +23,7 @@ func _cruzar(w: SimWorld) -> bool:
 		w.step(DT)
 		if not w.combat.engagements.is_empty():
 			return true
+	print("      [laço] não cruzou: pipa B a %.1f m de altura, pipa A a %.1f m" % [b.kite.position.y, w.flyers[0].kite.position.y])
 	return false
 
 

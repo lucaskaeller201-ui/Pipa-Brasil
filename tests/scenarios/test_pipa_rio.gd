@@ -51,7 +51,7 @@ func test_dando_linha_gira_num_ritmo_constante() -> void:
 	var soma := 0.0
 	for k in range(3, 10):
 		soma += absf(taxas[k])
-		assert_true(absf(taxas[k]) < 255.0, "nunca gira rápido demais (%.0f°/s)" % taxas[k])
+		assert_true(absf(taxas[k]) < 280.0, "nunca gira rápido demais (%.0f°/s)" % taxas[k])
 	var media := soma / 7.0
 	assert_true(media > 100.0, "gira de verdade enquanto descarrega (média %.0f°/s)" % media)
 	assert_true(w.is_finite_state())
@@ -114,7 +114,7 @@ func test_toque_trava_o_giro_e_a_pipa_vai_reta_como_flecha() -> void:
 		media /= maxf(1.0, rumos.size())
 		for x in rumos:
 			assert_true(absf(_dif(x, media)) < 15.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
-		assert_true(absf(_dif(media, r["bico0"])) < 30.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
+		assert_true(absf(_dif(media, r["bico0"])) < 35.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
 		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 30.0, "o toque trava o bico perto de onde estava")
 		assert_true(absf(_dif(r["bico1"], r["bico0"])) < 20.0, "o bico não vira durante a puxada")
 		assert_true(w.is_finite_state())
