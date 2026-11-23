@@ -46,8 +46,8 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0,
 		}
 		if i > 0 or you_bot:
-			var nivel := BotDifficulty.Level.DIFICIL if i == 0 else [BotDifficulty.Level.NORMAL,
-				BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL][i % 3]
+			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]
+			var nivel: BotDifficulty.Level = BotDifficulty.Level.DIFICIL if i == 0 else niveis[i % 3]
 			var bot := BotPilot.new(BotDifficulty.create(nivel), seed_ * 31 + i)
 			bot.line_target = _rng.randf_range(30.0, 55.0)
 			p["bot"] = bot

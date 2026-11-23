@@ -186,6 +186,12 @@ func integrate(h: float) -> void:
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
+	if definition.spin_damping_taut > 0.0:
+		# Implícito (decaimento exato): estável mesmo com amortecimento forte.
+		var b := bow_factor()
+		var n := rotation * Vector3(0.0, 0.0, 1.0)
+		var wn := angular_velocity.dot(n)
+		angular_velocity -= n * (wn * (1.0 - exp(-definition.spin_damping_taut * b * b * h)))
 	_prev_rotation = rotation
 	_step_delta = velocity * h
 	position += _step_delta

@@ -30,6 +30,10 @@ extends Resource
 @export var spin_damping_linear := 0.0
 ## Tendência de giro com a linha frouxa (sentido preferido da pipa; 0 = nenhum).
 @export var spin_bias := 0.0
+## Firmeza do giro com a linha esticada (1/s): a vareta envergada segura o bico
+## onde ele está, e a pipa vai reta para onde aponta (D-024). Multiplica o
+## quadrado do quanto a vareta está envergada; com a linha frouxa, some.
+@export var spin_damping_taut := 0.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true
@@ -107,5 +111,6 @@ static func raia_sem_rabiola() -> KiteDefinition:
 	d.spin_damping_quadratic = 1.0
 	d.spin_damping_linear = 0.3
 	d.spin_bias = 0.3
+	d.spin_damping_taut = 20.0
 	d.tail_enabled = false
 	return d

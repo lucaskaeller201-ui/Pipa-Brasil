@@ -30,8 +30,8 @@ static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
 		var x := rng.randf_range(-70.0, 80.0)
 		var z := rng.randf_range(-90.0, 40.0)
 		var perto := false
-		for i in mini(lajes, LAJES.size()):
-			var l: Vector3 = LAJES[i]
+		for k in mini(lajes, LAJES.size()):
+			var l: Vector3 = LAJES[k]
 			if absf(x - l.x) < 9.0 and absf(z - l.z) < 10.0:
 				perto = true
 		if perto:
