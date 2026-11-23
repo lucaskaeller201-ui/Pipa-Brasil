@@ -218,6 +218,12 @@ func _solve_links() -> void:
 	for l in links:
 		var chain: ParticleChain = l["chain"]
 		var cchain: ParticleChain = l["cchain"]
+		var ct: Flyer = l["catcher"]
+		var av: Flyer = l["avoada"]
+		# Ligação que perdeu o sentido (quem aparou foi cortado, a avoada mudou
+		# de pedaço): não puxa nada; check_snags desfaz no fim do subpasso.
+		if ct.cut or (cchain != ct.line and cchain != ct.tail) or (chain != av.trailing_line and chain != av.tail):
+			continue
 		var idx: int = l["idx"]
 		var loc := cchain.locate_material(float(l["m"]))
 		var seg := int(loc.x)
@@ -232,7 +238,7 @@ func _solve_links() -> void:
 		var wp := cchain.inv_mass[seg] * (1.0 - s) * (1.0 - s) + cchain.inv_mass[seg + 1] * s * s
 		if wq + wp < 1e-12:
 			continue
-		var dl := -(dist - LINK_SLACK) / (wq + wp)
+		var dl := -minf(dist - LINK_SLACK, 0.5) / (wq + wp)   # no máximo 0,5 m por passo
 		chain.pos[idx] += n * (wq * dl)
 		cchain.pos[seg] -= n * (cchain.inv_mass[seg] * (1.0 - s) * dl)
 		cchain.pos[seg + 1] -= n * (cchain.inv_mass[seg + 1] * s * dl)
