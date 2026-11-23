@@ -31,6 +31,9 @@ var tension := 0.0
 ## Direção da força da linha sobre a pipa (unitária).
 var tension_direction := Vector3.ZERO
 var kite_on_ground := false
+## Quão rápido a linha está correndo na mão (m/s): dando ou puxando linha.
+## É o que decide o relo (D-027).
+var line_rate := 0.0
 
 var _attach_dl := 0.0
 
@@ -64,6 +67,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	if pilot != null and not cut:
 		var dir := (bridle_position() - pilot.shoulder_position()).normalized()
 		var delta := pilot.update(h, t, input, dir, tension, line.rest_total())
+		line_rate = absf(delta) / h + absf(pilot.arm_velocity) * 0.5
 		if delta != 0.0:
 			line.change_length(delta)
 		hand_position = pilot.hand_position

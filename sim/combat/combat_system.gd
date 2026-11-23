@@ -287,10 +287,10 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		e["mb"] = mb
 		var f := LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, 0.0) + float(e.get("f", 0.0))
 		if wear_k > 0.0:
-			# Relo (D-027): quanto do material de cada linha passou pelo ponto de
-			# encontro. A linha que corre gasta a outra; um pouco para as duas sempre.
-			var corre_a := absf(ma - float(e.get("ma0", ma))) / h
-			var corre_b := absf(mb - float(e.get("mb0", mb))) / h
+			# Relo (D-027): a linha que corre (quem está dando ou puxando linha)
+			# gasta a outra; um pouco para as duas sempre.
+			var corre_a := fa.line_rate
+			var corre_b := fb.line_rate
 			var base := 0.15 * (corre_a + corre_b) + 0.05
 			a.add_wear(bi, bst.x, wear_k * f * (corre_b + base) * h)
 			b.add_wear(bj, bst.y, wear_k * f * (corre_a + base) * h)
