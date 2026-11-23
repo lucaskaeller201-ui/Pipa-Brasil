@@ -38,6 +38,7 @@ func _embolar(w: SimWorld) -> bool:
 	b.cut_line(12)
 	# Espera encostar; aí manda linha (gira) enquanto está encostado.
 	var mandando := 0.0
+	var em_contato_mandando := 0
 	for i in roundi(15.0 / DT):
 		w.step(DT)
 		if w.combat.contacts_last_step > 0 and mandando <= 0.0:
@@ -45,11 +46,14 @@ func _embolar(w: SimWorld) -> bool:
 		if mandando > 0.0:
 			a.input.haul_speed = -1.0
 			mandando -= DT
+			if w.combat.contacts_last_step > 0:
+				em_contato_mandando += 1
 		else:
 			a.input.clear()
 		if b.caught_by != null:
 			break
 	a.input.clear()
+	print("      [embolar] passos em contato mandando linha: %d; modo do giro de A: %d" % [em_contato_mandando, a.kite.spin_mode])
 	return b.caught_by == a
 
 

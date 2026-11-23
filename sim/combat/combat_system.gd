@@ -46,6 +46,7 @@ var contact_points: PackedVector3Array = PackedVector3Array()
 
 var _pairs: Array = []
 var _tangle := {}              ## (avoada, pipeiro) -> s mandando linha em contato
+var _tangle_touched := {}
 var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
 var _h := 0.0
 var _chains: Array = []
@@ -60,8 +61,9 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	if not enabled:
 		return
 	_h = h
+	_tangle_touched.clear()
 	for k in _tangle.keys():
-		_tangle[k] = float(_tangle[k]) - 0.5 * h
+		_tangle[k] = float(_tangle[k]) - 0.1 * h
 		if float(_tangle[k]) <= 0.0:
 			_tangle.erase(k)
 	_chains.clear()
@@ -152,6 +154,9 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 		if ct.kite.spin_mode != KiteBody.SpinMode.SPIN_GIVE:
 			return
 		var chave := Vector2i(av.get_instance_id(), ct.get_instance_id())
+		if _tangle_touched.has(chave):
+			return   # já contou neste subpasso
+		_tangle_touched[chave] = true
 		var acumulado := float(_tangle.get(chave, 0.0)) + _h
 		_tangle[chave] = acumulado
 		if acumulado < TANGLE_TIME:
