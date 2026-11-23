@@ -78,7 +78,8 @@ func check_breaks(flyers: Array, loose: Array) -> void:
 	for c in loose.duplicate():
 		var ch: ParticleChain = c
 		if ch.max_wear() >= ch.strength and ch.pos.size() > 3:
-			var resto := ch.split(ch.weakest_segment())
+			var seg := ch.weakest_segment()
+			var resto := ch.split(seg)
 			loose.append(resto)
 			events.append({"type": "pedaco", "segment": seg})
 
