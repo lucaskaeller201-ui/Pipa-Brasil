@@ -8,6 +8,7 @@ topo da seção correspondente. A especificação original fica em
 
 | Data | Tema | Decisão |
 | --- | --- | --- |
+| 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
 | 2026-11-14 | Câmera | Primeira e terceira pessoa |
 | 2026-11-14 | Gráficos | Realistas e otimizados; três perfis (Baixo, Médio, Alto); bonito já no Médio |
@@ -21,6 +22,24 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-020 — Aparagem ("manda busca") e nova prioridade (2026-11-23)
+Quando um contato acontece entre a linha (pedaço que ficou com a pipa) ou a
+rabiola de uma pipa avoada e a linha ou a rabiola de um pipeiro em voo, cria-se
+um enrosco: uma restrição de distância zero entre a partícula da avoada e um
+ponto fixo no MATERIAL da linha de quem aparou (coordenada a partir da ponta de
+fora, que não muda ao recolher). Recolhendo, esse ponto vem até a mão; a pipa é
+aparada quando o enrosco chega a 3 m da mão (a linha da avoada está na mão).
+Se quem aparou tiver a linha cortada, o enrosco se desfaz. Avoada que toca o
+chão sem enrosco é perdida. Por ora o primeiro enrosco vale (sem disputa pela
+mesma avoada) e o contato continua sem atrito; enrosco é uma regra do jogo,
+não uma simulação de nó.
+
+Com o Manda Busca como referência, a ordem muda: cortar e aparar passam a ser o
+centro do jogo, a fatia vertical (Fase 5) acontece na laje de um bairro em vez
+de um terreno aberto, e o combate livre offline com até 8 pipas (bots) entra
+antes do online. Online com 8 jogadores continua por último e terá de ser
+gratuito (um jogador hospeda a sala), porque servidor dedicado custa dinheiro.
 
 ### D-018 — Raia sem rabiola sem estabilidade direcional da vareta (2026-11-23)
 O termo de estabilidade direcional criado na D-012 alinhava a espinha da pipa

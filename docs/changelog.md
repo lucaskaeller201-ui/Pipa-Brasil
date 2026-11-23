@@ -1,5 +1,14 @@
 # Histórico de alterações
 
+## 0.4.1 — 2026-11-23
+
+- Manda busca: a linha ou a rabiola de uma pipa avoada enrosca na linha ou na
+  rabiola de quem está em voo; recolhendo, ela vem até a mão (pipa aparada).
+  Avoada que cai sem ninguém aparar é pipa perdida.
+- O bot recolhe sozinho quando sente uma pipa enroscada.
+- Laboratório: avisos de corte, enrosco, aparada e perdida; placar de cortes e
+  aparadas.
+
 ## 0.4.0 — 2026-11-23
 
 - Fase 4: bot piloto em `game/ai/` (`BotDifficulty`, `BotPerception`,

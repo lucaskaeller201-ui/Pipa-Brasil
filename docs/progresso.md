@@ -18,6 +18,8 @@ Portão para avançar: o bot mantém a pipa no ar 5 minutos com rajadas
 | Bot contra bot | Feito: as linhas se encostaram e uma rompeu, sem ninguém programar a disputa |
 | Laboratório: rival pilotado por bot (persegue a sua pipa), nível escolhível, piloto automático | Feito |
 | Mirar um lado do céu com precisão | Pendente: o bot chega ao lado certo só metade das vezes (D-018) |
+| Manda busca: aparar a pipa avoada (linha ou rabiola enrosca; recolher traz até a mão) | Feito (D-020) |
+| Bot faz o manda busca sozinho | Feito: aparou em 9,4 s no teste |
 | Bot que procura enganchar e disputar de propósito | Pendente (Fase 8) |
 | Personalidades (defensivo, agressivo etc.) | Pendente (Fase 8) |
 
@@ -33,10 +35,10 @@ Portão para avançar: o bot mantém a pipa no ar 5 minutos com rajadas
 
 ## Próxima tarefa
 
-Fase 5 — Fatia vertical: partida 1 contra 1 contra o bot, no terreno aberto,
-com pôr do sol básico, câmera em 3ª pessoa e aparagem. Antes, melhorar a mira
-do bot (ele precisa conseguir ir atrás da sua pipa de propósito) e decidir com
-o Lucas a regra do desgaste (D-015).
+Fase 5 — Fatia vertical no estilo Manda Busca (D-020): partida 1 contra 1
+contra o bot na LAJE de um bairro, pôr do sol básico, câmera em 3ª pessoa,
+cortar e aparar. Antes: melhorar a mira do bot (ele precisa ir atrás da sua
+pipa de propósito) e decidir com o Lucas a regra do desgaste (D-015).
 
 ## Fases
 
@@ -47,7 +49,7 @@ o Lucas a regra do desgaste (D-015).
 | 2 | Controle e rabiola | Concluída no CI; falta o teste no celular |
 | 3 | Linha avançada | Núcleo concluído no CI; faltam aparagem e nó |
 | 4 | Bot piloto | Concluída no CI; falta a mira precisa |
-| 5 | Fatia vertical: 1x1 contra bot | Próxima |
+| 5 | Fatia vertical: 1x1 contra bot na laje (cortar e aparar) | Próxima |
 | 6 | Modelos de pipa e materiais | — |
 | 7 | Mundo | — |
 | 8 | Bots completos e combate livre | — |

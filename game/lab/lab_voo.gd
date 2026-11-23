@@ -43,6 +43,7 @@ var _bot_meu: BotPilot
 var _botao_nivel: Button
 var _mensagem := ""
 var _mensagem_ate := 0.0
+var _cortes := 0
 
 var _vento := VENTO_PADRAO
 var _comprimento_linha := 30.0
@@ -196,10 +197,22 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	for e in world.combat.take_events():
-		if e["type"] == "ruptura":
-			_mensagem = "A SUA LINHA ROMPEU! Pipa avoada." if e["flyer"] == 0 else "A linha do rival rompeu!"
-		else:
-			_mensagem = "A linha fixa rompeu."
+		match e["type"]:
+			"ruptura":
+				_mensagem = "A SUA LINHA ROMPEU! Pipa avoada." if e["flyer"] == 0 else "CORTOU! A pipa do rival está avoada. Manda busca!"
+				if e["flyer"] != 0:
+					_cortes += 1
+			"enroscou":
+				if e["catcher"] == 0:
+					_mensagem = "ENROSCOU NA SUA %s! Recolhe para trazer." % ("RABIOLA" if e["by_tail"] else "LINHA")
+				else:
+					_mensagem = "O rival enroscou a sua pipa..."
+			"aparada":
+				_mensagem = "MANDA BUSCA! Você aparou a pipa." if e["catcher"] == 0 else "O rival aparou a sua pipa."
+			"perdida":
+				_mensagem = "A pipa caiu no chão: ninguém aparou."
+			_:
+				_mensagem = "A linha fixa rompeu."
 		_mensagem_ate = Time.get_ticks_msec() / 1000.0 + 5.0
 	_atualizar_visual()
 	_atualizar_camera()
@@ -273,9 +286,10 @@ func texto_info() -> String:
 	var meu: Flyer = world.flyers[0]
 	var desgaste := meu.line.max_wear() / meu.line.strength * 100.0 if not meu.cut else 100.0
 	var linhas := PackedStringArray([
-		"PIPA BRASIL · Fase 4 · Laboratório de voo · %s" % definicao.model_name,
+		"PIPA BRASIL · Laboratório de voo · %s" % definicao.model_name,
 		"Linha: %s m · carretilha %s · comando: %s" % [_num(world.line_length(), 1), carretilha, _ultimo_comando],
 		"Desgaste da sua linha: %d%% · linhas encostadas: %s" % [roundi(desgaste), "sim" if world.combat.contacts_last_step > 0 else "não"],
+		"Cortes: %d · Aparadas: %d%s" % [_cortes, meu.catches, " · PIPA ENROSCADA NA SUA LINHA" if meu.holding > 0 else ""],
 		"Vento na pipa: %s m/s" % _num(k.last_wind.length(), 1),
 		"Elevação: %d°   Ângulo de ataque: %d°" % [roundi(world.elevation_deg()), roundi(k.last_aoa_deg)],
 		"Tensão da linha: %s N" % _num(world.tension, 2),
