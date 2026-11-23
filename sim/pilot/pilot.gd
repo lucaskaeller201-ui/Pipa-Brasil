@@ -9,7 +9,7 @@ extends RefCounted
 
 enum Impulse { PUXAO, ARRANCAO, DESBICAR }
 
-const SHOULDER := Vector3(0.0, 1.45, 0.0)
+const SHOULDER := Vector3(0.0, 1.45, 0.0)  ## em relação a `base`
 const HAND_DROP := 0.25          ## m abaixo do ombro
 const ARM_REST := 0.35           ## m à frente, na direção da pipa
 const ARM_STIFFNESS := 30.0      ## rad/s (mola do braço)
@@ -23,6 +23,7 @@ const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
 
+var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)
 var arm_offset := 0.0            ## m ao longo da linha (+ = para a pipa)
 var arm_velocity := 0.0
@@ -42,6 +43,10 @@ func trigger(impulse: Impulse, t: float) -> void:
 		Impulse.DESBICAR:
 			# folga curta e rápida, depois um puxão: o bico gira na folga
 			_moves = [[t, 0.30, 0.40, 5.0], [t + 0.30, 0.15, -0.40, 5.0], [t + 0.45, 0.4, 0.0, 1.5]]
+
+
+func shoulder_position() -> Vector3:
+	return base + SHOULDER
 
 
 static func impulse_name(impulse: Impulse) -> String:
@@ -70,7 +75,7 @@ func update(h: float, t: float, input: PilotInput, dir_to_kite: Vector3, tension
 	var acc := w * w * (alvo - arm_offset) - 2.0 * w * arm_velocity
 	arm_velocity = clampf(arm_velocity + acc * h, -vmax, vmax)
 	arm_offset += arm_velocity * h
-	hand_position = SHOULDER + Vector3(0.0, -HAND_DROP, 0.0) + dir_to_kite * (ARM_REST + arm_offset)
+	hand_position = shoulder_position() + Vector3(0.0, -HAND_DROP, 0.0) + dir_to_kite * (ARM_REST + arm_offset)
 
 	# Carretilha.
 	var delta := 0.0

@@ -24,6 +24,12 @@ var compliance_per_meter := 0.0  ## m/N por metro de linha
 var mass_per_particle := 0.0
 var thickness := 0.0        ## m: diâmetro da linha ou largura da rabiola
 var drag_coefficient := 1.0
+## Combate virtual: desgaste por ponto do material, em faixas de WEAR_BIN
+## metros contadas a partir da ponta de fora (lado da pipa). Essa coordenada
+## não muda quando a carretilha solta ou enrola linha (isso acontece na mão).
+const WEAR_BIN := 0.05
+var wear_bins := {}   ## faixa (int) -> desgaste acumulado (float)
+var strength := 1.0   ## desgaste em que a linha rompe
 
 var _forces := PackedVector3Array()
 
@@ -89,6 +95,76 @@ func change_length(delta: float) -> void:
 		inv_mass.remove_at(1)
 		_forces.remove_at(1)
 	rest[0] = maxf(rest[0], 0.05)
+
+
+## Coordenada no material: distância ao longo da linha, a partir da ponta de
+## fora, do ponto no parâmetro s (0..1) do segmento i.
+func material_coordinate(i: int, s: float) -> float:
+	var total := (1.0 - s) * rest[i]
+	for k in range(i + 1, rest.size()):
+		total += rest[k]
+	return total
+
+
+func add_wear(i: int, s: float, amount: float) -> void:
+	var faixa := floori(material_coordinate(i, s) / WEAR_BIN)
+	wear_bins[faixa] = float(wear_bins.get(faixa, 0.0)) + amount
+
+
+## Maior desgaste num ponto da linha.
+func max_wear() -> float:
+	var maior := 0.0
+	for v in wear_bins.values():
+		maior = maxf(maior, float(v))
+	return maior
+
+
+## Segmento onde está o ponto mais desgastado, ou -1 se não há desgaste.
+func weakest_segment() -> int:
+	if wear_bins.is_empty():
+		return -1
+	var pior := 0
+	var maior := -1.0
+	for k in wear_bins:
+		if float(wear_bins[k]) > maior:
+			maior = float(wear_bins[k])
+			pior = int(k)
+	var alvo := (pior + 0.5) * WEAR_BIN
+	var acumulado := 0.0
+	for i in range(rest.size() - 1, -1, -1):
+		acumulado += rest[i]
+		if acumulado >= alvo:
+			return i
+	return 0
+
+
+## Rompe a cadeia no segmento `segment`: esta cadeia fica com as partículas
+## 0..segment (ponta solta) e a cadeia devolvida fica com segment+1..fim
+## (ponta solta no começo). Velocidades e desgaste são preservados.
+func split(segment: int) -> ParticleChain:
+	var n := pos.size()
+	var corte := clampi(segment, 0, n - 2)
+	var resto := ParticleChain.new(kind, pos[corte + 1], pos[n - 1], maxi(1, n - 2 - corte),
+		mass_per_particle * maxi(1, n - 2 - corte), compliance_per_meter, thickness, drag_coefficient)
+	resto.strength = strength
+	resto.rest_length = rest_length
+	resto.pos = pos.slice(corte + 1)
+	resto.prev = prev.slice(corte + 1)
+	resto.vel = vel.slice(corte + 1)
+	resto.inv_mass = inv_mass.slice(corte + 1)
+	resto.rest = rest.slice(corte + 1)
+	resto._forces.resize(resto.pos.size())
+	if resto.inv_mass.size() > 0 and resto.inv_mass[0] == 0.0:
+		resto.inv_mass[0] = 1.0 / mass_per_particle
+	pos = pos.slice(0, corte + 1)
+	prev = prev.slice(0, corte + 1)
+	vel = vel.slice(0, corte + 1)
+	inv_mass = inv_mass.slice(0, corte + 1)
+	rest = rest.slice(0, corte)
+	# Depois da ruptura o desgaste deixa de importar: os dois pedaços recomeçam.
+	wear_bins.clear()
+	_forces.resize(pos.size())
+	return resto
 
 
 ## Encurta todos os segmentos por um fator (pré-tensão no lançamento).
