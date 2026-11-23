@@ -3,9 +3,10 @@ extends "res://tests/test_case.gd"
 ##
 ## Montagem determinística: o pipeiro A (que vai aparar) voa normalmente; o
 ## pipeiro B fica 15 m atrás de A, no mesmo alinhamento do vento, com a pipa
-## bem acima da linha de A. Quando a linha de B é cortada perto da mão, a pipa
-## de B sai avoada vento abaixo e o pedaço de linha pendurado nela cai sobre a
-## linha de A, com metros de margem.
+## bem acima da linha de A. A linha de B é cortada no meio: a pipa de B sai
+## avoada vento abaixo e os 15 m de linha pendurados nela caem sobre a linha
+## de A lá no alto, longe da mão. (Se a ponta solta chegar na mão de quem está
+## embaixo, a pipa já conta como aparada: a linha dela está na mão.)
 
 const DT := 1.0 / 120.0
 
@@ -34,7 +35,7 @@ func test_avoada_enrosca_na_linha_de_quem_esta_embaixo() -> void:
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
 	assert_eq(w.combat.take_events().size(), 0, "nada acontece antes do corte")
-	b.cut_line(1)
+	b.cut_line(12)
 	var enroscou_em := -1.0
 	for i in roundi(15.0 / DT):
 		w.step(DT)
@@ -53,7 +54,7 @@ func test_recolher_traz_a_pipa_para_a_mao() -> void:
 	var w := _montagem()
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
-	b.cut_line(1)
+	b.cut_line(12)
 	for i in roundi(15.0 / DT):
 		w.step(DT)
 		if b.caught_by != null:
@@ -83,7 +84,7 @@ func test_recolher_traz_a_pipa_para_a_mao() -> void:
 func test_avoada_sem_ninguem_embaixo_e_pipa_perdida() -> void:
 	var w := _montagem(false)
 	var b: Flyer = w.flyers[0]
-	b.cut_line(1)
+	b.cut_line(12)
 	var perdida := false
 	for i in roundi(30.0 / DT):
 		w.step(DT)
@@ -102,7 +103,7 @@ func test_bot_manda_busca_sozinho() -> void:
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
 	var bot := BotPilot.new(BotDifficulty.create(BotDifficulty.Level.NORMAL), 3)
-	b.cut_line(1)
+	b.cut_line(12)
 	var aparou := false
 	for i in roundi(60.0 / DT):
 		bot.update(a, w.time)
@@ -118,7 +119,7 @@ func test_quem_aparou_e_cortado_a_avoada_se_solta() -> void:
 	var w := _montagem()
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
-	b.cut_line(1)
+	b.cut_line(12)
 	for i in roundi(15.0 / DT):
 		w.step(DT)
 		if b.caught_by != null:
