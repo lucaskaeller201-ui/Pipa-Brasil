@@ -16,6 +16,12 @@ const Bairro := preload("res://game/world/bairro.gd")
 const KiteView := preload("res://game/views/kite_view.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
 
+## Ajustes finos (também na tela, no botão "Ajustes"):
+## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
+## que a mão recolhe no toque e no máximo ao deslizar para baixo).
+@export var velocidade_giro_mandando_linha := 900.0
+@export var forca_puxada := 6.0
+
 const BOTS := 3
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
 const EMBALO := 0.15            ## s: quanto a carretilha ainda gira depois de soltar o dedo
@@ -52,6 +58,7 @@ var _aviso_ate := 0.0
 var _info: Label
 var _dica: Label
 var _sobreposicao: Control
+var _painel_ajustes: PanelContainer
 
 
 func _ready() -> void:
@@ -63,6 +70,7 @@ func _ready() -> void:
 		elif arg.begins_with("--semente="):
 			_semente = arg.trim_prefix("--semente=").to_int()
 	modo = FreeMode.new(BOTS, _semente, _automatico)
+	_aplicar_giro()
 	Ambiente.criar_por_do_sol(self, false)
 	Bairro.criar(self, modo.players.size())
 	for i in modo.players.size():
@@ -111,10 +119,10 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 	# Toque (desbico): a mão recolhe a folga depressa até a linha esticar.
 	if modo.world.time < _toque_ate:
 		if eu.tension < TOQUE_TENSAO:
-			v = maxf(v, Pilot.HAUL_MAX_SPEED)
+			v = maxf(v, forca_puxada)
 		else:
 			_toque_ate = -1.0
-	e.haul_speed = clampf(v, -DAR_LINHA_MAX, Pilot.HAUL_MAX_SPEED)
+	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
 func _process(delta: float) -> void:
@@ -259,7 +267,7 @@ func _sobre_botao(posicao: Vector2) -> bool:
 func _atualizar_textos(eu: Flyer) -> void:
 	var linhas: Array[String] = []
 	for p in modo.ranking():
-		linhas.append("%s — %d %s · %d %s" % [p["name"], p["cuts"], "corte" if int(p["cuts"]) == 1 else "cortes", p["catches"], "aparada" if int(p["catches"]) == 1 else "aparadas"])
+		linhas.append("%s — %d %s · %d %s · estoque %d" % [p["name"], p["cuts"], "corte" if int(p["cuts"]) == 1 else "cortes", p["catches"], "aparada" if int(p["catches"]) == 1 else "aparadas", p["stock"]])
 	_placar.text = "\n".join(linhas)
 	var p0: Dictionary = modo.players[0]
 	if eu.cut:
@@ -398,15 +406,31 @@ func _criar_interface() -> void:
 
 	var cantos := HBoxContainer.new()
 	cantos.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	cantos.offset_left = -240.0
+	cantos.offset_left = -360.0
 	cantos.offset_right = -12.0
 	cantos.offset_top = 12.0
 	cantos.alignment = BoxContainer.ALIGNMENT_END
 	raiz.add_child(cantos)
 	var cam := _botao(cantos, "Câmera")
 	cam.pressed.connect(func() -> void: _primeira_pessoa = not _primeira_pessoa)
+	var ajustes := _botao(cantos, "Ajustes")
+	ajustes.pressed.connect(func() -> void: _painel_ajustes.visible = not _painel_ajustes.visible)
 	var lab := _botao(cantos, "Lab")
 	lab.pressed.connect(_ao_abrir_laboratorio)
+
+	_painel_ajustes = PanelContainer.new()
+	_painel_ajustes.name = "Ajustes"
+	_painel_ajustes.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_painel_ajustes.offset_left = -430.0
+	_painel_ajustes.offset_right = -12.0
+	_painel_ajustes.offset_top = 70.0
+	_painel_ajustes.visible = false
+	_painel_ajustes.add_to_group("botao_livre")
+	raiz.add_child(_painel_ajustes)
+	var caixa := VBoxContainer.new()
+	_painel_ajustes.add_child(caixa)
+	_ajuste(caixa, "Giro mandando linha (°/s)", 300.0, 1800.0, 50.0, velocidade_giro_mandando_linha, "giro")
+	_ajuste(caixa, "Força da puxada (m/s)", 2.0, 10.0, 0.5, forca_puxada, "puxada")
 
 	var versao := Label.new()
 	versao.text = "PIPA BRASIL %s · build %s" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT]
@@ -460,3 +484,34 @@ func _boneco(cor: Color) -> MeshInstance3D:
 
 func _ao_abrir_laboratorio() -> void:
 	get_tree().change_scene_to_file("res://scenes/lab/lab.tscn")
+
+
+func _aplicar_giro() -> void:
+	modo.your_spin_rate = velocidade_giro_mandando_linha
+	var eu := modo.you()
+	if eu != null:
+		eu.kite.definition.spin_give_rate_deg = velocidade_giro_mandando_linha
+
+
+func _ao_ajustar(v: float, qual: String, rotulo: Label, nome: String) -> void:
+	rotulo.text = "%s: %s" % [nome, str(v)]
+	if qual == "giro":
+		velocidade_giro_mandando_linha = v
+		_aplicar_giro()
+	else:
+		forca_puxada = v
+
+
+func _ajuste(caixa: VBoxContainer, nome: String, minimo: float, maximo: float, passo: float, valor: float, qual: String) -> void:
+	var rotulo := Label.new()
+	rotulo.add_theme_font_size_override("font_size", 18)
+	caixa.add_child(rotulo)
+	var s := HSlider.new()
+	s.min_value = minimo
+	s.max_value = maximo
+	s.step = passo
+	s.value = valor
+	s.custom_minimum_size = Vector2(380.0, 40.0)
+	caixa.add_child(s)
+	rotulo.text = "%s: %s" % [nome, str(valor)]
+	s.value_changed.connect(_ao_ajustar.bind(qual, rotulo, nome))

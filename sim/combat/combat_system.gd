@@ -27,6 +27,9 @@ var wear_rate := 1.0           ## desgaste por (N · m/s · s), no ponto de cont
 var events: Array = []
 
 const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considerada aparada
+const TANGLE_TIME := 0.4       ## s mandando linha em contato para embolar (D-029)
+const CUT_RATE := 3.0          ## m/s de linha puxada acima dos quais o contato decepa
+const LINK_SLACK := 0.3        ## m de folga no ponto embolado (pêndulo)
 
 ## Enroscos ativos. Cada um: {"avoada": Flyer, "chain": ParticleChain (da
 ## avoada), "idx": int (partícula enroscada), "catcher": Flyer, "cchain":
@@ -42,6 +45,9 @@ var engagements: Array = []
 var contact_points: PackedVector3Array = PackedVector3Array()
 
 var _pairs: Array = []
+var _tangle := {}              ## (avoada, pipeiro) -> s mandando linha em contato
+var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
+var _h := 0.0
 var _chains: Array = []
 var _groups := PackedInt32Array()
 var _owners: Array = []
@@ -53,6 +59,11 @@ var max_contact_force := 0.0
 func solve(flyers: Array, loose: Array, h: float) -> void:
 	if not enabled:
 		return
+	_h = h
+	for k in _tangle.keys():
+		_tangle[k] = float(_tangle[k]) - 0.5 * h
+		if float(_tangle[k]) <= 0.0:
+			_tangle.erase(k)
 	_chains.clear()
 	_owners.clear()
 	_groups.clear()
@@ -100,10 +111,25 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 				_maybe_engage(p[0], p[1], p[2], p[3])
 		_solve_links()
 		_solve_engagements(h, wear_rate if it == 0 else 0.0)
+	# Puxada rápida com a avoada embolada: o embolo arrebenta.
+	for l in links:
+		var ct: Flyer = l["catcher"]
+		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
+			_pending_cuts.append([l["avoada"], l["chain"], maxi(0, int(l["idx"]) - 1), ct])
+	var feitos := {}
+	for c in _pending_cuts:
+		var av: Flyer = c[0]
+		if feitos.has(av) or (c[1] != av.trailing_line and c[1] != av.tail):
+			continue
+		feitos[av] = true
+		_decepar(av, c[1], int(c[2]), c[3], loose)
+	_pending_cuts.clear()
 
 
-## Se uma das cadeias é de uma pipa avoada livre e a outra é a linha ou a
-## rabiola de um pipeiro em voo, cria o enrosco no ponto de contato.
+## Aparar (D-029): a linha ou a rabiola de uma avoada encosta na linha ou na
+## rabiola de quem está em voo. Só EMBOLA se quem está em voo estiver mandando
+## linha (girando) em contato por TANGLE_TIME. Puxando rápido (acima de
+## CUT_RATE) em contato, DECEPA o pedaço da avoada no ponto de contato.
 func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 	for ordem in 2:
 		var av_idx := ia if ordem == 0 else ib
@@ -120,6 +146,17 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 			continue
 		if not (cchain == ct.line or cchain == ct.tail):
 			continue
+		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
+			_pending_cuts.append([av, chain, av_seg, ct])
+			return
+		if ct.kite.spin_mode != KiteBody.SpinMode.SPIN_GIVE:
+			return
+		var chave := Vector2i(av.get_instance_id(), ct.get_instance_id())
+		var acumulado := float(_tangle.get(chave, 0.0)) + _h
+		_tangle[chave] = acumulado
+		if acumulado < TANGLE_TIME:
+			return
+		_tangle.erase(chave)
 		var st := LineContact.closest_params(chain.pos[av_seg], chain.pos[av_seg + 1], cchain.pos[ct_seg], cchain.pos[ct_seg + 1])
 		var idx := av_seg if st.x < 0.5 else av_seg + 1
 		links.append({"avoada": av, "chain": chain, "idx": idx, "catcher": ct, "cchain": cchain,
@@ -129,6 +166,27 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 		events.append({"type": "enroscou", "flyer": av.id, "catcher": ct.id,
 			"by_tail": cchain == ct.tail})
 		return
+
+
+## Decepa o pedaço da avoada (linha solta ou rabiola) no segmento indicado:
+## a parte de fora cai solta; a avoada continua livre.
+func _decepar(av: Flyer, chain: ParticleChain, seg: int, ct: Flyer, loose: Array) -> void:
+	if chain.size() < 3:
+		return
+	for l in links.duplicate():
+		if l["avoada"] == av:
+			links.erase(l)
+			(l["catcher"] as Flyer).holding = maxi(0, (l["catcher"] as Flyer).holding - 1)
+	av.caught_by = null
+	seg = clampi(seg, 0, chain.size() - 2)
+	var pedaco := chain.split(seg)
+	if chain == av.trailing_line:
+		# a ponta presa à pipa fica com ela; o resto da linha cai
+		av.trailing_line = pedaco
+		loose.append(chain)
+	else:
+		loose.append(pedaco)
+	events.append({"type": "decepou", "flyer": av.id, "catcher": ct.id, "tail": chain == av.tail})
 
 
 ## Mantém cada ponto enroscado preso ao seu lugar no material da outra linha.
@@ -143,14 +201,14 @@ func _solve_links() -> void:
 		var p := cchain.pos[seg].lerp(cchain.pos[seg + 1], s)
 		var d := chain.pos[idx] - p
 		var dist := d.length()
-		if dist < 1e-9:
+		if dist < LINK_SLACK:
 			continue
 		var n := d / dist
 		var wq := chain.inv_mass[idx]
 		var wp := cchain.inv_mass[seg] * (1.0 - s) * (1.0 - s) + cchain.inv_mass[seg + 1] * s * s
 		if wq + wp < 1e-12:
 			continue
-		var dl := -dist / (wq + wp)
+		var dl := -(dist - LINK_SLACK) / (wq + wp)
 		chain.pos[idx] += n * (wq * dl)
 		cchain.pos[seg] -= n * (cchain.inv_mass[seg] * (1.0 - s) * dl)
 		cchain.pos[seg + 1] -= n * (cchain.inv_mass[seg + 1] * s * dl)

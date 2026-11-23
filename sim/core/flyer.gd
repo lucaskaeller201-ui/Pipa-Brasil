@@ -71,6 +71,16 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		if delta != 0.0:
 			line.change_length(delta)
 		hand_position = pilot.hand_position
+	# Giro de dois estados (D-028): mandando linha com a mão gira; puxando trava.
+	if cut or pilot == null:
+		k.spin_mode = KiteBody.SpinMode.SPIN_FREE
+	elif input.haul_speed > 0.1 or input.pull > 0.05 or pilot.is_pulling(t):
+		k.spin_mode = KiteBody.SpinMode.SPIN_LOCK
+	elif input.haul_speed < -0.1:
+		k.spin_mode = KiteBody.SpinMode.SPIN_GIVE
+	else:
+		k.spin_mode = KiteBody.SpinMode.SPIN_FREE
+	k.towed = cut and caught_by != null
 	k.update_flex(tension if not cut else 0.0, h)
 	k.compute_aero(wind, t)
 	k.integrate(h)

@@ -15,6 +15,12 @@ var position := Vector3.ZERO
 var rotation := Quaternion.IDENTITY
 var velocity := Vector3.ZERO
 var angular_velocity := Vector3.ZERO  ## rad/s, no referencial do mundo
+## Estado do giro (D-028): SPIN_FREE = física normal; SPIN_GIVE = mandando
+## linha (gira direto); SPIN_LOCK = puxando (giro zerado).
+enum SpinMode { SPIN_FREE, SPIN_GIVE, SPIN_LOCK }
+var spin_mode: SpinMode = SpinMode.SPIN_FREE
+## Pipa avoada embolada na linha de alguém: rebocada com muito arrasto, sem girar.
+var towed := false
 
 var _prev_rotation := Quaternion.IDENTITY
 # Deslocamento acumulado no subpasso. Guardado à parte porque Vector3 usa
@@ -187,7 +193,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force + GRAVITY * m
+	var f := last_aero_force * (0.3 if towed else 1.0) + GRAVITY * m
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
@@ -197,12 +203,23 @@ func integrate(h: float) -> void:
 		var n := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn := angular_velocity.dot(n)
 		angular_velocity -= n * (wn * (1.0 - exp(-definition.spin_damping_taut * b * b * h)))
-	if definition.spin_rate_max_deg > 0.0:
+	if definition.spin_give_rate_deg > 0.0 and spin_mode != SpinMode.SPIN_FREE:
+		var nn := rotation * Vector3(0.0, 0.0, 1.0)
+		var wnn := angular_velocity.dot(nn)
+		var alvo := 0.0
+		if spin_mode == SpinMode.SPIN_GIVE:
+			alvo = definition.spin_give_sign * deg_to_rad(definition.spin_give_rate_deg)
+		angular_velocity += nn * (alvo - wnn)
+	elif definition.spin_rate_max_deg > 0.0:
 		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn2 := angular_velocity.dot(n2)
 		var lim := deg_to_rad(definition.spin_rate_max_deg)
 		if absf(wn2) > lim:
 			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
+	if towed:
+		# Rebocada: balança como um pêndulo amortecido, sem girar.
+		angular_velocity *= exp(-20.0 * h)
+		velocity *= exp(-1.5 * h)
 	_prev_rotation = rotation
 	_step_delta = velocity * h
 	position += _step_delta

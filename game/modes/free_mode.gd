@@ -24,6 +24,8 @@ var world: SimWorld
 var _messages: Array[String] = []
 var _remocoes: Array = []        ## [Flyer, instante (s)]
 var _rng := RandomNumberGenerator.new()
+## Velocidade do giro mandando linha da SUA pipa (graus/s), ajustável na tela.
+var your_spin_rate := 900.0
 
 
 ## n_bots rivais; se `you_bot`, um bot também pilota a sua pipa (testes, capturas).
@@ -43,7 +45,7 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 		var p := {
 			"name": "Você" if i == 0 else String(nomes[i - 1]),
 			"base": (Bairro.LAJES[i] as Vector3) + Vector3(0.0, Bairro.ALTURA_LAJE, 0.0),
-			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0,
+			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0, "stock": 0,
 		}
 		if i > 0 or you_bot:
 			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]
@@ -135,7 +137,10 @@ func _lancar(i: int) -> void:
 	if velha != null:
 		velha.tag = -1           # vira avoada de ninguém
 		velha.line = null        # o pedaço que ficou na mão vai junto com o pipeiro
-	var f := world.add_flyer(KiteDefinition.pipa_rio(), p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
+	var def := KiteDefinition.pipa_rio()
+	if i == 0:
+		def.spin_give_rate_deg = your_spin_rate
+	var f := world.add_flyer(def, p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
 	f.tag = i
 	p["flyer"] = f
 	p["respawn"] = -1.0
@@ -169,11 +174,16 @@ func _evento(e: Dictionary) -> void:
 		"enroscou":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:
-				_messages.append("Enroscou na linha de %s! Recolhe!" % _nome_obj(quem) if quem > 0 else "Enroscou na sua linha! Recolhe!")
+				_messages.append("Embolou na linha de %s!" % _nome_obj(quem) if quem > 0 else "EMBOLOU! Puxe devagar para trazer.")
+		"decepou":
+			var quem := _dono(int(e["catcher"]))
+			if quem >= 0:
+				_messages.append(("%s decepou a %s da avoada." % [_nome(quem), "rabiola" if bool(e["tail"]) else "linha"]) if quem > 0 else ("Decepou a %s! A avoada escapou." % ("rabiola" if bool(e["tail"]) else "linha")))
 		"aparada":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:
 				players[quem]["catches"] = int(players[quem]["catches"]) + 1
+				players[quem]["stock"] = int(players[quem]["stock"]) + 1
 				_messages.append("MANDA BUSCA! %s aparou a pipa." % _nome(quem))
 
 

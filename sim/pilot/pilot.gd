@@ -46,6 +46,14 @@ func trigger(impulse: Impulse, t: float) -> void:
 			_moves = [[t, 0.30, 0.40, 5.0], [t + 0.30, 0.15, -0.40, 5.0], [t + 0.45, 0.4, 0.0, 1.5]]
 
 
+## Verdadeiro se a mão está no meio de um puxão (puxão, arrancão, toque).
+func is_pulling(t: float) -> bool:
+	for m in _moves:
+		if float(m[0]) <= t and t < float(m[0]) + float(m[1]) and float(m[2]) < 0.0:
+			return true
+	return false
+
+
 func shoulder_position() -> Vector3:
 	return base + SHOULDER
 

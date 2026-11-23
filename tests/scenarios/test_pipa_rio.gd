@@ -37,24 +37,38 @@ func test_tem_rabiola_e_fica_parada_com_o_bico_para_cima() -> void:
 	assert_true(f.elevation_deg() > 35.0)
 
 
-func test_dando_linha_gira_num_ritmo_constante() -> void:
+func test_mandando_linha_gira_rapido_e_constante() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var el0 := f.elevation_deg()
+	f.input.haul_speed = -3.0
+	var taxas: Array[float] = []
+	for i in 20:
+		var a := f.nose_angle_deg()
+		_rodar(w, 0.05)
+		taxas.append(_dif(f.nose_angle_deg(), a) / 0.05)
+	f.input.clear()
+	print("      [mandando linha] giro (°/s) a cada 0,05 s: %s; elevação %.0f° → %.0f°" % [taxas.map(func(x): return roundi(x)), el0, f.elevation_deg()])
+	var soma := 0.0
+	for x in taxas:
+		soma += absf(x)
+	var media := soma / taxas.size()
+	assert_true(media > 700.0 and media < 1000.0, "gira 2 a 3 voltas por segundo (média %.0f°/s)" % media)
+	assert_true(w.is_finite_state())
+
+
+func test_puxar_zera_o_giro_na_hora() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
 	f.input.haul_speed = -3.0
-	var taxas: Array[float] = []
-	for i in 10:
-		var a := f.nose_angle_deg()
-		_rodar(w, 0.2)
-		taxas.append(_dif(f.nose_angle_deg(), a) / 0.2)
-	f.input.clear()
-	print("      [dando linha 3 m/s] giro (°/s) a cada 0,2 s: %s" % [taxas.map(func(x): return roundi(x))])
-	var soma := 0.0
-	for k in range(3, 10):
-		soma += absf(taxas[k])
-		assert_true(absf(taxas[k]) < 280.0, "nunca gira rápido demais (%.0f°/s)" % taxas[k])
-	var media := soma / 7.0
-	assert_true(media > 100.0, "gira de verdade enquanto descarrega (média %.0f°/s)" % media)
-	assert_true(w.is_finite_state())
+	_rodar(w, 0.6)
+	f.input.haul_speed = 3.0
+	w.step(DT)
+	var b0 := f.nose_angle_deg()
+	_rodar(w, 0.3)
+	var giro := _dif(f.nose_angle_deg(), b0)
+	print("      [trava seca] bico andou %.1f° em 0,3 s de puxada" % giro)
+	assert_true(absf(giro) < 10.0, "o bico fica onde estava")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.
@@ -62,7 +76,7 @@ func _mirar_e_puxar(w: SimWorld, alvo: float, segundos: float) -> Dictionary:
 	var f: Flyer = w.flyers[0]
 	f.input.haul_speed = -3.0
 	var t := 0.0
-	while absf(_dif(f.nose_angle_deg(), alvo)) > 12.0 and t < 8.0:
+	while absf(_dif(f.nose_angle_deg(), alvo)) > 6.0 and t < 8.0:
 		w.step(DT)
 		t += DT
 	f.input.clear()
@@ -115,7 +129,7 @@ func test_toque_trava_o_giro_e_a_pipa_vai_reta_como_flecha() -> void:
 		for x in rumos:
 			assert_true(absf(_dif(x, media)) < 15.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
 		assert_true(absf(_dif(media, r["bico0"])) < 35.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
-		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 30.0, "o toque trava o bico perto de onde estava")
+		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 15.0, "o toque trava o bico onde estava")
 		assert_true(absf(_dif(r["bico1"], r["bico0"])) < 20.0, "o bico não vira durante a puxada")
 		assert_true(w.is_finite_state())
 

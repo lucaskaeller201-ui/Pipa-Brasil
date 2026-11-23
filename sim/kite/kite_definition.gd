@@ -40,6 +40,12 @@ extends Resource
 ## Força lateral contra a derrapagem (ar ao longo da envergadura): a pipa não
 ## anda de lado; vai na direção da espinha, como uma flecha (D-026).
 @export var side_force_coefficient := 0.0
+## Giro de dois estados (D-028, pedido do Lucas; 0 = desligado):
+## mandando linha com a mão, o bico gira direto nesta velocidade (graus/s,
+## "velocidadeGiroMandandoLinha"); puxando, o giro zera na hora (trava seca).
+@export var spin_give_rate_deg := 0.0
+## Sentido do giro mandando linha (+1 ou -1).
+@export var spin_give_sign := -1.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true
@@ -118,6 +124,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_damping_taut = 150.0
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 4.0
+	d.spin_give_rate_deg = 900.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
 	return d
