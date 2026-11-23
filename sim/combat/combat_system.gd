@@ -28,6 +28,7 @@ var events: Array = []
 
 const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considerada aparada
 const TANGLE_TIME := 0.4       ## s mandando linha em contato para embolar (D-029)
+const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
 const CUT_RATE := 3.0          ## m/s de linha puxada acima dos quais o contato decepa
 const LINK_SLACK := 0.3        ## m de folga no ponto embolado (pêndulo)
 
@@ -45,8 +46,8 @@ var engagements: Array = []
 var contact_points: PackedVector3Array = PackedVector3Array()
 
 var _pairs: Array = []
-var _tangle := {}              ## (avoada, pipeiro) -> s mandando linha em contato
-var _tangle_touched := {}
+var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
+var _clock := 0.0
 var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
 var _h := 0.0
 var _chains: Array = []
@@ -61,11 +62,8 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	if not enabled:
 		return
 	_h = h
-	_tangle_touched.clear()
-	for k in _tangle.keys():
-		_tangle[k] = float(_tangle[k]) - 0.1 * h
-		if float(_tangle[k]) <= 0.0:
-			_tangle.erase(k)
+	_clock += h
+	_advance_tangles(h)
 	_chains.clear()
 	_owners.clear()
 	_groups.clear()
@@ -153,24 +151,45 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 			return
 		if ct.kite.spin_mode != KiteBody.SpinMode.SPIN_GIVE:
 			return
+		# Encostou mandando linha: o embolo começa (ou continua) a se formar.
 		var chave := Vector2i(av.get_instance_id(), ct.get_instance_id())
-		if _tangle_touched.has(chave):
-			return   # já contou neste subpasso
-		_tangle_touched[chave] = true
-		var acumulado := float(_tangle.get(chave, 0.0)) + _h
-		_tangle[chave] = acumulado
-		if acumulado < TANGLE_TIME:
-			return
-		_tangle.erase(chave)
 		var st := LineContact.closest_params(chain.pos[av_seg], chain.pos[av_seg + 1], cchain.pos[ct_seg], cchain.pos[ct_seg + 1])
-		var idx := av_seg if st.x < 0.5 else av_seg + 1
-		links.append({"avoada": av, "chain": chain, "idx": idx, "catcher": ct, "cchain": cchain,
-			"m": cchain.material_coordinate(ct_seg, st.y), "captured": false})
-		av.caught_by = ct
-		ct.holding += 1
-		events.append({"type": "enroscou", "flyer": av.id, "catcher": ct.id,
-			"by_tail": cchain == ct.tail})
+		var t: Dictionary = _tangle.get(chave, {"t": 0.0})
+		t["last"] = _clock
+		t["av"] = av
+		t["ct"] = ct
+		t["chain"] = chain
+		t["idx"] = av_seg if st.x < 0.5 else av_seg + 1
+		t["cchain"] = cchain
+		t["m"] = cchain.material_coordinate(ct_seg, st.y)
+		_tangle[chave] = t
 		return
+
+
+## O embolo cresce enquanto quem aparou segue mandando linha com o contato
+## recente (encostou há menos de TANGLE_GAP); senão desfaz devagar.
+func _advance_tangles(h: float) -> void:
+	for chave in _tangle.keys():
+		var t: Dictionary = _tangle[chave]
+		var av: Flyer = t["av"]
+		var ct: Flyer = t["ct"]
+		var ativo := _clock - float(t["last"]) < TANGLE_GAP and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE
+		t["t"] = float(t["t"]) + (h if ativo else -0.5 * h)
+		if float(t["t"]) <= 0.0 or av.caught_by != null or ct.cut or not av.cut:
+			_tangle.erase(chave)
+			continue
+		var chain: ParticleChain = t["chain"]
+		var cchain: ParticleChain = t["cchain"]
+		if chain != av.trailing_line and chain != av.tail or (cchain != ct.line and cchain != ct.tail):
+			_tangle.erase(chave)
+			continue
+		if float(t["t"]) >= TANGLE_TIME:
+			_tangle.erase(chave)
+			links.append({"avoada": av, "chain": chain, "idx": clampi(int(t["idx"]), 0, chain.size() - 1),
+				"catcher": ct, "cchain": cchain, "m": float(t["m"]), "captured": false})
+			av.caught_by = ct
+			ct.holding += 1
+			events.append({"type": "enroscou", "flyer": av.id, "catcher": ct.id, "by_tail": cchain == ct.tail})
 
 
 ## Decepa o pedaço da avoada (linha solta ou rabiola) no segmento indicado:
