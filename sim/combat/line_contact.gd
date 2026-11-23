@@ -148,7 +148,7 @@ static func find_pairs(chains: Array, groups: PackedInt32Array, margin: float) -
 						var key := Vector3i(x, y, z)
 						if grid.has(key):
 							var cell: Array = grid[key]
-							for other in cell:
+							for other: int in cell:
 								var oc: int = other / 100000
 								if groups[oc] == groups[ci]:
 									continue
