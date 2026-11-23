@@ -42,7 +42,7 @@ func test_linhas_lacadas_nao_se_soltam_ate_alguem_cortar() -> void:
 			soltou = true
 			break
 	var quem := "A" if a.cut else ("B" if b.cut else "ninguém")
-	print("      [laço] %.1f s até o corte; cortada: %s; desgaste A %.2f, B %.2f" % [t, quem, a.line.max_wear(), b.line.max_wear()])
+	print("      [laço] %.1f s até o corte; cortada: %s" % [t, quem])
 	assert_false(soltou, "as linhas não se soltaram sem corte")
 	assert_true(a.cut or b.cut, "alguém foi cortado")
 	assert_true(a.cut, "quem descarrega (B) gasta a linha parada (A)")

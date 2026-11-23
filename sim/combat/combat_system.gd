@@ -192,6 +192,28 @@ func check_snags(flyers: Array) -> void:
 func check_breaks(flyers: Array, loose: Array) -> void:
 	if not enabled:
 		return
+	# Laços: rompe a linha que perdeu a integridade, no ponto de encontro.
+	for e in engagements.duplicate():
+		var fa: Flyer = e["a"]
+		var fb: Flyer = e["b"]
+		if fa.cut or fb.cut or not e.has("ia"):
+			continue
+		var perde: Flyer = null
+		var seg := 0
+		if float(e.get("wa", 0.0)) >= fa.line.strength and float(e.get("wa", 0.0)) >= float(e.get("wb", 0.0)):
+			perde = fa
+			seg = int(e["ia"])
+		elif float(e.get("wb", 0.0)) >= fb.line.strength:
+			perde = fb
+			seg = int(e["ib"])
+		if perde == null:
+			continue
+		var autor := fb if perde == fa else fa
+		seg = clampi(seg, 0, perde.line.size() - 2)
+		var onde := perde.line.pos[seg].lerp(perde.line.pos[seg + 1], 0.5)
+		engagements.erase(e)
+		perde.cut_line(seg)
+		events.append({"type": "ruptura", "flyer": perde.id, "segment": seg, "position": onde, "by": autor.id})
 	for f in flyers:
 		var fl: Flyer = f
 		if fl.cut or fl.line == null:
@@ -292,8 +314,9 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 			var corre_a := fa.line_rate
 			var corre_b := fb.line_rate
 			var base := 0.15 * (corre_a + corre_b) + 0.05
-			a.add_wear(bi, bst.x, wear_k * f * (corre_b + base) * h)
-			b.add_wear(bj, bst.y, wear_k * f * (corre_a + base) * h)
-			e["ma0"] = ma
-			e["mb0"] = mb
+			# Integridade de cada linha neste laço (não espalha pelo comprimento).
+			e["wa"] = float(e.get("wa", 0.0)) + wear_k * f * (corre_b + base) * h
+			e["wb"] = float(e.get("wb", 0.0)) + wear_k * f * (corre_a + base) * h
+		e["ia"] = bi
+		e["ib"] = bj
 		contact_points.append(a.pos[bi].lerp(a.pos[bi + 1], bst.x))
