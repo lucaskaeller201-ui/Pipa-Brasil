@@ -75,6 +75,10 @@ func rest_total() -> float:
 ## carretilha: positivo solta linha, negativo recolhe. Cria ou remove nós
 ## para manter os segmentos perto do comprimento nominal.
 func change_length(delta: float) -> void:
+	if not is_finite(delta) or not is_finite(rest[0]):
+		push_warning("change_length: valor inválido (%s); ignorado" % delta)
+		return
+	delta = clampf(delta, -2.0, 2.0)
 	rest[0] += delta
 	while rest[0] > 1.5 * rest_length:
 		var a := pos[0]
