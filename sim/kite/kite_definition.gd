@@ -61,7 +61,7 @@ extends Resource
 ## Tenteio (D-041): cada toque gira o bico este tanto (graus); 10 toques no
 ## mesmo sentido = uma volta. O bico chega lá suave (ganho spin_kick_damp por
 ## s, no máximo spin_kick_max_deg °/s) e para exato.
-@export var spin_kick_rate_deg := 36.0
+@export var spin_kick_rate_deg := 30.0
 @export var spin_kick_damp := 14.0
 @export var spin_kick_max_deg := 420.0
 ## Retorno elástico (D-035): solta (sem comando), o vento traz o bico de volta

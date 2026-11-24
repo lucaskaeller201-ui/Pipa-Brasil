@@ -60,16 +60,16 @@ var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
-var _ultimo_toque := -99.0      # instante do último toque (s)
-var _ultimo_duplo := -99.0      # instante do último toque duplo (s)
+var _pendente := -1.0           # instante de um toque esperando para ver se vira duplo
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
-## Tenteio (D-041), como no Pipa Combate: cada toque gira o bico um passo
-## (36°). Toque simples: alterna o sentido (desbica para um lado e para o
-## outro). Toque DUPLO (rápido): continua no mesmo sentido; seguindo com mais
-## toques duplos a pipa dá a volta num círculo curto (10 toques = 360°).
-const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
-const VOLTA_SEGUE_S := 0.9      ## s: toque logo depois de um duplo continua a volta
-@export var graus_por_toque := 36.0
+## Tenteio (D-047), como o Lucas explicou do Pipa Combate:
+## - toque simples: o bico muda uns 30°, cada toque para um lado (desbica
+##   da esquerda para a direita); toques simples, mesmo rápidos, NÃO rodam;
+## - toque DUPLO (dois toques bem rápidos): o bico segue 60° no mesmo
+##   sentido do último tenteio — assim leva o bico para baixo ou para qualquer
+##   lado; 6 toques duplos seguidos = uma volta.
+const TOQUE_DUPLO_S := 0.22     ## s entre os dois toques do toque duplo
+@export var graus_por_toque := 30.0
 
 # interface
 var _placar: Label
@@ -166,6 +166,7 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_ver_toque_pendente()
 	# Velocidade da mão a partir do deslizar deste quadro.
 	var altura := maxf(1.0, get_viewport().get_visible_rect().size.y)
 	var alvo := (_dy_quadro / altura) * LINHA_POR_TELA / maxf(delta, 1e-3)
@@ -317,13 +318,21 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 ## Tenteio pelo toque (D-041).
 func _tentear() -> void:
 	var agora := Time.get_ticks_msec() / 1000.0
-	var seguido := agora - _ultimo_toque < TOQUE_DUPLO_S
-	if seguido:
-		_ultimo_duplo = agora
-	elif agora - _ultimo_duplo >= VOLTA_SEGUE_S:
-		_sentido = -_sentido      # toque simples: troca de lado
-	_ultimo_toque = agora
-	_desbicar(_sentido, _sentido)
+	if _pendente >= 0.0 and agora - _pendente < TOQUE_DUPLO_S:
+		# toque duplo: segue no mesmo sentido, dois passos
+		_pendente = -1.0
+		_desbicar(_sentido, _sentido, 2.0)
+	else:
+		_pendente = agora   # espera um instante para ver se vem o 2º toque
+
+
+## Toque simples confirmado (não veio o 2º toque): troca de lado, um passo.
+func _ver_toque_pendente() -> void:
+	if _pendente < 0.0 or Time.get_ticks_msec() / 1000.0 - _pendente < TOQUE_DUPLO_S:
+		return
+	_pendente = -1.0
+	_sentido = -_sentido
+	_desbicar(_sentido, _sentido, 1.0)
 
 
 func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
@@ -497,7 +506,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (um para cada lado) · TOQUES DUPLOS: a pipa vai girando (5 duplos = uma volta)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (o bico muda ~30°, um para cada lado) · TOQUE DUPLO: segue virando (6 duplos = uma volta)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
@@ -814,7 +823,7 @@ func _desenhar_previa() -> void:
 	var tb := float(m[3]) / float(m[0])
 	var tc := (float(m[3]) + float(m[4])) / float(m[0])
 	var meia := maxf(float(m[1]), float(m[2])) * 0.5
-	for fx in 3:
+	for fx in range(1, 3):   # o bico não tem papel (D-047)
 		for j in 8:
 			var ya := lerpf(ys[fx], ys[fx + 1], j / 8.0)
 			var yb := lerpf(ys[fx], ys[fx + 1], (j + 1) / 8.0)
@@ -833,7 +842,12 @@ func _desenhar_previa() -> void:
 				elif wb < 0.001:
 					pts = PackedVector2Array([pts[0], pts[1], pts[2]])
 				_previa.draw_colored_polygon(pts, cor)
-	# varetas
+	# linha do bico e varetas
+	var topo := Vector2(cx, y0)
+	var ys1: float = y0 + float(ys[1]) * escala
+	var ws1: float = float(ws[1]) * escala
+	_previa.draw_line(topo, Vector2(cx - ws1, ys1), Color(0.95, 0.95, 0.95), 1.5)
+	_previa.draw_line(topo, Vector2(cx + ws1, ys1), Color(0.95, 0.95, 0.95), 1.5)
 	var marrom := Color(0.35, 0.22, 0.1)
 	_previa.draw_line(Vector2(cx, y0), Vector2(cx, y0 + float(m[0]) * escala), marrom, 2.0)
 	for k in [1, 2]:

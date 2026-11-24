@@ -15,7 +15,7 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 		var vela: MeshInstance3D = v.get_node("Vela")
 		assert_not_null(vela, "%s tem vela" % estilo["nome"])
 		var tris: int = vela.mesh.surface_get_array_len(0) / 3
-		assert_eq(tris, 3 * 16 * 6 * 2, "%s: bico, caixa e rabeta em grade" % estilo["nome"])
+		assert_eq(tris, 2 * 16 * 6 * 2, "%s: caixa e rabeta em grade (o bico não tem papel)" % estilo["nome"])
 		var m: Array = estilo["m"]
 		assert_true(absf(float(m[3]) + float(m[4]) + float(m[5]) - float(m[0])) < 1.0, "%s: medidas somam a vareta central" % estilo["nome"])
 		# a estampa usa mais de uma cor na caixa e na rabeta

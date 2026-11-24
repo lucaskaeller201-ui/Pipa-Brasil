@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.16.2 — 2026-11-24
+
+- O bico das pipas sem papel: só a linha e a vareta.
+- Tenteio: cada toque muda o bico uns 30°, um para cada lado (não roda);
+  toque duplo segue virando no mesmo sentido (6 duplos = uma volta).
+
 ## 0.16.1 — 2026-11-24
 
 - Largada de volta mais parecida com a anterior, com um coice para a frente

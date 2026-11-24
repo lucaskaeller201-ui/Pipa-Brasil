@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-047 — Bico sem papel; tenteio de 30° que não roda sozinho (2026-11-24)
+O Lucas: o bico das pipas (acima da vareta de cima) não tem papel — só a
+linha da ponta às pontas da vareta; agora o desenho (3D e prévia) começa na
+vareta de cima e o bico mostra só essa linha.
+Tenteio: toques simples, mesmo rápidos, não podem fazer a pipa rodar. Agora
+cada toque simples muda o bico ~30°, alternando o lado; o toque DUPLO (dois
+toques em menos de 0,22 s) segue 60° no mesmo sentido do último tenteio — é
+assim que se leva o bico para baixo ou dá a volta (6 duplos = 360°). Para
+distinguir, o toque simples espera 0,22 s antes de agir. Substitui a regra
+de toques seguidos da D-039/D-041.
+
 ### D-046 — Largada de volta ao jeito da 0.15 com coice; prévia dos modelos (2026-11-24)
 O Lucas achou a largada da 0.16 esquisita (a linha frouxa como se tivesse
 soltado da mão). A linha não corre mais sozinha na largada e o ar só perde
