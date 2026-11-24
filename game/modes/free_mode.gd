@@ -393,6 +393,9 @@ func _evento(e: Dictionary) -> void:
 					_messages.append("%s decepou a %s da avoada." % [_nome(quem), parte])
 				else:
 					_messages.append("Decepou a %s! A avoada escapou." % parte)
+		"soltou":
+			if _dono(int(e["catcher"])) == 0:
+				_messages.append("Tenteou e a avoada saiu do aparo.")
 		"aparada":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:

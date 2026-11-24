@@ -29,7 +29,10 @@ var events: Array = []
 const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considerada aparada
 const TANGLE_TIME := 0.25      ## s mandando linha em contato para embolar (D-029)
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
-const DECEPAR_TEMPO := 0.35   ## s seguidos puxando forte em contato para decepar (D-036)
+const DECEPAR_METROS := 3.0   ## m de linha puxada rápido em contato para decepar (D-044)
+const DECEPAR_RAPIDO := 3.5   ## m/s: com a avoada no aparo, puxar acima disso vai decepando
+const SAIR_APARO := 3.0       ## s tenteando sem parar para a avoada sair do aparo (D-044)
+const PERDIDA_CHAO := 5.0     ## s com a pipa no chão até virar perdida (a linha ainda cai)
 const CUT_RATE := 5.5          ## m/s de linha puxada acima dos quais o contato decepa
 const DECEPAR_GRACE := 4.0     ## s depois do corte em que a avoada não decepa (dá tempo de aparar)
 const LARGADA_PRESSAO := 8.0  ## N: pressão (puxada) acima do voo parado que arma a largada
@@ -52,7 +55,10 @@ var _pairs: Array = []
 var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
 var _clock := 0.0
 var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
-var _cut_acc := {}             ## avoada -> s puxando forte em contato
+var _cut_acc := {}             ## avoada -> m puxados rápido em contato
+var _solta_acc := {}           ## avoada -> s de tenteio de quem aparou
+var _chao := {}                ## avoada -> s com a pipa no chão
+var _snag_clock := 0.0
 var _last_cut := {}            ## avoada -> instante do último decepar
 var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
 var _h := 0.0
@@ -120,17 +126,19 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	# Puxada rápida com a avoada embolada: o embolo arrebenta.
 	for l in links:
 		var ct: Flyer = l["catcher"]
-		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
+		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > DECEPAR_RAPIDO:
 			_cut_want[l["avoada"]] = [l["chain"], maxi(0, int(l["idx"]) - 1), ct]
-	# Decepar só com puxada forte SUSTENTADA (D-036), não com um tranco.
+	# Decepar (D-044): puxar devagar traz para a mão; puxar RÁPIDO e MUITOS
+	# metros (DECEPAR_METROS) arrebenta o embolo. Um tranco não decepa.
 	for av in _cut_acc.keys():
 		if not _cut_want.has(av):
-			_cut_acc[av] = float(_cut_acc[av]) - 2.0 * h
+			_cut_acc[av] = float(_cut_acc[av]) - 1.5 * h
 			if float(_cut_acc[av]) <= 0.0:
 				_cut_acc.erase(av)
 	for av in _cut_want:
-		_cut_acc[av] = float(_cut_acc.get(av, 0.0)) + h
-		if float(_cut_acc[av]) >= DECEPAR_TEMPO:
+		var quem: Flyer = (_cut_want[av] as Array)[2]
+		_cut_acc[av] = float(_cut_acc.get(av, 0.0)) + quem.line_rate * h
+		if float(_cut_acc[av]) >= DECEPAR_METROS:
 			var c: Array = _cut_want[av]
 			_pending_cuts.append([av, c[0], c[1], c[2]])
 			_cut_acc.erase(av)
@@ -265,6 +273,8 @@ func _solve_links() -> void:
 
 ## Pipa aparada (chegou na mão), pipa perdida (chão) e enroscos desfeitos.
 func check_snags(flyers: Array) -> void:
+	var dt := clampf(_clock - _snag_clock, 0.0, 0.1)
+	_snag_clock = _clock
 	for l in links.duplicate():
 		var av: Flyer = l["avoada"]
 		var ct: Flyer = l["catcher"]
@@ -276,6 +286,18 @@ func check_snags(flyers: Array) -> void:
 			ct.holding = maxi(0, ct.holding - 1)
 			continue
 		if bool(l["captured"]):
+			continue
+		# Sair do aparo (D-044): tenteando sem parar uns 3 s, o embolo solta.
+		if ct.tenteio_age < 0.6:
+			_solta_acc[av] = float(_solta_acc.get(av, 0.0)) + dt
+		else:
+			_solta_acc[av] = maxf(0.0, float(_solta_acc.get(av, 0.0)) - 0.5 * dt)
+		if float(_solta_acc[av]) >= SAIR_APARO:
+			links.erase(l)
+			av.caught_by = null
+			_solta_acc.erase(av)
+			_cut_acc.erase(av)
+			events.append({"type": "soltou", "flyer": av.id, "catcher": ct.id})
 			continue
 		var loc := cchain.locate_material(float(l["m"]))
 		var p := cchain.pos[int(loc.x)].lerp(cchain.pos[int(loc.x) + 1], loc.y)
@@ -296,9 +318,14 @@ func check_snags(flyers: Array) -> void:
 			(l["catcher"] as Flyer).holding += 1
 	for f in flyers:
 		var fl: Flyer = f
+		# Pipa no chão ainda pode ser aparada enquanto a linha e a rabiola
+		# caem (D-044); só depois de um tempo no chão vira perdida.
 		if fl.cut and fl.caught_by == null and not fl.lost and fl.kite_on_ground:
-			fl.lost = true
-			events.append({"type": "perdida", "flyer": fl.id})
+			_chao[fl] = float(_chao.get(fl, 0.0)) + dt
+			if float(_chao[fl]) >= PERDIDA_CHAO:
+				fl.lost = true
+				_chao.erase(fl)
+				events.append({"type": "perdida", "flyer": fl.id})
 
 
 ## Verifica rupturas. Chamar uma vez por subpasso, depois de `solve`.
@@ -362,6 +389,8 @@ func take_events() -> Array:
 ## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
 func forget(f: Flyer) -> void:
 	_cut_acc.erase(f)
+	_solta_acc.erase(f)
+	_chao.erase(f)
 	_last_cut.erase(f)
 	for e in engagements.duplicate():
 		if e["a"] == f or e["b"] == f:

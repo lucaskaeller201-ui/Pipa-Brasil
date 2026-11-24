@@ -35,5 +35,5 @@ func test_rabiola_tem_fitinhas() -> void:
 	var im: ImmediateMesh = l.mesh
 	assert_eq(im.get_surface_count(), 1)
 	var vertices: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-	assert_eq(vertices.size(), 10 * 3 * 6, "três fitinhas por pedaço da rabiola")
+	assert_eq(vertices.size(), 10 * 2 * 6, "duas fitinhas por pedaço da rabiola")
 	l.free()

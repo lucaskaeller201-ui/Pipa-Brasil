@@ -33,6 +33,21 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-044 — Aparo no meio-termo; rabiola comprida, fina e leve (2026-11-24)
+Pedido do Lucas (vídeos do Manda Busca e Pipa Combate):
+- Aparada: puxar num ritmo normal traz para a mão sem decepar. Decepar exige
+  puxar RÁPIDO (acima de 3,5 m/s) e MUITOS metros: 3 m puxados rápido em
+  contato (o acumulado cai 1,5 m/s quando para). Substitui o tempo da D-036.
+- Sair do aparo: tenteando sem parar (toques com menos de 0,6 s entre eles)
+  por uns 3 s, o embolo solta e a avoada segue avoada.
+- Pipa avoada no chão ainda pode ser aparada por 5 s (a linha e a rabiola
+  ainda caem); só depois vira perdida.
+- Rabiola da pipa do Rio: 4,5 m, 7 g, 22 pedaços, 1,2 cm de largura de
+  arrasto — comprida, fina e leve, balança bastante; desenho com barbante fino
+  e fitinhas pequenas.
+Ficam para depois (registrados em progresso.md): enroscar e cortar na rabiola
+do rival; o plano de física do tenteio do texto do Lucas.
+
 ### D-043 — Desenhos de pipa e rabiola de fitinhas (2026-11-24)
 O Lucas pediu para focar no visual: pipas como as dos vídeos (raias e
 peixinhos com estampas fortes) e rabiola de fitinhas (antes era só uma linha

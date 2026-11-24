@@ -58,7 +58,7 @@ func _lado(p: Vector3, dir: Vector3, largura: float) -> Vector3:
 	return lado.normalized() * meia
 
 
-## Rabiola de fitinhas (D-043): em cada pedaço da rabiola, fitinhas curtas
+## Rabiola de fitinhas (D-043): em cada pedaço da rabiola, duas fitinhas curtas
 ## amarradas atravessadas, alternando as cores e balançando com o vento.
 func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -> void:
 	if pontos.size() < 2 or cores.is_empty():
@@ -72,16 +72,16 @@ func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -
 		if dir.length_squared() < 1e-8:
 			continue
 		dir = dir.normalized()
-		for parte in 3:
-			var p := a.lerp(b, (parte + 0.5) / 3.0)
+		for parte in 2:
+			var p := a.lerp(b, (parte + 0.5) / 2.0)
 			var para_camera := camera_position - p
 			var lado := dir.cross(para_camera)
 			if lado.length_squared() < 1e-10:
 				continue
 			lado = lado.normalized()
 			var escala := maxf(1.0, min_width_per_meter * para_camera.length() / 0.025)
-			var comprimento := 0.07 * escala
-			var largura := 0.03 * escala
+			var comprimento := 0.05 * escala
+			var largura := 0.025 * escala
 			var ang := sin(tempo * 11.0 + k * 1.9) * 0.6
 			var eixo := lado * cos(ang) + dir * sin(ang)
 			var w := dir * (largura * 0.5)

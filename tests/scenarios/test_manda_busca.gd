@@ -129,7 +129,7 @@ func test_puxar_rapido_decepa_e_a_avoada_escapa() -> void:
 	w.step(DT)
 	var no_tranco := _eventos_do_tipo(w.combat.take_events(), "decepou").size()
 	assert_eq(no_tranco, 0, "um tranco curto não decepa")
-	for i in roundi(0.4 / DT):
+	for i in roundi(1.0 / DT):
 		w.step(DT)
 	a.input.clear()
 	var eventos := _eventos_do_tipo(w.combat.take_events(), "decepou")
@@ -206,3 +206,41 @@ func test_avoada_desce_devagar_e_da_tempo_de_aparar() -> void:
 func _rodar_seg(w: SimWorld, s: float) -> void:
 	for i in roundi(s / DT):
 		w.step(DT)
+
+
+## D-044: puxando num ritmo normal (3 m/s) a aparada vem, não decepa.
+func test_puxar_normal_nao_decepa() -> void:
+	var w := _montagem()
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	assert_true(_embolar(w))
+	while b.cut_age < KiteCombatSystem.DECEPAR_GRACE + 0.1:
+		w.step(DT)
+	a.input.haul_speed = 3.0
+	for i in roundi(2.0 / DT):
+		w.step(DT)
+	a.input.clear()
+	var eventos := _eventos_do_tipo(w.combat.take_events(), "decepou")
+	assert_eq(eventos.size(), 0, "puxar normal não decepa")
+	assert_true(b.caught_by == a or b.captured, "a avoada continua no aparo")
+
+
+## D-044: tenteando sem parar uns 3 s, a avoada sai do aparo.
+func test_tentear_sai_do_aparo() -> void:
+	var w := _montagem()
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	assert_true(_embolar(w))
+	var soltou := -1.0
+	var t0 := w.time
+	for k in 20:
+		a.input.kick_side = 1.0 if k % 2 == 0 else -1.0
+		a.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.3 / DT):
+			w.step(DT)
+		if b.caught_by == null and not b.captured:
+			soltou = w.time - t0
+			break
+	print("      [sair do aparo] soltou depois de %.1f s tenteando" % soltou)
+	assert_true(soltou >= 2.5 and soltou <= 4.5, "sai do aparo tenteando uns 3 s (%.1f s)" % soltou)
+	assert_eq(_eventos_do_tipo(w.combat.take_events(), "soltou").size(), 1)

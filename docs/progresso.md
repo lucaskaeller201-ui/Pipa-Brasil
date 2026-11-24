@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.15.0).
+Atualizado em 2026-11-24 (versão 0.15.1).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -22,6 +22,9 @@ Atualizado em 2026-11-24 (versão 0.15.0).
 | Tenteio por ângulo-alvo: 36° por toque, para exato, volta curta | Feito (D-041) |
 | Tenteio que murcha e vai para a frente; coice da largada | Feito (D-042); Lucas ainda não gostou do tenteio, pausado a pedido dele |
 | Desenhos de pipa (raia/peixinho, 8 estampas) e rabiola de fitinhas | Feito (D-043), aguardando teste do Lucas |
+| Aparo meio-termo, sair do aparo tenteando, aparar no chão, rabiola fina e comprida | Feito (D-044), aguardando teste do Lucas |
+| Enroscar e cortar na rabiola do rival | Pendente |
+| Tenteio: plano de física a partir do texto do Lucas (diagnóstico enviado) | Pendente, aguardando o Lucas |
 | Próximo no visual: cenário, boneco, animações, mais formatos de pipa | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

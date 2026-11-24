@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.15.1 — 2026-11-24
+
+- Aparo: puxar normal traz a pipa; para decepar, puxe rápido e bastante linha.
+- Tenteando uns 3 segundos sem parar, a avoada sai do aparo.
+- Avoada no chão ainda dá para aparar por alguns segundos.
+- Rabiola mais comprida, fina e leve, com fitinhas pequenas.
+
 ## 0.15.0 — 2026-11-24
 
 - Oito desenhos de pipa (raias e peixinhos com estampas), escolha na tela de

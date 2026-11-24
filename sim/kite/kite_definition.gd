@@ -153,6 +153,12 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_return = 4.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
+	# Rabiola de verdade (D-044): comprida, fina e leve (mais fina e mais leve
+	# que a linha de cortar por metro de arrasto), balança bastante.
+	d.tail_length = 4.5
+	d.tail_mass = 0.007
+	d.tail_segments = 22
+	d.tail_width = 0.012
 	return d
 
 
