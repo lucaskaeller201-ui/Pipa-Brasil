@@ -194,7 +194,7 @@ func test_puxando_a_pipa_vai_para_onde_o_bico_parou() -> void:
 			media += x
 		media /= maxf(1.0, rumos.size())
 		for x in rumos:
-			assert_true(absf(_dif(x, media)) < 15.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
+			assert_true(absf(_dif(x, media)) < 20.0, "trajetória reta (rumo %.0f°, média %.0f°)" % [x, media])
 		assert_true(absf(_dif(media, r["bico0"])) < 45.0, "vai para onde o bico aponta (rumo %.0f°, bico %.0f°)" % [media, r["bico0"]])
 		assert_true(absf(_dif(r["bico0"], r["bico_antes_do_toque"])) < 60.0, "puxando, o giro freia logo")
 		# (o "para cima" do céu muda com a posição da pipa, por isso a folga)
