@@ -223,7 +223,12 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force * (0.3 if towed else (0.14 if drifting else 1.0)) + GRAVITY * m
+	var ar := 0.3 if towed else (0.14 if drifting else 1.0)
+	if lunge > 0.0:
+		# Na largada a linha corre solta e a vela não segura o ar: o vento freia
+		# pouco e a pipa dispara para a frente (D-045).
+		ar *= 1.0 - 0.85 * lunge / LUNGE_TIME
+	var f := last_aero_force * ar + GRAVITY * m
 	if lunge >= LUNGE_TIME:
 		# Largada: o tranco inicial (a pressão guardada solta de uma vez).
 		velocity += (rotation * Vector3.UP) * LUNGE_KICK
