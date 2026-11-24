@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.10.1 — 2026-11-23
+
+- Mandar linha voltou a ser deslizar para cima; a carretilha embala e a pipa
+  continua girando um pouco depois do dedo parar. Segurar não faz nada.
+- Desbico de verdade: o toque endireita a pipa (bico volta para cima).
+
 ## 0.10.0 — 2026-11-23
 
 Primeiro bloco da lista de pedidos do Lucas (docs/pedidos-do-lucas.md):

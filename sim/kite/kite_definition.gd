@@ -53,9 +53,9 @@ extends Resource
 ## Freio do giro (1/s): ao soltar o dedo (linha volta a esticar) e ao puxar.
 @export var spin_release_drag := 7.0
 @export var spin_pull_drag := 25.0
-## Desbico (toque): o bico dá um pulo de direção nesta velocidade (graus/s)
-## enquanto dura o toque na mão (Pilot.DESBICO_TIME).
-@export var spin_kick_rate_deg := 400.0
+## Desbico (toque, D-031): a pipa se endireita — o bico volta para cima, no
+## máximo nesta velocidade (graus/s), enquanto dura a folga do toque.
+@export var spin_kick_rate_deg := 500.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true

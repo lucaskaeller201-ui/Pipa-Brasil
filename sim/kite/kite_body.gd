@@ -217,7 +217,15 @@ func integrate(h: float) -> void:
 				if signf(novo) == signf(alvo) and absf(novo) > absf(alvo):
 					novo = alvo   # o vento não passa do teto
 			SpinMode.SPIN_KICK:
-				novo = d.spin_give_sign * deg_to_rad(d.spin_kick_rate_deg)
+				# Desbico (D-031): a folga curta deixa a pipa se endireitar —
+				# o bico volta para cima pelo caminho mais curto.
+				var bico := rotation * Vector3.UP
+				var cima := Vector3.UP - nn * Vector3.UP.dot(nn)
+				if cima.length_squared() > 1e-6:
+					cima = cima.normalized()
+					var ang := atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
+					var lim := deg_to_rad(d.spin_kick_rate_deg)
+					novo = clampf(ang * 8.0, -lim, lim)
 			SpinMode.SPIN_LOCK:
 				novo = wnn * exp(-d.spin_pull_drag * h)
 			_:

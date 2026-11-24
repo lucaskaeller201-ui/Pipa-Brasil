@@ -5,8 +5,8 @@ extends Node3D
 ##   • Deslizar o dedo para BAIXO: puxa linha com a mão ("abraçar"); rápido = puxada forte.
 ##   • Deslizar para CIMA: dá linha (até 4 m/s); a pipa descarrega e gira num
 ##     ritmo constante, mostrando o bico para todos os lados.
-##   • TOQUE rápido: desbica — um puxão curto que trava o giro; a pipa arranca
-##     reta para onde o bico parou (D-026).
+##   • TOQUE rápido: desbica — folga curta e a pipa se endireita, bico para
+##     cima (D-031).
 ## No PC: W/↓ puxa, S/↑ dá linha, Espaço desbica, arrastar com o mouse também vale.
 ## A física é a mesma do laboratório: os gestos viram comandos do PilotInput.
 
@@ -25,10 +25,10 @@ const LinesView := preload("res://game/views/lines_view.gd")
 const BOTS := 5   ## festival: 5 rivais com jeitos diferentes de jogar
 const ARQUIVO_ESTATISTICAS := "user://estatisticas.json"
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
-const DESCARREGAR := 2.5        ## m/s de linha saindo com o dedo segurado
+const DESCARREGAR := 2.5        ## m/s de linha saindo com a tecla S/↑
+const EMBALO := 0.6             ## s que a carretilha leva para parar depois de mandar linha
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
 const PUXOU_PX := 6.0           ## px para baixo que transformam o dedo em dedo de puxar
-const DESCARREGAR_APOS := 0.4   ## s com o dedo parado (sem puxar) até começar a descarregar
 const TOQUE_MAX_S := 0.25
 const TOQUE_MAX_PX := 18.0
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
@@ -49,6 +49,7 @@ var _dedos := {}                # índice -> {"ini": Vector2, "t0": float, "ult"
 var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo)
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
 var _giro_carretilha := 0.0
+var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 
 # interface
 var _placar: Label
@@ -110,26 +111,23 @@ func _physics_process(delta: float) -> void:
 		_avisar(msg)
 
 
-func _ler_comandos(eu: Flyer, _delta: float) -> void:
+func _ler_comandos(eu: Flyer, delta: float) -> void:
 	var e := eu.input
-	var agora := Time.get_ticks_msec() / 1000.0
-	var v := _velocidade_mao   # + = puxando (deslizar para baixo)
+	var v := _velocidade_mao   # + = puxando (para baixo); - = mandando linha (para cima)
 	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_DOWN):
 		v = maxf(v, 3.0)
-	# Descarregar: dedo segurado (sem puxar para baixo) ou tecla S/↑.
-	var descarregando := Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_UP)
-	var algum_puxando := false
-	for k in _dedos:
-		if bool((_dedos[k] as Dictionary).get("puxou", false)):
-			algum_puxando = true
-	for k in _dedos:
-		var d: Dictionary = _dedos[k]
-		var parado := (d["ult"] as Vector2).distance_to(d["ini"]) < 30.0 or (d["ult"] as Vector2).y < (d["ini"] as Vector2).y
-		if not algum_puxando and parado and agora - float(d["t0"]) >= DESCARREGAR_APOS:
-			descarregando = true
-	# Puxar sempre ganha de descarregar.
-	if v <= 0.05 and descarregando:
-		v = minf(v, -DESCARREGAR)   # deslizar para cima junto manda ainda mais rápido
+	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_UP):
+		v = minf(v, -DESCARREGAR)
+	# Mandando linha (deslizar para cima): a carretilha embala e continua
+	# soltando um pouco depois do dedo parar; puxar corta o embalo na hora.
+	if v < -0.3:
+		_embalo = maxf(_embalo, -v)
+	elif v > 0.3:
+		_embalo = 0.0
+	else:
+		_embalo = move_toward(_embalo, 0.0, delta * DAR_LINHA_MAX / EMBALO)
+		if _embalo > 0.2:
+			v = -_embalo
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
@@ -425,7 +423,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "SEGURE o dedo: descarrega (a pipa gira) · SOLTE: ela firma · Deslize para BAIXO: puxa · TOQUE: desbica"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: desbica (bico volta para cima)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

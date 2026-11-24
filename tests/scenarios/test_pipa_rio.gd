@@ -81,22 +81,32 @@ func test_soltar_o_dedo_freia_o_giro_em_fracao_de_segundo() -> void:
 	assert_true(fim < 0.3 * antes, "em meio segundo quase parou (%.0f°/s)" % fim)
 
 
-func test_toque_desbica_o_bico_e_ele_fica() -> void:
+func test_toque_desbica_e_o_bico_volta_para_cima() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
+	# Manda linha até o bico ficar bem de lado (ou embicado).
+	f.input.haul_speed = -2.5
+	var t := 0.0
+	while absf(f.nose_angle_deg()) < 100.0 and t < 4.0:
+		w.step(DT)
+		t += DT
+	f.input.clear()
+	_rodar(w, 0.15)
 	var b0 := f.nose_angle_deg()
 	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
-	_rodar(w, 0.7)
-	var b1 := f.nose_angle_deg()
 	_rodar(w, 0.6)
+	var b1 := f.nose_angle_deg()
+	print("      [desbico] bico %.0f° → %.0f° (0 = para cima)" % [b0, b1])
+	assert_true(absf(b0) > 60.0, "antes do toque o bico estava de lado")
+	assert_true(absf(b1) < 30.0, "o toque endireita a pipa: bico para cima (%.0f°)" % b1)
+	# Com o bico já para cima, o toque não vira a pipa para lado nenhum.
+	_rodar(w, 1.0)
 	var b2 := f.nose_angle_deg()
-	print("      [desbico] bico %.0f° → %.0f° → %.0f°" % [b0, b1, b2])
-	assert_true(absf(_dif(b1, b0)) > 25.0 and absf(_dif(b1, b0)) < 110.0, "o toque muda a direção do bico (%.0f°)" % _dif(b1, b0))
 	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
-	_rodar(w, 0.7)
+	_rodar(w, 0.6)
 	var b3 := f.nose_angle_deg()
-	print("      [desbico 2] bico %.0f° → %.0f°" % [b2, b3])
-	assert_true(absf(_dif(b3, b2)) > 25.0, "outro toque, outro pulo")
+	print("      [desbico com o bico para cima] %.0f° → %.0f°" % [b2, b3])
+	assert_true(absf(b3) < 25.0, "continua para cima")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.

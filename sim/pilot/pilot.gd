@@ -23,7 +23,7 @@ const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
 const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
-const DESBICO_TIME := 0.2        ## s: duração do toque de desbicar (folga curta)
+const DESBICO_TIME := 0.4        ## s: duração do toque de desbicar (folga curta)
 
 var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)

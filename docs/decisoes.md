@@ -16,6 +16,7 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-23 | Pipa do Rio | Com rabiola ("tabula"); dando linha ela gira num ritmo constante; um toque trava o giro e ela arranca reta |
 | 2026-11-23 | Giro | Mandando linha: 2 a 3 voltas por segundo (900°/s), imediato; puxando: trava seca. Valores ajustáveis na tela |
 | 2026-11-23 | Aparar | Só embola girando em contato; puxada rápida decepa a linha solta ou a rabiola; devagar traz rebocada até a mão, para o estoque |
+| 2026-11-23 | Mandar linha e desbico | Mandar linha = deslizar para cima (a carretilha embala); desbico = a pipa se endireita, bico para cima (não vira para um lado) |
 | 2026-11-23 | Relo | Linhas que se cruzam ficam laçadas até alguém cortar; quem está dando ou puxando linha leva vantagem sobre a linha parada |
 | 2026-11-23 | Referência principal | O jogo Manda Busca (Beedro Games): cortar e aparar, soltar pipa na laje, mapas Bairro, Praia e Montanha, salas de até 8. Projeto Rélo e Pipa Combate ficam só como inspiração distante |
 | 2026-11-14 | Plataformas | PC (Windows) e celular (Android) |
@@ -31,6 +32,16 @@ topo da seção correspondente. A especificação original fica em
 | 2026-11-14 | Referências | Estudar o comportamento de outros jogos de pipa, sem copiar código, arte ou mecânicas |
 
 ## Decisões técnicas
+
+### D-031 — Mandar linha deslizando; desbico endireita (2026-11-23)
+O Lucas corrigiu: mandar linha é DESLIZAR o dedo para cima (não segurar), e
+desbicar não vira a pipa para um lado — na vida real, o desbico tira a pipa
+de embicada: a folga curta deixa ela se endireitar, bico para cima. Agora:
+deslizar para cima solta linha no ritmo do dedo e a carretilha embala (segue
+soltando, cada vez menos, por até 0,6 s); a pipa gira enquanto a linha corre
+(giro da D-030). Toque: folga de 0,4 s em que o bico volta para cima pelo
+caminho mais curto (até 500°/s); com o bico já para cima, nada muda. Segurar
+o dedo parado não faz nada.
 
 ### D-030 — Descarregar redondo e desbico de verdade (2026-11-23)
 O Lucas achou o giro "quadrado" (velocidade constante, como hélice), que só
