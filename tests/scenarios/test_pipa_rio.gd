@@ -51,11 +51,20 @@ func _giro_medio(velocidade: float) -> float:
 	var f: Flyer = w.flyers[0]
 	f.input.haul_speed = -velocidade
 	_rodar(w, 0.6)
-	var taxas := _taxas(w, f, 16)
+	# Giro no plano da pipa (em torno da normal), medido no próprio corpo.
 	var soma := 0.0
+	var n := 0
+	var soma_ceu := 0.0
+	var taxas := _taxas(w, f, 16)
 	for x in taxas:
-		soma += x
-	return soma / taxas.size()
+		soma_ceu += x
+	for i in roundi(0.8 / DT):
+		w.step(DT)
+		var normal := f.kite.rotation * Vector3(0.0, 0.0, 1.0)
+		soma += absf(rad_to_deg(f.kite.angular_velocity.dot(normal)))
+		n += 1
+	print("      [giro %.1f m/s] no corpo %.0f°/s; visto do céu %.0f°/s; elevação %.0f°" % [velocidade, soma / n, soma_ceu / taxas.size(), f.elevation_deg()])
+	return soma / n
 
 
 func test_mandar_linha_gira_conforme_o_dedo() -> void:
