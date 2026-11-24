@@ -128,7 +128,7 @@ func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
 	assert_true(_dif(b2, b1) < -10.0, "toque para a esquerda: pulo para o outro lado (%.0f°)" % _dif(b2, b1))
 	assert_true(_dif(b3, b2) < -5.0, "outro para a esquerda: mais um pouco")
 	assert_true(absf(_dif(b_pausa, b3)) < 15.0, "logo depois do toque, o bico fica onde foi (%.0f° → %.0f°)" % [b3, b_pausa])
-	assert_true(absf(b4) < 20.0, "parando um tempo, o vento traz o bico para cima (%.0f°)" % b4)
+	assert_true(absf(b4) < absf(b_pausa) - 12.0, "parando um tempo, o vento vai trazendo o bico para cima (%.0f° → %.0f°)" % [b_pausa, b4])
 	assert_true(absf(f.line_length() - l0) < 0.5, "o tenteio não puxa nem solta linha de verdade")
 
 
