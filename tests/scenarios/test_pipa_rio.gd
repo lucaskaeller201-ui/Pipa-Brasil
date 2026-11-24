@@ -214,8 +214,6 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		assert_true(r["el_min"] > -5.0)
 
 
-## D-041: cada toque gira um passo (36°) e para exato; 10 toques no mesmo
-## sentido dão a volta num círculo curto.
 func test_tocar_rapido_tenteia_e_nao_roda() -> void:
 	# D-049: dez toques rápidos (um para cada lado): o bico balança em volta
 	# da direção em que estava, sem rodar.
