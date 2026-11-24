@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.9.1 — 2026-11-23
+
+- Puxar ganha de descarregar: qualquer deslizar para baixo (6 px) já é
+  puxada; só descarrega com o dedo parado por 0,4 s sem ter puxado.
+
 ## 0.9.0 — 2026-11-23
 
 - Segurar o dedo descarrega: a linha corre e a pipa gira acelerando aos

@@ -67,3 +67,38 @@ func test_modo_livre_abre_e_as_pipas_voam() -> void:
 	assert_true(modo.world.is_finite_state())
 	raiz.call("_process", 0.016)
 	raiz.queue_free()
+
+
+## Gesto de puxar: dedo na tela deslizando para baixo vira puxada (não descarrega).
+func test_deslizar_para_baixo_puxa() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("avancar", 3.0)
+	var modo: FreeMode = raiz.get("modo")
+	var eu := modo.you()
+	var toque := InputEventScreenTouch.new()
+	toque.index = 0
+	toque.position = Vector2(640, 300)
+	toque.pressed = true
+	raiz.call("_input", toque)
+	# dedo parado um tempo (como quem encosta antes de puxar)
+	var dedos: Dictionary = raiz.get("_dedos")
+	(dedos[0] as Dictionary)["t0"] = float((dedos[0] as Dictionary)["t0"]) - 1.0
+	var maior := 0.0
+	for k in 6:
+		var arrasto := InputEventScreenDrag.new()
+		arrasto.index = 0
+		arrasto.position = Vector2(640, 300 + 25 * (k + 1))
+		arrasto.relative = Vector2(0, 25)
+		raiz.call("_input", arrasto)
+		raiz.call("_process", 1.0 / 60.0)
+		raiz.call("_physics_process", 1.0 / 120.0)
+		maior = maxf(maior, eu.input.haul_speed)
+	print("      [gesto] puxada pelo deslizar: %.1f m/s" % maior)
+	assert_true(maior > 2.0, "deslizar para baixo puxa (%.1f m/s)" % maior)
+	# parou o dedo depois de puxar: segura, não descarrega
+	raiz.call("_process", 1.0 / 60.0)
+	raiz.call("_physics_process", 1.0 / 120.0)
+	assert_true(eu.input.haul_speed >= 0.0, "dedo de puxar parado não descarrega")
+	raiz.queue_free()

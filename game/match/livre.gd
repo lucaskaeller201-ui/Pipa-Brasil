@@ -26,7 +26,8 @@ const BOTS := 3
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
 const DESCARREGAR := 2.5        ## m/s de linha saindo com o dedo segurado
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
-const PUXOU_PX := 14.0          ## px para baixo que transformam o toque em puxada
+const PUXOU_PX := 6.0           ## px para baixo que transformam o dedo em dedo de puxar
+const DESCARREGAR_APOS := 0.4   ## s com o dedo parado (sem puxar) até começar a descarregar
 const TOQUE_MAX_S := 0.25
 const TOQUE_MAX_PX := 18.0
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
@@ -110,11 +111,17 @@ func _ler_comandos(eu: Flyer, _delta: float) -> void:
 		v = maxf(v, 3.0)
 	# Descarregar: dedo segurado (sem puxar para baixo) ou tecla S/↑.
 	var descarregando := Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_UP)
+	var algum_puxando := false
+	for k in _dedos:
+		if bool((_dedos[k] as Dictionary).get("puxou", false)):
+			algum_puxando = true
 	for k in _dedos:
 		var d: Dictionary = _dedos[k]
-		if not bool(d.get("puxou", false)) and agora - float(d["t0"]) >= TOQUE_MAX_S:
+		var parado := (d["ult"] as Vector2).distance_to(d["ini"]) < 30.0 or (d["ult"] as Vector2).y < (d["ini"] as Vector2).y
+		if not algum_puxando and parado and agora - float(d["t0"]) >= DESCARREGAR_APOS:
 			descarregando = true
-	if v <= 0.5 and descarregando:
+	# Puxar sempre ganha de descarregar.
+	if v <= 0.05 and descarregando:
 		v = minf(v, -DESCARREGAR)   # deslizar para cima junto manda ainda mais rápido
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
@@ -236,7 +243,7 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 	_dy_quadro += relativo.y
 	var d: Dictionary = _dedos[indice]
 	d["ult"] = posicao
-	if posicao.y - (d["ini"] as Vector2).y > PUXOU_PX:
+	if relativo.y > 0.0 and posicao.y - (d["ini"] as Vector2).y > PUXOU_PX:
 		d["puxou"] = true   # este dedo é de puxar (enquanto estiver na tela)
 
 
