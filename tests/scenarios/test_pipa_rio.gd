@@ -271,8 +271,8 @@ func test_tenteio_murcha_um_lado() -> void:
 func test_largada_da_coice() -> void:
 	var com := _coice(true)
 	var sem := _coice(false)
-	print("      [largada] linha que correu em 0,6 s: com puxada antes %.1f m, sem %.1f m" % [com, sem])
-	assert_true(com > sem + 3.0, "na largada a pipa vai embora levando linha")
+	print("      [largada] avanço para a frente em 0,6 s: com puxada antes %.1f m, sem %.1f m" % [com, sem])
+	assert_true(com > sem + 0.5, "na largada a pipa dá um coice para a frente")
 
 
 func _coice(puxar_antes: bool) -> float:
@@ -286,6 +286,7 @@ func _coice(puxar_antes: bool) -> float:
 	var p0 := f.kite.position
 	var l0 := f.line_length()
 	var paralinha := (f.kite.position - f.hand_position).normalized()
+	var dir0 := f.kite.lunge_dir()
 	_rodar(w, 0.6)
 	f.input.clear()
 	var dp := f.kite.position - p0
@@ -293,4 +294,4 @@ func _coice(puxar_antes: bool) -> float:
 		"com" if puxar_antes else "sem", dp.length(), dp.dot(paralinha), bico.dot(paralinha), l0, f.line_length()])
 	if puxar_antes:
 		assert_eq(f.lunges, 1, "deu uma largada")
-	return f.line_length() - l0
+	return dp.dot(dir0)

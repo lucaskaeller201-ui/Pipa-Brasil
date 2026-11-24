@@ -87,6 +87,8 @@ var _painel_mao: PanelContainer     # escolher pipa e linha e colocar no alto (D
 var _botoes_pipa: Array = []
 var _botoes_linha: Array = []
 var _botao_desenho: Button
+var _previa: Control
+var _previa_estilo := -1
 var _rotulo_mao: Label
 var _estatisticas := {"cortes": 0, "aparadas": 0, "perdidas": 0, "melhor_sequencia": 0}
 
@@ -234,10 +236,10 @@ func _posicionar_camera(imediato: bool) -> void:
 	var mira := eu.kite.position if eu != null else olho + Vector3(0.0, 14.0, -22.0)
 	var alvo := mira - olho
 	var dist := alvo.length()
-	# Zoom (1ª pessoa): a pipa ocupa uns 6% da altura da tela. Na 3ª pessoa,
+	# Zoom (1ª pessoa): a pipa ocupa uns 10% da altura da tela (dá para ver o modelo). Na 3ª pessoa,
 	# visão aberta para ver as lajes e as outras pipas.
 	var envergadura := 0.6
-	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.06, 14.0, 55.0)
+	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.10, 8.0, 55.0)
 	if not _primeira_pessoa:
 		fov = 50.0
 	var guinada := atan2(-alvo.x, -alvo.z)
@@ -738,10 +740,10 @@ func _criar_painel_mao(raiz: Control) -> void:
 	_painel_mao = PanelContainer.new()
 	_painel_mao.name = "PipaNaMao"
 	_painel_mao.set_anchors_preset(Control.PRESET_CENTER)
-	_painel_mao.offset_left = -380.0
-	_painel_mao.offset_right = 380.0
-	_painel_mao.offset_top = -195.0
-	_painel_mao.offset_bottom = 195.0
+	_painel_mao.offset_left = -470.0
+	_painel_mao.offset_right = 470.0
+	_painel_mao.offset_top = -200.0
+	_painel_mao.offset_bottom = 200.0
 	var fundo := StyleBoxFlat.new()
 	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.8)
 	fundo.set_corner_radius_all(18)
@@ -749,9 +751,20 @@ func _criar_painel_mao(raiz: Control) -> void:
 	_painel_mao.add_theme_stylebox_override("panel", fundo)
 	_painel_mao.add_to_group("botao_livre")
 	raiz.add_child(_painel_mao)
+	var linha_mao := HBoxContainer.new()
+	linha_mao.add_theme_constant_override("separation", 16)
+	_painel_mao.add_child(linha_mao)
+	# Prévia da pipa escolhida (formato e estampa do modelo).
+	_previa = Control.new()
+	_previa.name = "Previa"
+	_previa.custom_minimum_size = Vector2(190.0, 300.0)
+	_previa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_previa.draw.connect(_desenhar_previa)
+	linha_mao.add_child(_previa)
 	var caixa := VBoxContainer.new()
 	caixa.add_theme_constant_override("separation", 8)
-	_painel_mao.add_child(caixa)
+	caixa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	linha_mao.add_child(caixa)
 	_rotulo_mao = _rotulo(caixa, 20, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
 	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Rabiola:"
 	var linha_p := HBoxContainer.new()
@@ -785,6 +798,47 @@ func _escolher_pipa(k: int) -> void:
 
 func _trocar_desenho() -> void:
 	modo.you_style = (modo.you_style + 1) % Estilos.ESTILOS.size()
+	_previa.queue_redraw()
+
+
+## Desenha o modelo escolhido: contorno com as medidas e a estampa.
+func _desenhar_previa() -> void:
+	var estilo: Dictionary = Estilos.ESTILOS[modo.you_style]
+	var m: Array = estilo["m"]
+	var area := _previa.size
+	var escala := minf((area.y - 20.0) / float(m[0]), (area.x - 20.0) / maxf(float(m[1]), float(m[2])))
+	var cx := area.x * 0.5
+	var y0 := (area.y - float(m[0]) * escala) * 0.5
+	var ys := [0.0, float(m[3]), float(m[3]) + float(m[4]), float(m[0])]
+	var ws := [0.0, float(m[1]) * 0.5, float(m[2]) * 0.5, 0.0]
+	var tb := float(m[3]) / float(m[0])
+	var tc := (float(m[3]) + float(m[4])) / float(m[0])
+	var meia := maxf(float(m[1]), float(m[2])) * 0.5
+	for fx in 3:
+		for j in 8:
+			var ya := lerpf(ys[fx], ys[fx + 1], j / 8.0)
+			var yb := lerpf(ys[fx], ys[fx + 1], (j + 1) / 8.0)
+			var wa := lerpf(ws[fx], ws[fx + 1], j / 8.0)
+			var wb := lerpf(ws[fx], ws[fx + 1], (j + 1) / 8.0)
+			for i in 16:
+				var u0 := lerpf(-1.0, 1.0, i / 16.0)
+				var u1 := lerpf(-1.0, 1.0, (i + 1) / 16.0)
+				var cxm := (u0 + u1) * 0.25 * (wa + wb)
+				var cor := Estilos.cor(estilo, cxm / meia, (ya + yb) * 0.5 / float(m[0]), tb, tc)
+				var pts := PackedVector2Array([
+					Vector2(cx + u0 * wa * escala, y0 + ya * escala), Vector2(cx + u1 * wa * escala, y0 + ya * escala),
+					Vector2(cx + u1 * wb * escala, y0 + yb * escala), Vector2(cx + u0 * wb * escala, y0 + yb * escala)])
+				if wa < 0.001:
+					pts = PackedVector2Array([pts[0], pts[2], pts[3]])
+				elif wb < 0.001:
+					pts = PackedVector2Array([pts[0], pts[1], pts[2]])
+				_previa.draw_colored_polygon(pts, cor)
+	# varetas
+	var marrom := Color(0.35, 0.22, 0.1)
+	_previa.draw_line(Vector2(cx, y0), Vector2(cx, y0 + float(m[0]) * escala), marrom, 2.0)
+	for k in [1, 2]:
+		var y: float = y0 + float(ys[k]) * escala
+		_previa.draw_line(Vector2(cx - float(ws[k]) * escala, y), Vector2(cx + float(ws[k]) * escala, y), marrom, 2.0)
 
 
 func _escolher_linha(k: int) -> void:
@@ -797,6 +851,9 @@ func _atualizar_painel_mao() -> void:
 	for k in _botoes_pipa.size():
 		(_botoes_pipa[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_kite else Color(1, 1, 1, 0.7)
 	_botao_desenho.text = "Pipa: %s  (toque para trocar)" % String(Estilos.ESTILOS[modo.you_style]["nome"])
+	if _previa_estilo != modo.you_style:
+		_previa_estilo = modo.you_style
+		_previa.queue_redraw()
 	for k in _botoes_linha.size():
 		(_botoes_linha[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_line else Color(1, 1, 1, 0.7)
 

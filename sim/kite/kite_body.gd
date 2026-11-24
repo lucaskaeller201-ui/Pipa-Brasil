@@ -41,9 +41,9 @@ var _hold_ang := 0.0   ## ângulo do bico guardado no fim do tenteio (rad)
 var line_dir := Vector3.UP
 ## Coice da largada (D-042): s restantes do empurrão para a frente.
 var lunge := 0.0
-const LUNGE_TIME := 0.6
-const LUNGE_ACCEL := 70.0       ## m/s² no começo do coice
-const LUNGE_KICK := 9.0         ## m/s de tranco na hora da largada
+const LUNGE_TIME := 0.45
+const LUNGE_ACCEL := 40.0       ## m/s² no começo do coice
+const LUNGE_KICK := 4.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _kick_prev := false
@@ -227,7 +227,7 @@ func integrate(h: float) -> void:
 	if lunge > 0.0:
 		# Na largada a linha corre solta e a vela não segura o ar: o vento freia
 		# pouco e a pipa dispara para a frente (D-045).
-		ar *= 1.0 - 0.85 * lunge / LUNGE_TIME
+		ar *= 1.0 - 0.4 * lunge / LUNGE_TIME
 	var f := last_aero_force * ar + GRAVITY * m
 	if lunge >= LUNGE_TIME:
 		# Largada: o tranco inicial (a pressão guardada solta de uma vez).
@@ -264,7 +264,7 @@ func integrate(h: float) -> void:
 				# ao contrário): vento e rabiola não fazem furacão
 				var teto := absf(alvo)
 				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
-				if lunge > LUNGE_TIME - 0.35:
+				if lunge > LUNGE_TIME - 0.25:
 					novo = 0.0   # no coice da largada ela vai reta antes de girar
 			SpinMode.SPIN_KICK:
 				# Tenteio (D-041): cada toque soma um passo fixo ao ângulo-alvo

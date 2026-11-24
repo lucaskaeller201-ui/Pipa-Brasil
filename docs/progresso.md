@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.16.0).
+Atualizado em 2026-11-24 (versão 0.16.1).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -27,7 +27,8 @@ Atualizado em 2026-11-24 (versão 0.16.0).
 | Tenteio: plano de física a partir do texto do Lucas (diagnóstico enviado) | Pendente, aguardando o Lucas |
 | 20 modelos de pipa com medidas reais (só visual); rabiola 5 m; largada forte | Feito (D-045), aguardando teste do Lucas |
 | Cada modelo com a sua física (tamanho e formato) | Pendente |
-| Largada: a linha corre 5,5 m, mas o deslocamento da pipa no coice ainda é pequeno (~1,5 m); investigar a linha segurando a pipa | Pendente |
+| Largada sem soltar a linha, com coice para a frente | Feito (D-046), aguardando teste do Lucas |
+| Prévia do modelo na tela de pipa na mão; câmera mais perto | Feito (D-046), aguardando teste do Lucas |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

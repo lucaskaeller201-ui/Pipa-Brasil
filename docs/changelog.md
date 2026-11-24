@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.16.1 — 2026-11-24
+
+- Largada de volta mais parecida com a anterior, com um coice para a frente
+  (sem soltar a linha).
+- Prévia da pipa escolhida na tela de pipa na mão; câmera mais perto da pipa.
+
 ## 0.16.0 — 2026-11-24
 
 - 20 modelos de pipa com as medidas dos pipeiros (GT, Pizza, Come Rato, Mucha

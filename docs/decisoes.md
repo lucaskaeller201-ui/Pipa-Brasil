@@ -33,6 +33,16 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-046 — Largada de volta ao jeito da 0.15 com coice; prévia dos modelos (2026-11-24)
+O Lucas achou a largada da 0.16 esquisita (a linha frouxa como se tivesse
+soltado da mão). A linha não corre mais sozinha na largada e o ar só perde
+40% durante o coice; o coice fica: tranco de 4 m/s e 40 m/s² caindo a zero em
+0,45 s, para onde o bico aponta (nunca de volta para a mão).
+Os modelos "pareciam iguais": no céu a pipa ocupava uns 6% da tela e o
+formato não aparecia. Agora a tela de pipa na mão mostra a prévia do modelo
+(formato com as medidas, estampa e varetas) e a câmera em 1ª pessoa aproxima
+mais (a pipa ocupa uns 10% da altura).
+
 ### D-045 — Modelos de pipa com medidas reais; rabiola maior e fitinhas finas; largada forte (2026-11-24)
 O Lucas mandou moldes da Voar Pipas e a página "Pipas e medidas" da Escola de
 Pipeiros. Agora há 20 modelos (GT, Pizza, Come Rato, Mucha Mucha, Carrapeta,
