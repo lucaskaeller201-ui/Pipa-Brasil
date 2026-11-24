@@ -405,8 +405,9 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		if wear_k > 0.0:
 			# Relo (D-027): a linha que corre (quem está dando ou puxando linha)
 			# gasta a outra; um pouco para as duas sempre.
-			var corre_a := fa.line_rate * _largada(fa)
-			var corre_b := fb.line_rate * _largada(fb)
+			# Cada tenteio no relô também serra (D-035).
+			var corre_a := fa.line_rate * _largada(fa) + (2.0 if fa.tenteio_age < 0.3 else 0.0)
+			var corre_b := fb.line_rate * _largada(fb) + (2.0 if fb.tenteio_age < 0.3 else 0.0)
 			var base := 0.15 * (corre_a + corre_b) + 0.05
 			# Integridade de cada linha neste laço (não espalha pelo comprimento).
 			e["wa"] = float(e.get("wa", 0.0)) + wear_k * f * (corre_b + base) * h

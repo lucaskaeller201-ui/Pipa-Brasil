@@ -23,7 +23,7 @@ const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
 const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
-const DESBICO_TIME := 0.15        ## s: duração do toque de desbicar (folga curta)
+const DESBICO_TIME := 0.08        ## s: duração do toque de desbicar (folga curta)
 
 var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)
@@ -49,8 +49,9 @@ func trigger(impulse: Impulse, t: float) -> void:
 			_moves = [[t, 0.30, 0.40, 5.0], [t + 0.30, 0.15, -0.40, 5.0], [t + 0.45, 0.4, 0.0, 1.5]]
 			_desbico_ate = t + DESBICO_TIME
 		Impulse.DESBICAR_LADO:
-			# D-034: folguinha em que o bico pula para o lado, tranco que trava
-			_moves = [[t, DESBICO_TIME, 0.20, 5.0], [t + DESBICO_TIME, 0.15, -0.45, 5.0], [t + DESBICO_TIME + 0.15, 0.4, 0.0, 1.5]]
+			# Tenteio (D-035): folguinha de nada e o bico dá um pulo curto para o
+			# lado; sem puxar. O vento traz o bico de volta para cima depois.
+			_moves = [[t, DESBICO_TIME, 0.08, 5.0], [t + DESBICO_TIME, 0.2, 0.0, 2.0]]
 			_desbico_ate = t + DESBICO_TIME
 
 

@@ -38,6 +38,8 @@ var line_rate := 0.0
 var cut_age := 0.0
 ## Maior tensão recente (N), caindo devagar: diz se houve pressão antes de soltar.
 var tension_memo := 0.0
+## Segundos desde o último tenteio (para o relô: o tenteio serra a linha).
+var tenteio_age := 99.0
 
 var _attach_dl := 0.0
 
@@ -102,6 +104,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		k.kick_sign = input.kick_side * (s if s != 0.0 else 1.0)
 	# Memória da pressão: para a largada (puxa, e solta de uma vez no relô).
 	tension_memo = maxf(tension, tension_memo - 6.0 * h)
+	tenteio_age = 0.0 if k.spin_mode == KiteBody.SpinMode.SPIN_KICK else tenteio_age + h
 	if cut:
 		cut_age += h
 	k.update_flex(tension if not cut else 0.0, h)

@@ -102,38 +102,47 @@ func _tocar(w: SimWorld, f: Flyer) -> void:
 	f.input.clear()
 
 
-func _tocar_lado(w: SimWorld, f: Flyer, lado: float) -> void:
-	f.input.clear()
+func _tentear(w: SimWorld, f: Flyer, lado: float) -> void:
 	f.input.kick_side = lado
 	f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
-	f.input.haul_speed = 4.0
-	var t := 0.0
-	while t < 0.4 and (f.tension < 2.5 or t < Pilot.DESBICO_TIME):
-		w.step(DT)
-		t += DT
+	_rodar(w, 0.12)
+
+
+func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var l0 := f.line_length()
+	var b0 := f.nose_angle_deg()
+	_tentear(w, f, 1.0)
+	var b1 := f.nose_angle_deg()
+	_tentear(w, f, -1.0)
+	var b2 := f.nose_angle_deg()
+	_tentear(w, f, -1.0)
+	var b3 := f.nose_angle_deg()
+	_rodar(w, 1.0)
+	var b4 := f.nose_angle_deg()
+	print("      [tenteio] bico %.0f° → (direita) %.0f° → (esquerda) %.0f° → (esquerda) %.0f°; parado 1 s: %.0f°; linha %.1f → %.1f m" % [b0, b1, b2, b3, b4, l0, f.line_length()])
+	assert_true(_dif(b1, b0) > 10.0 and _dif(b1, b0) < 45.0, "toque para a direita: pulo curto (%.0f°)" % _dif(b1, b0))
+	assert_true(_dif(b2, b1) < -10.0, "toque para a esquerda: pulo para o outro lado (%.0f°)" % _dif(b2, b1))
+	assert_true(_dif(b3, b2) < -5.0, "outro para a esquerda: mais um pouco")
+	assert_true(absf(b4) < 15.0, "parando, o vento traz o bico para cima (%.0f°)" % b4)
+	assert_true(absf(f.line_length() - l0) < 0.5, "o tenteio não puxa nem solta linha de verdade")
+
+
+func test_tenteio_e_puxada_vai_para_onde_o_bico_apontou() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var p0 := f.sky_position_deg()
+	for k in 3:
+		_tentear(w, f, 1.0)
+	var bico := f.nose_angle_deg()
+	f.input.haul_speed = 3.0
+	_rodar(w, 0.8)
 	f.input.clear()
-	f.input.kick_side = lado
-
-
-func test_toque_desbica_para_o_lado_pedido() -> void:
-	for lado in [1.0, -1.0]:
-		var w := _voo()
-		var f: Flyer = w.flyers[0]
-		var b0 := f.nose_angle_deg()
-		var p0 := f.sky_position_deg()
-		_tocar_lado(w, f, lado)
-		var b1 := f.nose_angle_deg()
-		_rodar(w, 0.5)
-		var b2 := f.nose_angle_deg()
-		var d := f.sky_position_deg() - p0
-		print("      [desbico para %s] bico %.0f° → %.0f° → %.0f°; a pipa andou %.1f° de lado" % ["a direita" if lado > 0 else "a esquerda", b0, b1, b2, d.x])
-		assert_true(_dif(b1, b0) * lado > 20.0 and _dif(b1, b0) * lado < 90.0, "o bico pulou para o lado do toque (%.0f°)" % _dif(b1, b0))
-		assert_true(absf(_dif(b2, b1)) < 35.0, "e travou")
-		assert_true(d.x * lado > 0.0, "a pipa foi para aquele lado")
-		# dois toques do mesmo lado: mais um pulo
-		_tocar_lado(w, f, lado)
-		var b3 := f.nose_angle_deg()
-		assert_true(_dif(b3, b2) * lado > 15.0, "outro toque, outro pulo para o mesmo lado")
+	var d := f.sky_position_deg() - p0
+	print("      [tenteio + puxada] bico %.0f°; a pipa andou %.1f° de lado e %.1f° de altura" % [bico, d.x, d.y])
+	assert_true(bico > 25.0, "três toques para a direita")
+	assert_true(d.x > 2.0, "puxando, foi para a direita")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.

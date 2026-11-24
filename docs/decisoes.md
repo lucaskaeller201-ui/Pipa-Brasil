@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-035 — Tenteio (2026-11-24)
+O Lucas descreveu o tenteio do Pipa Combate: toques curtos dão impulsos de
+rotação curtos, cada toque para um lado, sem puxar a pipa; parando de tocar,
+o vento traz o bico de volta para cima; amortecimento alto (movimento seco).
+Agora: toque = pulo de uns 25° (310°/s por 0,08 s), alternando o lado a cada
+toque (no PC, Q/E escolhem o lado, Espaço alterna); quase sem mexer na linha.
+Solta, a pipa volta o bico para cima com uma "mola" de 5/s. Para ir para um
+lado: tenteia até o bico apontar e puxa (deslizar para baixo trava o bico e
+arranca). No relô, cada tenteio também serra (como 2 m/s de linha correndo, por
+0,3 s). Todos os bots tenteiam de vez em quando. Substitui o desbico da D-034.
+
 ### D-034 — Desbico para o lado, largada e pressão da puxada (2026-11-24)
 Pedido do Lucas, comparando com o Pipa Combate 4. Desbico: cada toque joga o
 bico para um lado — o lado do toque (metade esquerda ou direita da tela; no PC

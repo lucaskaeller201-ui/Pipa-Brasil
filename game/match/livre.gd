@@ -5,8 +5,9 @@ extends Node3D
 ##   • Deslizar o dedo para BAIXO: puxa linha com a mão ("abraçar"); rápido = puxada forte.
 ##   • Deslizar para CIMA: dá linha (até 4 m/s); a pipa descarrega e gira num
 ##     ritmo constante, mostrando o bico para todos os lados.
-##   • TOQUE rápido: desbica — o bico pula para o lado do toque (metade
-##     esquerda ou direita da tela), trava e a pipa arranca para lá (D-034).
+##   • TOQUE rápido: tenteio — o bico dá um pulo de uns 25°, cada toque para um
+##     lado; parando, o vento traz o bico de volta para cima. Puxe (deslize
+##     para baixo) quando o bico apontar para onde quer ir (D-035).
 ##   • LARGADA: com a linha laçada, puxe (pressão) e logo deslize para cima de
 ##     uma vez: a linha corre e serra a do rival com o dobro de força.
 ## No PC: W/↓ puxa, S/↑ dá linha, Espaço desbica, arrastar com o mouse também vale.
@@ -56,6 +57,7 @@ var _velocidade_mao := 0.0      # m/s (+ = puxando)
 var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
+var _ultimo_lado := 1.0         # lado do último tenteio (o próximo vai para o outro)
 
 # interface
 var _placar: Label
@@ -246,8 +248,10 @@ func _input(evento: InputEvent) -> void:
 		var tecla := (evento as InputEventKey).physical_keycode
 		if tecla == KEY_Q or tecla == KEY_LEFT:
 			_desbicar(-1.0)
-		elif tecla == KEY_E or tecla == KEY_RIGHT or tecla == KEY_SPACE:
+		elif tecla == KEY_E or tecla == KEY_RIGHT:
 			_desbicar(1.0)
+		elif tecla == KEY_SPACE:
+			_desbicar(-_ultimo_lado)
 
 
 func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
@@ -263,7 +267,7 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 	_dedos.erase(indice)
 	if agora - float(d["t0"]) < TOQUE_MAX_S and posicao.distance_to(d["ini"]) < TOQUE_MAX_PX:
 		# toque na metade esquerda da tela: bico para a esquerda; direita: direita
-		_desbicar(-1.0 if posicao.x < get_viewport().get_visible_rect().size.x * 0.5 else 1.0)
+		_desbicar(-_ultimo_lado)   # tenteio: cada toque para um lado
 
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
@@ -280,13 +284,12 @@ func _desbicar(lado: float) -> void:
 	var eu := modo.you()
 	if _automatico or eu.cut or eu.pilot == null:
 		return
-	# Desbico (D-034): o bico pula para o lado do toque, trava, a mão recolhe a
-	# folga até a linha esticar e a pipa arranca para onde o bico apontou.
+	# Tenteio (D-035): o bico dá um pulo curto para um lado (cada toque para
+	# um lado), sem puxar; o vento traz de volta. Puxe quando apontar certo.
+	_ultimo_lado = lado
 	eu.input.kick_side = lado
 	eu.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, modo.world.time)
-	_toque_ate = modo.world.time + TOQUE_RECOLHE
 	_embalo = 0.0
-	_mostrar_aviso_curto("desbicou")
 
 
 func _sobre_botao(posicao: Vector2) -> bool:
@@ -444,7 +447,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE à esquerda/direita: desbica para aquele lado"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (cada um para um lado)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

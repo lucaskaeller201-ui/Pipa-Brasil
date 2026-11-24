@@ -94,6 +94,12 @@ func update(dt: float) -> void:
 		if bot != null and f != null and not f.cut:
 			bot.target_azimuth = _mira(i)
 			bot.update(f, t)
+			# Todo pipeiro tenteia: toques de vez em quando, cada um para um lado.
+			if f.input.haul_speed <= 0.1 and f.input.pull < 0.05 and _rng.randf() < dt / 0.8:
+				var lado := -float(p.get("ultimo_lado", 1.0))
+				p["ultimo_lado"] = lado
+				f.input.kick_side = lado
+				f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, t)
 			# Fujão: com a linha laçada (dá para ver), descarrega para escapar.
 			if p["profile"] == "fujao" and _lacado(f):
 				f.input.haul_speed = -2.0

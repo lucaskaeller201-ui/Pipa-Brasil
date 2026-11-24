@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.12.0 — 2026-11-24
+
+- Tenteio: cada toque dá um pulo curto no bico, um para cada lado, sem puxar;
+  parando, o vento traz o bico de volta para cima. Puxe quando apontar.
+- Todas as pipas tenteiam. No relô, o tenteio também serra.
+
 ## 0.11.0 — 2026-11-24
 
 - Desbico para o lado: toque à esquerda ou à direita da tela joga o bico para

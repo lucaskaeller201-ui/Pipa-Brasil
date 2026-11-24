@@ -245,6 +245,15 @@ func integrate(h: float) -> void:
 				# solta, mas sem furacão: nunca mais rápido que o teto do giro
 				var teto_livre := deg_to_rad(d.spin_give_rate_deg)
 				novo = clampf(novo, -teto_livre, teto_livre)
+				if d.spin_return > 0.0 and not drifting and not towed:
+					# Retorno elástico (D-035): o vento traz o bico para cima.
+					var bico := rotation * Vector3.UP
+					var cima := Vector3.UP - nn * Vector3.UP.dot(nn)
+					if cima.length_squared() > 1e-6:
+						cima = cima.normalized()
+						var ang := atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
+						var volta := clampf(ang * d.spin_return, -deg_to_rad(160.0), deg_to_rad(160.0))
+						novo = lerpf(novo, volta, 1.0 - exp(-8.0 * h))
 		angular_velocity += nn * (novo - wnn)
 		_spin_controlado = spin_mode != SpinMode.SPIN_FREE
 		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE else -1.0
