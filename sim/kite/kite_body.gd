@@ -239,8 +239,11 @@ func integrate(h: float) -> void:
 				novo = wnn * exp(-d.spin_pull_drag * h)
 			_:
 				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
+				# solta, mas sem furacão: nunca mais rápido que o teto do giro
+				var teto_livre := deg_to_rad(d.spin_give_rate_deg)
+				novo = clampf(novo, -teto_livre, teto_livre)
 		angular_velocity += nn * (novo - wnn)
-		_spin_controlado = spin_mode != SpinMode.SPIN_FREE
+		_spin_controlado = true
 		_spin_alvo = novo
 		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
 			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola

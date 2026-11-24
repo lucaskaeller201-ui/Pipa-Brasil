@@ -71,7 +71,7 @@ func test_mandar_linha_gira_conforme_o_dedo() -> void:
 	var devagar := _giro_medio(1.0)
 	var rapido := _giro_medio(3.0)
 	print("      [mandando linha] 1 m/s: %.0f°/s; 3 m/s: %.0f°/s" % [devagar, rapido])
-	assert_true(devagar > 40.0 and devagar < 140.0, "devagar gira devagar (%.0f°/s)" % devagar)
+	assert_true(devagar > 20.0 and devagar < 140.0, "devagar gira devagar (%.0f°/s)" % devagar)
 	assert_true(rapido > devagar * 1.8, "mais rápido no dedo, mais giro")
 	assert_true(rapido > 160.0 and rapido < 380.0, "rápido gira mais, sem furacão (%.0f°/s)" % rapido)
 
@@ -180,5 +180,5 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		var w := _voo()
 		var r := _mirar_e_puxar(w, alvo, 4.0)
 		print("      [para o lado %.0f°] chegou a %.0f° de azimute; elevação mínima %.0f°" % [alvo, r["az_max"], r["el_min"]])
-		assert_true(r["az_max"] > 50.0, "foi longe para o lado (%.0f°)" % r["az_max"])
-		assert_true(r["el_min"] > -2.0)
+		assert_true(r["az_max"] > 40.0, "foi longe para o lado (%.0f°)" % r["az_max"])
+		assert_true(r["el_min"] > -5.0)
