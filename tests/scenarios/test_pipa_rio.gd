@@ -284,8 +284,13 @@ func _coice(puxar_antes: bool) -> float:
 	f.input.haul_speed = -3.0
 	var bico := f.kite.rotation * Vector3.UP
 	var p0 := f.kite.position
+	var l0 := f.line_length()
+	var paralinha := (f.kite.position - f.hand_position).normalized()
 	_rodar(w, 0.6)
 	f.input.clear()
+	var dp := f.kite.position - p0
+	print("      [largada %s] andou %.1f m (ao longo da linha %.1f m, bico·linha %.2f); linha %.1f → %.1f m" % [
+		"com" if puxar_antes else "sem", dp.length(), dp.dot(paralinha), bico.dot(paralinha), l0, f.line_length()])
 	if puxar_antes:
 		assert_eq(f.lunges, 1, "deu uma largada")
 	return (f.kite.position - p0).dot(bico)
