@@ -136,15 +136,14 @@ func test_tenteio_e_puxada_vai_para_onde_o_bico_apontou() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
 	var p0 := f.sky_position_deg()
-	for k in 3:
-		_tentear(w, f, 1.0)
+	_tentear(w, f, 1.0)   # um toque: ~60° (vários seguidos dão a volta, D-038)
 	var bico := f.nose_angle_deg()
 	f.input.haul_speed = 3.0
 	_rodar(w, 0.8)
 	f.input.clear()
 	var d := f.sky_position_deg() - p0
 	print("      [tenteio + puxada] bico %.0f°; a pipa andou %.1f° de lado e %.1f° de altura" % [bico, d.x, d.y])
-	assert_true(bico > 25.0, "três toques para a direita")
+	assert_true(bico > 25.0 and bico < 120.0, "um toque para a direita (%.0f°)" % bico)
 	assert_true(d.x > 2.0, "puxando, foi para a direita")
 
 
