@@ -28,6 +28,7 @@ var give_speed := 0.0
 var drifting := false
 ## Desbico para o lado (D-034): sentido do pulo do bico (+1/-1, no eixo da normal).
 var kick_sign := 1.0
+var kick_scale := 1.0
 ## Puxada (D-034): velocidade da mão puxando e se a linha está esticada; dá
 ## "pressão" para a pipa ir longe para os lados (e até para trás).
 var pull_speed := 0.0
@@ -241,7 +242,7 @@ func integrate(h: float) -> void:
 				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
 			SpinMode.SPIN_KICK:
 				# Desbico (D-034): o bico pula para o lado pedido.
-				novo = kick_sign * deg_to_rad(d.spin_kick_rate_deg)
+				novo = kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg)
 				_hold_ang = _nose_ang(nn)
 			SpinMode.SPIN_LOCK:
 				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)

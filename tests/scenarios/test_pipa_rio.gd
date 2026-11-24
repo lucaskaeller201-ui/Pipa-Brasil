@@ -213,20 +213,27 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		assert_true(r["el_min"] > -5.0)
 
 
-## D-038: toques seguidos para o mesmo lado dão a volta inteira com a pipa.
-func test_tenteios_seguidos_dao_a_volta() -> void:
+## D-039: toque simples alterna o lado; 6 toques duplos seguidos dão a volta.
+func test_toques_duplos_dao_a_volta() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
 	var giro := 0.0
 	var antes := f.nose_angle_deg()
-	for k in 10:
-		f.input.kick_side = 1.0
-		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
-		for i in roundi(0.35 / DT):
-			w.step(DT)
-			var agora := f.nose_angle_deg()
-			giro += wrapf(agora - antes, -180.0, 180.0)
-			antes = agora
-	print("      [volta] 10 toques seguidos para o mesmo lado: bico girou %.0f°" % giro)
-	assert_true(absf(giro) >= 330.0, "dá a volta inteira (%.0f°)" % giro)
+	var sentido := 0.0
+	for k in 6:
+		for toque in 2:
+			f.input.kick_side = 1.0
+			f.input.kick_spin = sentido
+			f.input.kick_scale = 1.0 if toque == 0 else 0.1
+			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+			for i in roundi((0.15 if toque == 0 else 0.35) / DT):
+				w.step(DT)
+				var agora := f.nose_angle_deg()
+				giro += wrapf(agora - antes, -180.0, 180.0)
+				antes = agora
+			sentido = f.kite.kick_sign
+	f.input.kick_spin = 0.0
+	f.input.kick_scale = 1.0
+	print("      [volta] 6 toques duplos: bico girou %.0f°" % giro)
+	assert_true(absf(giro) >= 300.0 and absf(giro) <= 480.0, "6 toques duplos dão uma volta (%.0f°)" % giro)
 	assert_true(w.is_finite_state())

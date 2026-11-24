@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-039 — Toque duplo para dar a volta; toque simples como antes (2026-11-24)
+A D-038 estragou o tenteio (toques rápidos giravam sem parar). O Lucas explicou
+o Pipa Combate: o toque simples continua como antes (cada toque para um lado,
+o pulo vai para o lado do céu); a volta sai com TOQUES DUPLOS — uns 6 toques
+duplos rápidos dão a volta inteira. Regra: o 2º toque do duplo (até 0,3 s
+depois do 1º) dá um empurrãozinho no mesmo sentido do 1º; se outro toque
+duplo vier até 0,9 s depois, ele continua no mesmo sentido (cerca de 60° por
+toque duplo). O sentido da volta vai no comando (PilotInput.kick_spin), a
+mesma interface dos bots. Fica da D-038 só: a avoada mais devagar e o bico que
+segura o ângulo logo depois do tenteio.
+
 ### D-038 — Volta de 360° no tenteio; avoada mais devagar (2026-11-24)
 Pedido do Lucas (vídeo do Pipa Combate): o tenteio tem que levar o bico para
 onde ele quiser, inclusive dar a volta inteira. Regra: toques seguidos (menos de

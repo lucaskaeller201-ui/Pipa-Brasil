@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.13.1).
+Atualizado em 2026-11-24 (versão 0.13.2).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -17,7 +17,8 @@ Atualizado em 2026-11-24 (versão 0.13.1).
 | Aparar mais fácil, decepar só puxando forte por um tempo | Feito (D-036) |
 | Pipa na mão: escolher pipa e linha, colocar no alto, tirar do alto (estoque) | Feito (D-037), aguardando teste do Lucas |
 | Aparada vem reta (sem furacão); tenteio com puxadinha | Feito (D-037) |
-| Volta de 360° com tenteios seguidos; avoada mais devagar | Feito (D-038), aguardando teste do Lucas |
+| Avoada mais devagar | Feito (D-038), aguardando teste do Lucas |
+| Volta de 360° com toques duplos; toque simples como antes | Feito (D-039), aguardando teste do Lucas |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |
 | Bots disputando | Melhorou: em 3 min de teste houve vários laços e cortes |

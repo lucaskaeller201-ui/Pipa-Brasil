@@ -103,10 +103,12 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		var linha := (k.position - hand_position).normalized()
 		var cima := (Vector3.UP - linha * Vector3.UP.dot(linha)).normalized()
 		var direita := linha.cross(cima).normalized()
-		# Sentido fixo visto da mão (horário = direita), não o lado para onde o
-		# bico aponta agora: assim toques seguidos dão a volta inteira (D-038).
-		var s := signf(n.cross(cima).dot(direita))
+		var bico := k.rotation * Vector3.UP
+		var s := signf(n.cross(bico).dot(direita))
 		k.kick_sign = input.kick_side * (s if s != 0.0 else 1.0)
+		if input.kick_spin != 0.0:
+			k.kick_sign = signf(input.kick_spin)   # volta: continua no mesmo sentido (D-039)
+		k.kick_scale = input.kick_scale
 	# Memória da pressão: para a largada (puxa, e solta de uma vez no relô).
 	tension_memo = maxf(tension, tension_memo - 6.0 * h)
 	tenteio_age = 0.0 if k.spin_mode == KiteBody.SpinMode.SPIN_KICK else tenteio_age + h

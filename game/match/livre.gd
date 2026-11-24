@@ -58,11 +58,16 @@ var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
-var _ultimo_toque := -99.0      # instante do último tenteio (s)
-## Toques seguidos (menos que isso entre eles) continuam girando para o mesmo
-## lado: dá a volta de 360° com a pipa. Com pausa, o próximo vai para o outro
-## lado (desbica da esquerda para a direita). D-038.
-const TOQUE_SEGUIDO_S := 0.45
+var _ultimo_toque := -99.0      # instante do último toque (s)
+var _ultimo_duplo := -99.0      # instante do último toque duplo (s)
+var _sentido_volta := 0.0       # sentido do giro na volta com a pipa
+## Tenteio (D-039), como no Pipa Combate:
+## - toque simples: cada toque para um lado (desbica da esquerda para a direita);
+## - toque DUPLO (dois toques rápidos): a pipa continua girando no mesmo
+##   sentido; uns 6 toques duplos seguidos dão a volta inteira (360°).
+const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
+const VOLTA_SEGUE_S := 0.9      ## s: toque duplo logo depois de outro continua a volta
+const VOLTA_SEGUNDO_TOQUE := 0.1   ## o 2º toque do duplo é só um empurrãozinho
 
 # interface
 var _placar: Label
@@ -296,16 +301,29 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 		d["puxou"] = true   # este dedo é de puxar (enquanto estiver na tela)
 
 
-## Tenteio pelo toque: seguido do anterior, mesmo lado (dá a volta); depois de
-## uma pausa, troca de lado.
+## Tenteio pelo toque (D-039): toque simples alterna o lado; o toque duplo
+## continua girando no mesmo sentido (vários seguidos dão a volta).
 func _tentear() -> void:
 	var agora := Time.get_ticks_msec() / 1000.0
-	var lado := _ultimo_lado if agora - _ultimo_toque < TOQUE_SEGUIDO_S else -_ultimo_lado
+	var eu := modo.you()
+	if eu == null:
+		return
+	if agora - _ultimo_toque < TOQUE_DUPLO_S:
+		# 2º toque do duplo: empurrãozinho no mesmo sentido do 1º.
+		_ultimo_toque = -99.0
+		_ultimo_duplo = agora
+		_sentido_volta = eu.kite.kick_sign
+		_desbicar(_ultimo_lado, _sentido_volta, VOLTA_SEGUNDO_TOQUE)
+		return
 	_ultimo_toque = agora
-	_desbicar(lado)
+	if agora - _ultimo_duplo < VOLTA_SEGUE_S and _sentido_volta != 0.0:
+		# no meio da volta: o 1º toque do próximo duplo segue girando
+		_desbicar(_ultimo_lado, _sentido_volta, 1.0)
+	else:
+		_desbicar(-_ultimo_lado)
 
 
-func _desbicar(lado: float) -> void:
+func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
 	var eu := modo.you()
 	if _automatico or eu == null or eu.cut or eu.pilot == null:
 		return
@@ -313,6 +331,8 @@ func _desbicar(lado: float) -> void:
 	# um lado), sem puxar; o vento traz de volta. Puxe quando apontar certo.
 	_ultimo_lado = lado
 	eu.input.kick_side = lado
+	eu.input.kick_spin = sentido
+	eu.input.kick_scale = escala
 	eu.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, modo.world.time)
 	_embalo = 0.0
 
@@ -474,7 +494,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (cada um para um lado)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (cada um para um lado) · TOQUE DUPLO: gira a pipa (6 seguidos = uma volta)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

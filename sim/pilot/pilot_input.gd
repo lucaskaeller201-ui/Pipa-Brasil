@@ -16,6 +16,11 @@ var reel_in := false    ## Recolher: enrola linha (1,2 m/s, se a força deixar)
 var haul_speed := 0.0
 ## Lado do desbico (D-034): +1 = bico para a direita do pipeiro, -1 = esquerda.
 var kick_side := 1.0
+## Volta com a pipa (D-039): se não for zero, o tenteio gira neste sentido fixo
+## (o mesmo do tenteio anterior), em vez de ir para um lado do céu.
+var kick_spin := 0.0
+## Tamanho do pulo do tenteio (1 = normal).
+var kick_scale := 1.0
 
 
 func clear() -> void:

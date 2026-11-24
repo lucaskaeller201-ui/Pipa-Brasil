@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.13.2 — 2026-11-24
+
+- Tenteio de volta como antes: cada toque para um lado.
+- Toque duplo: a pipa continua girando no mesmo sentido; uns 6 toques duplos
+  seguidos dão a volta de 360°.
+
 ## 0.13.1 — 2026-11-24
 
 - Tenteio: toques seguidos giram para o mesmo lado e dão a volta de 360°;
