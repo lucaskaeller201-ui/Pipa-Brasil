@@ -16,7 +16,7 @@ const PIPA_NOVA_APOS := 3.0      ## s depois do corte
 const SOME_APARADA := 4.0        ## s até a avoada aparada sair do céu
 const SOME_PERDIDA := 6.0        ## s até a avoada perdida sumir do chão
 const RAIO_MAXIMO := 450.0
-const RECOLHER_LINHA := 3.5      ## m: com menos linha que isso a pipa chega na mão (D-037)
+const RECOLHER_LINHA := Pilot.MIN_LINE + 0.5   ## m: linha toda recolhida, a pipa chega na mão (D-037)
 ## Escolhas antes de subir a pipa (D-037). As pipas brasileiras novas entram
 ## aqui quando chegarem as fotos; por enquanto, a do Rio em três montagens.
 const PIPAS := ["Pipa do Rio", "Rabiola curta", "Rabiola longa"]

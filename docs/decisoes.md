@@ -39,7 +39,7 @@ Pedido do Lucas (vídeo da 0.12.1), como no Pipa Combate:
   enquanto a do Rio em três montagens de rabiola, até chegarem as fotos das
   brasileiras) e de linha (Leve, Comum, Forte — linhas fictícias do jogo, que
   mudam só resistência, espessura e peso) e o botão "COLOCAR NO ALTO".
-- Tirar do alto: puxando a linha toda (menos de 3,5 m) a pipa chega na mão; o
+- Tirar do alto: puxando a linha toda (até o mínimo de 5 m) a pipa chega na mão; o
   que estiver enroscado na sua linha, mesmo perto do cabresto, vai para o
   estoque. Depois do corte ou da queda, também volta para a escolha.
 - A aparada (rebocada) vem reta: o giro no próprio plano é zerado.
