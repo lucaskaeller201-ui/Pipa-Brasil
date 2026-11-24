@@ -85,12 +85,12 @@ func test_festival_cinco_rivais_com_jeitos_diferentes() -> void:
 	assert_eq(modo.players.size(), 6)
 	for perfil in ["cacador", "alto", "fujao", "equilibrado"]:
 		assert_true(perfis.has(perfil), "tem bot %s" % perfil)
+	var maior := 0.0
 	for i in 30 * 120:
 		modo.update(1.0 / 120.0)
+		for p in modo.players:
+			if p["profile"] == "alto":
+				maior = maxf(maior, (p["flyer"] as Flyer).line_length())
 	assert_true(modo.world.is_finite_state())
-	var alto: Flyer = null
-	for p in modo.players:
-		if p["profile"] == "alto":
-			alto = p["flyer"]
-	print("      [festival] linha do bot 'alto' depois de 30 s: %.0f m" % alto.line_length())
-	assert_true(alto.line_length() > 30.0, "o bot 'alto' dá linha para ficar lá em cima")
+	print("      [festival] maior linha do bot 'alto' em 30 s: %.0f m" % maior)
+	assert_true(maior > 40.0, "o bot 'alto' dá linha para ficar lá em cima")
