@@ -58,7 +58,7 @@ extends Resource
 @export var spin_pull_drag := 25.0
 ## Desbico (toque, D-031): a pipa se endireita — o bico volta para cima, no
 ## máximo nesta velocidade (graus/s), enquanto dura a folga do toque.
-@export var spin_kick_rate_deg := 560.0   ## 0,08 s × 560°/s ≈ 45° por tenteio
+@export var spin_kick_rate_deg := 700.0   ## 0,08 s × 700°/s ≈ 55° por tenteio
 ## Retorno elástico (D-035): solta (sem comando), o vento traz o bico de volta
 ## para cima com esta "mola" (1/s); 0 = desligado.
 @export var spin_return := 0.0

@@ -74,9 +74,14 @@ func test_deslizar_para_baixo_puxa() -> void:
 	var cena: PackedScene = load("res://scenes/main/main.tscn")
 	var raiz := cena.instantiate()
 	tree.root.add_child(raiz)
-	raiz.call("avancar", 3.0)
 	var modo: FreeMode = raiz.get("modo")
+	assert_true(modo.you_on_hand, "o jogo começa com a pipa na mão (D-037)")
+	assert_null(modo.you(), "nenhuma pipa sua no alto antes de escolher")
+	raiz.call("_process", 1.0 / 60.0)   # a tela sem pipa no alto não quebra
+	raiz.call("_colocar_no_alto")
+	raiz.call("avancar", 3.0)
 	var eu := modo.you()
+	assert_not_null(eu, "colocou a pipa no alto")
 	var toque := InputEventScreenTouch.new()
 	toque.index = 0
 	toque.position = Vector2(640, 300)

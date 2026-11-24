@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.13.0 — 2026-11-24
+
+- O jogo começa com a pipa na mão: escolha a pipa e a linha e toque em
+  "COLOCAR NO ALTO" (como no Pipa Combate).
+- Tirar do alto: puxe a linha toda; o que estiver enroscado vai para o estoque.
+- A pipa aparada vem reta, sem rodar.
+- Tenteio mais forte, com uma puxadinha logo depois do pulo do bico.
+
 ## 0.12.1 — 2026-11-24
 
 - Tenteio mais forte (uns 45° por toque) e o bico fica onde foi por um

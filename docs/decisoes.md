@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-037 — Pipa na mão, tirar do alto, aparada reta, tenteio com puxadinha (2026-11-24)
+Pedido do Lucas (vídeo da 0.12.1), como no Pipa Combate:
+- O jogo começa com a pipa NA MÃO: a tela mostra a escolha de pipa (por
+  enquanto a do Rio em três montagens de rabiola, até chegarem as fotos das
+  brasileiras) e de linha (Leve, Comum, Forte — linhas fictícias do jogo, que
+  mudam só resistência, espessura e peso) e o botão "COLOCAR NO ALTO".
+- Tirar do alto: puxando a linha toda (menos de 3,5 m) a pipa chega na mão; o
+  que estiver enroscado na sua linha, mesmo perto do cabresto, vai para o
+  estoque. Depois do corte ou da queda, também volta para a escolha.
+- A aparada (rebocada) vem reta: o giro no próprio plano é zerado.
+- Tenteio: pulo de uns 55° e, logo depois, uma puxadinha de 0,45 s (força
+  na direção do bico, como a da puxada), para a pipa já sair para o lado.
+- O aviso de pipa enroscada é recontado a cada passo (não fica preso).
+
 ### D-036 — Tenteio que muda a direção; aparar mais fácil (2026-11-24)
 O Lucas achou o tenteio lerdo (não mudava a direção) e o decepar fácil demais.
 Tenteio: pulo de uns 45° (560°/s por 0,08 s); o vento só traz o bico de volta

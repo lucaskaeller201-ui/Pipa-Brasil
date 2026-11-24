@@ -94,3 +94,54 @@ func test_festival_cinco_rivais_com_jeitos_diferentes() -> void:
 	assert_true(modo.world.is_finite_state())
 	print("      [festival] maior linha do bot 'alto' em 30 s: %.0f m" % maior)
 	assert_true(maior > 40.0, "o bot 'alto' dá linha para ficar lá em cima")
+
+
+## Pipa na mão (D-037): escolher pipa e linha, colocar no alto, recolher a
+## linha toda e o que estava enroscado vai para o estoque.
+func test_pipa_na_mao_escolher_subir_e_recolher() -> void:
+	var modo := FreeMode.new(1, 9, false)
+	modo.put_you_on_hand()
+	assert_true(modo.you_on_hand)
+	assert_null(modo.you())
+	for i in 120:
+		modo.update(DT)   # o jogo segue sem a sua pipa
+	modo.launch_you(1, 2)
+	var eu := modo.you()
+	assert_not_null(eu)
+	assert_false(modo.you_on_hand)
+	assert_true(eu.kite.definition.tail_length < KiteDefinition.pipa_rio().tail_length, "rabiola curta")
+	assert_true(eu.line.strength > 1.2, "linha forte aguenta mais (%.2f)" % eu.line.strength)
+	var maior := 0.0
+	for i in 10 * 120:
+		modo.update(DT)
+		maior = maxf(maior, eu.kite.position.y - (modo.players[0]["base"] as Vector3).y)
+	print("      [pipa na mão] rabiola curta + linha forte subiu até %.1f m" % maior)
+	assert_true(maior > 8.0, "a pipa escolhida sobe")
+	# Uma avoada enroscada na sua linha (montada direto) vai para o estoque.
+	var av := modo.world.add_flyer(KiteDefinition.pipa_rio(), Vector3(20.0, 0.0, 0.0), 20.0)
+	av.cut = true
+	av.tag = -1
+	av.caught_by = eu
+	modo.world.combat.links.append({"avoada": av, "catcher": eu, "chain": eu.line, "idx": 2, "cchain": eu.line, "m": 1.0, "captured": false})
+	modo._recolher()
+	assert_true(modo.you_on_hand, "recolheu: pipa na mão")
+	assert_null(modo.you())
+	assert_eq(int(modo.players[0]["stock"]), 1, "a enroscada foi para o estoque")
+	for i in 120:
+		modo.update(DT)
+	assert_false(modo.world.flyers.has(av), "a avoada saiu do céu")
+	assert_true(modo.world.is_finite_state())
+
+
+func test_recolher_a_linha_toda_tira_do_alto() -> void:
+	var modo := FreeMode.new(1, 10, false)
+	for i in 3 * 120:
+		modo.update(DT)
+	var eu := modo.you()
+	for i in 30 * 120:
+		if modo.you_on_hand:
+			break
+		eu.input.clear()
+		eu.input.haul_speed = 4.0
+		modo.update(DT)
+	assert_true(modo.you_on_hand, "puxando a linha toda, a pipa chega na mão (linha %.1f m)" % eu.line_length())

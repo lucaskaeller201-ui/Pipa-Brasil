@@ -41,5 +41,10 @@ func assert_not_null(valor: Variant, mensagem := "") -> void:
 		_fail("valor nulo. %s" % mensagem)
 
 
+func assert_null(valor: Variant, mensagem := "") -> void:
+	if valor != null:
+		_fail("esperava nulo. %s" % mensagem)
+
+
 func _fail(mensagem: String) -> void:
 	failures.append("%s: %s" % [current_test, mensagem])

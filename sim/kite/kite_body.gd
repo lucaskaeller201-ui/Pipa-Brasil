@@ -319,9 +319,15 @@ func update_velocities(h: float) -> void:
 			rotation = (Quaternion(n2, (alvo2 - wn2) * h) * rotation).normalized()
 			angular_velocity += n2 * (alvo2 - wn2)
 		_spin_teto = -1.0
+	if towed:
+		# Aparada vindo para a mão: vem reta, sem girar no próprio plano (D-037).
+		var n3 := rotation * Vector3(0.0, 0.0, 1.0)
+		var wn3 := angular_velocity.dot(n3)
+		rotation = (Quaternion(n3, -wn3 * h) * rotation).normalized()
+		angular_velocity -= n3 * wn3
 	if towed or drifting:
 		# Avoada ou rebocada: balança, mas sem giro de furacão.
-		var lim := deg_to_rad(60.0 if towed else 90.0)
+		var lim := deg_to_rad(25.0 if towed else 90.0)
 		if angular_velocity.length() > lim:
 			angular_velocity = angular_velocity.normalized() * lim
 

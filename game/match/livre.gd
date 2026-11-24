@@ -71,6 +71,10 @@ var _banner: Label
 var _banner_ate := 0.0
 var _tremor := 0.0              # força do tremor da câmera (decai)
 var _lenta_ate := 0.0           # até quando (tempo real) fica em câmera lenta
+var _painel_mao: PanelContainer     # escolher pipa e linha e colocar no alto (D-037)
+var _botoes_pipa: Array = []
+var _botoes_linha: Array = []
+var _rotulo_mao: Label
 var _estatisticas := {"cortes": 0, "aparadas": 0, "perdidas": 0, "melhor_sequencia": 0}
 
 
@@ -100,6 +104,8 @@ func _ready() -> void:
 	_camera.far = 2000.0
 	_camera.current = true
 	add_child(_camera)
+	if not _automatico:
+		modo.put_you_on_hand()
 	_criar_interface()
 	_posicionar_camera(true)
 
@@ -112,7 +118,7 @@ func avancar(segundos: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	var eu := modo.you()
-	if not _automatico and not eu.cut:
+	if not _automatico and eu != null and not eu.cut:
 		_ler_comandos(eu, delta)
 	modo.update(delta)
 	for msg in modo.take_messages():
@@ -171,7 +177,11 @@ func _process(delta: float) -> void:
 	if Engine.time_scale < 1.0 and agora_real > _lenta_ate:
 		Engine.time_scale = 1.0
 	_banner.visible = agora_real < _banner_ate
-	_giro_carretilha += eu.input.haul_speed * delta * 3.0
+	if eu != null:
+		_giro_carretilha += eu.input.haul_speed * delta * 3.0
+	_painel_mao.visible = modo.you_on_hand
+	if modo.you_on_hand:
+		_atualizar_painel_mao()
 	_atualizar_textos(eu)
 	_sobreposicao.queue_redraw()
 
@@ -202,7 +212,8 @@ func _posicionar_camera(imediato: bool) -> void:
 	if not _primeira_pessoa:
 		olho = base + Pilot.SHOULDER + Vector3(1.5, 1.5, 6.5)
 	_corpos[0].visible = not _primeira_pessoa
-	var alvo := eu.kite.position - olho
+	var mira := eu.kite.position if eu != null else olho + Vector3(0.0, 14.0, -22.0)
+	var alvo := mira - olho
 	var dist := alvo.length()
 	# Zoom (1ª pessoa): a pipa ocupa uns 6% da altura da tela. Na 3ª pessoa,
 	# visão aberta para ver as lajes e as outras pipas.
@@ -282,7 +293,7 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 
 func _desbicar(lado: float) -> void:
 	var eu := modo.you()
-	if _automatico or eu.cut or eu.pilot == null:
+	if _automatico or eu == null or eu.cut or eu.pilot == null:
 		return
 	# Tenteio (D-035): o bico dá um pulo curto para um lado (cada toque para
 	# um lado), sem puxar; o vento traz de volta. Puxe quando apontar certo.
@@ -311,10 +322,12 @@ func _atualizar_textos(eu: Flyer) -> void:
 	linhas.append("Total salvo: %d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]])
 	_placar.text = "\n".join(linhas)
 	var p0: Dictionary = modo.players[0]
-	if eu.cut:
-		_info.text = "Sua linha foi cortada. Pipa nova em %d s…" % ceili(maxf(0.0, float(p0["respawn"])))
+	if eu == null:
+		_info.text = "Pipa na mão · estoque %d" % int(p0["stock"])
+	elif eu.cut:
+		_info.text = "Sua linha foi cortada…"
 	else:
-		var extra := "   PIPA ENROSCADA: puxe!" if eu.holding > 0 else ""
+		var extra := "   ENROSCOU: puxe a linha toda para trazer!" if eu.holding > 0 else ""
 		_info.text = "Linha %d m · altura %d m%s" % [roundi(eu.line_length()), roundi(eu.kite.position.y - (p0["base"] as Vector3).y), extra]
 	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate
 	_dica.visible = modo.world.time < 15.0
@@ -481,6 +494,8 @@ func _criar_interface() -> void:
 	_painel_ajustes.add_child(caixa)
 	_ajuste(caixa, "Giro máximo mandando linha (°/s)", 60.0, 900.0, 20.0, velocidade_giro_mandando_linha, "giro")
 	_ajuste(caixa, "Força da puxada (m/s)", 2.0, 10.0, 0.5, forca_puxada, "puxada")
+
+	_criar_painel_mao(raiz)
 
 	var versao := Label.new()
 	versao.text = "PIPA BRASIL %s · build %s" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT]
@@ -657,7 +672,8 @@ func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
 		c.draw_string_outline(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, 6, Color(0, 0, 0, 0.85))
 		c.draw_string(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, cor)
 	# Vento: seta no canto (direção vista da sua câmera) e força.
-	var vento := modo.world.wind.sample(modo.you().kite.position, modo.world.time)
+	var ref := modo.you().kite.position if modo.you() != null else _camera.global_position + Vector3(0.0, 15.0, 0.0)
+	var vento := modo.world.wind.sample(ref, modo.world.time)
 	var na_tela := _camera.global_transform.basis.inverse() * vento
 	var dir := Vector2(na_tela.x, -na_tela.y - na_tela.z * 0.3)
 	if dir.length() > 0.01:
@@ -673,3 +689,73 @@ func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
 
 func _mostrar_aviso_curto(texto: String) -> void:
 	_avisar(texto)
+
+
+# ---------------- pipa na mão (D-037) ----------------
+
+func _criar_painel_mao(raiz: Control) -> void:
+	_painel_mao = PanelContainer.new()
+	_painel_mao.name = "PipaNaMao"
+	_painel_mao.set_anchors_preset(Control.PRESET_CENTER)
+	_painel_mao.offset_left = -380.0
+	_painel_mao.offset_right = 380.0
+	_painel_mao.offset_top = -170.0
+	_painel_mao.offset_bottom = 170.0
+	var fundo := StyleBoxFlat.new()
+	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.8)
+	fundo.set_corner_radius_all(18)
+	fundo.set_content_margin_all(16)
+	_painel_mao.add_theme_stylebox_override("panel", fundo)
+	_painel_mao.add_to_group("botao_livre")
+	raiz.add_child(_painel_mao)
+	var caixa := VBoxContainer.new()
+	caixa.add_theme_constant_override("separation", 8)
+	_painel_mao.add_child(caixa)
+	_rotulo_mao = _rotulo(caixa, 20, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
+	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Pipa:"
+	var linha_p := HBoxContainer.new()
+	caixa.add_child(linha_p)
+	for k in FreeMode.PIPAS.size():
+		var b := _botao(linha_p, String(FreeMode.PIPAS[k]))
+		b.add_theme_font_size_override("font_size", 14)
+		b.pressed.connect(_escolher_pipa.bind(k))
+		_botoes_pipa.append(b)
+	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Linha:"
+	var linha_l := HBoxContainer.new()
+	caixa.add_child(linha_l)
+	for k in FreeMode.LINHAS.size():
+		var b := _botao(linha_l, String(FreeMode.LINHAS[k]))
+		b.add_theme_font_size_override("font_size", 14)
+		b.pressed.connect(_escolher_linha.bind(k))
+		_botoes_linha.append(b)
+	var subir := _botao(caixa, "COLOCAR NO ALTO")
+	subir.name = "ColocarNoAlto"
+	subir.add_theme_font_size_override("font_size", 26)
+	subir.pressed.connect(_colocar_no_alto)
+	_painel_mao.visible = modo.you_on_hand
+
+
+func _escolher_pipa(k: int) -> void:
+	modo.you_kite = k
+
+
+func _escolher_linha(k: int) -> void:
+	modo.you_line = k
+
+
+func _atualizar_painel_mao() -> void:
+	_rotulo_mao.text = "Sua pipa está na mão · estoque: %d\n%s: %s · linha %s: %s" % [int(modo.players[0]["stock"]),
+		FreeMode.PIPAS[modo.you_kite], FreeMode.PIPAS_INFO[modo.you_kite], FreeMode.LINHAS[modo.you_line], FreeMode.LINHAS_INFO[modo.you_line]]
+	for k in _botoes_pipa.size():
+		(_botoes_pipa[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_kite else Color(1, 1, 1, 0.7)
+	for k in _botoes_linha.size():
+		(_botoes_linha[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_line else Color(1, 1, 1, 0.7)
+
+
+func _colocar_no_alto() -> void:
+	if not modo.you_on_hand:
+		return
+	modo.launch_you()
+	_dedos.clear()
+	_embalo = 0.0
+	_painel_mao.visible = false

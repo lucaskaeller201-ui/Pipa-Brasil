@@ -124,7 +124,7 @@ func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
 	_rodar(w, 1.6)
 	var b4 := f.nose_angle_deg()
 	print("      [tenteio] bico %.0f° → (direita) %.0f° → (esquerda) %.0f° → (esquerda) %.0f°; parado 1 s: %.0f°; linha %.1f → %.1f m" % [b0, b1, b2, b3, b4, l0, f.line_length()])
-	assert_true(_dif(b1, b0) > 25.0 and _dif(b1, b0) < 70.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
+	assert_true(_dif(b1, b0) > 35.0 and _dif(b1, b0) < 95.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
 	assert_true(_dif(b2, b1) < -10.0, "toque para a esquerda: pulo para o outro lado (%.0f°)" % _dif(b2, b1))
 	assert_true(_dif(b3, b2) < -5.0, "outro para a esquerda: mais um pouco")
 	assert_true(absf(_dif(b_pausa, b3)) < 15.0, "logo depois do toque, o bico fica onde foi (%.0f° → %.0f°)" % [b3, b_pausa])

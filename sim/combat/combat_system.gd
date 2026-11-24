@@ -288,6 +288,12 @@ func check_snags(flyers: Array) -> void:
 			ct.holding = maxi(0, ct.holding - 1)
 			ct.catches += 1
 			events.append({"type": "aparada", "flyer": av.id, "catcher": ct.id})
+	# Enroscos ainda não trazidos, contados de novo (o aviso não fica preso).
+	for f in flyers:
+		(f as Flyer).holding = 0
+	for l in links:
+		if not bool(l["captured"]):
+			(l["catcher"] as Flyer).holding += 1
 	for f in flyers:
 		var fl: Flyer = f
 		if fl.cut and fl.caught_by == null and not fl.lost and fl.kite_on_ground:

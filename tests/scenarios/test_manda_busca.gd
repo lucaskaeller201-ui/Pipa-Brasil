@@ -93,10 +93,13 @@ func test_puxar_devagar_traz_para_a_mao() -> void:
 	a.input.reel_in = true   # 1,2 m/s: devagar
 	var aparou_em := -1.0
 	var giro_max := 0.0
+	var giro_plano := 0.0
 	for i in roundi(40.0 / DT):
 		w.step(DT)
 		if i > 120 and not b.captured:
 			giro_max = maxf(giro_max, rad_to_deg(b.kite.angular_velocity.length()))
+			var n := b.kite.rotation * Vector3(0.0, 0.0, 1.0)
+			giro_plano = maxf(giro_plano, absf(rad_to_deg(b.kite.angular_velocity.dot(n))))
 		if b.captured:
 			aparou_em = i * DT
 			break
@@ -108,6 +111,8 @@ func test_puxar_devagar_traz_para_a_mao() -> void:
 	assert_eq(a.catches, 1)
 	assert_eq(a.holding, 0)
 	assert_true(giro_max < 200.0, "a rebocada não gira como furacão (%.0f°/s)" % giro_max)
+	print("      [manda busca] giro da rebocada no próprio plano: até %.1f°/s" % giro_plano)
+	assert_true(giro_plano < 5.0, "a aparada vem reta, sem rodar (D-037) (%.1f°/s)" % giro_plano)
 	assert_true(w.is_finite_state())
 
 
