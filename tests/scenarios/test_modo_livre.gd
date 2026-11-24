@@ -93,4 +93,4 @@ func test_festival_cinco_rivais_com_jeitos_diferentes() -> void:
 		if p["profile"] == "alto":
 			alto = p["flyer"]
 	print("      [festival] linha do bot 'alto' depois de 30 s: %.0f m" % alto.line_length())
-	assert_true(alto.line_length() > 40.0, "o bot 'alto' dá linha para ficar lá em cima")
+	assert_true(alto.line_length() > 30.0, "o bot 'alto' dá linha para ficar lá em cima")

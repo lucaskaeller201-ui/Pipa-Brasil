@@ -24,7 +24,14 @@ func test_linhas_lacadas_nao_se_soltam_ate_alguem_cortar() -> void:
 	var w := _mundo()
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
-	b.input.haul_speed = -1.5   # B descarrega; A fica parada
+	# Laçadas e paradas por 1,5 s (a pressão do começo do laço passa), depois
+	# B descarrega devagar (sem largada) e A fica parada.
+	for i in roundi(1.5 / DT):
+		w.step(DT)
+	if a.cut or b.cut:
+		assert_true(false, "ninguém corta só com as linhas paradas")
+		return
+	b.input.haul_speed = -1.5
 	var t := 0.0
 	var soltou := false
 	while not a.cut and not b.cut and t < 30.0:
