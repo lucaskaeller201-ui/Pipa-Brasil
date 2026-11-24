@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-23.
+Atualizado em 2026-11-24 (versão 0.12.1).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -13,6 +13,8 @@ Atualizado em 2026-11-23.
 | Pipa reta: com a linha esticada vai para onde o bico aponta | Feito (D-024) |
 | Câmera com zoom na sua pipa, seta do bico, setas e nomes dos rivais | Feito |
 | Jogar no iPhone pelo Safari (GitHub Pages) | Feito (D-022) |
+| Tenteio que muda a direção (~45° por toque, bico fica onde foi) | Feito (D-036), aguardando teste do Lucas |
+| Aparar mais fácil, decepar só puxando forte por um tempo | Feito (D-036), aguardando teste do Lucas |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |
 | Bots disputando | Melhorou: em 3 min de teste houve vários laços e cortes |
