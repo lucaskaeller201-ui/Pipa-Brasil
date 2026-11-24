@@ -100,7 +100,7 @@ func _decide(o: Dictionary, t: float) -> Dictionary:
 		if absf(nose) < 45.0 and line > line_target + 12.0:
 			d = {"haul": 2.0}
 		# Falta linha (por exemplo, para subir mais): dá linha com o bico para cima.
-		if d.is_empty() and absf(nose) < 40.0 and line < line_target - 4.0:
+		if d.is_empty() and absf(nose) < 60.0 and line < line_target - 4.0:
 			d = {"pay_out": true}
 	# Emergência: bico para baixo, solta a carretilha para parar o mergulho.
 	if absf(nose) > 110.0 and el < 40.0 and line < line_target + 25.0:
