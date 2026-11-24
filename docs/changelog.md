@@ -1,5 +1,15 @@
 # Histórico de alterações
 
+## 0.10.0 — 2026-11-23
+
+Primeiro bloco da lista de pedidos do Lucas (docs/pedidos-do-lucas.md):
+- Festival: 5 rivais, cada um com um jeito de jogar.
+- Corte com impacto: tremor, câmera lenta, "CORTOU! +1"; "AVOOU!" quando
+  cortam você.
+- Barra do relô: verde você está ganhando; vermelho, sua linha vai estourar.
+- Sequência de cortes com multiplicador e "Rei da Laje"; estatísticas salvas.
+- Indicador de vento. Pipa que cai no chão é trocada por uma nova em 6 s.
+
 ## 0.9.1 — 2026-11-23
 
 - Puxar ganha de descarregar: qualquer deslizar para baixo (6 px) já é

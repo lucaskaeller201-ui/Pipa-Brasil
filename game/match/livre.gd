@@ -402,7 +402,7 @@ func _criar_interface() -> void:
 	_sobreposicao.draw.connect(_desenhar_sobreposicao)
 	raiz.add_child(_sobreposicao)
 
-	_placar = _rotulo(raiz, 20, Color(1.0, 0.95, 0.7), HORIZONTAL_ALIGNMENT_LEFT)
+	_placar = _rotulo(raiz, 16, Color(1.0, 0.95, 0.7), HORIZONTAL_ALIGNMENT_LEFT)
 	_placar.position = Vector2(16.0, 28.0)
 	_info = _rotulo(raiz, 20, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 	_info.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
