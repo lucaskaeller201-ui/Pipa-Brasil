@@ -159,6 +159,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.tail_mass = 0.007
 	d.tail_segments = 22
 	d.tail_width = 0.012
+	d.spin_release_drag = 11.0   # a rabiola comprida embala: freia um pouco mais
 	return d
 
 
