@@ -45,7 +45,7 @@ não estão nas tabelas.
 Rabiola: 5 m, 7,5 g, 24 pedaços; fitinhas com ~1 px de largura e ~3 px para
 cada lado (antes cresciam demais com a distância e pareciam mais grossas que
 a pipa).
-Largada: coice de 70 m/s² caindo a zero em 0,6 s e a linha corre junto (até
+Largada: tranco de 9 m/s e coice de 70 m/s² caindo a zero em 0,6 s e a linha corre junto (até 12 m/s; era
 8 m/s no começo); vale puxar e mandar linha até 0,5 s depois.
 
 ### D-044 — Aparo no meio-termo; rabiola comprida, fina e leve (2026-11-24)

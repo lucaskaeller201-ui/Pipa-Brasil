@@ -20,9 +20,11 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 		assert_true(absf(float(m[3]) + float(m[4]) + float(m[5]) - float(m[0])) < 1.0, "%s: medidas somam a vareta central" % estilo["nome"])
 		# a estampa usa mais de uma cor na caixa e na rabeta
 		var cores := {}
-		for x in [-0.8, -0.5, -0.2, 0.0, 0.2, 0.5, 0.8]:
-			for t in [0.4, 0.5, 0.6, 0.7, 0.8]:
-				cores[Estilos.cor(estilo, x, t, 0.3, 0.65)] = true
+		for i in 39:
+			for j in 13:
+				var x := -0.95 + 0.05 * i
+				var t := 0.35 + 0.05 * j
+				cores[Estilos.cor(estilo, x, t, 0.3, 0.65).to_html()] = true
 		assert_true(cores.size() >= 2, "%s tem estampa" % estilo["nome"])
 		v.free()
 

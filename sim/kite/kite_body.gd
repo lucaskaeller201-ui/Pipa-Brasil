@@ -43,6 +43,7 @@ var line_dir := Vector3.UP
 var lunge := 0.0
 const LUNGE_TIME := 0.6
 const LUNGE_ACCEL := 70.0       ## m/s² no começo do coice
+const LUNGE_KICK := 9.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _kick_prev := false
@@ -223,6 +224,9 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 func integrate(h: float) -> void:
 	var m := definition.mass
 	var f := last_aero_force * (0.3 if towed else (0.14 if drifting else 1.0)) + GRAVITY * m
+	if lunge >= LUNGE_TIME:
+		# Largada: o tranco inicial (a pressão guardada solta de uma vez).
+		velocity += (rotation * Vector3.UP) * LUNGE_KICK
 	if lunge > 0.0:
 		# Largada: a pressão guardada solta de uma vez, a pipa dá um coice para
 		# a frente (na direção do bico).

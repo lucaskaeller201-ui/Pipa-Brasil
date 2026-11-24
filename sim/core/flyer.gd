@@ -110,7 +110,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		lunges += 1
 	# Na largada a linha corre solta: a pipa leva linha junto no coice.
 	if not cut and k.lunge > 0.0 and line != null:
-		line.change_length(8.0 * (k.lunge / KiteBody.LUNGE_TIME) * h)
+		line.change_length(12.0 * (k.lunge / KiteBody.LUNGE_TIME) * h)
 	_was_giving = k.spin_mode == KiteBody.SpinMode.SPIN_GIVE
 	k.pull_taut = tension > 1.0
 	# Sentido do giro do desbico, para o bico ir para o lado pedido no céu.
