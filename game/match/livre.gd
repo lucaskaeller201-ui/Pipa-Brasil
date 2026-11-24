@@ -22,7 +22,8 @@ const LinesView := preload("res://game/views/lines_view.gd")
 @export var velocidade_giro_mandando_linha := 720.0
 @export var forca_puxada := 6.0
 
-const BOTS := 3
+const BOTS := 5   ## festival: 5 rivais com jeitos diferentes de jogar
+const ARQUIVO_ESTATISTICAS := "user://estatisticas.json"
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
 const DESCARREGAR := 2.5        ## m/s de linha saindo com o dedo segurado
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
@@ -57,6 +58,11 @@ var _info: Label
 var _dica: Label
 var _sobreposicao: Control
 var _painel_ajustes: PanelContainer
+var _banner: Label
+var _banner_ate := 0.0
+var _tremor := 0.0              # força do tremor da câmera (decai)
+var _lenta_ate := 0.0           # até quando (tempo real) fica em câmera lenta
+var _estatisticas := {"cortes": 0, "aparadas": 0, "perdidas": 0, "melhor_sequencia": 0}
 
 
 func _ready() -> void:
@@ -68,6 +74,7 @@ func _ready() -> void:
 		elif arg.begins_with("--semente="):
 			_semente = arg.trim_prefix("--semente=").to_int()
 	modo = FreeMode.new(BOTS, _semente, _automatico)
+	_carregar_estatisticas()
 	_aplicar_giro()
 	Ambiente.criar_por_do_sol(self, false)
 	Bairro.criar(self, modo.players.size())
@@ -148,6 +155,11 @@ func _process(delta: float) -> void:
 		if fl.tail != null:
 			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(1.0, 0.30, 0.60) if fl.tag <= 0 else cor.darkened(0.1), 0.02)
 	var eu := modo.you()
+	_tratar_acontecimentos()
+	var agora_real := Time.get_ticks_msec() / 1000.0
+	if Engine.time_scale < 1.0 and agora_real > _lenta_ate:
+		Engine.time_scale = 1.0
+	_banner.visible = agora_real < _banner_ate
 	_giro_carretilha += eu.input.haul_speed * delta * 3.0
 	_atualizar_textos(eu)
 	_sobreposicao.queue_redraw()
@@ -198,6 +210,10 @@ func _posicionar_camera(imediato: bool) -> void:
 	else:
 		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.1)
 		_camera.fov = lerpf(_camera.fov, fov, 0.05)
+	# Tremor (corte): deslocamento pequeno da imagem, que some rápido.
+	_camera.h_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
+	_camera.v_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
+	_tremor = maxf(0.0, _tremor - 0.06)
 
 
 # ---------------- gestos ----------------
@@ -267,6 +283,10 @@ func _atualizar_textos(eu: Flyer) -> void:
 	var linhas: Array[String] = []
 	for p in modo.ranking():
 		linhas.append("%s — %d %s · %d %s · estoque %d" % [p["name"], p["cuts"], "corte" if int(p["cuts"]) == 1 else "cortes", p["catches"], "aparada" if int(p["catches"]) == 1 else "aparadas", p["stock"]])
+	var seq := int(modo.players[0]["streak"])
+	if seq >= 2:
+		linhas.append("Sequência: %d cortes · x%d%s" % [seq, _multiplicador(seq), "  · REI DA LAJE" if seq >= 3 else ""])
+	linhas.append("Total salvo: %d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]])
 	_placar.text = "\n".join(linhas)
 	var p0: Dictionary = modo.players[0]
 	if eu.cut:
@@ -299,6 +319,7 @@ func _desenhar_sobreposicao() -> void:
 	var cabo := centro + Vector2.from_angle(_giro_carretilha) * 58.0
 	c.draw_circle(cabo, 11.0, Color(0.25, 0.15, 0.08))
 
+	_desenhar_relo_e_vento(c, tela)
 	# Faísca nos pontos em que as linhas estão laçadas.
 	for p in modo.world.combat.contact_points:
 		if _camera.is_position_behind(p):
@@ -395,6 +416,14 @@ func _criar_interface() -> void:
 	_aviso.offset_right = 420.0
 	_aviso.offset_top = 70.0
 	_aviso.offset_bottom = 160.0
+	_banner = _rotulo(raiz, 48, Color(1.0, 0.82, 0.15), HORIZONTAL_ALIGNMENT_CENTER)
+	_banner.set_anchors_preset(Control.PRESET_CENTER)
+	_banner.offset_left = -520.0
+	_banner.offset_right = 520.0
+	_banner.offset_top = -120.0
+	_banner.offset_bottom = -40.0
+	_banner.add_theme_constant_override("outline_size", 12)
+	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
 	_dica.text = "SEGURE o dedo: descarrega (a pipa gira) · SOLTE: ela firma · Deslize para BAIXO: puxa · TOQUE: desbica"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -514,3 +543,107 @@ func _ajuste(caixa: VBoxContainer, nome: String, minimo: float, maximo: float, p
 	caixa.add_child(s)
 	rotulo.text = "%s: %s" % [nome, str(valor)]
 	s.value_changed.connect(_ao_ajustar.bind(qual, rotulo, nome))
+
+
+
+# ---------------- impacto, relô, sequência e estatísticas ----------------
+
+func _tratar_acontecimentos() -> void:
+	for e in modo.take_screen_events():
+		match e["type"]:
+			"corte":
+				if int(e["autor"]) == 0:
+					_tremor = 1.0
+					_camera_lenta(0.3)
+					var seq := int(modo.players[0]["streak"])
+					_mostrar_banner("CORTOU! +%d" % _multiplicador(seq) if seq < 3 else "CORTOU! +%d · REI DA LAJE!" % _multiplicador(seq))
+					_estatisticas["cortes"] = int(_estatisticas["cortes"]) + 1
+					_estatisticas["melhor_sequencia"] = maxi(int(_estatisticas["melhor_sequencia"]), seq)
+					_salvar_estatisticas()
+				elif int(e["vitima"]) == 0:
+					_tremor = 0.7
+					_mostrar_banner("AVOOU! Sua linha foi cortada.")
+					_estatisticas["perdidas"] = int(_estatisticas["perdidas"]) + 1
+					_salvar_estatisticas()
+			"aparada":
+				if int(e["quem"]) == 0:
+					_mostrar_banner("APAROU! A pipa foi para o estoque.")
+					_estatisticas["aparadas"] = int(_estatisticas["aparadas"]) + 1
+					_salvar_estatisticas()
+
+
+## Sequência de cortes sem perder a pipa: 2 seguidos valem 2, 3 ou mais valem 3, 5 ou mais valem 5.
+func _multiplicador(seq: int) -> int:
+	if seq >= 5:
+		return 5
+	if seq >= 3:
+		return 3
+	if seq >= 2:
+		return 2
+	return 1
+
+
+func _camera_lenta(segundos: float) -> void:
+	Engine.time_scale = 0.3
+	_lenta_ate = Time.get_ticks_msec() / 1000.0 + segundos
+
+
+func _mostrar_banner(texto: String) -> void:
+	_banner.text = texto
+	_banner_ate = Time.get_ticks_msec() / 1000.0 + 2.0
+
+
+func _carregar_estatisticas() -> void:
+	if not FileAccess.file_exists(ARQUIVO_ESTATISTICAS):
+		return
+	var f := FileAccess.open(ARQUIVO_ESTATISTICAS, FileAccess.READ)
+	if f == null:
+		return
+	var dados = JSON.parse_string(f.get_as_text())
+	if dados is Dictionary:
+		for k in _estatisticas:
+			if (dados as Dictionary).has(k):
+				_estatisticas[k] = int(dados[k])
+
+
+func _salvar_estatisticas() -> void:
+	var f := FileAccess.open(ARQUIVO_ESTATISTICAS, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify(_estatisticas))
+
+
+## Barra do relô (verde = você está ganhando; vermelho = sua linha vai
+## estourar, descarregue!) e indicador de vento.
+func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
+	var fonte := ThemeDB.fallback_font
+	var r := modo.your_relo()
+	if not r.is_empty():
+		var forca: float = maxf(0.01, float(r["strength"]))
+		var eu := clampf(float(r["you"]) / forca, 0.0, 1.0)
+		var ele := clampf(float(r["them"]) / forca, 0.0, 1.0)
+		var largura := 420.0
+		var x0 := (tela.x - largura) * 0.5
+		var y0 := 170.0
+		c.draw_rect(Rect2(x0 - 4, y0 - 4, largura + 8, 30), Color(0, 0, 0, 0.55))
+		# metade esquerda: quanto a SUA linha já gastou; direita: a dele
+		c.draw_rect(Rect2(x0, y0, largura * 0.5 * eu, 22), Color(0.95, 0.2, 0.15))
+		c.draw_rect(Rect2(x0 + largura * 0.5, y0, largura * 0.5 * ele, 22), Color(0.2, 0.85, 0.3))
+		c.draw_line(Vector2(x0 + largura * 0.5, y0 - 4), Vector2(x0 + largura * 0.5, y0 + 26), Color.WHITE, 2.0)
+		var nome := String(modo.players[int(r["other"])]["name"]) if int(r["other"]) >= 0 else "rival"
+		var aviso := "RELÔ com %s — você está ganhando!" % nome if ele >= eu else "RELÔ com %s — sua linha vai estourar, descarregue!" % nome
+		var cor := Color(0.4, 1.0, 0.5) if ele >= eu else Color(1.0, 0.45, 0.35)
+		c.draw_string_outline(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, 6, Color(0, 0, 0, 0.85))
+		c.draw_string(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, cor)
+	# Vento: seta no canto (direção vista da sua câmera) e força.
+	var vento := modo.world.wind.sample(modo.you().kite.position, modo.world.time)
+	var na_tela := _camera.global_transform.basis.inverse() * vento
+	var dir := Vector2(na_tela.x, -na_tela.y - na_tela.z * 0.3)
+	if dir.length() > 0.01:
+		dir = dir.normalized()
+	var centro := Vector2(tela.x - 70.0, 120.0)
+	c.draw_circle(centro, 34.0, Color(0, 0, 0, 0.4))
+	c.draw_line(centro - dir * 22.0, centro + dir * 22.0, Color(0.85, 0.95, 1.0), 4.0)
+	c.draw_colored_polygon(PackedVector2Array([centro + dir * 30.0, centro + dir * 16.0 + dir.orthogonal() * 9.0, centro + dir * 16.0 - dir.orthogonal() * 9.0]), Color(0.85, 0.95, 1.0))
+	var txt := "vento %d m/s" % roundi(vento.length())
+	c.draw_string_outline(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, 5, Color(0, 0, 0, 0.8))
+	c.draw_string(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)

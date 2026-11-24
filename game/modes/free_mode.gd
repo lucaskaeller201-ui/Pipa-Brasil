@@ -26,6 +26,12 @@ var _remocoes: Array = []        ## [Flyer, instante (s)]
 var _rng := RandomNumberGenerator.new()
 ## Velocidade do giro mandando linha da SUA pipa (graus/s), ajustável na tela.
 var your_spin_rate := 900.0
+## Acontecimentos para a tela (tremor, câmera lenta, avisos): {"type", ...}
+var screen_events: Array = []
+## Jeitos de jogar dos bots (Prompt 2 do Lucas): "alto" fica lá em cima
+## esperando; "cacador" vai atrás da sua pipa; "fujao" foge do relô dando
+## linha; "equilibrado" troca de alvo de tempos em tempos.
+const PERFIS := ["cacador", "alto", "equilibrado", "fujao", "cacador", "alto", "equilibrado"]
 
 
 ## n_bots rivais; se `you_bot`, um bot também pilota a sua pipa (testes, capturas).
@@ -46,12 +52,15 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 			"name": "Você" if i == 0 else String(nomes[i - 1]),
 			"base": (Bairro.LAJES[i] as Vector3) + Vector3(0.0, Bairro.ALTURA_LAJE, 0.0),
 			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0, "stock": 0,
+			"streak": 0, "profile": "jogador" if i == 0 else String(PERFIS[(i - 1) % PERFIS.size()]),
 		}
 		if i > 0 or you_bot:
 			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]
 			var nivel: BotDifficulty.Level = BotDifficulty.Level.DIFICIL if i == 0 else niveis[i % 3]
 			var bot := BotPilot.new(BotDifficulty.create(nivel), seed_ * 31 + i)
 			bot.line_target = _rng.randf_range(30.0, 55.0)
+			if p["profile"] == "alto":
+				bot.line_target = _rng.randf_range(65.0, 85.0)
 			p["bot"] = bot
 		players.append(p)
 		_lancar(i)
@@ -84,6 +93,9 @@ func update(dt: float) -> void:
 		if bot != null and f != null and not f.cut:
 			bot.target_azimuth = _mira(i)
 			bot.update(f, t)
+			# Fujão: com a linha laçada (dá para ver), descarrega para escapar.
+			if p["profile"] == "fujao" and _lacado(f):
+				f.input.haul_speed = -2.0
 	world.step(dt)
 	for e in world.combat.take_events():
 		_evento(e)
@@ -122,9 +134,34 @@ func _agendada(f: Flyer) -> bool:
 
 ## Para onde o bot i mira: a pipa de outro participante, trocando de alvo de
 ## tempos em tempos (cada bot tem o seu).
+func _lacado(f: Flyer) -> bool:
+	for e in world.combat.engagements:
+		if e["a"] == f or e["b"] == f:
+			return true
+	return false
+
+
+## Relô da sua linha agora: {"other": índice do rival, "you": desgaste da sua
+## linha no laço, "them": desgaste da dele} ou vazio.
+func your_relo() -> Dictionary:
+	var eu := you()
+	for e in world.combat.engagements:
+		if e["a"] == eu or e["b"] == eu:
+			var outro: Flyer = e["b"] if e["a"] == eu else e["a"]
+			var w_eu := float(e.get("wa", 0.0)) if e["a"] == eu else float(e.get("wb", 0.0))
+			var w_ele := float(e.get("wb", 0.0)) if e["a"] == eu else float(e.get("wa", 0.0))
+			return {"other": outro.tag, "you": w_eu, "them": w_ele, "strength": eu.line.strength if eu.line != null else 1.0}
+	return {}
+
+
 func _mira(i: int) -> float:
 	var me: Flyer = players[i]["flyer"]
+	var perfil := String(players[i]["profile"])
+	if perfil == "alto":
+		return 0.0
 	var alvo_i := (i + 1 + int(world.time / 25.0)) % players.size()
+	if perfil == "cacador":
+		alvo_i = 0
 	if alvo_i == i:
 		alvo_i = (alvo_i + 1) % players.size()
 	var outro: Flyer = players[alvo_i]["flyer"]
@@ -164,8 +201,11 @@ func _evento(e: Dictionary) -> void:
 				return
 			players[vitima]["losses"] = int(players[vitima]["losses"]) + 1
 			players[vitima]["respawn"] = PIPA_NOVA_APOS
+			players[vitima]["streak"] = 0
+			screen_events.append({"type": "corte", "autor": autor, "vitima": vitima})
 			if autor >= 0 and autor != vitima:
 				players[autor]["cuts"] = int(players[autor]["cuts"]) + 1
+				players[autor]["streak"] = int(players[autor]["streak"]) + 1
 				_messages.append("%s cortou %s!" % [_nome(autor), _nome_obj(vitima)])
 			else:
 				_messages.append("A linha de %s rompeu!" % _nome_obj(vitima))
@@ -194,6 +234,7 @@ func _evento(e: Dictionary) -> void:
 			if quem >= 0:
 				players[quem]["catches"] = int(players[quem]["catches"]) + 1
 				players[quem]["stock"] = int(players[quem]["stock"]) + 1
+				screen_events.append({"type": "aparada", "quem": quem})
 				_messages.append("MANDA BUSCA! %s aparou a pipa." % _nome(quem))
 
 
@@ -203,3 +244,9 @@ func _nome(i: int) -> String:
 
 func _nome_obj(i: int) -> String:
 	return "você" if i == 0 else String(players[i]["name"])
+
+
+func take_screen_events() -> Array:
+	var e := screen_events
+	screen_events = []
+	return e

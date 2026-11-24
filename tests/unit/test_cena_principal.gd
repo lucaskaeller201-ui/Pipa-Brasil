@@ -55,7 +55,7 @@ func test_modo_livre_abre_e_as_pipas_voam() -> void:
 	assert_not_null(raiz.find_child("Sobreposicao", true, false), "faltou a sobreposição (carretilha e setas)")
 	var modo: FreeMode = raiz.get("modo")
 	assert_not_null(modo)
-	assert_eq(modo.players.size(), 4, "você e 3 bots")
+	assert_eq(modo.players.size(), 6, "você e 5 bots (festival)")
 	var alto := {}
 	for k in 20:
 		raiz.call("avancar", 1.0)

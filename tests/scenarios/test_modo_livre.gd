@@ -65,3 +65,23 @@ func test_quatro_pipeiros_dois_minutos_sem_tempo_limite() -> void:
 	for p in modo.players:
 		var f: Flyer = p["flyer"]
 		assert_true(f.cut or f.kite.position.y > 6.0, "%s está voando ou esperando pipa nova" % p["name"])
+
+
+func test_festival_cinco_rivais_com_jeitos_diferentes() -> void:
+	var modo := FreeMode.new(5, 7, true)
+	var perfis := {}
+	for p in modo.players:
+		perfis[p["profile"]] = true
+	print("      [festival] perfis: %s" % [perfis.keys()])
+	assert_eq(modo.players.size(), 6)
+	for perfil in ["cacador", "alto", "fujao", "equilibrado"]:
+		assert_true(perfis.has(perfil), "tem bot %s" % perfil)
+	for i in 30 * 120:
+		modo.update(1.0 / 120.0)
+	assert_true(modo.world.is_finite_state())
+	var alto: Flyer = null
+	for p in modo.players:
+		if p["profile"] == "alto":
+			alto = p["flyer"]
+	print("      [festival] linha do bot 'alto' depois de 30 s: %.0f m" % alto.line_length())
+	assert_true(alto.line_length() > 40.0, "o bot 'alto' dá linha para ficar lá em cima")
