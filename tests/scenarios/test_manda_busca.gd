@@ -122,6 +122,10 @@ func test_puxar_rapido_decepa_e_a_avoada_escapa() -> void:
 	a.input.haul_speed = 6.0
 	w.step(DT)
 	w.step(DT)
+	var no_tranco := _eventos_do_tipo(w.combat.take_events(), "decepou").size()
+	assert_eq(no_tranco, 0, "um tranco curto não decepa")
+	for i in roundi(0.4 / DT):
+		w.step(DT)
 	a.input.clear()
 	var eventos := _eventos_do_tipo(w.combat.take_events(), "decepou")
 	print("      [decepou] eventos %d; pedaços soltos %d → %d" % [eventos.size(), soltos_antes, w.loose_chains.size()])

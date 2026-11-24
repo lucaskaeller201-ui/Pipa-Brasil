@@ -32,6 +32,9 @@ var kick_sign := 1.0
 ## "pressão" para a pipa ir longe para os lados (e até para trás).
 var pull_speed := 0.0
 var pull_taut := false
+## Segundos desde o último tenteio: o vento só traz o bico de volta depois de
+## uma pausa (D-036), para o tenteio mudar a direção de verdade.
+var since_kick := 99.0
 var _spin_controlado := false
 var _spin_alvo := 0.0
 var _spin_teto := -1.0
@@ -245,7 +248,7 @@ func integrate(h: float) -> void:
 				# solta, mas sem furacão: nunca mais rápido que o teto do giro
 				var teto_livre := deg_to_rad(d.spin_give_rate_deg)
 				novo = clampf(novo, -teto_livre, teto_livre)
-				if d.spin_return > 0.0 and not drifting and not towed:
+				if d.spin_return > 0.0 and not drifting and not towed and since_kick > 0.6:
 					# Retorno elástico (D-035): o vento traz o bico para cima.
 					var bico := rotation * Vector3.UP
 					var cima := Vector3.UP - nn * Vector3.UP.dot(nn)

@@ -27,8 +27,9 @@ var wear_rate := 1.0           ## desgaste por (N · m/s · s), no ponto de cont
 var events: Array = []
 
 const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considerada aparada
-const TANGLE_TIME := 0.4       ## s mandando linha em contato para embolar (D-029)
+const TANGLE_TIME := 0.25      ## s mandando linha em contato para embolar (D-029)
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
+const DECEPAR_TEMPO := 0.35   ## s seguidos puxando forte em contato para decepar (D-036)
 const CUT_RATE := 5.5          ## m/s de linha puxada acima dos quais o contato decepa
 const DECEPAR_GRACE := 4.0     ## s depois do corte em que a avoada não decepa (dá tempo de aparar)
 const LARGADA_PRESSAO := 8.0  ## N: pressão (puxada) acima do voo parado que arma a largada
@@ -50,6 +51,8 @@ var contact_points: PackedVector3Array = PackedVector3Array()
 var _pairs: Array = []
 var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
 var _clock := 0.0
+var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
+var _cut_acc := {}             ## avoada -> s puxando forte em contato
 var _last_cut := {}            ## avoada -> instante do último decepar
 var _pending_cuts: Array = []  ## [avoada, cadeia, segmento, quem decepou]
 var _h := 0.0
@@ -118,7 +121,20 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	for l in links:
 		var ct: Flyer = l["catcher"]
 		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
-			_pending_cuts.append([l["avoada"], l["chain"], maxi(0, int(l["idx"]) - 1), ct])
+			_cut_want[l["avoada"]] = [l["chain"], maxi(0, int(l["idx"]) - 1), ct]
+	# Decepar só com puxada forte SUSTENTADA (D-036), não com um tranco.
+	for av in _cut_acc.keys():
+		if not _cut_want.has(av):
+			_cut_acc[av] = float(_cut_acc[av]) - 2.0 * h
+			if float(_cut_acc[av]) <= 0.0:
+				_cut_acc.erase(av)
+	for av in _cut_want:
+		_cut_acc[av] = float(_cut_acc.get(av, 0.0)) + h
+		if float(_cut_acc[av]) >= DECEPAR_TEMPO:
+			var c: Array = _cut_want[av]
+			_pending_cuts.append([av, c[0], c[1], c[2]])
+			_cut_acc.erase(av)
+	_cut_want.clear()
 	for c in _pending_cuts:
 		var av: Flyer = c[0]
 		if _clock - float(_last_cut.get(av, -10.0)) < 0.5 or (c[1] != av.trailing_line and c[1] != av.tail):
@@ -150,9 +166,9 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 			continue
 		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
 			if av.cut_age > DECEPAR_GRACE:
-				_pending_cuts.append([av, chain, av_seg, ct])
+				_cut_want[av] = [chain, av_seg, ct]
 			return
-		if ct.kite.spin_mode != KiteBody.SpinMode.SPIN_GIVE:
+		if not _girando(ct):
 			return
 		# Encostou mandando linha: o embolo começa (ou continua) a se formar.
 		var chave := Vector2i(av.get_instance_id(), ct.get_instance_id())
@@ -176,7 +192,7 @@ func _advance_tangles(h: float) -> void:
 		var t: Dictionary = _tangle[chave]
 		var av: Flyer = t["av"]
 		var ct: Flyer = t["ct"]
-		var ativo := _clock - float(t["last"]) < TANGLE_GAP and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE
+		var ativo := _clock - float(t["last"]) < TANGLE_GAP and _girando(ct)
 		t["t"] = float(t["t"]) + (h if ativo else -0.5 * h)
 		if float(t["t"]) <= 0.0 or av.caught_by != null or ct.cut or not av.cut:
 			_tangle.erase(chave)
@@ -339,6 +355,7 @@ func take_events() -> Array:
 
 ## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
 func forget(f: Flyer) -> void:
+	_cut_acc.erase(f)
 	_last_cut.erase(f)
 	for e in engagements.duplicate():
 		if e["a"] == f or e["b"] == f:
@@ -423,3 +440,8 @@ func _largada(f: Flyer) -> float:
 	if f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > LARGADA_PRESSAO and f.line_rate > 1.5:
 		return 2.0
 	return 1.0
+
+
+## Girando a pipa para embolar: mandando linha ou tenteando.
+func _girando(f: Flyer) -> bool:
+	return f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE or f.kite.spin_mode == KiteBody.SpinMode.SPIN_KICK or f.tenteio_age < 0.4

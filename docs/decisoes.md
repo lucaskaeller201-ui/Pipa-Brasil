@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-036 — Tenteio que muda a direção; aparar mais fácil (2026-11-24)
+O Lucas achou o tenteio lerdo (não mudava a direção) e o decepar fácil demais.
+Tenteio: pulo de uns 45° (560°/s por 0,08 s); o vento só traz o bico de volta
+depois de 0,6 s sem tenteio, e mais devagar (mola 2,5/s) — dá tempo de puxar
+para o lado escolhido. Aparar: embola com 0,25 s girando em contato, e
+tenteando também conta como girar. Decepar exige puxar forte (acima de 5,5 m/s)
+SEGUIDO por 0,35 s em contato; um tranco não decepa.
+
 ### D-035 — Tenteio (2026-11-24)
 O Lucas descreveu o tenteio do Pipa Combate: toques curtos dão impulsos de
 rotação curtos, cada toque para um lado, sem puxar a pipa; parando de tocar,

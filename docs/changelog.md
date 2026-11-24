@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.12.1 — 2026-11-24
+
+- Tenteio mais forte (uns 45° por toque) e o bico fica onde foi por um
+  instante antes do vento trazer de volta.
+- Aparar mais fácil: embola mais rápido, tenteando também embola; decepar só
+  puxando forte por um tempo (um tranco não decepa).
+
 ## 0.12.0 — 2026-11-24
 
 - Tenteio: cada toque dá um pulo curto no bico, um para cada lado, sem puxar;
