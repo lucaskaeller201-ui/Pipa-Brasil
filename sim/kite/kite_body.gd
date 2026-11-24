@@ -389,12 +389,17 @@ func d_pull_assist() -> float:
 ## Ângulo do bico em relação ao "para cima", no plano da pipa (rad, com sinal:
 ## girar com velocidade positiva em torno da normal diminui este ângulo).
 func _nose_ang(nn: Vector3) -> float:
+	# Medido no céu (em torno da linha), não no plano da pipa: assim a pipa
+	# murchar de lado não muda o ângulo do bico (D-042).
+	var eixo := line_dir * (1.0 if nn.dot(line_dir) >= 0.0 else -1.0)
+	if line_dir.length_squared() < 0.5:
+		eixo = nn
 	var bico := rotation * Vector3.UP
-	var cima := Vector3.UP - nn * Vector3.UP.dot(nn)
-	if cima.length_squared() < 1e-6:
+	bico -= eixo * bico.dot(eixo)
+	var cima := Vector3.UP - eixo * Vector3.UP.dot(eixo)
+	if cima.length_squared() < 1e-6 or bico.length_squared() < 1e-6:
 		return 0.0
-	cima = cima.normalized()
-	return atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
+	return atan2(eixo.dot(bico.cross(cima)), bico.normalized().dot(cima.normalized()))
 
 
 ## Inclinação de lado (rad): quanto a face da pipa virou em torno do eixo do
