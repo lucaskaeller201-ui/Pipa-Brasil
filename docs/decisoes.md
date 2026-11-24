@@ -33,6 +33,21 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-045 — Modelos de pipa com medidas reais; rabiola maior e fitinhas finas; largada forte (2026-11-24)
+O Lucas mandou moldes da Voar Pipas e a página "Pipas e medidas" da Escola de
+Pipeiros. Agora há 20 modelos (GT, Pizza, Come Rato, Mucha Mucha, Carrapeta,
+Britt, Charutinho, Palito, Bicuda, Gigante, Vanda, Latão, Francesinha, Lápis,
+Charuto, Batata, Bicão…), cada um com as medidas do pipeiro (vareta central,
+vareta de cima e de baixo, bico, caixa e rabeta), desenhados na escala da
+pipa da física, com a estampa do molde (aproximada) e as varetas. Só visual
+por enquanto: todos voam com a física da pipa do Rio. Flechinha e Veloster
+não estão nas tabelas.
+Rabiola: 5 m, 7,5 g, 24 pedaços; fitinhas com ~1 px de largura e ~3 px para
+cada lado (antes cresciam demais com a distância e pareciam mais grossas que
+a pipa).
+Largada: coice de 70 m/s² caindo a zero em 0,6 s e a linha corre junto (até
+8 m/s no começo); vale puxar e mandar linha até 0,5 s depois.
+
 ### D-044 — Aparo no meio-termo; rabiola comprida, fina e leve (2026-11-24)
 Pedido do Lucas (vídeos do Manda Busca e Pipa Combate):
 - Aparada: puxar num ritmo normal traz para a mão sem decepar. Decepar exige

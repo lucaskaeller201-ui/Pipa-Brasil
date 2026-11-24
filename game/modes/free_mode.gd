@@ -19,7 +19,7 @@ const RAIO_MAXIMO := 450.0
 const RECOLHER_LINHA := Pilot.MIN_LINE + 0.5   ## m: linha toda recolhida, a pipa chega na mão (D-037)
 ## Escolhas antes de subir a pipa (D-037). As pipas brasileiras novas entram
 ## aqui quando chegarem as fotos; por enquanto, a do Rio em três montagens.
-const PIPAS := ["Pipa do Rio", "Rabiola curta", "Rabiola longa"]
+const PIPAS := ["Rabiola média", "Rabiola curta", "Rabiola longa"]
 const PIPAS_INFO := ["a de sempre", "mais ágil: gira e tenteia mais rápido", "mais firme: gira mais devagar"]
 const LINHAS := ["Leve", "Comum", "Forte"]
 const LINHAS_INFO := ["sobe fácil, mas rompe antes", "equilibrada", "pesada (faz barriga), mas aguenta mais no relô"]
@@ -72,7 +72,7 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 			"base": (Bairro.LAJES[i] as Vector3) + Vector3(0.0, Bairro.ALTURA_LAJE, 0.0),
 			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0, "stock": 0,
 			"streak": 0, "profile": "jogador" if i == 0 else String(PERFIS[(i - 1) % PERFIS.size()]),
-			"style": 0 if i == 0 else 1 + (i - 1 + seed_) % 7,
+			"style": 0 if i == 0 else (i * 3 + seed_) % 20,
 		}
 		if i > 0 or you_bot:
 			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]

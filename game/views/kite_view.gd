@@ -44,8 +44,16 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 	var right := def.corners[3]
 	linhas.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	linhas.surface_set_color(Color(0.35, 0.22, 0.10))
-	for p in [top, bottom, left, right]:
-		linhas.surface_add_vertex(p)
+	if estilo.is_empty():
+		for p in [top, bottom, left, right]:
+			linhas.surface_add_vertex(p)
+	else:
+		# vareta central e as duas varetas atravessadas do modelo
+		var c := contorno(def, estilo)
+		var sup: Vector3 = c[1]
+		var inf: Vector3 = c[2]
+		for p in [c[0], c[3], Vector3(-sup.x, sup.y, 0.0), sup, Vector3(-inf.x, inf.y, 0.0), inf]:
+			linhas.surface_add_vertex(p)
 	linhas.surface_set_color(Color(0.95, 0.95, 0.95))
 	var meio_espinha := Vector3(0.0, -0.2, 0.0)
 	for p in [top, def.tow_point, def.tow_point, meio_espinha]:
@@ -62,41 +70,68 @@ func atualizar(kite: KiteBody) -> void:
 	transform = Transform3D(Basis(kite.rotation), kite.position)
 
 
-## Vela em grade (estampa por ponto) e, no peixinho, o rabo de peixe embaixo.
+## Vela no formato do modelo (D-045): bico, caixa e rabeta com as medidas
+## do pipeiro, na escala do comprimento da pipa da física; estampa por ponto.
 func _vela_estampada(st: SurfaceTool, def: KiteDefinition, estilo: Dictionary) -> void:
+	var pts := contorno(def, estilo)
+	var top: Vector3 = pts[0]
+	var sup_d: Vector3 = pts[1]
+	var inf_d: Vector3 = pts[2]
+	var bottom: Vector3 = pts[3]
+	var meia := maxf(sup_d.x, inf_d.x)
+	var comprimento := top.y - bottom.y
+	var tb := (top.y - sup_d.y) / comprimento
+	var tc := (top.y - inf_d.y) / comprimento
+	# três faixas: bico (ponta → vareta de cima), caixa, rabeta (→ ponta de baixo)
+	var nu := 16
+	var nv := 6
+	for fx in 3:
+		var y0: float
+		var y1: float
+		var w0: float
+		var w1: float
+		if fx == 0:
+			y0 = top.y
+			y1 = sup_d.y
+			w0 = 0.0
+			w1 = sup_d.x
+		elif fx == 1:
+			y0 = sup_d.y
+			y1 = inf_d.y
+			w0 = sup_d.x
+			w1 = inf_d.x
+		else:
+			y0 = inf_d.y
+			y1 = bottom.y
+			w0 = inf_d.x
+			w1 = 0.0
+		for j in nv:
+			var v0 := float(j) / nv
+			var v1 := float(j + 1) / nv
+			var ya := lerpf(y0, y1, v0)
+			var yb := lerpf(y0, y1, v1)
+			var wa := lerpf(w0, w1, v0)
+			var wb := lerpf(w0, w1, v1)
+			for i in nu:
+				var u0 := lerpf(-1.0, 1.0, float(i) / nu)
+				var u1 := lerpf(-1.0, 1.0, float(i + 1) / nu)
+				var p00 := Vector3(u0 * wa, ya, 0.0)
+				var p10 := Vector3(u1 * wa, ya, 0.0)
+				var p11 := Vector3(u1 * wb, yb, 0.0)
+				var p01 := Vector3(u0 * wb, yb, 0.0)
+				var c := (p00 + p10 + p11 + p01) * 0.25
+				st.set_color(Estilos.cor(estilo, c.x / meia, (top.y - c.y) / comprimento, tb, tc))
+				for p in [p00, p10, p11, p00, p11, p01]:
+					st.add_vertex(p)
+
+
+## Pontos do contorno (lado direito): [ponta de cima, vareta de cima, vareta
+## de baixo, ponta de baixo], na escala da pipa da física.
+static func contorno(def: KiteDefinition, estilo: Dictionary) -> Array:
+	var m: Array = estilo["m"]
 	var top := def.corners[0]
 	var bottom := def.corners[1]
-	var left := def.corners[2]
-	var right := def.corners[3]
-	var cy := left.y
-	var meia := maxf(absf(right.x), absf(left.x))
-	var n := 14
-	for i in n:
-		for j in n:
-			var s0 := float(i) / n
-			var s1 := float(i + 1) / n
-			var t0 := float(j) / n
-			var t1 := float(j + 1) / n
-			var p00 := _bilinear(left, top, right, bottom, s0, t0)
-			var p10 := _bilinear(left, top, right, bottom, s1, t0)
-			var p11 := _bilinear(left, top, right, bottom, s1, t1)
-			var p01 := _bilinear(left, top, right, bottom, s0, t1)
-			var c := (p00 + p10 + p11 + p01) * 0.25
-			var nx := c.x / meia
-			var ny := (c.y - cy) / (top.y - cy) if c.y >= cy else (c.y - cy) / (cy - bottom.y)
-			st.set_color(Estilos.cor(estilo, nx, ny))
-			for p in [p00, p10, p11, p00, p11, p01]:
-				st.add_vertex(p)
-	if String(estilo["forma"]) == "peixinho":
-		var cores: Array = estilo["cores"]
-		var h := cy - bottom.y
-		st.set_color(cores[2])
-		var b := bottom
-		for lado in [-1.0, 1.0]:
-			st.add_vertex(b)
-			st.add_vertex(b + Vector3(lado * meia * 0.45, -h * 0.45, 0.0))
-			st.add_vertex(b + Vector3(lado * meia * 0.12, -h * 0.2, 0.0))
-
-
-static func _bilinear(l: Vector3, t: Vector3, r: Vector3, b: Vector3, s: float, u: float) -> Vector3:
-	return l * ((1.0 - s) * (1.0 - u)) + t * (s * (1.0 - u)) + r * (s * u) + b * ((1.0 - s) * u)
+	var s := (top.y - bottom.y) / float(m[0])
+	var sup := Vector3(float(m[1]) * 0.5 * s, top.y - float(m[3]) * s, 0.0)
+	var inf := Vector3(float(m[2]) * 0.5 * s, top.y - (float(m[3]) + float(m[4])) * s, 0.0)
+	return [Vector3(0.0, top.y, 0.0), sup, inf, Vector3(0.0, bottom.y, 0.0)]

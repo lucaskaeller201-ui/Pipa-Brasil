@@ -271,8 +271,8 @@ func test_tenteio_murcha_um_lado() -> void:
 func test_largada_da_coice() -> void:
 	var com := _coice(true)
 	var sem := _coice(false)
-	print("      [largada] avanço na direção do bico em 0,4 s: com puxada antes %.1f m, sem %.1f m" % [com, sem])
-	assert_true(com > sem + 1.0, "a largada dá um coice para a frente")
+	print("      [largada] avanço na direção do bico em 0,6 s: com puxada antes %.1f m, sem %.1f m" % [com, sem])
+	assert_true(com > sem + 3.0, "a largada dá um coice para a frente e vai embora")
 
 
 func _coice(puxar_antes: bool) -> float:
@@ -284,7 +284,7 @@ func _coice(puxar_antes: bool) -> float:
 	f.input.haul_speed = -3.0
 	var bico := f.kite.rotation * Vector3.UP
 	var p0 := f.kite.position
-	_rodar(w, 0.4)
+	_rodar(w, 0.6)
 	f.input.clear()
 	if puxar_antes:
 		assert_eq(f.lunges, 1, "deu uma largada")

@@ -753,7 +753,7 @@ func _criar_painel_mao(raiz: Control) -> void:
 	caixa.add_theme_constant_override("separation", 8)
 	_painel_mao.add_child(caixa)
 	_rotulo_mao = _rotulo(caixa, 20, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
-	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Pipa:"
+	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Rabiola:"
 	var linha_p := HBoxContainer.new()
 	caixa.add_child(linha_p)
 	for k in FreeMode.PIPAS.size():
@@ -796,7 +796,7 @@ func _atualizar_painel_mao() -> void:
 		FreeMode.PIPAS[modo.you_kite], FreeMode.PIPAS_INFO[modo.you_kite], FreeMode.LINHAS[modo.you_line], FreeMode.LINHAS_INFO[modo.you_line]]
 	for k in _botoes_pipa.size():
 		(_botoes_pipa[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_kite else Color(1, 1, 1, 0.7)
-	_botao_desenho.text = "Desenho: %s  (toque para trocar)" % String(Estilos.ESTILOS[modo.you_style]["nome"])
+	_botao_desenho.text = "Pipa: %s  (toque para trocar)" % String(Estilos.ESTILOS[modo.you_style]["nome"])
 	for k in _botoes_linha.size():
 		(_botoes_linha[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_line else Color(1, 1, 1, 0.7)
 

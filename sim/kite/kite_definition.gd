@@ -155,9 +155,9 @@ static func pipa_rio() -> KiteDefinition:
 	d.tail_enabled = true
 	# Rabiola de verdade (D-044): comprida, fina e leve (mais fina e mais leve
 	# que a linha de cortar por metro de arrasto), balança bastante.
-	d.tail_length = 3.5
-	d.tail_mass = 0.0065
-	d.tail_segments = 18
+	d.tail_length = 5.0
+	d.tail_mass = 0.0075
+	d.tail_segments = 24
 	d.tail_width = 0.012
 	d.spin_release_drag = 11.0   # a rabiola comprida embala: freia um pouco mais
 	return d

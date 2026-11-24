@@ -7,7 +7,7 @@ const LinesView := preload("res://game/views/lines_view.gd")
 
 
 func test_todos_os_desenhos_montam_a_pipa() -> void:
-	assert_true(Estilos.ESTILOS.size() >= 6, "vários desenhos")
+	assert_true(Estilos.ESTILOS.size() >= 18, "vários modelos de pipa")
 	for e in Estilos.ESTILOS:
 		var estilo: Dictionary = e
 		var v: Node3D = KiteView.new()
@@ -15,12 +15,14 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 		var vela: MeshInstance3D = v.get_node("Vela")
 		assert_not_null(vela, "%s tem vela" % estilo["nome"])
 		var tris: int = vela.mesh.surface_get_array_len(0) / 3
-		assert_true(tris >= 392, "%s: estampa em grade (%d triângulos)" % [estilo["nome"], tris])
-		# a estampa usa mais de uma cor
+		assert_eq(tris, 3 * 16 * 6 * 2, "%s: bico, caixa e rabeta em grade" % estilo["nome"])
+		var m: Array = estilo["m"]
+		assert_true(absf(float(m[3]) + float(m[4]) + float(m[5]) - float(m[0])) < 1.0, "%s: medidas somam a vareta central" % estilo["nome"])
+		# a estampa usa mais de uma cor na caixa e na rabeta
 		var cores := {}
-		for nx in [-0.6, -0.1, 0.1, 0.6]:
-			for ny in [-0.5, 0.0, 0.3, 0.9]:
-				cores[Estilos.cor(estilo, nx, ny * (1.0 - absf(nx)))] = true
+		for x in [-0.8, -0.5, -0.2, 0.0, 0.2, 0.5, 0.8]:
+			for t in [0.4, 0.5, 0.6, 0.7, 0.8]:
+				cores[Estilos.cor(estilo, x, t, 0.3, 0.65)] = true
 		assert_true(cores.size() >= 2, "%s tem estampa" % estilo["nome"])
 		v.free()
 

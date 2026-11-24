@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.16.0 — 2026-11-24
+
+- 20 modelos de pipa com as medidas dos pipeiros (GT, Pizza, Come Rato, Mucha
+  Mucha, Carrapeta, Britt, Latão, Vanda...), escolha na tela de pipa na mão.
+- Rabiola mais comprida, com fitinhas finas.
+- Largada mais forte: a pipa dá o coice e vai embora levando linha.
+
 ## 0.15.1 — 2026-11-24
 
 - Aparo: puxar normal traz a pipa; para decepar, puxe rápido e bastante linha.

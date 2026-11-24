@@ -79,9 +79,10 @@ func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -
 			if lado.length_squared() < 1e-10:
 				continue
 			lado = lado.normalized()
-			var escala := maxf(1.0, min_width_per_meter * para_camera.length() / 0.025)
-			var comprimento := 0.05 * escala
-			var largura := 0.025 * escala
+			# fitinha fina: no máximo ~1 px de largura e uns 3 px para cada lado
+			var px := min_width_per_meter * 0.5 * para_camera.length()
+			var comprimento := maxf(0.04, 3.0 * px)
+			var largura := maxf(0.008, 1.0 * px)
 			var ang := sin(tempo * 11.0 + k * 1.9) * 0.6
 			var eixo := lado * cos(ang) + dir * sin(ang)
 			var w := dir * (largura * 0.5)
