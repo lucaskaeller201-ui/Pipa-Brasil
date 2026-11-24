@@ -116,6 +116,8 @@ func test_puxar_rapido_decepa_e_a_avoada_escapa() -> void:
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
 	assert_true(_embolar(w))
+	while b.cut_age < KiteCombatSystem.DECEPAR_GRACE + 0.1:
+		w.step(DT)
 	var soltos_antes := w.loose_chains.size()
 	a.input.haul_speed = 6.0
 	w.step(DT)
@@ -176,3 +178,21 @@ func test_quem_aparou_e_cortado_a_avoada_se_solta() -> void:
 	w.step(DT)
 	assert_true(b.caught_by == null, "sem a linha de A, nada segura a avoada")
 	assert_eq(w.combat.links.size(), 0)
+
+
+
+func test_avoada_desce_devagar_e_da_tempo_de_aparar() -> void:
+	var w := _montagem(false)
+	var b: Flyer = w.flyers[0]
+	var p0 := b.kite.position
+	b.cut_line(12)
+	_rodar_seg(w, 5.0)
+	var p1 := b.kite.position
+	var longe := Vector2(p1.x - p0.x, p1.z - p0.z).length()
+	print("      [avoada] em 5 s andou %.1f m e desceu %.1f m" % [longe, p0.y - p1.y])
+	assert_true(longe < 30.0, "não vai embora rápido demais (%.1f m em 5 s)" % longe)
+
+
+func _rodar_seg(w: SimWorld, s: float) -> void:
+	for i in roundi(s / DT):
+		w.step(DT)

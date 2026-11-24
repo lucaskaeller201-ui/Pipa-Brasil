@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-032 — Giro conforme o dedo; avoada mais lenta; decepar com calma (2026-11-23)
+Depois do vídeo do Lucas: o giro mandando linha agora é proporcional à
+velocidade da linha saindo (80°/s por m/s, teto padrão 300°/s, ajustável):
+deslizar devagar gira devagar e dá para acertar o bico. O toque de desbico
+para o embalo da carretilha (sem giro depois). A pipa avoada solta (sem
+ninguém aparando) desce mais devagar: força do ar a 55% e arrasto extra, para
+dar tempo de aparar. Uma avoada recém-cortada (2,5 s) não é decepada, e decepar
+exige puxar acima de 4,5 m/s (era 3).
+
 ### D-031 — Mandar linha deslizando; desbico endireita (2026-11-23)
 O Lucas corrigiu: mandar linha é DESLIZAR o dedo para cima (não segurar), e
 desbicar não vira a pipa para um lado — na vida real, o desbico tira a pipa

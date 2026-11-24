@@ -34,6 +34,8 @@ var kite_on_ground := false
 ## Quão rápido a linha está correndo na mão (m/s): dando ou puxando linha.
 ## É o que decide o relo (D-027).
 var line_rate := 0.0
+## Segundos desde que a linha foi cortada (avoada recém-cortada não decepa).
+var cut_age := 0.0
 
 var _attach_dl := 0.0
 
@@ -83,6 +85,10 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	else:
 		k.spin_mode = KiteBody.SpinMode.SPIN_FREE
 	k.towed = cut and caught_by != null
+	k.drifting = cut and caught_by == null and not lost
+	k.give_speed = maxf(0.0, -input.haul_speed)
+	if cut:
+		cut_age += h
 	k.update_flex(tension if not cut else 0.0, h)
 	k.compute_aero(wind, t)
 	k.integrate(h)

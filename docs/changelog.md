@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.10.2 — 2026-11-23
+
+- O giro mandando linha segue o dedo: devagar gira devagar, rápido gira mais
+  (teto de 300°/s, ajustável). Sem furacão.
+- O toque de desbico para a carretilha e mostra "desbicou".
+- A avoada desce devagar; recém-cortada não decepa; decepar só puxando forte.
+
 ## 0.10.1 — 2026-11-23
 
 - Mandar linha voltou a ser deslizar para cima; a carretilha embala e a pipa

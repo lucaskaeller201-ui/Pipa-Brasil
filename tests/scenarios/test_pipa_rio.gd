@@ -46,31 +46,30 @@ func _taxas(w: SimWorld, f: Flyer, n: int, passo := 0.05) -> Array[float]:
 	return out
 
 
-func test_descarregar_gira_redondo() -> void:
+func _giro_medio(velocidade: float) -> float:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
-	f.input.haul_speed = -2.5
-	var taxas := _taxas(w, f, 24)
-	f.input.clear()
-	print("      [descarregando] giro (°/s) a cada 0,05 s: %s" % [taxas.map(func(x): return roundi(x))])
-	assert_true(taxas[0] < 0.6 * 720.0, "começa devagar e acelera (%.0f°/s no início)" % taxas[0])
+	f.input.haul_speed = -velocidade
+	_rodar(w, 0.6)
+	var taxas := _taxas(w, f, 16)
 	var soma := 0.0
-	var menor := INF
-	var maior := 0.0
-	for k in range(8, 24):
-		soma += taxas[k]
-		menor = minf(menor, taxas[k])
-		maior = maxf(maior, taxas[k])
-	var media := soma / 16.0
-	assert_true(media > 450.0 and media < 1050.0, "umas 2 voltas por segundo (média %.0f°/s)" % media)
-	assert_true(maior > 1.15 * menor, "ritmo orgânico: varia com o bico (%.0f a %.0f°/s)" % [menor, maior])
-	assert_true(w.is_finite_state())
+	for x in taxas:
+		soma += x
+	return soma / taxas.size()
+
+
+func test_mandar_linha_gira_conforme_o_dedo() -> void:
+	var devagar := _giro_medio(1.0)
+	var rapido := _giro_medio(3.0)
+	print("      [mandando linha] 1 m/s: %.0f°/s; 3 m/s: %.0f°/s" % [devagar, rapido])
+	assert_true(devagar > 40.0 and devagar < 140.0, "devagar gira devagar (%.0f°/s)" % devagar)
+	assert_true(rapido > 160.0 and rapido < 380.0, "rápido gira mais, sem furacão (%.0f°/s)" % rapido)
 
 
 func test_soltar_o_dedo_freia_o_giro_em_fracao_de_segundo() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
-	f.input.haul_speed = -2.5
+	f.input.haul_speed = -3.5
 	_rodar(w, 1.0)
 	var antes := _taxas(w, f, 1)[0]
 	f.input.clear()

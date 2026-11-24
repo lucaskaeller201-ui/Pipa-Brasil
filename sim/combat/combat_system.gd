@@ -29,7 +29,8 @@ var events: Array = []
 const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considerada aparada
 const TANGLE_TIME := 0.4       ## s mandando linha em contato para embolar (D-029)
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
-const CUT_RATE := 3.0          ## m/s de linha puxada acima dos quais o contato decepa
+const CUT_RATE := 4.5          ## m/s de linha puxada acima dos quais o contato decepa
+const DECEPAR_GRACE := 2.5     ## s depois do corte em que a avoada não decepa (dá tempo de aparar)
 const LINK_SLACK := 0.3        ## m de folga no ponto embolado (pêndulo)
 
 ## Enroscos ativos. Cada um: {"avoada": Flyer, "chain": ParticleChain (da
@@ -147,7 +148,8 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 		if not (cchain == ct.line or cchain == ct.tail):
 			continue
 		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
-			_pending_cuts.append([av, chain, av_seg, ct])
+			if av.cut_age > DECEPAR_GRACE:
+				_pending_cuts.append([av, chain, av_seg, ct])
 			return
 		if ct.kite.spin_mode != KiteBody.SpinMode.SPIN_GIVE:
 			return

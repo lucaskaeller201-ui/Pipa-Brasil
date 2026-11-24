@@ -19,14 +19,14 @@ const LinesView := preload("res://game/views/lines_view.gd")
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
 ## que a mão recolhe no toque e no máximo ao deslizar para baixo).
-@export var velocidade_giro_mandando_linha := 720.0
+@export var velocidade_giro_mandando_linha := 300.0
 @export var forca_puxada := 6.0
 
 const BOTS := 5   ## festival: 5 rivais com jeitos diferentes de jogar
 const ARQUIVO_ESTATISTICAS := "user://estatisticas.json"
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
 const DESCARREGAR := 2.5        ## m/s de linha saindo com a tecla S/↑
-const EMBALO := 0.6             ## s que a carretilha leva para parar depois de mandar linha
+const EMBALO := 0.35            ## s que a carretilha leva para parar depois de mandar linha
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
 const PUXOU_PX := 6.0           ## px para baixo que transformam o dedo em dedo de puxar
 const TOQUE_MAX_S := 0.25
@@ -266,6 +266,8 @@ func _desbicar() -> void:
 	if _automatico or eu.cut or eu.pilot == null:
 		return
 	eu.pilot.trigger(Pilot.Impulse.DESBICAR, modo.world.time)
+	_embalo = 0.0   # o toque para a carretilha: nada de giro depois do desbico
+	_mostrar_aviso_curto("desbicou")
 
 
 func _sobre_botao(posicao: Vector2) -> bool:
@@ -455,7 +457,7 @@ func _criar_interface() -> void:
 	raiz.add_child(_painel_ajustes)
 	var caixa := VBoxContainer.new()
 	_painel_ajustes.add_child(caixa)
-	_ajuste(caixa, "Giro mandando linha (°/s)", 300.0, 1800.0, 50.0, velocidade_giro_mandando_linha, "giro")
+	_ajuste(caixa, "Giro máximo mandando linha (°/s)", 60.0, 900.0, 20.0, velocidade_giro_mandando_linha, "giro")
 	_ajuste(caixa, "Força da puxada (m/s)", 2.0, 10.0, 0.5, forca_puxada, "puxada")
 
 	var versao := Label.new()
@@ -645,3 +647,7 @@ func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
 	var txt := "vento %d m/s" % roundi(vento.length())
 	c.draw_string_outline(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, 5, Color(0, 0, 0, 0.8))
 	c.draw_string(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+
+
+func _mostrar_aviso_curto(texto: String) -> void:
+	_avisar(texto)

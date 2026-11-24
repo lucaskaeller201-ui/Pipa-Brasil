@@ -21,6 +21,11 @@ enum SpinMode { SPIN_FREE, SPIN_GIVE, SPIN_LOCK, SPIN_KICK }
 var spin_mode: SpinMode = SpinMode.SPIN_FREE
 ## Pipa avoada embolada na linha de alguém: rebocada com muito arrasto, sem girar.
 var towed := false
+## Velocidade com que a linha está saindo (m/s) enquanto manda linha: o giro é
+## proporcional a ela (D-032).
+var give_speed := 0.0
+## Pipa avoada solta (ninguém aparou ainda): desce devagar, dá tempo de aparar.
+var drifting := false
 
 var _prev_rotation := Quaternion.IDENTITY
 # Deslocamento acumulado no subpasso. Guardado à parte porque Vector3 usa
@@ -193,7 +198,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force * (0.3 if towed else 1.0) + GRAVITY * m
+	var f := last_aero_force * (0.3 if towed else (0.55 if drifting else 1.0)) + GRAVITY * m
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
@@ -212,7 +217,8 @@ func integrate(h: float) -> void:
 		match spin_mode:
 			SpinMode.SPIN_GIVE:
 				var bico_cima := (rotation * Vector3.UP).dot(Vector3.UP)
-				var alvo := d.spin_give_sign * deg_to_rad(d.spin_give_rate_deg) * (1.0 - d.spin_gravity_mod * bico_cima)
+				var taxa := minf(d.spin_give_rate_deg, d.spin_per_line_speed_deg * give_speed)
+				var alvo := d.spin_give_sign * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
 				novo = move_toward(wnn, alvo, deg_to_rad(d.spin_give_accel_deg) * h)
 				if signf(novo) == signf(alvo) and absf(novo) > absf(alvo):
 					novo = alvo   # o vento não passa do teto
@@ -237,6 +243,9 @@ func integrate(h: float) -> void:
 		var lim := deg_to_rad(definition.spin_rate_max_deg)
 		if absf(wn2) > lim:
 			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
+	if drifting:
+		velocity *= exp(-0.8 * h)
+		angular_velocity *= exp(-3.0 * h)
 	if towed:
 		# Rebocada: balança como um pêndulo amortecido, sem girar.
 		angular_velocity *= exp(-20.0 * h)
