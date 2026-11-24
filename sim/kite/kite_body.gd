@@ -231,11 +231,11 @@ func integrate(h: float) -> void:
 	var f := last_aero_force * ar + GRAVITY * m
 	if lunge >= LUNGE_TIME:
 		# Largada: o tranco inicial (a pressão guardada solta de uma vez).
-		velocity += (rotation * Vector3.UP) * LUNGE_KICK
+		velocity += lunge_dir() * LUNGE_KICK
 	if lunge > 0.0:
-		# Largada: a pressão guardada solta de uma vez, a pipa dá um coice para
-		# a frente (na direção do bico).
-		f += (rotation * Vector3.UP) * (m * LUNGE_ACCEL * lunge / LUNGE_TIME)
+		# Largada: a pipa dá um coice para a frente (para onde o bico aponta)
+		# e vai embora levando linha — nunca de volta para a mão.
+		f += lunge_dir() * (m * LUNGE_ACCEL * lunge / LUNGE_TIME)
 		lunge = maxf(0.0, lunge - h)
 	if d_pull_assist() > 0.0 and pull_taut and pull_speed > 0.1:
 		# Pressão da puxada: a pipa ganha velocidade na direção do bico.
@@ -422,3 +422,12 @@ func roll_angle() -> float:
 	# medido no mesmo sentido de girar em torno do bico (+ = girou para +)
 	var s := signf(nn.dot(line_dir))
 	return asin(clampf(nn.dot(lado.normalized()), -1.0, 1.0)) * (s if s != 0.0 else 1.0)
+
+
+## Direção do coice da largada: para onde o bico aponta, sem a parte que
+## voltaria para a mão, e um pouco para longe (a linha corre solta).
+func lunge_dir() -> Vector3:
+	var bico := rotation * Vector3.UP
+	var ld := line_dir if line_dir.length_squared() > 0.5 else Vector3.ZERO
+	var d := bico - ld * minf(0.0, bico.dot(ld)) + ld * 0.6
+	return d.normalized() if d.length_squared() > 1e-6 else bico
