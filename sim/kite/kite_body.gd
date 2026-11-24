@@ -424,10 +424,12 @@ func roll_angle() -> float:
 	return asin(clampf(nn.dot(lado.normalized()), -1.0, 1.0)) * (s if s != 0.0 else 1.0)
 
 
-## Direção do coice da largada: para onde o bico aponta, sem a parte que
-## voltaria para a mão, e um pouco para longe (a linha corre solta).
+## Direção do coice da largada: para onde o bico aponta, de través da linha
+## (nem para a mão, nem esticando a linha).
 func lunge_dir() -> Vector3:
 	var bico := rotation * Vector3.UP
 	var ld := line_dir if line_dir.length_squared() > 0.5 else Vector3.ZERO
-	var d := bico - ld * minf(0.0, bico.dot(ld)) + ld * 0.6
+	# só a parte de lado (de través da linha): com a linha esticada é para lá
+	# que a pipa consegue disparar, varrendo o céu (D-046)
+	var d := bico - ld * bico.dot(ld)
 	return d.normalized() if d.length_squared() > 1e-6 else bico
