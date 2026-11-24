@@ -28,6 +28,7 @@ var give_speed := 0.0
 var drifting := false
 var _spin_controlado := false
 var _spin_alvo := 0.0
+var _spin_teto := -1.0
 
 var _prev_rotation := Quaternion.IDENTITY
 # Deslocamento acumulado no subpasso. Guardado à parte porque Vector3 usa
@@ -243,7 +244,8 @@ func integrate(h: float) -> void:
 				var teto_livre := deg_to_rad(d.spin_give_rate_deg)
 				novo = clampf(novo, -teto_livre, teto_livre)
 		angular_velocity += nn * (novo - wnn)
-		_spin_controlado = true
+		_spin_controlado = spin_mode != SpinMode.SPIN_FREE
+		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE else -1.0
 		_spin_alvo = novo
 		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
 			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola
@@ -290,6 +292,15 @@ func update_velocities(h: float) -> void:
 		rotation = (Quaternion(n, correcao) * rotation).normalized()
 		angular_velocity += n * (_spin_alvo - wn)
 		_spin_controlado = false
+	elif _spin_teto > 0.0:
+		# Solta: a física (rabiola, cabresto) age livre, só sem passar do teto.
+		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
+		var wn2 := angular_velocity.dot(n2)
+		if absf(wn2) > _spin_teto:
+			var alvo2 := signf(wn2) * _spin_teto
+			rotation = (Quaternion(n2, (alvo2 - wn2) * h) * rotation).normalized()
+			angular_velocity += n2 * (alvo2 - wn2)
+		_spin_teto = -1.0
 	if towed:
 		# Rebocada: sem giro de furacão, mesmo com os trancos do reboque.
 		var lim := deg_to_rad(120.0)
