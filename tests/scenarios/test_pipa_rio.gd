@@ -72,6 +72,7 @@ func test_mandar_linha_gira_conforme_o_dedo() -> void:
 	var rapido := _giro_medio(3.0)
 	print("      [mandando linha] 1 m/s: %.0f°/s; 3 m/s: %.0f°/s" % [devagar, rapido])
 	assert_true(devagar > 40.0 and devagar < 140.0, "devagar gira devagar (%.0f°/s)" % devagar)
+	assert_true(rapido > devagar * 1.8, "mais rápido no dedo, mais giro")
 	assert_true(rapido > 160.0 and rapido < 380.0, "rápido gira mais, sem furacão (%.0f°/s)" % rapido)
 
 

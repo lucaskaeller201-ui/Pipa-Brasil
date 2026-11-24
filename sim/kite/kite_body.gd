@@ -26,6 +26,8 @@ var towed := false
 var give_speed := 0.0
 ## Pipa avoada solta (ninguém aparou ainda): desce devagar, dá tempo de aparar.
 var drifting := false
+var _spin_controlado := false
+var _spin_alvo := 0.0
 
 var _prev_rotation := Quaternion.IDENTITY
 # Deslocamento acumulado no subpasso. Guardado à parte porque Vector3 usa
@@ -237,6 +239,8 @@ func integrate(h: float) -> void:
 			_:
 				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
 		angular_velocity += nn * (novo - wnn)
+		_spin_controlado = spin_mode != SpinMode.SPIN_FREE
+		_spin_alvo = novo
 		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
 			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola
 			# segura a face virada para o vento (sem "furacão").
@@ -273,6 +277,15 @@ func update_velocities(h: float) -> void:
 	var dq := rotation * _prev_rotation.inverse()
 	var s := 2.0 / h if dq.w >= 0.0 else -2.0 / h
 	angular_velocity = Vector3(dq.x, dq.y, dq.z) * s
+	if _spin_controlado:
+		# Giro comandado (D-028/D-032): as restrições da linha e da rabiola não
+		# podem acelerar o giro no plano da pipa além do comando.
+		var n := rotation * Vector3(0.0, 0.0, 1.0)
+		var wn := angular_velocity.dot(n)
+		var correcao := (_spin_alvo - wn) * h
+		rotation = (Quaternion(n, correcao) * rotation).normalized()
+		angular_velocity += n * (_spin_alvo - wn)
+		_spin_controlado = false
 	if towed:
 		# Rebocada: sem giro de furacão, mesmo com os trancos do reboque.
 		var lim := deg_to_rad(120.0)
