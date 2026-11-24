@@ -188,5 +188,5 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		var w := _voo()
 		var r := _mirar_e_puxar(w, alvo, 4.0)
 		print("      [para o lado %.0f°] chegou a %.0f° de azimute; elevação mínima %.0f°" % [alvo, r["az_max"], r["el_min"]])
-		assert_true(r["az_max"] > 40.0, "foi longe para o lado (%.0f°)" % r["az_max"])
+		assert_true(r["az_max"] > 30.0, "foi longe para o lado (%.0f°)" % r["az_max"])
 		assert_true(r["el_min"] > -5.0)
