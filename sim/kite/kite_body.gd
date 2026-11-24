@@ -237,6 +237,11 @@ func integrate(h: float) -> void:
 			_:
 				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
 		angular_velocity += nn * (novo - wnn)
+		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
+			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola
+			# segura a face virada para o vento (sem "furacão").
+			var fora := angular_velocity - nn * angular_velocity.dot(nn)
+			angular_velocity -= fora * (1.0 - exp(-12.0 * h))
 	elif definition.spin_rate_max_deg > 0.0:
 		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn2 := angular_velocity.dot(n2)
