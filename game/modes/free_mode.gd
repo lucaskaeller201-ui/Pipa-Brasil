@@ -96,7 +96,7 @@ func update(dt: float) -> void:
 			bot.update(f, t)
 			# Todo pipeiro tenteia: toques de vez em quando, cada um para um lado.
 			# (só com a pipa já no alto: subindo, ele cuida de dar linha)
-			if f.input.haul_speed <= 0.1 and f.input.pull < 0.05 and f.line_length() > bot.line_target - 5.0 \
+			if p["profile"] != "alto" and f.input.haul_speed <= 0.1 and f.input.pull < 0.05 and f.line_length() > bot.line_target - 5.0 \
 					and absf(f.nose_angle_deg()) < 25.0 and _rng.randf() < dt / 1.2:
 				var lado := -float(p.get("ultimo_lado", 1.0))
 				p["ultimo_lado"] = lado

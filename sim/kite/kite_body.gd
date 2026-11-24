@@ -257,9 +257,13 @@ func integrate(h: float) -> void:
 						var ang := atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
 						var volta := clampf(ang * d.spin_return, -deg_to_rad(160.0), deg_to_rad(160.0))
 						novo = lerpf(novo, volta, 1.0 - exp(-8.0 * h))
+		# Logo depois do tenteio o bico fica onde foi (dá tempo de puxar).
+		var segura := spin_mode == SpinMode.SPIN_FREE and since_kick < 0.6 and d.spin_return > 0.0 and not drifting and not towed
+		if segura:
+			novo = 0.0
 		angular_velocity += nn * (novo - wnn)
-		_spin_controlado = spin_mode != SpinMode.SPIN_FREE
-		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE else -1.0
+		_spin_controlado = spin_mode != SpinMode.SPIN_FREE or segura
+		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE and not segura else -1.0
 		_spin_alvo = novo
 		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
 			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola
