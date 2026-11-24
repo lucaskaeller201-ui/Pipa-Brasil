@@ -145,7 +145,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
 	d.spin_give_rate_deg = 360.0
 	d.pull_assist = 0.12
-	d.spin_return = 2.5
+	d.spin_return = 4.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
 	return d
