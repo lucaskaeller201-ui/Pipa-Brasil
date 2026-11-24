@@ -309,9 +309,9 @@ static func kite_for(k: int) -> KiteDefinition:
 static func apply_line(f: Flyer, k: int) -> void:
 	if f.line == null:
 		return
-	var forca := [0.85, 1.0, 1.3][k]
-	var grossura := [0.75, 1.0, 1.4][k]
-	var peso := [0.75, 1.0, 1.5][k]
+	var forca: float = [0.85, 1.0, 1.3][k]
+	var grossura: float = [0.75, 1.0, 1.4][k]
+	var peso: float = [0.75, 1.0, 1.5][k]
 	f.line.strength *= forca
 	f.line.thickness *= grossura
 	f.line.mass_per_particle *= peso
