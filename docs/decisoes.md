@@ -37,7 +37,7 @@ topo da seção correspondente. A especificação original fica em
 O Lucas mandou um vídeo de pipa de verdade: no tenteio um lado da pipa murcha
 (ela inclina) e ela vai para a frente, para onde foi desbicada — não gira como
 ponteiro de relógio. Agora, enquanto o bico segue o ângulo do tenteio, a pipa
-inclina em torno do eixo do bico até 25° para o lado da curva (o vento a leva
+inclina em torno do eixo do bico até 20° para o lado da curva (o vento a leva
 para onde o bico vai) e a puxadinha do toque voltou a 3 m/s por 0,3 s.
 Largada: puxar forte (mais de 2,5 m/s) e mandar linha até 0,35 s depois dá um
 coice: empurrão para a frente na direção do bico (30 m/s² caindo a zero em

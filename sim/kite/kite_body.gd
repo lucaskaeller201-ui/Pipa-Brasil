@@ -43,7 +43,7 @@ var line_dir := Vector3.UP
 var lunge := 0.0
 const LUNGE_TIME := 0.4
 const LUNGE_ACCEL := 30.0       ## m/s² no começo do coice
-const MURCHA_MAX_DEG := 25.0    ## tenteio: um lado da pipa "murcha" (inclina)
+const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _kick_prev := false
 const KICK_HOLD := 1.5 ## s: depois do último toque o bico fica onde parou
@@ -308,7 +308,7 @@ func integrate(h: float) -> void:
 			var forca_giro := clampf(absf(novo) / deg_to_rad(d.spin_kick_max_deg) * 3.0, 0.0, 1.0)
 			var alvo_murcha := -signf(novo) * deg_to_rad(MURCHA_MAX_DEG) * forca_giro
 			var atual := roll_angle()
-			angular_velocity += bico * ((alvo_murcha - atual) * 10.0 - angular_velocity.dot(bico))
+			angular_velocity += bico * (clampf((alvo_murcha - atual) * 8.0, -3.0, 3.0) - angular_velocity.dot(bico))
 	elif definition.spin_rate_max_deg > 0.0:
 		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn2 := angular_velocity.dot(n2)
@@ -405,4 +405,6 @@ func roll_angle() -> float:
 	var lado := bico.cross(line_dir)
 	if lado.length_squared() < 1e-6:
 		return 0.0
-	return asin(clampf(nn.dot(lado.normalized()), -1.0, 1.0))
+	# medido no mesmo sentido de girar em torno do bico (+ = girou para +)
+	var s := signf(nn.dot(line_dir))
+	return asin(clampf(nn.dot(lado.normalized()), -1.0, 1.0)) * (s if s != 0.0 else 1.0)
