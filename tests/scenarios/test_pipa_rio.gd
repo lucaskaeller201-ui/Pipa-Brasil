@@ -105,7 +105,7 @@ func _tocar(w: SimWorld, f: Flyer) -> void:
 func _tentear(w: SimWorld, f: Flyer, lado: float) -> void:
 	f.input.kick_side = lado
 	f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
-	_rodar(w, 0.12)
+	_rodar(w, 0.7)   # o arco do tenteio vai freando (D-040)
 
 
 func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
