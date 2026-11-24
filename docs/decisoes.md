@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-038 — Volta de 360° no tenteio; avoada mais devagar (2026-11-24)
+Pedido do Lucas (vídeo do Pipa Combate): o tenteio tem que levar o bico para
+onde ele quiser, inclusive dar a volta inteira. Regra: toques seguidos (menos de
+0,45 s entre eles) continuam girando para o MESMO lado — vários toques dão a
+volta; depois de uma pausa, o próximo toque vai para o outro lado (desbicar da
+esquerda para a direita). A avoada vai embora mais devagar: força do vento
+×0,14 (era 0,2) e freio do ar 3,5/s (era 2,5/s) — devagar, mas não parada
+(teste: entre 2 e 22 m em 5 s).
+
 ### D-037 — Pipa na mão, tirar do alto, aparada reta, tenteio com puxadinha (2026-11-24)
 Pedido do Lucas (vídeo da 0.12.1), como no Pipa Combate:
 - O jogo começa com a pipa NA MÃO: a tela mostra a escolha de pipa (por

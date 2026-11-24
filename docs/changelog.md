@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.13.1 — 2026-11-24
+
+- Tenteio: toques seguidos giram para o mesmo lado e dão a volta de 360°;
+  com pausa entre os toques, desbica de um lado para o outro.
+- A pipa avoada vai embora mais devagar (dá para correr atrás e aparar).
+
 ## 0.13.0 — 2026-11-24
 
 - O jogo começa com a pipa na mão: escolha a pipa e a linha e toque em

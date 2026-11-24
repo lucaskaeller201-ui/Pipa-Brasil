@@ -57,7 +57,12 @@ var _velocidade_mao := 0.0      # m/s (+ = puxando)
 var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
-var _ultimo_lado := 1.0         # lado do último tenteio (o próximo vai para o outro)
+var _ultimo_lado := 1.0         # lado do último tenteio
+var _ultimo_toque := -99.0      # instante do último tenteio (s)
+## Toques seguidos (menos que isso entre eles) continuam girando para o mesmo
+## lado: dá a volta de 360° com a pipa. Com pausa, o próximo vai para o outro
+## lado (desbica da esquerda para a direita). D-038.
+const TOQUE_SEGUIDO_S := 0.45
 
 # interface
 var _placar: Label
@@ -262,7 +267,7 @@ func _input(evento: InputEvent) -> void:
 		elif tecla == KEY_E or tecla == KEY_RIGHT:
 			_desbicar(1.0)
 		elif tecla == KEY_SPACE:
-			_desbicar(-_ultimo_lado)
+			_tentear()
 
 
 func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
@@ -278,7 +283,7 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 	_dedos.erase(indice)
 	if agora - float(d["t0"]) < TOQUE_MAX_S and posicao.distance_to(d["ini"]) < TOQUE_MAX_PX:
 		# toque na metade esquerda da tela: bico para a esquerda; direita: direita
-		_desbicar(-_ultimo_lado)   # tenteio: cada toque para um lado
+		_tentear()
 
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
@@ -289,6 +294,15 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 	d["ult"] = posicao
 	if relativo.y > 0.0 and posicao.y - (d["ini"] as Vector2).y > PUXOU_PX:
 		d["puxou"] = true   # este dedo é de puxar (enquanto estiver na tela)
+
+
+## Tenteio pelo toque: seguido do anterior, mesmo lado (dá a volta); depois de
+## uma pausa, troca de lado.
+func _tentear() -> void:
+	var agora := Time.get_ticks_msec() / 1000.0
+	var lado := _ultimo_lado if agora - _ultimo_toque < TOQUE_SEGUIDO_S else -_ultimo_lado
+	_ultimo_toque = agora
+	_desbicar(lado)
 
 
 func _desbicar(lado: float) -> void:

@@ -199,7 +199,8 @@ func test_avoada_desce_devagar_e_da_tempo_de_aparar() -> void:
 	var p1 := b.kite.position
 	var longe := Vector2(p1.x - p0.x, p1.z - p0.z).length()
 	print("      [avoada] em 5 s andou %.1f m e desceu %.1f m" % [longe, p0.y - p1.y])
-	assert_true(longe < 30.0, "não vai embora rápido demais (%.1f m em 5 s)" % longe)
+	assert_true(longe < 22.0, "não vai embora rápido demais (%.1f m em 5 s)" % longe)
+	assert_true(longe > 2.0, "mas também não fica parada (%.1f m em 5 s)" % longe)
 
 
 func _rodar_seg(w: SimWorld, s: float) -> void:

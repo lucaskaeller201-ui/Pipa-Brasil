@@ -212,3 +212,22 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		print("      [para o lado %.0f°] chegou a %.0f° de azimute; elevação mínima %.0f°" % [alvo, r["az_max"], r["el_min"]])
 		assert_true(r["az_max"] > 30.0, "foi longe para o lado (%.0f°)" % r["az_max"])
 		assert_true(r["el_min"] > -5.0)
+
+
+## D-038: toques seguidos para o mesmo lado dão a volta inteira com a pipa.
+func test_tenteios_seguidos_dao_a_volta() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var giro := 0.0
+	var antes := f.nose_angle_deg()
+	for k in 10:
+		f.input.kick_side = 1.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.35 / DT):
+			w.step(DT)
+			var agora := f.nose_angle_deg()
+			giro += wrapf(agora - antes, -180.0, 180.0)
+			antes = agora
+	print("      [volta] 10 toques seguidos para o mesmo lado: bico girou %.0f°" % giro)
+	assert_true(absf(giro) >= 330.0, "dá a volta inteira (%.0f°)" % giro)
+	assert_true(w.is_finite_state())

@@ -210,7 +210,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force * (0.3 if towed else (0.2 if drifting else 1.0)) + GRAVITY * m
+	var f := last_aero_force * (0.3 if towed else (0.14 if drifting else 1.0)) + GRAVITY * m
 	if d_pull_assist() > 0.0 and pull_taut and pull_speed > 0.1:
 		# Pressão da puxada: a pipa ganha velocidade na direção do bico.
 		f += (rotation * Vector3.UP) * (d_pull_assist() * pull_speed)
@@ -277,7 +277,8 @@ func integrate(h: float) -> void:
 		if absf(wn2) > lim:
 			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
 	if drifting:
-		velocity *= exp(-2.5 * h)
+		# Avoada vai embora devagar (D-038): dá tempo de correr atrás e aparar.
+		velocity *= exp(-3.5 * h)
 		angular_velocity *= exp(-6.0 * h)
 	if towed:
 		# Rebocada: balança como um pêndulo amortecido, sem girar.
