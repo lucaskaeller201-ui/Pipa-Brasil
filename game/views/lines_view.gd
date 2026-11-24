@@ -27,7 +27,7 @@ func limpar() -> void:
 
 ## Desenha a cadeia como fita. `largura` é a largura real (m); a fita nunca fica
 ## mais fina que `min_width_per_meter` × distância até a câmera.
-func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006) -> void:
+func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, minimo := 1.0) -> void:
 	if pontos.size() < 2:
 		return
 	_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
@@ -38,8 +38,8 @@ func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006) 
 		var dir := b - a
 		if dir.length_squared() < 1e-10:
 			continue
-		var la := _lado(a, dir, largura)
-		var lb := _lado(b, dir, largura)
+		var la := _lado(a, dir, largura, minimo)
+		var lb := _lado(b, dir, largura, minimo)
 		_im.surface_add_vertex(a - la)
 		_im.surface_add_vertex(a + la)
 		_im.surface_add_vertex(b + lb)
@@ -49,12 +49,12 @@ func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006) 
 	_im.surface_end()
 
 
-func _lado(p: Vector3, dir: Vector3, largura: float) -> Vector3:
+func _lado(p: Vector3, dir: Vector3, largura: float, minimo := 1.0) -> Vector3:
 	var para_camera := camera_position - p
 	var lado := dir.cross(para_camera)
 	if lado.length_squared() < 1e-10:
 		lado = dir.cross(Vector3.UP)
-	var meia := 0.5 * maxf(largura, min_width_per_meter * para_camera.length())
+	var meia := 0.5 * maxf(largura, minimo * min_width_per_meter * para_camera.length())
 	return lado.normalized() * meia
 
 
@@ -79,10 +79,14 @@ func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -
 			if lado.length_squared() < 1e-10:
 				continue
 			lado = lado.normalized()
-			# fitinha fina: no máximo ~1 px de largura e uns 3 px para cada lado
+			# fitinha no tamanho de verdade (D-048): de longe ela some, como na
+			# vida real, e fica só o barbante fininho
 			var px := min_width_per_meter * 0.5 * para_camera.length()
-			var comprimento := maxf(0.04, 3.0 * px)
-			var largura := maxf(0.008, 1.0 * px)
+			var comprimento := 0.05
+			var largura := 0.012
+			if comprimento < 1.2 * px:
+				k += 1
+				continue
 			var ang := sin(tempo * 11.0 + k * 1.9) * 0.6
 			var eixo := lado * cos(ang) + dir * sin(ang)
 			var w := dir * (largura * 0.5)

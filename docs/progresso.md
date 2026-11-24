@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.16.2).
+Atualizado em 2026-11-24 (versão 0.16.3).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -29,7 +29,8 @@ Atualizado em 2026-11-24 (versão 0.16.2).
 | Cada modelo com a sua física (tamanho e formato) | Pendente |
 | Largada sem soltar a linha, com coice para a frente | Feito (D-046), aguardando teste do Lucas |
 | Prévia do modelo na tela de pipa na mão; câmera mais perto | Feito (D-046) |
-| Bico sem papel; tenteio 30° sem rodar, toque duplo segue virando | Feito (D-047), aguardando teste do Lucas |
+| Bico sem papel; tenteio 30° sem rodar, toque duplo segue virando | Feito (D-047), Lucas aprovou |
+| Rabiola fina de longe | Feito (D-048), aguardando teste do Lucas |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.16.3 — 2026-11-24
+
+- Rabiola fina também com a pipa longe.
+
 ## 0.16.2 — 2026-11-24
 
 - O bico das pipas sem papel: só a linha e a vareta.

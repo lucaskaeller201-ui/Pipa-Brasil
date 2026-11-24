@@ -33,6 +33,12 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-048 — Rabiola de longe fina (2026-11-24)
+De longe a rabiola ainda parecia grossa: as fitinhas tinham tamanho mínimo na
+tela (uns 6 px). Agora as fitinhas têm o tamanho de verdade (5 cm para cada
+lado) e somem quando ficariam menores que ~1 px, sobrando o barbante, que
+tem metade da espessura mínima da linha e é um pouco transparente.
+
 ### D-047 — Bico sem papel; tenteio de 30° que não roda sozinho (2026-11-24)
 O Lucas: o bico das pipas (acima da vareta de cima) não tem papel — só a
 linha da ponta às pontas da vareta; agora o desenho (3D e prévia) começa na

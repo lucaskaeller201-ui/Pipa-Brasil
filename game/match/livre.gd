@@ -188,7 +188,7 @@ func _process(delta: float) -> void:
 		if fl.tail != null:
 			# Rabiola: o barbante fininho e as fitinhas coloridas (D-043).
 			var estilo: Dictionary = _estilo_de.get(fl, Estilos.ESTILOS[0])
-			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9), 0.0008)
+			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9, 0.8), 0.0008, 0.5)
 			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
 	var eu := modo.you()
 	_tratar_acontecimentos()

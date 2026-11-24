@@ -31,7 +31,7 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 
 func test_rabiola_tem_fitinhas() -> void:
 	var l: MeshInstance3D = LinesView.new()
-	l.set("camera_position", Vector3(0.0, 0.0, 30.0))
+	l.set("camera_position", Vector3(0.0, 0.0, 10.0))
 	var pontos := PackedVector3Array()
 	for i in 11:
 		pontos.append(Vector3(0.0, -0.2 * i, 0.0))
@@ -40,4 +40,22 @@ func test_rabiola_tem_fitinhas() -> void:
 	assert_eq(im.get_surface_count(), 1)
 	var vertices: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 	assert_eq(vertices.size(), 10 * 2 * 6, "duas fitinhas por pedaço da rabiola")
+	l.free()
+
+
+## D-048: de longe as fitinhas somem (tamanho de verdade) e fica o barbante.
+func test_rabiola_de_longe_nao_engrossa() -> void:
+	var l: MeshInstance3D = LinesView.new()
+	l.set("camera_position", Vector3(0.0, 0.0, 120.0))
+	l.set("min_width_per_meter", 0.002)
+	var pontos := PackedVector3Array()
+	for i in 11:
+		pontos.append(Vector3(0.0, -0.2 * i, 0.0))
+	l.call("desenhar_fitinhas", pontos, [Color.RED, Color.WHITE], 1.0)
+	var im: ImmediateMesh = l.mesh
+	var n := 0
+	if im.get_surface_count() > 0:
+		var vertices: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		n = vertices.size()
+	assert_eq(n, 0, "a 120 m as fitinhas não aparecem maiores que a pipa")
 	l.free()
