@@ -62,9 +62,18 @@ func test_quatro_pipeiros_dois_minutos_sem_tempo_limite() -> void:
 	print("      [livre] pipas no mundo ao mesmo tempo: no máximo %d; agora %d" % [maximo_de_pipas, modo.world.flyers.size()])
 	assert_true(modo.world.is_finite_state())
 	assert_true(maximo_de_pipas <= 12, "avoadas antigas saem do céu")
+	# Nos últimos 20 s, cada pipeiro teve a pipa no ar (acima da laje) em algum momento.
+	var no_ar := {}
+	for i in 20 * 120:
+		modo.update(DT)
+		for p in modo.players:
+			var f: Flyer = p["flyer"]
+			if f != null and not f.cut and f.kite.position.y > 8.0:
+				no_ar[p["name"]] = true
 	for p in modo.players:
 		var f: Flyer = p["flyer"]
-		assert_true(f.cut or f.kite.position.y > 6.0, "%s está voando ou esperando pipa nova" % p["name"])
+		print("      [livre] %s: pipa a %.1f m, no chão %s, cortada %s" % [p["name"], f.kite.position.y, f.kite_on_ground, f.cut])
+		assert_true(no_ar.has(p["name"]), "%s solta pipa (no ar nos últimos 20 s)" % p["name"])
 
 
 func test_festival_cinco_rivais_com_jeitos_diferentes() -> void:
