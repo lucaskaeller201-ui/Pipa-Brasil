@@ -100,11 +100,12 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	# Sentido do giro do desbico, para o bico ir para o lado pedido no céu.
 	if k.spin_mode == KiteBody.SpinMode.SPIN_KICK:
 		var n := k.rotation * Vector3(0.0, 0.0, 1.0)
-		var bico := k.rotation * Vector3.UP
 		var linha := (k.position - hand_position).normalized()
 		var cima := (Vector3.UP - linha * Vector3.UP.dot(linha)).normalized()
 		var direita := linha.cross(cima).normalized()
-		var s := signf(n.cross(bico).dot(direita))
+		# Sentido fixo visto da mão (horário = direita), não o lado para onde o
+		# bico aponta agora: assim toques seguidos dão a volta inteira (D-038).
+		var s := signf(n.cross(cima).dot(direita))
 		k.kick_sign = input.kick_side * (s if s != 0.0 else 1.0)
 	# Memória da pressão: para a largada (puxa, e solta de uma vez no relô).
 	tension_memo = maxf(tension, tension_memo - 6.0 * h)
