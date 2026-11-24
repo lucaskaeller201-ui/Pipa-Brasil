@@ -37,6 +37,9 @@ var pull_taut := false
 ## uma pausa (D-036), para o tenteio mudar a direção de verdade.
 var since_kick := 99.0
 var _hold_ang := 0.0   ## ângulo do bico guardado no fim do tenteio (rad)
+var _kick_omega := 0.0 ## giro do tenteio que ainda resta (rad/s), freado pelo ar
+var _kick_prev := false
+const KICK_HOLD := 1.2 ## s: depois do tenteio o bico fica onde parou
 var _spin_controlado := false
 var _spin_alvo := 0.0
 var _spin_teto := -1.0
@@ -241,17 +244,20 @@ func integrate(h: float) -> void:
 				var teto := absf(alvo)
 				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
 			SpinMode.SPIN_KICK:
-				# Desbico (D-034): o bico pula para o lado pedido.
-				novo = kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg)
+				# Tenteio (D-040): um impulso de giro, somado ao que ainda resta.
+				if not _kick_prev:
+					_kick_omega += kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg)
+				novo = _kick_omega
 				_hold_ang = _nose_ang(nn)
 			SpinMode.SPIN_LOCK:
 				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)
+				_kick_omega = 0.0
 			_:
 				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
 				# solta, mas sem furacão: nunca mais rápido que o teto do giro
 				var teto_livre := deg_to_rad(d.spin_give_rate_deg)
 				novo = clampf(novo, -teto_livre, teto_livre)
-				if d.spin_return > 0.0 and not drifting and not towed and since_kick > 0.6:
+				if d.spin_return > 0.0 and not drifting and not towed and since_kick > KICK_HOLD:
 					# Retorno elástico (D-035): o vento traz o bico para cima.
 					var bico := rotation * Vector3.UP
 					var cima := Vector3.UP - nn * Vector3.UP.dot(nn)
@@ -260,18 +266,30 @@ func integrate(h: float) -> void:
 						var ang := atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
 						var volta := clampf(ang * d.spin_return, -deg_to_rad(160.0), deg_to_rad(160.0))
 						novo = lerpf(novo, volta, 1.0 - exp(-8.0 * h))
-		# Logo depois do tenteio o bico fica onde foi (dá tempo de puxar).
-		var segura := spin_mode == SpinMode.SPIN_FREE and since_kick < 0.6 and d.spin_return > 0.0 and not drifting and not towed
+		_kick_prev = spin_mode == SpinMode.SPIN_KICK
+		if spin_mode == SpinMode.SPIN_GIVE:
+			_kick_omega = 0.0
+		# O giro do tenteio continua depois do toque e o ar vai freando: arco
+		# redondo, sem parada seca (D-040).
+		var girando := spin_mode == SpinMode.SPIN_FREE and absf(_kick_omega) > deg_to_rad(4.0) and not drifting and not towed
+		if girando:
+			novo = _kick_omega
+			_hold_ang = _nose_ang(nn)
+		_kick_omega *= exp(-d.spin_kick_damp * h)
+		if spin_mode == SpinMode.SPIN_FREE and not girando:
+			_kick_omega = 0.0
+		# Logo depois do tenteio o bico fica onde parou (dá tempo de puxar).
+		var segura := spin_mode == SpinMode.SPIN_FREE and not girando and since_kick < KICK_HOLD and d.spin_return > 0.0 and not drifting and not towed
 		if segura:
 			# Segura o ângulo (não só para de girar): a linha e a rabiola não
 			# puxam o bico de volta, e tenteios seguidos dão a volta (D-038).
 			var erro := wrapf(_nose_ang(nn) - _hold_ang, -PI, PI)
 			novo = clampf(erro * 12.0, -deg_to_rad(300.0), deg_to_rad(300.0))
 		angular_velocity += nn * (novo - wnn)
-		_spin_controlado = spin_mode != SpinMode.SPIN_FREE or segura
-		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE and not segura else -1.0
+		_spin_controlado = spin_mode != SpinMode.SPIN_FREE or segura or girando
+		_spin_teto = deg_to_rad(d.spin_give_rate_deg) if spin_mode == SpinMode.SPIN_FREE and not segura and not girando else -1.0
 		_spin_alvo = novo
-		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK:
+		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_KICK or girando:
 			# Mandando linha a pipa gira no plano dela, sem capotar: a rabiola
 			# segura a face virada para o vento (sem "furacão").
 			var fora := angular_velocity - nn * angular_velocity.dot(nn)

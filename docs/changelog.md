@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.13.3 — 2026-11-24
+
+- Tenteio redondo: o bico gira num arco que começa rápido e vai freando
+  (sem parada seca); toques seguidos somam o giro.
+
 ## 0.13.2 — 2026-11-24
 
 - Tenteio de volta como antes: cada toque para um lado.

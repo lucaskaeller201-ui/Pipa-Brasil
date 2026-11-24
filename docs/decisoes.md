@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-040 — Tenteio redondo: impulso de giro freado pelo ar (2026-11-24)
+O Lucas achou o giro "quadrado" (mandou um texto explicando o Pipa Combate). O
+tenteio era um giro a velocidade fixa por 0,08 s e uma parada seca. Agora cada
+toque SOMA um impulso de giro (330°/s) que o ar freia aos poucos (6/s): o bico
+gira uns 55° num arco que começa rápido e desacelera suave; toques seguidos
+somam o giro que ainda resta (arco contínuo na volta com toques duplos). Mandar
+linha ou puxar forte zera o que resta. Depois que o giro acaba, o bico fica
+onde parou até 1,2 s do toque e então o vento o traz de volta.
+
 ### D-039 — Toque duplo para dar a volta; toque simples como antes (2026-11-24)
 A D-038 estragou o tenteio (toques rápidos giravam sem parar). O Lucas explicou
 o Pipa Combate: o toque simples continua como antes (cada toque para um lado,
