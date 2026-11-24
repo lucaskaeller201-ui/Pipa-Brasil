@@ -33,6 +33,16 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-033 — Desbico trava e arranca; aparar com mais calma (2026-11-24)
+O Lucas aprovou o giro mandando linha (pediu só um pouco mais rápido: 100°/s
+por m/s, teto 360°/s) e explicou o desbico: é para mudar a direção para o lado
+que ele quer. Toque = tranco curto: o giro trava na hora (puxando, o giro é
+zerado), a mão recolhe a folga a 4 m/s até a linha esticar e a pipa arranca
+reta para onde o bico parou. Para escolher o lado: manda linha, ela gira, toca
+quando o bico apontar. Avoada: força do ar a 35%, mais arrasto e giro limitado
+a 90°/s (rebocada, 60°/s); não decepa nos 4 s depois do corte e decepar exige
+puxar acima de 5,5 m/s.
+
 ### D-032 — Giro conforme o dedo; avoada mais lenta; decepar com calma (2026-11-23)
 Depois do vídeo do Lucas: o giro mandando linha agora é proporcional à
 velocidade da linha saindo (80°/s por m/s, teto padrão 300°/s, ajustável):

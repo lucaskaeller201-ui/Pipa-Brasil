@@ -201,7 +201,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force * (0.3 if towed else (0.55 if drifting else 1.0)) + GRAVITY * m
+	var f := last_aero_force * (0.3 if towed else (0.35 if drifting else 1.0)) + GRAVITY * m
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
@@ -237,7 +237,7 @@ func integrate(h: float) -> void:
 					var lim := deg_to_rad(d.spin_kick_rate_deg)
 					novo = clampf(ang * 8.0, -lim, lim)
 			SpinMode.SPIN_LOCK:
-				novo = wnn * exp(-d.spin_pull_drag * h)
+				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)
 			_:
 				novo = wnn * exp(-d.spin_release_drag * bow_factor() * h)
 				# solta, mas sem furacão: nunca mais rápido que o teto do giro
@@ -259,8 +259,8 @@ func integrate(h: float) -> void:
 		if absf(wn2) > lim:
 			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
 	if drifting:
-		velocity *= exp(-0.8 * h)
-		angular_velocity *= exp(-3.0 * h)
+		velocity *= exp(-1.5 * h)
+		angular_velocity *= exp(-6.0 * h)
 	if towed:
 		# Rebocada: balança como um pêndulo amortecido, sem girar.
 		angular_velocity *= exp(-20.0 * h)
@@ -301,9 +301,9 @@ func update_velocities(h: float) -> void:
 			rotation = (Quaternion(n2, (alvo2 - wn2) * h) * rotation).normalized()
 			angular_velocity += n2 * (alvo2 - wn2)
 		_spin_teto = -1.0
-	if towed:
-		# Rebocada: sem giro de furacão, mesmo com os trancos do reboque.
-		var lim := deg_to_rad(120.0)
+	if towed or drifting:
+		# Avoada ou rebocada: balança, mas sem giro de furacão.
+		var lim := deg_to_rad(60.0 if towed else 90.0)
 		if angular_velocity.length() > lim:
 			angular_velocity = angular_velocity.normalized() * lim
 

@@ -90,32 +90,40 @@ func test_soltar_o_dedo_freia_o_giro_em_fracao_de_segundo() -> void:
 	assert_true(fim < 0.3 * antes, "em meio segundo quase parou (%.0f°/s)" % fim)
 
 
-func test_toque_desbica_e_o_bico_volta_para_cima() -> void:
-	var w := _voo()
-	var f: Flyer = w.flyers[0]
-	# Manda linha até o bico ficar bem de lado (ou embicado).
-	f.input.haul_speed = -2.5
+## Toque como no jogo: puxão curto e a mão recolhe a folga até esticar.
+func _tocar(w: SimWorld, f: Flyer) -> void:
+	f.input.clear()
+	f.pilot.trigger(Pilot.Impulse.PUXAO, w.time)
+	f.input.haul_speed = 4.0
 	var t := 0.0
-	while absf(f.nose_angle_deg()) < 100.0 and t < 4.0:
+	while t < 0.4 and f.tension < 2.5:
 		w.step(DT)
 		t += DT
 	f.input.clear()
-	_rodar(w, 0.15)
-	var b0 := f.nose_angle_deg()
-	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
-	_rodar(w, 0.6)
-	var b1 := f.nose_angle_deg()
-	print("      [desbico] bico %.0f° → %.0f° (0 = para cima)" % [b0, b1])
-	assert_true(absf(b0) > 60.0, "antes do toque o bico estava de lado")
-	assert_true(absf(b1) < 30.0, "o toque endireita a pipa: bico para cima (%.0f°)" % b1)
-	# Com o bico já para cima, o toque não vira a pipa para lado nenhum.
-	_rodar(w, 1.0)
-	var b2 := f.nose_angle_deg()
-	f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
-	_rodar(w, 0.6)
-	var b3 := f.nose_angle_deg()
-	print("      [desbico com o bico para cima] %.0f° → %.0f°" % [b2, b3])
-	assert_true(absf(b3) < 25.0, "continua para cima")
+
+
+func test_toque_trava_o_giro_e_a_pipa_arranca_para_onde_o_bico_parou() -> void:
+	for alvo in [-70.0, 60.0]:
+		var w := _voo()
+		var f: Flyer = w.flyers[0]
+		f.input.haul_speed = -3.0
+		var t := 0.0
+		while absf(_dif(f.nose_angle_deg(), alvo)) > 10.0 and t < 6.0:
+			w.step(DT)
+			t += DT
+		var b0 := f.nose_angle_deg()
+		_tocar(w, f)
+		var b1 := f.nose_angle_deg()
+		var p0 := f.sky_position_deg()
+		_rodar(w, 0.6)
+		var p1 := f.sky_position_deg()
+		var b2 := f.nose_angle_deg()
+		var d := p1 - p0
+		var rumo := rad_to_deg(atan2(d.x * cos(deg_to_rad(p1.y)), d.y))
+		print("      [desbico %.0f°] bico no toque %.0f° → %.0f° → %.0f°; a pipa foi para %.0f° (andou %.1f°)" % [alvo, b0, b1, b2, rumo, d.length()])
+		assert_true(absf(_dif(b1, b0)) < 25.0, "o toque trava o bico onde estava")
+		assert_true(absf(_dif(b2, b1)) < 25.0, "e ele fica")
+		assert_true(signf(d.x) == signf(b1) or absf(b1) < 20.0, "a pipa vai para o lado do bico")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.

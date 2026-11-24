@@ -51,7 +51,7 @@ extends Resource
 @export var spin_give_accel_deg := 1200.0
 ## Giro por velocidade de linha saindo (graus/s por m/s): deslizar devagar
 ## gira devagar, rápido gira rápido, até o teto spin_give_rate_deg (D-032).
-@export var spin_per_line_speed_deg := 80.0
+@export var spin_per_line_speed_deg := 100.0
 @export var spin_gravity_mod := 0.4
 ## Freio do giro (1/s): ao soltar o dedo (linha volta a esticar) e ao puxar.
 @export var spin_release_drag := 7.0
@@ -137,7 +137,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_damping_taut = 12.0
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
-	d.spin_give_rate_deg = 300.0
+	d.spin_give_rate_deg = 360.0
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
 	return d

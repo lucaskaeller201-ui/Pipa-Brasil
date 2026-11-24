@@ -5,8 +5,9 @@ extends Node3D
 ##   • Deslizar o dedo para BAIXO: puxa linha com a mão ("abraçar"); rápido = puxada forte.
 ##   • Deslizar para CIMA: dá linha (até 4 m/s); a pipa descarrega e gira num
 ##     ritmo constante, mostrando o bico para todos os lados.
-##   • TOQUE rápido: desbica — folga curta e a pipa se endireita, bico para
-##     cima (D-031).
+##   • TOQUE rápido: desbica — trava o giro na hora e a pipa arranca reta para
+##     onde o bico parou (D-033). Para escolher o lado: manda linha, a pipa
+##     gira, e você toca quando o bico apontar para onde quer ir.
 ## No PC: W/↓ puxa, S/↑ dá linha, Espaço desbica, arrastar com o mouse também vale.
 ## A física é a mesma do laboratório: os gestos viram comandos do PilotInput.
 
@@ -19,13 +20,16 @@ const LinesView := preload("res://game/views/lines_view.gd")
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
 ## que a mão recolhe no toque e no máximo ao deslizar para baixo).
-@export var velocidade_giro_mandando_linha := 300.0
+@export var velocidade_giro_mandando_linha := 360.0
 @export var forca_puxada := 6.0
 
 const BOTS := 5   ## festival: 5 rivais com jeitos diferentes de jogar
 const ARQUIVO_ESTATISTICAS := "user://estatisticas.json"
 const LINHA_POR_TELA := 2.5     ## m de linha por altura de tela deslizada
 const DESCARREGAR := 2.5        ## m/s de linha saindo com a tecla S/↑
+const TOQUE_RECOLHE := 0.4      ## s: no desbico, a mão recolhe a folga até a linha esticar
+const TOQUE_VELOCIDADE := 4.0   ## m/s dessa recolhida (abaixo do que decepa)
+const TOQUE_TENSAO := 2.5       ## N: linha esticada de novo
 const EMBALO := 0.35            ## s que a carretilha leva para parar depois de mandar linha
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
 const PUXOU_PX := 6.0           ## px para baixo que transformam o dedo em dedo de puxar
@@ -50,6 +54,7 @@ var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
 var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
+var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 
 # interface
 var _placar: Label
@@ -128,6 +133,11 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 		_embalo = move_toward(_embalo, 0.0, delta * DAR_LINHA_MAX / EMBALO)
 		if _embalo > 0.2:
 			v = -_embalo
+	if modo.world.time < _toque_ate:
+		if eu.tension < TOQUE_TENSAO:
+			v = maxf(v, TOQUE_VELOCIDADE)
+		else:
+			_toque_ate = -1.0
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
@@ -265,8 +275,11 @@ func _desbicar() -> void:
 	var eu := modo.you()
 	if _automatico or eu.cut or eu.pilot == null:
 		return
-	eu.pilot.trigger(Pilot.Impulse.DESBICAR, modo.world.time)
-	_embalo = 0.0   # o toque para a carretilha: nada de giro depois do desbico
+	# Desbico (D-033): um tranco curto que trava o giro na hora; a mão recolhe a
+	# folga até a linha esticar e a pipa arranca reta para onde o bico parou.
+	eu.pilot.trigger(Pilot.Impulse.PUXAO, modo.world.time)
+	_toque_ate = modo.world.time + TOQUE_RECOLHE
+	_embalo = 0.0
 	_mostrar_aviso_curto("desbicou")
 
 
@@ -425,7 +438,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: desbica (bico volta para cima)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: desbica (trava o bico e ela arranca)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

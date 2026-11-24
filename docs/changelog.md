@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.10.3 — 2026-11-24
+
+- Desbico: o toque trava o giro e a pipa arranca para onde o bico parou.
+- Giro mandando linha um pouco mais rápido.
+- Avoada desce mais devagar e não gira como furacão (nem rebocada); decepar
+  só com puxada muito forte e não nos primeiros 4 s depois do corte.
+
 ## 0.10.2 — 2026-11-23
 
 - O giro mandando linha segue o dedo: devagar gira devagar, rápido gira mais
