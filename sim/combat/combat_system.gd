@@ -404,8 +404,8 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		if wear_k > 0.0:
 			# Relo (D-027): a linha que corre (quem está dando ou puxando linha)
 			# gasta a outra; um pouco para as duas sempre.
-			var corre_a := fa.line_rate
-			var corre_b := fb.line_rate
+			var corre_a := fa.line_rate * _largada(fa)
+			var corre_b := fb.line_rate * _largada(fb)
 			var base := 0.15 * (corre_a + corre_b) + 0.05
 			# Integridade de cada linha neste laço (não espalha pelo comprimento).
 			e["wa"] = float(e.get("wa", 0.0)) + wear_k * f * (corre_b + base) * h
@@ -413,3 +413,11 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		e["ia"] = bi
 		e["ib"] = bj
 		contact_points.append(a.pos[bi].lerp(a.pos[bi + 1], bst.x))
+
+
+## Largada (D-034): puxou (linha com pressão) e soltou de uma vez no relô —
+## a linha corre com força e serra a outra: desgaste em dobro.
+func _largada(f: Flyer) -> float:
+	if f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > 3.0 and f.line_rate > 1.5:
+		return 2.0
+	return 1.0

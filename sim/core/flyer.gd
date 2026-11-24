@@ -36,6 +36,8 @@ var kite_on_ground := false
 var line_rate := 0.0
 ## Segundos desde que a linha foi cortada (avoada recém-cortada não decepa).
 var cut_age := 0.0
+## Maior tensão recente (N), caindo devagar: diz se houve pressão antes de soltar.
+var tension_memo := 0.0
 
 var _attach_dl := 0.0
 
@@ -87,6 +89,19 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	k.towed = cut and caught_by != null
 	k.drifting = cut and caught_by == null and not lost
 	k.give_speed = maxf(0.0, -input.haul_speed)
+	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
+	k.pull_taut = tension > 1.0
+	# Sentido do giro do desbico, para o bico ir para o lado pedido no céu.
+	if k.spin_mode == KiteBody.SpinMode.SPIN_KICK:
+		var n := k.rotation * Vector3(0.0, 0.0, 1.0)
+		var bico := k.rotation * Vector3.UP
+		var linha := (k.position - hand_position).normalized()
+		var cima := (Vector3.UP - linha * Vector3.UP.dot(linha)).normalized()
+		var direita := linha.cross(cima).normalized()
+		var s := signf(n.cross(bico).dot(direita))
+		k.kick_sign = input.kick_side * (s if s != 0.0 else 1.0)
+	# Memória da pressão: para a largada (puxa, e solta de uma vez no relô).
+	tension_memo = maxf(tension, tension_memo - 6.0 * h)
 	if cut:
 		cut_age += h
 	k.update_flex(tension if not cut else 0.0, h)

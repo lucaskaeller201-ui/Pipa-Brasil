@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-034 — Desbico para o lado, largada e pressão da puxada (2026-11-24)
+Pedido do Lucas, comparando com o Pipa Combate 4. Desbico: cada toque joga o
+bico para um lado — o lado do toque (metade esquerda ou direita da tela; no PC
+Q/E ou setas) — uns 45° em 0,15 s (300°/s), e então o tranco trava e a mão
+recolhe a folga: a pipa arranca para lá. Largada: com a linha laçada, se você
+vinha com pressão (tensão recente acima de 3 N) e solta de uma vez (manda
+linha acima de 1,5 m/s), a sua linha serra com o dobro de força; aviso
+"LARGADA!". Pressão da puxada (`pull_assist`, 0,12 N por m/s): com a linha
+esticada, puxar empurra a pipa na direção do bico, para ela ir bem mais longe
+para os lados. Avoada ainda mais lenta (força do ar a 20%, mais arrasto).
+
 ### D-033 — Desbico trava e arranca; aparar com mais calma (2026-11-24)
 O Lucas aprovou o giro mandando linha (pediu só um pouco mais rápido: 100°/s
 por m/s, teto 360°/s) e explicou o desbico: é para mudar a direção para o lado

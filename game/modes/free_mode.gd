@@ -98,6 +98,7 @@ func update(dt: float) -> void:
 			if p["profile"] == "fujao" and _lacado(f):
 				f.input.haul_speed = -2.0
 	world.step(dt)
+	_ver_largada()
 	for e in world.combat.take_events():
 		_evento(e)
 	for i in players.size():
@@ -154,6 +155,19 @@ func _lacado(f: Flyer) -> bool:
 		if e["a"] == f or e["b"] == f:
 			return true
 	return false
+
+
+var _ultima_largada := -10.0
+
+
+## Avisa a tela quando você dá uma largada no relô.
+func _ver_largada() -> void:
+	var eu := you()
+	if eu == null or eu.cut or world.time - _ultima_largada < 1.5:
+		return
+	if _lacado(eu) and world.combat._largada(eu) > 1.0:
+		_ultima_largada = world.time
+		_messages.append("LARGADA!")
 
 
 ## Relô da sua linha agora: {"other": índice do rival, "you": desgaste da sua

@@ -7,7 +7,7 @@ extends RefCounted
 ## com uma mola criticamente amortecida e velocidade máxima, como um braço.
 ## A carretilha muda o comprimento da linha na ponta da mão.
 
-enum Impulse { PUXAO, ARRANCAO, DESBICAR }
+enum Impulse { PUXAO, ARRANCAO, DESBICAR, DESBICAR_LADO }
 
 const SHOULDER := Vector3(0.0, 1.45, 0.0)  ## em relação a `base`
 const HAND_DROP := 0.25          ## m abaixo do ombro
@@ -23,7 +23,7 @@ const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
 const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
-const DESBICO_TIME := 0.4        ## s: duração do toque de desbicar (folga curta)
+const DESBICO_TIME := 0.15        ## s: duração do toque de desbicar (folga curta)
 
 var base := Vector3.ZERO  ## onde o pipeiro está pisando
 var hand_position := SHOULDER + Vector3(0.0, -HAND_DROP, -ARM_REST)
@@ -48,6 +48,10 @@ func trigger(impulse: Impulse, t: float) -> void:
 			# pipa com giro controlado, dá um pulo de direção (D-030)
 			_moves = [[t, 0.30, 0.40, 5.0], [t + 0.30, 0.15, -0.40, 5.0], [t + 0.45, 0.4, 0.0, 1.5]]
 			_desbico_ate = t + DESBICO_TIME
+		Impulse.DESBICAR_LADO:
+			# D-034: folguinha em que o bico pula para o lado, tranco que trava
+			_moves = [[t, DESBICO_TIME, 0.20, 5.0], [t + DESBICO_TIME, 0.15, -0.45, 5.0], [t + DESBICO_TIME + 0.15, 0.4, 0.0, 1.5]]
+			_desbico_ate = t + DESBICO_TIME
 
 
 ## Verdadeiro durante a folga curta do desbico.
@@ -68,7 +72,7 @@ func shoulder_position() -> Vector3:
 
 
 static func impulse_name(impulse: Impulse) -> String:
-	return ["Puxão", "Arrancão", "Desbicar"][impulse]
+	return ["Puxão", "Arrancão", "Desbicar", "Desbicar para o lado"][impulse]
 
 
 ## Atualiza mão e carretilha. Devolve a variação do comprimento de linha (m).

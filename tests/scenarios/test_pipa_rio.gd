@@ -102,28 +102,38 @@ func _tocar(w: SimWorld, f: Flyer) -> void:
 	f.input.clear()
 
 
-func test_toque_trava_o_giro_e_a_pipa_arranca_para_onde_o_bico_parou() -> void:
-	for alvo in [-70.0, 60.0]:
+func _tocar_lado(w: SimWorld, f: Flyer, lado: float) -> void:
+	f.input.clear()
+	f.input.kick_side = lado
+	f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+	f.input.haul_speed = 4.0
+	var t := 0.0
+	while t < 0.4 and (f.tension < 2.5 or t < Pilot.DESBICO_TIME):
+		w.step(DT)
+		t += DT
+	f.input.clear()
+	f.input.kick_side = lado
+
+
+func test_toque_desbica_para_o_lado_pedido() -> void:
+	for lado in [1.0, -1.0]:
 		var w := _voo()
 		var f: Flyer = w.flyers[0]
-		f.input.haul_speed = -3.0
-		var t := 0.0
-		while absf(_dif(f.nose_angle_deg(), alvo)) > 10.0 and t < 6.0:
-			w.step(DT)
-			t += DT
 		var b0 := f.nose_angle_deg()
-		_tocar(w, f)
-		var b1 := f.nose_angle_deg()
 		var p0 := f.sky_position_deg()
-		_rodar(w, 0.6)
-		var p1 := f.sky_position_deg()
+		_tocar_lado(w, f, lado)
+		var b1 := f.nose_angle_deg()
+		_rodar(w, 0.5)
 		var b2 := f.nose_angle_deg()
-		var d := p1 - p0
-		var rumo := rad_to_deg(atan2(d.x * cos(deg_to_rad(p1.y)), d.y))
-		print("      [desbico %.0f°] bico no toque %.0f° → %.0f° → %.0f°; a pipa foi para %.0f° (andou %.1f°)" % [alvo, b0, b1, b2, rumo, d.length()])
-		assert_true(absf(_dif(b1, b0)) < 25.0, "o toque trava o bico onde estava")
-		assert_true(absf(_dif(b2, b1)) < 25.0, "e ele fica")
-		assert_true(signf(d.x) == signf(b1) or absf(b1) < 20.0, "a pipa vai para o lado do bico")
+		var d := f.sky_position_deg() - p0
+		print("      [desbico para %s] bico %.0f° → %.0f° → %.0f°; a pipa andou %.1f° de lado" % ["a direita" if lado > 0 else "a esquerda", b0, b1, b2, d.x])
+		assert_true(_dif(b1, b0) * lado > 20.0 and _dif(b1, b0) * lado < 90.0, "o bico pulou para o lado do toque (%.0f°)" % _dif(b1, b0))
+		assert_true(absf(_dif(b2, b1)) < 25.0, "e travou")
+		assert_true(d.x * lado > 0.0, "a pipa foi para aquele lado")
+		# dois toques do mesmo lado: mais um pulo
+		_tocar_lado(w, f, lado)
+		var b3 := f.nose_angle_deg()
+		assert_true(_dif(b3, b2) * lado > 15.0, "outro toque, outro pulo para o mesmo lado")
 
 
 ## Dá linha, espera o bico apontar perto de `alvo` graus, toca (puxão) e puxa.

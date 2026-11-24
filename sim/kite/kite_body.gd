@@ -26,6 +26,12 @@ var towed := false
 var give_speed := 0.0
 ## Pipa avoada solta (ninguém aparou ainda): desce devagar, dá tempo de aparar.
 var drifting := false
+## Desbico para o lado (D-034): sentido do pulo do bico (+1/-1, no eixo da normal).
+var kick_sign := 1.0
+## Puxada (D-034): velocidade da mão puxando e se a linha está esticada; dá
+## "pressão" para a pipa ir longe para os lados (e até para trás).
+var pull_speed := 0.0
+var pull_taut := false
 var _spin_controlado := false
 var _spin_alvo := 0.0
 var _spin_teto := -1.0
@@ -201,7 +207,10 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 ## Avança com as forças externas (aerodinâmica já calculada + gravidade).
 func integrate(h: float) -> void:
 	var m := definition.mass
-	var f := last_aero_force * (0.3 if towed else (0.35 if drifting else 1.0)) + GRAVITY * m
+	var f := last_aero_force * (0.3 if towed else (0.2 if drifting else 1.0)) + GRAVITY * m
+	if d_pull_assist() > 0.0 and pull_taut and pull_speed > 0.1:
+		# Pressão da puxada: a pipa ganha velocidade na direção do bico.
+		f += (rotation * Vector3.UP) * (d_pull_assist() * pull_speed)
 	velocity += f * (h / m)
 	var iw := inertia_world(angular_velocity)
 	angular_velocity += inv_inertia_world(last_aero_torque - angular_velocity.cross(iw)) * h
@@ -227,15 +236,8 @@ func integrate(h: float) -> void:
 				var teto := absf(alvo)
 				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
 			SpinMode.SPIN_KICK:
-				# Desbico (D-031): a folga curta deixa a pipa se endireitar —
-				# o bico volta para cima pelo caminho mais curto.
-				var bico := rotation * Vector3.UP
-				var cima := Vector3.UP - nn * Vector3.UP.dot(nn)
-				if cima.length_squared() > 1e-6:
-					cima = cima.normalized()
-					var ang := atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
-					var lim := deg_to_rad(d.spin_kick_rate_deg)
-					novo = clampf(ang * 8.0, -lim, lim)
+				# Desbico (D-034): o bico pula para o lado pedido.
+				novo = kick_sign * deg_to_rad(d.spin_kick_rate_deg)
 			SpinMode.SPIN_LOCK:
 				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)
 			_:
@@ -259,7 +261,7 @@ func integrate(h: float) -> void:
 		if absf(wn2) > lim:
 			angular_velocity -= n2 * (wn2 - signf(wn2) * lim)
 	if drifting:
-		velocity *= exp(-1.5 * h)
+		velocity *= exp(-2.5 * h)
 		angular_velocity *= exp(-6.0 * h)
 	if towed:
 		# Rebocada: balança como um pêndulo amortecido, sem girar.
@@ -316,3 +318,7 @@ func reset_pose(p_position: Vector3, p_rotation: Quaternion) -> void:
 	angular_velocity = Vector3.ZERO
 	_step_delta = Vector3.ZERO
 	_prev_rotation = rotation
+
+
+func d_pull_assist() -> float:
+	return definition.pull_assist

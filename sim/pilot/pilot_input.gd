@@ -14,6 +14,8 @@ var reel_in := false    ## Recolher: enrola linha (1,2 m/s, se a força deixar)
 ## Linha pela mão (m/s): + = puxa linha para si ("abraçar"), - = dá linha com a
 ## mão. É o gesto de deslizar o dedo; tem prioridade sobre a carretilha.
 var haul_speed := 0.0
+## Lado do desbico (D-034): +1 = bico para a direita do pipeiro, -1 = esquerda.
+var kick_side := 1.0
 
 
 func clear() -> void:

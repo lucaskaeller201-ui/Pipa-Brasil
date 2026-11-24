@@ -40,3 +40,19 @@ func test_linhas_lacadas_nao_se_soltam_ate_alguem_cortar() -> void:
 	assert_true(a.cut, "quem descarrega (B) gasta a linha parada (A)")
 	assert_true(t > 0.5, "o laço leva um tempo até cortar (%.1f s)" % t)
 	assert_true(w.is_finite_state())
+
+
+func test_largada_puxa_e_solta_de_uma_vez_serra_mais() -> void:
+	var w := _mundo()
+	var b: Flyer = w.flyers[1]
+	b.input.haul_speed = 3.0   # puxa: pressão na linha
+	for i in roundi(0.4 / DT):
+		w.step(DT)
+	var memo := b.tension_memo
+	b.input.haul_speed = -3.0  # solta de uma vez
+	for i in roundi(0.15 / DT):
+		w.step(DT)
+	var fator := w.combat._largada(b)
+	print("      [largada] pressão antes %.1f N; fator de corte %.1f" % [memo, fator])
+	assert_true(memo > 3.0, "puxando, a linha ganhou pressão")
+	assert_eq(fator, 2.0, "soltando de uma vez depois de puxar: largada")

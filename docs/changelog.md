@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.11.0 — 2026-11-24
+
+- Desbico para o lado: toque à esquerda ou à direita da tela joga o bico para
+  aquele lado, trava e a pipa arranca para lá.
+- Largada: puxar e soltar de uma vez com as linhas laçadas serra em dobro.
+- A puxada dá pressão: a pipa vai mais longe para os lados.
+- Avoada ainda mais lenta para dar tempo de aparar.
+
 ## 0.10.3 — 2026-11-24
 
 - Desbico: o toque trava o giro e a pipa arranca para onde o bico parou.

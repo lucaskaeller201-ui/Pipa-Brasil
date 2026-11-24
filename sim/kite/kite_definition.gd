@@ -58,7 +58,10 @@ extends Resource
 @export var spin_pull_drag := 25.0
 ## Desbico (toque, D-031): a pipa se endireita — o bico volta para cima, no
 ## máximo nesta velocidade (graus/s), enquanto dura a folga do toque.
-@export var spin_kick_rate_deg := 500.0
+@export var spin_kick_rate_deg := 300.0
+## Pressão da puxada (N por m/s puxado, D-034): com a linha esticada, puxar
+## empurra a pipa na direção do bico; deixa ir longe para os lados.
+@export var pull_assist := 0.0
 
 @export_group("Rabiola")
 @export var tail_enabled := true
@@ -138,6 +141,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
 	d.spin_give_rate_deg = 360.0
+	d.pull_assist = 0.12
 	d.flex_reference_tension = 2.5  # relaxa mais fácil ao descarregar: gira o tempo todo
 	d.tail_enabled = true
 	return d
