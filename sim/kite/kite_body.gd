@@ -221,9 +221,10 @@ func integrate(h: float) -> void:
 				var bico_cima := (rotation * Vector3.UP).dot(Vector3.UP)
 				var taxa := minf(d.spin_give_rate_deg, d.spin_per_line_speed_deg * give_speed)
 				var alvo := d.spin_give_sign * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
-				novo = move_toward(wnn, alvo, deg_to_rad(d.spin_give_accel_deg) * h)
-				if signf(novo) == signf(alvo) and absf(novo) > absf(alvo):
-					novo = alvo   # o vento não passa do teto
+				# acelera aos poucos até o comando, mas nunca passa dele (nem gira
+				# ao contrário): vento e rabiola não fazem furacão
+				var teto := absf(alvo)
+				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
 			SpinMode.SPIN_KICK:
 				# Desbico (D-031): a folga curta deixa a pipa se endireitar —
 				# o bico volta para cima pelo caminho mais curto.
