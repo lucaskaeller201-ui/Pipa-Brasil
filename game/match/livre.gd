@@ -17,6 +17,7 @@ const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
 const Bairro := preload("res://game/world/bairro.gd")
 const KiteView := preload("res://game/views/kite_view.gd")
+const Estilos := preload("res://game/views/estilos_pipa.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
 
 ## Ajustes finos (também na tela, no botão "Ajustes"):
@@ -48,6 +49,7 @@ var _primeira_pessoa := true
 var _camera: Camera3D
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
+var _estilo_de := {}            # Flyer -> estilo (desenho e fitinhas)
 var _corpos: Array = []         # boneco de cada participante
 
 # gestos
@@ -84,6 +86,7 @@ var _lenta_ate := 0.0           # até quando (tempo real) fica em câmera lenta
 var _painel_mao: PanelContainer     # escolher pipa e linha e colocar no alto (D-037)
 var _botoes_pipa: Array = []
 var _botoes_linha: Array = []
+var _botao_desenho: Button
 var _rotulo_mao: Label
 var _estatisticas := {"cortes": 0, "aparadas": 0, "perdidas": 0, "melhor_sequencia": 0}
 
@@ -180,7 +183,10 @@ func _process(delta: float) -> void:
 		if fl.trailing_line != null:
 			_linhas.call("desenhar_cadeia", fl.trailing_line.pos, cor, 0.0012)
 		if fl.tail != null:
-			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(1.0, 0.30, 0.60) if fl.tag <= 0 else cor.darkened(0.1), 0.02)
+			# Rabiola: o barbante fininho e as fitinhas coloridas (D-043).
+			var estilo: Dictionary = _estilo_de.get(fl, Estilos.ESTILOS[0])
+			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9), 0.003)
+			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
 	var eu := modo.you()
 	_tratar_acontecimentos()
 	var agora_real := Time.get_ticks_msec() / 1000.0
@@ -204,13 +210,16 @@ func _atualizar_vistas() -> void:
 		if not _vistas.has(fl):
 			var v: Node3D = KiteView.new()
 			add_child(v)
-			v.call("construir", fl.kite.definition)
+			var estilo: Dictionary = Estilos.ESTILOS[int(modo.players[fl.tag].get("style", 0))] if fl.tag >= 0 else Estilos.ESTILOS[0]
+			_estilo_de[fl] = estilo
+			v.call("construir", fl.kite.definition, estilo)
 			_vistas[fl] = v
 		(_vistas[fl] as Node3D).call("atualizar", fl.kite)
 	for fl in _vistas.keys():
 		if not vivos.has(fl):
 			(_vistas[fl] as Node).queue_free()
 			_vistas.erase(fl)
+			_estilo_de.erase(fl)
 
 
 # ---------------- câmera ----------------
@@ -731,8 +740,8 @@ func _criar_painel_mao(raiz: Control) -> void:
 	_painel_mao.set_anchors_preset(Control.PRESET_CENTER)
 	_painel_mao.offset_left = -380.0
 	_painel_mao.offset_right = 380.0
-	_painel_mao.offset_top = -170.0
-	_painel_mao.offset_bottom = 170.0
+	_painel_mao.offset_top = -195.0
+	_painel_mao.offset_bottom = 195.0
 	var fundo := StyleBoxFlat.new()
 	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.8)
 	fundo.set_corner_radius_all(18)
@@ -760,6 +769,9 @@ func _criar_painel_mao(raiz: Control) -> void:
 		b.add_theme_font_size_override("font_size", 14)
 		b.pressed.connect(_escolher_linha.bind(k))
 		_botoes_linha.append(b)
+	_botao_desenho = _botao(caixa, "")
+	_botao_desenho.add_theme_font_size_override("font_size", 15)
+	_botao_desenho.pressed.connect(_trocar_desenho)
 	var subir := _botao(caixa, "COLOCAR NO ALTO")
 	subir.name = "ColocarNoAlto"
 	subir.add_theme_font_size_override("font_size", 26)
@@ -771,6 +783,10 @@ func _escolher_pipa(k: int) -> void:
 	modo.you_kite = k
 
 
+func _trocar_desenho() -> void:
+	modo.you_style = (modo.you_style + 1) % Estilos.ESTILOS.size()
+
+
 func _escolher_linha(k: int) -> void:
 	modo.you_line = k
 
@@ -780,6 +796,7 @@ func _atualizar_painel_mao() -> void:
 		FreeMode.PIPAS[modo.you_kite], FreeMode.PIPAS_INFO[modo.you_kite], FreeMode.LINHAS[modo.you_line], FreeMode.LINHAS_INFO[modo.you_line]]
 	for k in _botoes_pipa.size():
 		(_botoes_pipa[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_kite else Color(1, 1, 1, 0.7)
+	_botao_desenho.text = "Desenho: %s  (toque para trocar)" % String(Estilos.ESTILOS[modo.you_style]["nome"])
 	for k in _botoes_linha.size():
 		(_botoes_linha[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_line else Color(1, 1, 1, 0.7)
 

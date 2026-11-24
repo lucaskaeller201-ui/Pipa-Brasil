@@ -44,6 +44,7 @@ var you_on_hand := false
 var _coices_vistos := 0
 var you_kite := 0
 var you_line := 1
+var you_style := 0     ## desenho da sua pipa (estilos_pipa.gd)
 var _you_bot := false
 ## Jeitos de jogar dos bots (Prompt 2 do Lucas): "alto" fica lá em cima
 ## esperando; "cacador" vai atrás da sua pipa; "fujao" foge do relô dando
@@ -71,6 +72,7 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 			"base": (Bairro.LAJES[i] as Vector3) + Vector3(0.0, Bairro.ALTURA_LAJE, 0.0),
 			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0, "stock": 0,
 			"streak": 0, "profile": "jogador" if i == 0 else String(PERFIS[(i - 1) % PERFIS.size()]),
+			"style": 0 if i == 0 else 1 + (i - 1 + seed_) % 7,
 		}
 		if i > 0 or you_bot:
 			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]
@@ -250,6 +252,7 @@ func launch_you(kite := -1, line_kind := -1) -> void:
 	if line_kind >= 0:
 		you_line = clampi(line_kind, 0, LINHAS.size() - 1)
 	you_on_hand = false
+	players[0]["style"] = you_style
 	_lancar(0)
 
 

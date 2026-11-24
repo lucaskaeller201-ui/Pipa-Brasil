@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-043 — Desenhos de pipa e rabiola de fitinhas (2026-11-24)
+O Lucas pediu para focar no visual: pipas como as dos vídeos (raias e
+peixinhos com estampas fortes) e rabiola de fitinhas (antes era só uma linha
+colorida). Só visual, a física não muda. Oito desenhos em
+game/views/estilos_pipa.gd (forma raia ou peixinho + estampa: borda, xadrez,
+olho, losango, metades, cruz, listras, quadrantes); a vela é uma grade 14×14
+colorida pela estampa e o peixinho ganha rabo de peixe. A rabiola é um
+barbante fino com três fitinhas atravessadas por pedaço, nas cores do desenho,
+balançando. Escolha do desenho na tela "pipa na mão"; cada bot tem o seu.
+O tenteio fica como está (D-042) por enquanto, a pedido do Lucas.
+
 ### D-042 — Tenteio que murcha e vai para a frente; coice da largada (2026-11-24)
 O Lucas mandou um vídeo de pipa de verdade: no tenteio um lado da pipa murcha
 (ela inclina) e ela vai para a frente, para onde foi desbicada — não gira como

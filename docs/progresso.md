@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.14.1).
+Atualizado em 2026-11-24 (versão 0.15.0).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -20,7 +20,9 @@ Atualizado em 2026-11-24 (versão 0.14.1).
 | Avoada mais devagar | Feito (D-038), aguardando teste do Lucas |
 | Volta de 360° com toques duplos; toque simples como antes | Feito (D-039) |
 | Tenteio por ângulo-alvo: 36° por toque, para exato, volta curta | Feito (D-041) |
-| Tenteio que murcha e vai para a frente; coice da largada | Feito (D-042), aguardando teste do Lucas |
+| Tenteio que murcha e vai para a frente; coice da largada | Feito (D-042); Lucas ainda não gostou do tenteio, pausado a pedido dele |
+| Desenhos de pipa (raia/peixinho, 8 estampas) e rabiola de fitinhas | Feito (D-043), aguardando teste do Lucas |
+| Próximo no visual: cenário, boneco, animações, mais formatos de pipa | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |
 | Bots disputando | Melhorou: em 3 min de teste houve vários laços e cortes |

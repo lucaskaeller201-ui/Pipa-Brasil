@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.15.0 — 2026-11-24
+
+- Oito desenhos de pipa (raias e peixinhos com estampas), escolha na tela de
+  pipa na mão; cada rival com o seu.
+- Rabiola de fitinhas coloridas balançando, em vez de uma linha.
+
 ## 0.14.1 — 2026-11-24
 
 - Tenteio mais natural: a pipa murcha de um lado e vai para a frente, para
