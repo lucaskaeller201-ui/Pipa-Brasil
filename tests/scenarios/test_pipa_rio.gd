@@ -63,6 +63,7 @@ func _giro_medio(velocidade: float) -> float:
 		var normal := f.kite.rotation * Vector3(0.0, 0.0, 1.0)
 		soma += absf(rad_to_deg(f.kite.angular_velocity.dot(normal)))
 		n += 1
+	print("      [giro diag] modo %d, linha saindo %.2f m/s, teto %.0f, por m/s %.0f, alvo %.0f°/s, ω total %.0f°/s" % [f.kite.spin_mode, f.kite.give_speed, f.kite.definition.spin_give_rate_deg, f.kite.definition.spin_per_line_speed_deg, rad_to_deg(f.kite._spin_alvo), rad_to_deg(f.kite.angular_velocity.length())])
 	print("      [giro %.1f m/s] no corpo %.0f°/s; visto do céu %.0f°/s; elevação %.0f°" % [velocidade, soma / n, soma_ceu / taxas.size(), f.elevation_deg()])
 	return soma / n
 
