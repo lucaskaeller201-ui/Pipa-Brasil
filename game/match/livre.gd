@@ -62,12 +62,9 @@ var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
 var _pendente := -1.0           # instante de um toque esperando para ver se vira duplo
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
-## Tenteio (D-047), como o Lucas explicou do Pipa Combate:
-## - toque simples: o bico muda uns 30°, cada toque para um lado (desbica
-##   da esquerda para a direita); toques simples, mesmo rápidos, NÃO rodam;
-## - toque DUPLO (dois toques bem rápidos): o bico segue 60° no mesmo
-##   sentido do último tenteio — assim leva o bico para baixo ou para qualquer
-##   lado; 6 toques duplos seguidos = uma volta.
+## Tenteio (D-049): cada toque balança o bico ~30° para um lado e o próximo
+## para o outro, em volta da direção em que a pipa estava. Tocar rápido não
+## faz a pipa rodar. Rodar / virar a pipa para outra direção: mandar linha.
 const TOQUE_DUPLO_S := 0.22     ## s entre os dois toques do toque duplo
 @export var graus_por_toque := 30.0
 
@@ -317,22 +314,13 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 
 ## Tenteio pelo toque (D-041).
 func _tentear() -> void:
-	var agora := Time.get_ticks_msec() / 1000.0
-	if _pendente >= 0.0 and agora - _pendente < TOQUE_DUPLO_S:
-		# toque duplo: segue no mesmo sentido, dois passos
-		_pendente = -1.0
-		_desbicar(_sentido, _sentido, 2.0)
-	else:
-		_pendente = agora   # espera um instante para ver se vem o 2º toque
-
-
-## Toque simples confirmado (não veio o 2º toque): troca de lado, um passo.
-func _ver_toque_pendente() -> void:
-	if _pendente < 0.0 or Time.get_ticks_msec() / 1000.0 - _pendente < TOQUE_DUPLO_S:
-		return
-	_pendente = -1.0
+	# cada toque: o bico vai ~30° para o outro lado (na hora, sem esperar)
 	_sentido = -_sentido
 	_desbicar(_sentido, _sentido, 1.0)
+
+
+func _ver_toque_pendente() -> void:
+	pass
 
 
 func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
@@ -506,7 +494,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (o bico muda ~30°, um para cada lado) · TOQUE DUPLO: segue virando (6 duplos = uma volta)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · para virar a pipa, mande linha"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

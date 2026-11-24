@@ -46,6 +46,7 @@ const LUNGE_ACCEL := 40.0       ## m/s² no começo do coice
 const LUNGE_KICK := 4.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
+var _tenteio_base := 0.0    ## direção do bico quando o tenteio começou (rad)
 var _kick_prev := false
 const KICK_HOLD := 1.5 ## s: depois do último toque o bico fica onde parou
 var _spin_controlado := false
@@ -270,8 +271,13 @@ func integrate(h: float) -> void:
 				# Tenteio (D-041): cada toque soma um passo fixo ao ângulo-alvo
 				# do bico; o bico vai até lá suave e para exato (sem passar).
 				if not _kick_prev:
-					var base := _hold_ang if _tenteio_ativo else _nose_ang(nn)
-					_hold_ang = wrapf(base - kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
+					# Tenteio (D-049): o bico balança ~30° para um lado e para o
+					# outro EM VOLTA da direção em que estava — nunca acumula, então
+					# tocar rápido não faz a pipa rodar. Para virar a pipa toda,
+					# manda linha (ela gira) e tenteia na direção nova.
+					if not _tenteio_ativo:
+						_tenteio_base = _nose_ang(nn)
+					_hold_ang = wrapf(_tenteio_base - kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
 					_tenteio_ativo = true
 			SpinMode.SPIN_LOCK:
 				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)

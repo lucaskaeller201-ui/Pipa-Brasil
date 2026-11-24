@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.16.4 — 2026-11-24
+
+- Tenteio: tocar várias vezes balança o bico para os lados, sem a pipa rodar.
+  Para virar a pipa, mande linha.
+
 ## 0.16.3 — 2026-11-24
 
 - Rabiola fina também com a pipa longe.

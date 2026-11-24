@@ -127,7 +127,7 @@ func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
 	print("      [tenteio] bico %.0f° → (direita) %.0f° → (esquerda) %.0f° → (esquerda) %.0f°; parado 1 s: %.0f°; linha %.1f → %.1f m" % [b0, b1, b2, b3, b4, l0, f.line_length()])
 	assert_true(_dif(b1, b0) > 25.0 and _dif(b1, b0) < 50.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
 	assert_true(_dif(b2, b1) < -10.0, "toque para a esquerda: pulo para o outro lado (%.0f°)" % _dif(b2, b1))
-	assert_true(_dif(b3, b2) < -5.0, "outro para a esquerda: mais um pouco")
+	assert_true(absf(_dif(b3, b2)) < 12.0, "outro para a esquerda: fica do lado esquerdo, não acumula (D-049)")
 	assert_true(absf(_dif(b_pausa, b3)) < 15.0, "logo depois do toque, o bico fica onde foi (%.0f° → %.0f°)" % [b3, b_pausa])
 	assert_true(absf(b4) < absf(b_pausa) - 4.0, "parando um tempo, o vento vai trazendo o bico para cima (%.0f° → %.0f°)" % [b_pausa, b4])
 	assert_true(absf(f.line_length() - l0) < 0.5, "o tenteio não puxa nem solta linha de verdade")
@@ -216,41 +216,27 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 
 ## D-041: cada toque gira um passo (36°) e para exato; 10 toques no mesmo
 ## sentido dão a volta num círculo curto.
-func test_seis_toques_duplos_dao_a_volta_e_cada_toque_para_exato() -> void:
+func test_tocar_rapido_tenteia_e_nao_roda() -> void:
+	# D-049: dez toques rápidos (um para cada lado): o bico balança em volta
+	# da direção em que estava, sem rodar.
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
-	var giro := 0.0
-	var antes := f.nose_angle_deg()
-	var maximo := 0.0
-	var p0 := f.kite.position
-	var longe := 0.0
-	for k in 6:
-		f.input.kick_spin = 1.0
-		f.input.kick_scale = 2.0   # toque duplo: 60° no mesmo sentido (D-047)
+	var b0 := f.nose_angle_deg()
+	var maior := 0.0
+	var lado := 1.0
+	for k in 10:
+		f.input.kick_spin = lado
 		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
-		for i in roundi(0.3 / DT):
+		lado = -lado
+		for i in roundi(0.15 / DT):
 			w.step(DT)
-			var agora := f.nose_angle_deg()
-			giro += wrapf(agora - antes, -180.0, 180.0)
-			antes = agora
-			maximo = maxf(maximo, absf(giro))
-			longe = maxf(longe, f.kite.position.distance_to(p0))
-	for i in roundi(0.6 / DT):
-		w.step(DT)
-		var agora := f.nose_angle_deg()
-		giro += wrapf(agora - antes, -180.0, 180.0)
-		antes = agora
-		maximo = maxf(maximo, absf(giro))
+			maior = maxf(maior, absf(_dif(f.nose_angle_deg(), b0)))
 	f.input.kick_spin = 0.0
-	f.input.kick_scale = 1.0
-	print("      [volta] 6 toques duplos: bico girou %.0f° (máximo %.0f°); a pipa se afastou até %.1f m do lugar" % [giro, maximo, longe])
-	assert_true(absf(giro) >= 320.0 and absf(giro) <= 400.0, "6 toques duplos = uma volta (%.0f°)" % giro)
-	assert_true(maximo - absf(giro) < 8.0, "para exato, sem passar do ponto")
-	assert_true(longe < 18.0, "a volta é um círculo curto (%.1f m)" % longe)
+	print("      [tenteio rápido] 10 toques: o bico saiu no máximo %.0f° da direção" % maior)
+	assert_true(maior > 15.0, "o bico balança")
+	assert_true(maior < 60.0, "não roda (%.0f°)" % maior)
 	assert_true(w.is_finite_state())
 
-
-## D-042: no tenteio um lado da pipa murcha (ela inclina para o lado da curva).
 func test_tenteio_murcha_um_lado() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]

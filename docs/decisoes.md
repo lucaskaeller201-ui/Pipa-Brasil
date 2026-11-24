@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-049 — Tenteio balança em volta da direção, não roda (2026-11-24)
+O Lucas: dando vários toques a pipa ainda girava; girar é consequência, não o
+tenteio. Agora cada toque leva o bico ~30° para um lado e o próximo para o
+outro, sempre em volta da direção em que o bico estava quando o tenteio
+começou (o alvo nunca acumula). Tocar rápido = a pipa tenteia (balança o
+bico), sem rodar. Para virar a pipa para outra direção (ou rodar), manda
+linha — ela gira — e tenteia de novo na direção nova; puxa quando o bico
+apontar para onde quer ir. Sai o toque duplo da D-047 (e a espera de 0,22 s).
+
 ### D-048 — Rabiola de longe fina (2026-11-24)
 De longe a rabiola ainda parecia grossa: as fitinhas tinham tamanho mínimo na
 tela (uns 6 px). Agora as fitinhas têm o tamanho de verdade (5 cm para cada
