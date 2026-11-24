@@ -14,7 +14,7 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 		v.call("construir", KiteDefinition.pipa_rio(), estilo)
 		var vela: MeshInstance3D = v.get_node("Vela")
 		assert_not_null(vela, "%s tem vela" % estilo["nome"])
-		var tris := vela.mesh.surface_get_array_len(0) / 3
+		var tris: int = vela.mesh.surface_get_array_len(0) / 3
 		assert_true(tris >= 392, "%s: estampa em grade (%d triângulos)" % [estilo["nome"], tris])
 		# a estampa usa mais de uma cor
 		var cores := {}
