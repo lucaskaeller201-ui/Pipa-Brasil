@@ -104,7 +104,7 @@ func update(dt: float) -> void:
 		var p: Dictionary = players[i]
 		# Pipa caída no chão (sem cortar) por muito tempo: o pipeiro sobe outra.
 		var fl: Flyer = p["flyer"]
-		if fl != null and not fl.cut and fl.kite_on_ground:
+		if fl != null and not fl.cut and fl.kite.position.y < 1.5:
 			p["chao"] = float(p.get("chao", 0.0)) + dt
 			if float(p["chao"]) > CAIDA_RELANCA:
 				p["chao"] = 0.0
