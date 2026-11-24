@@ -41,6 +41,7 @@ var screen_events: Array = []
 ## Sua pipa está na mão, na laje: a tela mostra a escolha de pipa e linha e o
 ## botão de colocar no alto (D-037).
 var you_on_hand := false
+var _coices_vistos := 0
 var you_kite := 0
 var you_line := 1
 var _you_bot := false
@@ -201,6 +202,11 @@ var _ultima_largada := -10.0
 func _ver_largada() -> void:
 	var eu := you()
 	if eu == null or eu.cut or world.time - _ultima_largada < 1.5:
+		return
+	if eu.lunges > _coices_vistos:
+		_coices_vistos = eu.lunges
+		_ultima_largada = world.time
+		_messages.append("LARGADA!")
 		return
 	if _lacado(eu) and world.combat._largada(eu) > 1.0:
 		_ultima_largada = world.time

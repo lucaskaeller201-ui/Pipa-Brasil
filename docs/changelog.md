@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.14.1 — 2026-11-24
+
+- Tenteio mais natural: a pipa murcha de um lado e vai para a frente, para
+  onde foi desbicada.
+- Largada: puxe forte e mande linha logo em seguida — a pipa dá um coice para
+  a frente.
+
 ## 0.14.0 — 2026-11-24
 
 - Tenteio novo: cada toque gira o bico 36° e para exato, sem passar do ponto.

@@ -37,6 +37,13 @@ var pull_taut := false
 ## uma pausa (D-036), para o tenteio mudar a direção de verdade.
 var since_kick := 99.0
 var _hold_ang := 0.0   ## ângulo do bico guardado no fim do tenteio (rad)
+## Direção da linha (da mão para a pipa), informada pelo Flyer.
+var line_dir := Vector3.UP
+## Coice da largada (D-042): s restantes do empurrão para a frente.
+var lunge := 0.0
+const LUNGE_TIME := 0.4
+const LUNGE_ACCEL := 30.0       ## m/s² no começo do coice
+const MURCHA_MAX_DEG := 25.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _kick_prev := false
 const KICK_HOLD := 1.5 ## s: depois do último toque o bico fica onde parou
@@ -216,6 +223,11 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 func integrate(h: float) -> void:
 	var m := definition.mass
 	var f := last_aero_force * (0.3 if towed else (0.14 if drifting else 1.0)) + GRAVITY * m
+	if lunge > 0.0:
+		# Largada: a pressão guardada solta de uma vez, a pipa dá um coice para
+		# a frente (na direção do bico).
+		f += (rotation * Vector3.UP) * (m * LUNGE_ACCEL * lunge / LUNGE_TIME)
+		lunge = maxf(0.0, lunge - h)
 	if d_pull_assist() > 0.0 and pull_taut and pull_speed > 0.1:
 		# Pressão da puxada: a pipa ganha velocidade na direção do bico.
 		f += (rotation * Vector3.UP) * (d_pull_assist() * pull_speed)
@@ -243,6 +255,8 @@ func integrate(h: float) -> void:
 				# ao contrário): vento e rabiola não fazem furacão
 				var teto := absf(alvo)
 				novo = clampf(move_toward(clampf(wnn, -teto, teto), alvo, deg_to_rad(d.spin_give_accel_deg) * h), -teto, teto)
+				if lunge > LUNGE_TIME - 0.25:
+					novo = 0.0   # no coice da largada ela vai reta antes de girar
 			SpinMode.SPIN_KICK:
 				# Tenteio (D-041): cada toque soma um passo fixo ao ângulo-alvo
 				# do bico; o bico vai até lá suave e para exato (sem passar).
@@ -286,6 +300,15 @@ func integrate(h: float) -> void:
 			# segura a face virada para o vento (sem "furacão").
 			var fora := angular_velocity - nn * angular_velocity.dot(nn)
 			angular_velocity -= fora * (1.0 - exp(-12.0 * h))
+		if segura:
+			# Tenteio de verdade (D-042): girando, um lado da pipa murcha (ela
+			# inclina para o lado da curva) e o vento a leva para a frente, para
+			# onde o bico está indo: curva redonda, não ponteiro de relógio.
+			var bico := rotation * Vector3.UP
+			var forca_giro := clampf(absf(novo) / deg_to_rad(d.spin_kick_max_deg) * 3.0, 0.0, 1.0)
+			var alvo_murcha := -signf(novo) * deg_to_rad(MURCHA_MAX_DEG) * forca_giro
+			var atual := roll_angle()
+			angular_velocity += bico * ((alvo_murcha - atual) * 10.0 - angular_velocity.dot(bico))
 	elif definition.spin_rate_max_deg > 0.0:
 		var n2 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn2 := angular_velocity.dot(n2)
@@ -372,3 +395,14 @@ func _nose_ang(nn: Vector3) -> float:
 		return 0.0
 	cima = cima.normalized()
 	return atan2(nn.dot(bico.cross(cima)), bico.dot(cima))
+
+
+## Inclinação de lado (rad): quanto a face da pipa virou em torno do eixo do
+## bico, em relação ao plano que contém o bico e a linha.
+func roll_angle() -> float:
+	var nn := rotation * Vector3(0.0, 0.0, 1.0)
+	var bico := rotation * Vector3.UP
+	var lado := bico.cross(line_dir)
+	if lado.length_squared() < 1e-6:
+		return 0.0
+	return asin(clampf(nn.dot(lado.normalized()), -1.0, 1.0))

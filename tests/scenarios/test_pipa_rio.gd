@@ -243,5 +243,48 @@ func test_dez_toques_dao_a_volta_e_cada_toque_para_exato() -> void:
 	print("      [volta] 10 toques: bico girou %.0f° (máximo %.0f°); a pipa se afastou até %.1f m do lugar" % [giro, maximo, longe])
 	assert_true(absf(giro) >= 320.0 and absf(giro) <= 400.0, "10 toques = uma volta (%.0f°)" % giro)
 	assert_true(maximo - absf(giro) < 8.0, "para exato, sem passar do ponto")
-	assert_true(longe < 12.0, "a volta é um círculo curto (%.1f m)" % longe)
+	assert_true(longe < 18.0, "a volta é um círculo curto (%.1f m)" % longe)
 	assert_true(w.is_finite_state())
+
+
+## D-042: no tenteio um lado da pipa murcha (ela inclina para o lado da curva).
+func test_tenteio_murcha_um_lado() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var maior := 0.0
+	for k in 3:
+		f.input.kick_spin = 1.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.2 / DT):
+			w.step(DT)
+			maior = maxf(maior, absf(rad_to_deg(f.kite.roll_angle())))
+	f.input.kick_spin = 0.0
+	_rodar(w, 3.0)
+	var depois := absf(rad_to_deg(f.kite.roll_angle()))
+	print("      [murcha] inclinação no tenteio até %.0f°; depois de parar %.0f°" % [maior, depois])
+	assert_true(maior > 8.0, "girando, a pipa murcha de um lado (%.0f°)" % maior)
+	assert_true(w.is_finite_state())
+
+
+## D-042: largada — puxou forte e mandou linha logo depois: coice para a frente.
+func test_largada_da_coice() -> void:
+	var com := _coice(true)
+	var sem := _coice(false)
+	print("      [largada] avanço na direção do bico em 0,4 s: com puxada antes %.1f m, sem %.1f m" % [com, sem])
+	assert_true(com > sem + 1.0, "a largada dá um coice para a frente")
+
+
+func _coice(puxar_antes: bool) -> float:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	if puxar_antes:
+		f.input.haul_speed = 5.0
+		_rodar(w, 0.5)
+	f.input.haul_speed = -3.0
+	var bico := f.kite.rotation * Vector3.UP
+	var p0 := f.kite.position
+	_rodar(w, 0.4)
+	f.input.clear()
+	if puxar_antes:
+		assert_eq(f.lunges, 1, "deu uma largada")
+	return (f.kite.position - p0).dot(bico)

@@ -443,7 +443,7 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 ## Largada (D-034): puxou (linha com pressão) e soltou de uma vez no relô —
 ## a linha corre com força e serra a outra: desgaste em dobro.
 func _largada(f: Flyer) -> float:
-	if f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > LARGADA_PRESSAO and f.line_rate > 1.5:
+	if f.kite.lunge > 0.0 or (f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > LARGADA_PRESSAO and f.line_rate > 1.5):
 		return 2.0
 	return 1.0
 

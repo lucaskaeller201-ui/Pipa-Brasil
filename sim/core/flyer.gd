@@ -40,6 +40,9 @@ var cut_age := 0.0
 var tension_memo := 0.0
 ## Segundos desde o último tenteio (para o relô: o tenteio serra a linha).
 var tenteio_age := 99.0
+var pull_age := 99.0     ## s desde a última puxada forte
+var lunges := 0          ## quantas largadas (coices) deu
+var _was_giving := false
 
 var _attach_dl := 0.0
 
@@ -94,8 +97,18 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
 	# Tenteio (D-037): o toque leva uma puxadinha; logo depois do pulo do bico
 	# a pipa já sai andando para onde ele aponta.
-	if not cut and tenteio_age > 0.06 and tenteio_age < 0.25:
-		k.pull_speed = maxf(k.pull_speed, 1.2)   # pequena: o círculo fica curto (D-041)
+	if not cut and tenteio_age > 0.04 and tenteio_age < 0.35:
+		k.pull_speed = maxf(k.pull_speed, 3.0)   # vai para a frente, para onde desbicou (D-042)
+	k.line_dir = (k.position - hand_position).normalized() if not cut else Vector3.UP
+	# Largada (D-042): puxou forte e logo em seguida mandou linha: coice.
+	if not cut and input.haul_speed > 2.5:
+		pull_age = 0.0
+	else:
+		pull_age += h
+	if not cut and k.spin_mode == KiteBody.SpinMode.SPIN_GIVE and not _was_giving and pull_age < 0.35:
+		k.lunge = KiteBody.LUNGE_TIME
+		lunges += 1
+	_was_giving = k.spin_mode == KiteBody.SpinMode.SPIN_GIVE
 	k.pull_taut = tension > 1.0
 	# Sentido do giro do desbico, para o bico ir para o lado pedido no céu.
 	if k.spin_mode == KiteBody.SpinMode.SPIN_KICK:

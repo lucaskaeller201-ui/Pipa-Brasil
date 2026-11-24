@@ -33,6 +33,16 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-042 — Tenteio que murcha e vai para a frente; coice da largada (2026-11-24)
+O Lucas mandou um vídeo de pipa de verdade: no tenteio um lado da pipa murcha
+(ela inclina) e ela vai para a frente, para onde foi desbicada — não gira como
+ponteiro de relógio. Agora, enquanto o bico segue o ângulo do tenteio, a pipa
+inclina em torno do eixo do bico até 25° para o lado da curva (o vento a leva
+para onde o bico vai) e a puxadinha do toque voltou a 3 m/s por 0,3 s.
+Largada: puxar forte (mais de 2,5 m/s) e mandar linha até 0,35 s depois dá um
+coice: empurrão para a frente na direção do bico (30 m/s² caindo a zero em
+0,4 s), sem girar nos primeiros 0,25 s, e conta como largada no relô.
+
 ### D-041 — Tenteio por ângulo-alvo: 36° por toque, para exato (2026-11-24)
 O Lucas ainda achou injogável e explicou (com um texto de apoio): cada toque
 gira o bico um passo fixo; o bico vai até lá suave e PARA exato (sem passar,
