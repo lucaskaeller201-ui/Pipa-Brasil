@@ -38,7 +38,7 @@ Pedido do Lucas, comparando com o Pipa Combate 4. Desbico: cada toque joga o
 bico para um lado — o lado do toque (metade esquerda ou direita da tela; no PC
 Q/E ou setas) — uns 45° em 0,15 s (300°/s), e então o tranco trava e a mão
 recolhe a folga: a pipa arranca para lá. Largada: com a linha laçada, se você
-vinha com pressão (tensão recente acima de 3 N) e solta de uma vez (manda
+vinha com pressão (tensão recente acima de 8 N, bem mais que o voo parado) e solta de uma vez (manda
 linha acima de 1,5 m/s), a sua linha serra com o dobro de força; aviso
 "LARGADA!". Pressão da puxada (`pull_assist`, 0,12 N por m/s): com a linha
 esticada, puxar empurra a pipa na direção do bico, para ela ir bem mais longe

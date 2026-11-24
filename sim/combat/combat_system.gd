@@ -31,6 +31,7 @@ const TANGLE_TIME := 0.4       ## s mandando linha em contato para embolar (D-02
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
 const CUT_RATE := 5.5          ## m/s de linha puxada acima dos quais o contato decepa
 const DECEPAR_GRACE := 4.0     ## s depois do corte em que a avoada não decepa (dá tempo de aparar)
+const LARGADA_PRESSAO := 8.0  ## N: pressão (puxada) acima do voo parado que arma a largada
 const LINK_SLACK := 0.3        ## m de folga no ponto embolado (pêndulo)
 
 ## Enroscos ativos. Cada um: {"avoada": Flyer, "chain": ParticleChain (da
@@ -418,6 +419,6 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 ## Largada (D-034): puxou (linha com pressão) e soltou de uma vez no relô —
 ## a linha corre com força e serra a outra: desgaste em dobro.
 func _largada(f: Flyer) -> float:
-	if f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > 3.0 and f.line_rate > 1.5:
+	if f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE and f.tension_memo > LARGADA_PRESSAO and f.line_rate > 1.5:
 		return 2.0
 	return 1.0

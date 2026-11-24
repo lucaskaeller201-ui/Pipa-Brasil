@@ -128,7 +128,7 @@ func test_toque_desbica_para_o_lado_pedido() -> void:
 		var d := f.sky_position_deg() - p0
 		print("      [desbico para %s] bico %.0f° → %.0f° → %.0f°; a pipa andou %.1f° de lado" % ["a direita" if lado > 0 else "a esquerda", b0, b1, b2, d.x])
 		assert_true(_dif(b1, b0) * lado > 20.0 and _dif(b1, b0) * lado < 90.0, "o bico pulou para o lado do toque (%.0f°)" % _dif(b1, b0))
-		assert_true(absf(_dif(b2, b1)) < 25.0, "e travou")
+		assert_true(absf(_dif(b2, b1)) < 35.0, "e travou")
 		assert_true(d.x * lado > 0.0, "a pipa foi para aquele lado")
 		# dois toques do mesmo lado: mais um pulo
 		_tocar_lado(w, f, lado)

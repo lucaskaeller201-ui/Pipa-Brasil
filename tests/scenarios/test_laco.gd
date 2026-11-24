@@ -54,5 +54,5 @@ func test_largada_puxa_e_solta_de_uma_vez_serra_mais() -> void:
 		w.step(DT)
 	var fator := w.combat._largada(b)
 	print("      [largada] pressão antes %.1f N; fator de corte %.1f" % [memo, fator])
-	assert_true(memo > 3.0, "puxando, a linha ganhou pressão")
+	assert_true(memo > KiteCombatSystem.LARGADA_PRESSAO, "puxando, a linha ganhou pressão")
 	assert_eq(fator, 2.0, "soltando de uma vez depois de puxar: largada")
