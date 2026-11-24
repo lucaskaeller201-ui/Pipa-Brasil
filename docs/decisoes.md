@@ -42,7 +42,7 @@ Pedido do Lucas (vídeos do Manda Busca e Pipa Combate):
   por uns 3 s, o embolo solta e a avoada segue avoada.
 - Pipa avoada no chão ainda pode ser aparada por 5 s (a linha e a rabiola
   ainda caem); só depois vira perdida.
-- Rabiola da pipa do Rio: 4,5 m, 7 g, 22 pedaços, 1,2 cm de largura de
+- Rabiola da pipa do Rio: 3,5 m, 6,5 g, 18 pedaços, 1,2 cm de largura de
   arrasto — comprida, fina e leve, balança bastante; desenho com barbante fino
   e fitinhas pequenas.
 Ficam para depois (registrados em progresso.md): enroscar e cortar na rabiola

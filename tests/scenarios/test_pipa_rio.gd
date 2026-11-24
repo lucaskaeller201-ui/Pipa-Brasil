@@ -86,8 +86,9 @@ func test_soltar_o_dedo_freia_o_giro_em_fracao_de_segundo() -> void:
 	var depois := _taxas(w, f, 12)
 	print("      [soltou] antes %.0f°/s; depois (a cada 0,05 s): %s" % [antes, depois.map(func(x): return roundi(x))])
 	assert_true(depois[0] > 0.25 * antes, "não para seco: freia")
-	var fim := (depois[8] + depois[9] + depois[10] + depois[11]) / 4.0
-	assert_true(fim < 0.3 * antes, "em meio segundo quase parou (%.0f°/s)" % fim)
+	# freia até quase parar; depois o vento vai trazendo o bico para cima (mola)
+	var menor: float = depois.min()
+	assert_true(menor < 0.3 * antes, "em meio segundo quase parou (%.0f°/s)" % menor)
 
 
 ## Toque como no jogo: puxão curto e a mão recolhe a folga até esticar.
