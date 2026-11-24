@@ -60,14 +60,14 @@ var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
 var _ultimo_toque := -99.0      # instante do último toque (s)
 var _ultimo_duplo := -99.0      # instante do último toque duplo (s)
-var _sentido_volta := 0.0       # sentido do giro na volta com a pipa
-## Tenteio (D-039), como no Pipa Combate:
-## - toque simples: cada toque para um lado (desbica da esquerda para a direita);
-## - toque DUPLO (dois toques rápidos): a pipa continua girando no mesmo
-##   sentido; uns 6 toques duplos seguidos dão a volta inteira (360°).
+var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
+## Tenteio (D-041), como no Pipa Combate: cada toque gira o bico um passo
+## (36°). Toque simples: alterna o sentido (desbica para um lado e para o
+## outro). Toque DUPLO (rápido): continua no mesmo sentido; seguindo com mais
+## toques duplos a pipa dá a volta num círculo curto (10 toques = 360°).
 const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
-const VOLTA_SEGUE_S := 0.9      ## s: toque duplo logo depois de outro continua a volta
-const VOLTA_SEGUNDO_TOQUE := 0.1   ## o 2º toque do duplo é só um empurrãozinho
+const VOLTA_SEGUE_S := 0.9      ## s: toque logo depois de um duplo continua a volta
+@export var graus_por_toque := 36.0
 
 # interface
 var _placar: Label
@@ -268,9 +268,11 @@ func _input(evento: InputEvent) -> void:
 	elif evento is InputEventKey and evento.pressed and not evento.echo:
 		var tecla := (evento as InputEventKey).physical_keycode
 		if tecla == KEY_Q or tecla == KEY_LEFT:
-			_desbicar(-1.0)
+			_sentido = -1.0
+			_desbicar(-1.0, -1.0)
 		elif tecla == KEY_E or tecla == KEY_RIGHT:
-			_desbicar(1.0)
+			_sentido = 1.0
+			_desbicar(1.0, 1.0)
 		elif tecla == KEY_SPACE:
 			_tentear()
 
@@ -301,26 +303,16 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 		d["puxou"] = true   # este dedo é de puxar (enquanto estiver na tela)
 
 
-## Tenteio pelo toque (D-039): toque simples alterna o lado; o toque duplo
-## continua girando no mesmo sentido (vários seguidos dão a volta).
+## Tenteio pelo toque (D-041).
 func _tentear() -> void:
 	var agora := Time.get_ticks_msec() / 1000.0
-	var eu := modo.you()
-	if eu == null:
-		return
-	if agora - _ultimo_toque < TOQUE_DUPLO_S:
-		# 2º toque do duplo: empurrãozinho no mesmo sentido do 1º.
-		_ultimo_toque = -99.0
+	var seguido := agora - _ultimo_toque < TOQUE_DUPLO_S
+	if seguido:
 		_ultimo_duplo = agora
-		_sentido_volta = eu.kite.kick_sign
-		_desbicar(_ultimo_lado, _sentido_volta, VOLTA_SEGUNDO_TOQUE)
-		return
+	elif agora - _ultimo_duplo >= VOLTA_SEGUE_S:
+		_sentido = -_sentido      # toque simples: troca de lado
 	_ultimo_toque = agora
-	if agora - _ultimo_duplo < VOLTA_SEGUE_S and _sentido_volta != 0.0:
-		# no meio da volta: o 1º toque do próximo duplo segue girando
-		_desbicar(_ultimo_lado, _sentido_volta, 1.0)
-	else:
-		_desbicar(-_ultimo_lado)
+	_desbicar(_sentido, _sentido)
 
 
 func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
@@ -494,7 +486,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (cada um para um lado) · TOQUE DUPLO: gira a pipa (6 seguidos = uma volta)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUE: tenteio (um para cada lado) · TOQUES DUPLOS: a pipa vai girando (5 duplos = uma volta)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
@@ -528,6 +520,7 @@ func _criar_interface() -> void:
 	_painel_ajustes.add_child(caixa)
 	_ajuste(caixa, "Giro máximo mandando linha (°/s)", 60.0, 900.0, 20.0, velocidade_giro_mandando_linha, "giro")
 	_ajuste(caixa, "Força da puxada (m/s)", 2.0, 10.0, 0.5, forca_puxada, "puxada")
+	_ajuste(caixa, "Giro por toque no tenteio (°)", 15.0, 90.0, 3.0, graus_por_toque, "toque")
 
 	_criar_painel_mao(raiz)
 
@@ -594,6 +587,11 @@ func _aplicar_giro() -> void:
 
 func _ao_ajustar(v: float, qual: String, rotulo: Label, nome: String) -> void:
 	rotulo.text = "%s: %s" % [nome, str(v)]
+	if qual == "toque":
+		graus_por_toque = v
+		modo.your_kick_deg = v
+		if modo.you() != null:
+			modo.you().kite.definition.spin_kick_rate_deg = v
 	if qual == "giro":
 		velocidade_giro_mandando_linha = v
 		_aplicar_giro()

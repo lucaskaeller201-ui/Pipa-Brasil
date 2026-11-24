@@ -33,6 +33,18 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-041 — Tenteio por ângulo-alvo: 36° por toque, para exato (2026-11-24)
+O Lucas ainda achou injogável e explicou (com um texto de apoio): cada toque
+gira o bico um passo fixo; o bico vai até lá suave e PARA exato (sem passar,
+para conseguir apontar o bico para baixo e aparar). Toque simples alterna o
+sentido (desbica para um lado e para o outro); toque duplo continua no mesmo
+sentido, e seguindo com toques duplos a pipa dá a volta num círculo curto.
+Regra: cada toque soma ±36° ao ângulo-alvo do bico (10 toques = 360°,
+ajustável na tela: "Giro por toque"); o bico persegue o alvo com ganho 14/s
+(no máximo 420°/s); o alvo vale até 1,5 s depois do último toque e então o
+vento traz o bico de volta. A puxadinha do tenteio ficou pequena (1,2 m/s
+por 0,2 s), para o círculo ser curto. Substitui o impulso da D-040.
+
 ### D-040 — Tenteio redondo: impulso de giro freado pelo ar (2026-11-24)
 O Lucas achou o giro "quadrado" (mandou um texto explicando o Pipa Combate). O
 tenteio era um giro a velocidade fixa por 0,08 s e uma parada seca. Agora cada

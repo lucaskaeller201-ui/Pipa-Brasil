@@ -94,8 +94,8 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
 	# Tenteio (D-037): o toque leva uma puxadinha; logo depois do pulo do bico
 	# a pipa já sai andando para onde ele aponta.
-	if not cut and tenteio_age > 0.06 and tenteio_age < 0.5:
-		k.pull_speed = maxf(k.pull_speed, 3.0)
+	if not cut and tenteio_age > 0.06 and tenteio_age < 0.25:
+		k.pull_speed = maxf(k.pull_speed, 1.2)   # pequena: o círculo fica curto (D-041)
 	k.pull_taut = tension > 1.0
 	# Sentido do giro do desbico, para o bico ir para o lado pedido no céu.
 	if k.spin_mode == KiteBody.SpinMode.SPIN_KICK:

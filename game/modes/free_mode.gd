@@ -34,6 +34,8 @@ var _remocoes: Array = []        ## [Flyer, instante (s)]
 var _rng := RandomNumberGenerator.new()
 ## Velocidade do giro mandando linha da SUA pipa (graus/s), ajustável na tela.
 var your_spin_rate := 900.0
+## Giro por toque do SEU tenteio (graus), ajustável na tela.
+var your_kick_deg := 36.0
 ## Acontecimentos para a tela (tremor, câmera lenta, avisos): {"type", ...}
 var screen_events: Array = []
 ## Sua pipa está na mão, na laje: a tela mostra a escolha de pipa e linha e o
@@ -298,12 +300,10 @@ static func kite_for(k: int) -> KiteDefinition:
 		d.tail_length *= 0.6
 		d.tail_mass *= 0.6
 		d.spin_give_rate_deg *= 1.25
-		d.spin_kick_rate_deg *= 1.15
 	elif k == 2:
 		d.tail_length *= 1.4
 		d.tail_mass *= 1.4
 		d.spin_give_rate_deg *= 0.8
-		d.spin_kick_rate_deg *= 0.9
 	return d
 
 
@@ -332,6 +332,7 @@ func _lancar(i: int) -> void:
 	if i == 0:
 		def = kite_for(you_kite)
 		def.spin_give_rate_deg = your_spin_rate * def.spin_give_rate_deg / KiteDefinition.pipa_rio().spin_give_rate_deg
+		def.spin_kick_rate_deg = your_kick_deg
 	var f := world.add_flyer(def, p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
 	if i == 0:
 		apply_line(f, you_line)

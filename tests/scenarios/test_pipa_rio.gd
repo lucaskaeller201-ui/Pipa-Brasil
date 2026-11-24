@@ -124,7 +124,7 @@ func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
 	_rodar(w, 1.6)
 	var b4 := f.nose_angle_deg()
 	print("      [tenteio] bico %.0f° → (direita) %.0f° → (esquerda) %.0f° → (esquerda) %.0f°; parado 1 s: %.0f°; linha %.1f → %.1f m" % [b0, b1, b2, b3, b4, l0, f.line_length()])
-	assert_true(_dif(b1, b0) > 35.0 and _dif(b1, b0) < 95.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
+	assert_true(_dif(b1, b0) > 25.0 and _dif(b1, b0) < 50.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
 	assert_true(_dif(b2, b1) < -10.0, "toque para a esquerda: pulo para o outro lado (%.0f°)" % _dif(b2, b1))
 	assert_true(_dif(b3, b2) < -5.0, "outro para a esquerda: mais um pouco")
 	assert_true(absf(_dif(b_pausa, b3)) < 15.0, "logo depois do toque, o bico fica onde foi (%.0f° → %.0f°)" % [b3, b_pausa])
@@ -213,27 +213,35 @@ func test_o_vento_deixa_ir_bem_para_o_lado() -> void:
 		assert_true(r["el_min"] > -5.0)
 
 
-## D-039: toque simples alterna o lado; 6 toques duplos seguidos dão a volta.
-func test_toques_duplos_dao_a_volta() -> void:
+## D-041: cada toque gira um passo (36°) e para exato; 10 toques no mesmo
+## sentido dão a volta num círculo curto.
+func test_dez_toques_dao_a_volta_e_cada_toque_para_exato() -> void:
 	var w := _voo()
 	var f: Flyer = w.flyers[0]
 	var giro := 0.0
 	var antes := f.nose_angle_deg()
-	var sentido := 0.0
-	for k in 6:
-		for toque in 2:
-			f.input.kick_side = 1.0
-			f.input.kick_spin = sentido
-			f.input.kick_scale = 1.0 if toque == 0 else 0.1
-			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
-			for i in roundi((0.15 if toque == 0 else 0.35) / DT):
-				w.step(DT)
-				var agora := f.nose_angle_deg()
-				giro += wrapf(agora - antes, -180.0, 180.0)
-				antes = agora
-			sentido = f.kite.kick_sign
+	var maximo := 0.0
+	var p0 := f.kite.position
+	var longe := 0.0
+	for k in 10:
+		f.input.kick_spin = 1.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.2 / DT):
+			w.step(DT)
+			var agora := f.nose_angle_deg()
+			giro += wrapf(agora - antes, -180.0, 180.0)
+			antes = agora
+			maximo = maxf(maximo, absf(giro))
+			longe = maxf(longe, f.kite.position.distance_to(p0))
+	for i in roundi(0.6 / DT):
+		w.step(DT)
+		var agora := f.nose_angle_deg()
+		giro += wrapf(agora - antes, -180.0, 180.0)
+		antes = agora
+		maximo = maxf(maximo, absf(giro))
 	f.input.kick_spin = 0.0
-	f.input.kick_scale = 1.0
-	print("      [volta] 6 toques duplos: bico girou %.0f°" % giro)
-	assert_true(absf(giro) >= 300.0 and absf(giro) <= 480.0, "6 toques duplos dão uma volta (%.0f°)" % giro)
+	print("      [volta] 10 toques: bico girou %.0f° (máximo %.0f°); a pipa se afastou até %.1f m do lugar" % [giro, maximo, longe])
+	assert_true(absf(giro) >= 320.0 and absf(giro) <= 400.0, "10 toques = uma volta (%.0f°)" % giro)
+	assert_true(maximo - absf(giro) < 8.0, "para exato, sem passar do ponto")
+	assert_true(longe < 12.0, "a volta é um círculo curto (%.1f m)" % longe)
 	assert_true(w.is_finite_state())

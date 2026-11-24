@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.14.0 — 2026-11-24
+
+- Tenteio novo: cada toque gira o bico 36° e para exato, sem passar do ponto.
+  Toque simples alterna o lado; toques duplos seguem girando (10 toques = uma
+  volta, num círculo curto). Ajuste "Giro por toque" no painel.
+
 ## 0.13.3 — 2026-11-24
 
 - Tenteio redondo: o bico gira num arco que começa rápido e vai freando
