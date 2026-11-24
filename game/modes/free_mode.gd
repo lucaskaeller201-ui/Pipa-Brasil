@@ -15,7 +15,8 @@ const LINHA_INICIAL := 20.0
 const PIPA_NOVA_APOS := 3.0      ## s depois do corte
 const SOME_APARADA := 4.0        ## s até a avoada aparada sair do céu
 const SOME_PERDIDA := 6.0        ## s até a avoada perdida sumir do chão
-const RAIO_MAXIMO := 450.0       ## m: avoada que vai mais longe que isso some
+const RAIO_MAXIMO := 450.0
+const CAIDA_RELANCA := 6.0       ## s com a pipa no chão até subir outra       ## m: avoada que vai mais longe que isso some
 
 ## Um participante: {"name", "base", "flyer", "bot", "cuts", "catches", "losses",
 ## "respawn" (s até a pipa nova; < 0 = voando)}
@@ -101,6 +102,20 @@ func update(dt: float) -> void:
 		_evento(e)
 	for i in players.size():
 		var p: Dictionary = players[i]
+		# Pipa caída no chão (sem cortar) por muito tempo: o pipeiro sobe outra.
+		var fl: Flyer = p["flyer"]
+		if fl != null and not fl.cut and fl.kite_on_ground:
+			p["chao"] = float(p.get("chao", 0.0)) + dt
+			if float(p["chao"]) > CAIDA_RELANCA:
+				p["chao"] = 0.0
+				world.remove_flyer(fl)
+				p["flyer"] = null
+				_lancar(i)
+				if i == 0:
+					_messages.append("Sua pipa caiu. Pipa nova no alto!")
+				continue
+		else:
+			p["chao"] = 0.0
 		if float(p["respawn"]) >= 0.0:
 			p["respawn"] = float(p["respawn"]) - dt
 			if float(p["respawn"]) < 0.0:
