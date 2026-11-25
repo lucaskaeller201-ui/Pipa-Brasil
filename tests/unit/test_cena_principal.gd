@@ -1,4 +1,6 @@
 extends "res://tests/test_case.gd"
+
+const Estilos := preload("res://game/views/estilos_pipa.gd")
 ## Testes de fumaça: a partida (cena principal) e o laboratório de voo abrem,
 ## montam o que deveriam e as pipas voam usando o núcleo físico.
 
@@ -159,4 +161,27 @@ func test_pagina_inicial_mapa_e_hora() -> void:
 	raiz.call("_jogar")
 	assert_false(lobby.visible, "JOGAR fecha a página inicial")
 	raiz.call("_process", 1.0 / 60.0)
+	raiz.queue_free()
+
+
+
+## D-064: COLOCAR NO ALTO abre a escolha da pipa e depois da linha.
+func test_escolher_pipa_e_linha() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("_jogar")
+	var modo: FreeMode = raiz.get("modo")
+	assert_true(modo.you_on_hand)
+	raiz.call("_abrir_pipas")
+	var grade: GridContainer = raiz.get("_sel_grade")
+	assert_eq(grade.get_child_count(), Estilos.ESTILOS.size(), "um cartão por pipa")
+	raiz.call("_escolheu_pipa", 13)
+	assert_eq(grade.get_child_count() > 0, true)
+	raiz.call("_process", 1.0 / 60.0)
+	raiz.call("_escolheu_linha", 3)
+	assert_false(modo.you_on_hand, "a pipa subiu")
+	assert_eq(modo.you_style, 13)
+	assert_eq(modo.you_line, 3)
+	assert_not_null(modo.you())
 	raiz.queue_free()

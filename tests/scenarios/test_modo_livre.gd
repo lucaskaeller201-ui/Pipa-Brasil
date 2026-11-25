@@ -105,7 +105,7 @@ func test_pipa_na_mao_escolher_subir_e_recolher() -> void:
 	assert_null(modo.you())
 	for i in 120:
 		modo.update(DT)   # o jogo segue sem a sua pipa
-	modo.launch_you(1, 2)
+	modo.launch_you(4, 8)   # Volantines (rabiola 0 → curtinha) e Linha 24 Vermelha (D-064)
 	var eu := modo.you()
 	assert_not_null(eu)
 	assert_false(modo.you_on_hand)

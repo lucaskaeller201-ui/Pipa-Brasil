@@ -55,9 +55,10 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 		for p in [c[0], c[3], Vector3(-sup.x, sup.y, 0.0), sup, Vector3(-inf.x, inf.y, 0.0), inf]:
 			linhas.surface_add_vertex(p)
 		# linha do bico: da ponta da vareta central às pontas da vareta de cima
-		linhas.surface_set_color(Color(0.95, 0.95, 0.95))
-		for p in [c[0], sup, c[0], Vector3(-sup.x, sup.y, 0.0)]:
-			linhas.surface_add_vertex(p)
+		if Estilos.aberto(estilo):
+			linhas.surface_set_color(Color(0.95, 0.95, 0.95))
+			for p in [c[0], sup, c[0], Vector3(-sup.x, sup.y, 0.0)]:
+				linhas.surface_add_vertex(p)
 		linhas.surface_set_color(Color(0.35, 0.22, 0.10))
 	linhas.surface_set_color(Color(0.95, 0.95, 0.95))
 	var meio_espinha := Vector3(0.0, -0.2, 0.0)
@@ -92,7 +93,8 @@ func _vela_estampada(st: SurfaceTool, def: KiteDefinition, estilo: Dictionary) -
 	var nv := 6
 	# O bico (acima da vareta de cima) não tem papel: só a linha que vai da
 	# ponta às pontas da vareta (D-047). A vela começa na vareta de cima.
-	for fx in range(1, 3):
+	var primeira := 1 if Estilos.aberto(estilo) else 0
+	for fx in range(primeira, 3):
 		var y0: float
 		var y1: float
 		var w0: float

@@ -108,11 +108,6 @@ var _hora_arg := ""
 var _inicio_arg := false
 var _cantos: Control
 var _inicio_jogo := 0.0
-var _botoes_pipa: Array = []
-var _botoes_linha: Array = []
-var _botao_desenho: Button
-var _previa: Control
-var _previa_estilo := -1
 var _rotulo_mao: Label
 var _estatisticas := {"cortes": 0, "aparadas": 0, "perdidas": 0, "melhor_sequencia": 0}
 
@@ -254,6 +249,8 @@ func _process(delta: float) -> void:
 	for f in modo.world.flyers:
 		var fl: Flyer = f
 		var cor: Color = CORES[fl.tag] if fl.tag >= 0 else Color(0.85, 0.85, 0.85)
+		if fl.tag == 0:
+			cor = Estilos.LINHAS[modo.you_line]["cor"]   # a linha que você escolheu
 		if fl.line != null:
 			_linhas.call("desenhar_cadeia", fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012)
 		if fl.trailing_line != null:
@@ -271,7 +268,7 @@ func _process(delta: float) -> void:
 	_banner.visible = agora_real < _banner_ate
 	if eu != null:
 		_giro_carretilha += eu.input.haul_speed * delta * 3.0
-	_painel_mao.visible = modo.you_on_hand and not _no_lobby
+	_painel_mao.visible = modo.you_on_hand and not _no_lobby and not _selecao.visible
 	if modo.you_on_hand:
 		_atualizar_painel_mao()
 	_atualizar_textos(eu)
@@ -882,136 +879,196 @@ func _mostrar_aviso_curto(texto: String) -> void:
 # ---------------- pipa na mão (D-037) ----------------
 
 func _criar_painel_mao(raiz: Control) -> void:
+	# Pipa na mão (D-064): o estoque e o botão COLOCAR NO ALTO, que abre a
+	# escolha da pipa e depois da linha (como no Pipa Combate).
 	_painel_mao = PanelContainer.new()
 	_painel_mao.name = "PipaNaMao"
-	_painel_mao.set_anchors_preset(Control.PRESET_CENTER)
-	_painel_mao.offset_left = -470.0
-	_painel_mao.offset_right = 470.0
-	_painel_mao.offset_top = -200.0
-	_painel_mao.offset_bottom = 200.0
+	_painel_mao.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_painel_mao.offset_left = -260.0
+	_painel_mao.offset_right = 260.0
+	_painel_mao.offset_top = -190.0
+	_painel_mao.offset_bottom = -70.0
 	var fundo := StyleBoxFlat.new()
-	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.8)
+	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.75)
 	fundo.set_corner_radius_all(18)
-	fundo.set_content_margin_all(16)
+	fundo.set_content_margin_all(12)
 	_painel_mao.add_theme_stylebox_override("panel", fundo)
 	_painel_mao.add_to_group("botao_livre")
 	raiz.add_child(_painel_mao)
-	var linha_mao := HBoxContainer.new()
-	linha_mao.add_theme_constant_override("separation", 16)
-	_painel_mao.add_child(linha_mao)
-	# Prévia da pipa escolhida (formato e estampa do modelo).
-	_previa = Control.new()
-	_previa.name = "Previa"
-	_previa.custom_minimum_size = Vector2(190.0, 300.0)
-	_previa.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_previa.draw.connect(_desenhar_previa)
-	linha_mao.add_child(_previa)
 	var caixa := VBoxContainer.new()
 	caixa.add_theme_constant_override("separation", 8)
-	caixa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	linha_mao.add_child(caixa)
-	_rotulo_mao = _rotulo(caixa, 20, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
-	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Rabiola:"
-	var linha_p := HBoxContainer.new()
-	caixa.add_child(linha_p)
-	for k in FreeMode.PIPAS.size():
-		var b := _botao(linha_p, String(FreeMode.PIPAS[k]))
-		b.add_theme_font_size_override("font_size", 14)
-		b.pressed.connect(_escolher_pipa.bind(k))
-		_botoes_pipa.append(b)
-	_rotulo(caixa, 16, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT).text = "Linha:"
-	var linha_l := HBoxContainer.new()
-	caixa.add_child(linha_l)
-	for k in FreeMode.LINHAS.size():
-		var b := _botao(linha_l, String(FreeMode.LINHAS[k]))
-		b.add_theme_font_size_override("font_size", 14)
-		b.pressed.connect(_escolher_linha.bind(k))
-		_botoes_linha.append(b)
-	_botao_desenho = _botao(caixa, "")
-	_botao_desenho.add_theme_font_size_override("font_size", 15)
-	_botao_desenho.pressed.connect(_trocar_desenho)
+	_painel_mao.add_child(caixa)
+	_rotulo_mao = _rotulo(caixa, 18, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
 	var subir := _botao(caixa, "COLOCAR NO ALTO")
 	subir.name = "ColocarNoAlto"
-	subir.add_theme_font_size_override("font_size", 26)
-	subir.pressed.connect(_colocar_no_alto)
+	subir.add_theme_font_size_override("font_size", 30)
+	subir.custom_minimum_size = Vector2(480.0, 64.0)
+	subir.pressed.connect(_abrir_pipas)
 	_painel_mao.visible = modo.you_on_hand
-
-
-func _escolher_pipa(k: int) -> void:
-	modo.you_kite = k
-
-
-func _trocar_desenho() -> void:
-	modo.you_style = (modo.you_style + 1) % Estilos.ESTILOS.size()
-	_previa.queue_redraw()
-
-
-## Desenha o modelo escolhido: contorno com as medidas e a estampa.
-func _desenhar_previa() -> void:
-	var estilo: Dictionary = Estilos.ESTILOS[modo.you_style]
-	var m: Array = estilo["m"]
-	var area := _previa.size
-	var escala := minf((area.y - 20.0) / float(m[0]), (area.x - 20.0) / maxf(float(m[1]), float(m[2])))
-	var cx := area.x * 0.5
-	var y0 := (area.y - float(m[0]) * escala) * 0.5
-	var ys := [0.0, float(m[3]), float(m[3]) + float(m[4]), float(m[0])]
-	var ws := [0.0, float(m[1]) * 0.5, float(m[2]) * 0.5, 0.0]
-	var tb := float(m[3]) / float(m[0])
-	var tc := (float(m[3]) + float(m[4])) / float(m[0])
-	var meia := maxf(float(m[1]), float(m[2])) * 0.5
-	for fx in range(1, 3):   # o bico não tem papel (D-047)
-		for j in 8:
-			var ya := lerpf(ys[fx], ys[fx + 1], j / 8.0)
-			var yb := lerpf(ys[fx], ys[fx + 1], (j + 1) / 8.0)
-			var wa := lerpf(ws[fx], ws[fx + 1], j / 8.0)
-			var wb := lerpf(ws[fx], ws[fx + 1], (j + 1) / 8.0)
-			for i in 16:
-				var u0 := lerpf(-1.0, 1.0, i / 16.0)
-				var u1 := lerpf(-1.0, 1.0, (i + 1) / 16.0)
-				var cxm := (u0 + u1) * 0.25 * (wa + wb)
-				var cor := Estilos.cor(estilo, cxm / meia, (ya + yb) * 0.5 / float(m[0]), tb, tc)
-				var pts := PackedVector2Array([
-					Vector2(cx + u0 * wa * escala, y0 + ya * escala), Vector2(cx + u1 * wa * escala, y0 + ya * escala),
-					Vector2(cx + u1 * wb * escala, y0 + yb * escala), Vector2(cx + u0 * wb * escala, y0 + yb * escala)])
-				if wa < 0.001:
-					pts = PackedVector2Array([pts[0], pts[2], pts[3]])
-				elif wb < 0.001:
-					pts = PackedVector2Array([pts[0], pts[1], pts[2]])
-				_previa.draw_colored_polygon(pts, cor)
-	# linha do bico e varetas
-	var topo := Vector2(cx, y0)
-	var ys1: float = y0 + float(ys[1]) * escala
-	var ws1: float = float(ws[1]) * escala
-	_previa.draw_line(topo, Vector2(cx - ws1, ys1), Color(0.95, 0.95, 0.95), 1.5)
-	_previa.draw_line(topo, Vector2(cx + ws1, ys1), Color(0.95, 0.95, 0.95), 1.5)
-	var marrom := Color(0.35, 0.22, 0.1)
-	_previa.draw_line(Vector2(cx, y0), Vector2(cx, y0 + float(m[0]) * escala), marrom, 2.0)
-	for k in [1, 2]:
-		var y: float = y0 + float(ys[k]) * escala
-		_previa.draw_line(Vector2(cx - float(ws[k]) * escala, y), Vector2(cx + float(ws[k]) * escala, y), marrom, 2.0)
-
-
-func _escolher_linha(k: int) -> void:
-	modo.you_line = k
+	_criar_selecao(raiz)
 
 
 func _atualizar_painel_mao() -> void:
-	_rotulo_mao.text = "Sua pipa está na mão · estoque: %d\n%s: %s · linha %s: %s" % [int(modo.players[0]["stock"]),
-		FreeMode.PIPAS[modo.you_kite], FreeMode.PIPAS_INFO[modo.you_kite], FreeMode.LINHAS[modo.you_line], FreeMode.LINHAS_INFO[modo.you_line]]
-	for k in _botoes_pipa.size():
-		(_botoes_pipa[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_kite else Color(1, 1, 1, 0.7)
-	_botao_desenho.text = "Pipa: %s  (toque para trocar)" % String(Estilos.ESTILOS[modo.you_style]["nome"])
-	if _previa_estilo != modo.you_style:
-		_previa_estilo = modo.you_style
-		_previa.queue_redraw()
-	for k in _botoes_linha.size():
-		(_botoes_linha[k] as Button).modulate = Color(1.0, 0.85, 0.2) if k == modo.you_line else Color(1, 1, 1, 0.7)
+	var e: Dictionary = Estilos.ESTILOS[modo.you_style]
+	_rotulo_mao.text = "Sua pipa está na mão · estoque: %d · última: %s" % [int(modo.players[0]["stock"]), String(e["nome"])]
+
+
+# ---------------- escolha da pipa e da linha (D-064) ----------------
+
+var _selecao: Control
+var _sel_titulo: Label
+var _sel_grade: GridContainer
+var _sel_rolagem: ScrollContainer
+const PreviaPipa := preload("res://game/ui/previa_pipa.gd")
+const Carretel := preload("res://game/ui/carretel.gd")
+
+
+func _criar_selecao(raiz: Control) -> void:
+	_selecao = PanelContainer.new()
+	_selecao.name = "Selecao"
+	_selecao.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var fundo := StyleBoxFlat.new()
+	fundo.bg_color = Color(0.04, 0.06, 0.14, 0.96)
+	_selecao.add_theme_stylebox_override("panel", fundo)
+	_selecao.add_to_group("botao_livre")
+	_selecao.visible = false
+	raiz.add_child(_selecao)
+	var coluna := VBoxContainer.new()
+	coluna.add_theme_constant_override("separation", 8)
+	_selecao.add_child(coluna)
+	var topo := HBoxContainer.new()
+	coluna.add_child(topo)
+	var voltar := _botao(topo, "‹ Voltar")
+	voltar.add_theme_font_size_override("font_size", 22)
+	voltar.pressed.connect(_fechar_selecao)
+	_sel_titulo = _rotulo(topo, 28, Color(1.0, 0.86, 0.2), HORIZONTAL_ALIGNMENT_CENTER)
+	_sel_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sel_rolagem = ScrollContainer.new()
+	_sel_rolagem.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_sel_rolagem.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	coluna.add_child(_sel_rolagem)
+	_sel_grade = GridContainer.new()
+	_sel_grade.columns = 6
+	_sel_grade.add_theme_constant_override("h_separation", 8)
+	_sel_grade.add_theme_constant_override("v_separation", 8)
+	_sel_grade.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sel_rolagem.add_child(_sel_grade)
+
+
+func _limpar_grade() -> void:
+	for filho in _sel_grade.get_children():
+		_sel_grade.remove_child(filho)
+		filho.queue_free()
+	_sel_rolagem.scroll_vertical = 0
+
+
+func _cartao(texto_cima: String, linhas: Array) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(200.0, 250.0)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.13, 0.36, 0.72)
+	estilo.bg_color = estilo.bg_color.lerp(Color(0.98, 0.72, 0.42), 0.15)
+	estilo.set_corner_radius_all(10)
+	estilo.border_color = Color(0.25, 0.55, 0.95)
+	estilo.set_border_width_all(2)
+	b.add_theme_stylebox_override("normal", estilo)
+	b.add_theme_stylebox_override("hover", estilo)
+	var apertado := estilo.duplicate() as StyleBoxFlat
+	apertado.border_color = Color(1.0, 0.86, 0.2)
+	apertado.set_border_width_all(4)
+	b.add_theme_stylebox_override("pressed", apertado)
+	var caixa := VBoxContainer.new()
+	caixa.set_anchors_preset(Control.PRESET_FULL_RECT)
+	caixa.offset_left = 6.0
+	caixa.offset_right = -6.0
+	caixa.offset_top = 4.0
+	caixa.offset_bottom = -4.0
+	caixa.add_theme_constant_override("separation", 2)
+	caixa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(caixa)
+	var numero := Label.new()
+	numero.text = texto_cima
+	numero.add_theme_font_size_override("font_size", 14)
+	numero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caixa.add_child(numero)
+	b.set_meta("caixa", caixa)
+	return b
+
+
+func _linha_info(caixa: VBoxContainer, texto: String, grande := false) -> void:
+	var l := Label.new()
+	l.text = texto
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 19 if grande else 15)
+	l.add_theme_color_override("font_color", Color(1.0, 0.95, 0.6) if grande else Color.WHITE)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	l.add_theme_constant_override("outline_size", 4 if grande else 2)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caixa.add_child(l)
+
+
+func _abrir_pipas() -> void:
+	_limpar_grade()
+	_sel_titulo.text = "Escolha a sua pipa"
+	for i in Estilos.ESTILOS.size():
+		var e: Dictionary = Estilos.ESTILOS[i]
+		var b := _cartao(str(i + 1), [])
+		var caixa: VBoxContainer = b.get_meta("caixa")
+		var previa: Control = PreviaPipa.new()
+		previa.custom_minimum_size = Vector2(0.0, 112.0)
+		previa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		caixa.add_child(previa)
+		previa.set("estilo", e)
+		_linha_info(caixa, String(e["nome"]).to_upper(), true)
+		_linha_info(caixa, "Velocidade %d km" % int(e["velocidade"]))
+		_linha_info(caixa, "Força %d g" % int(e["forca"]))
+		_linha_info(caixa, "Rabiola %d m" % int(e["rabiola"]))
+		b.pressed.connect(_escolheu_pipa.bind(i))
+		_sel_grade.add_child(b)
+	_selecao.visible = true
+
+
+func _escolheu_pipa(i: int) -> void:
+	modo.you_style = i
+	_abrir_linhas()
+
+
+func _abrir_linhas() -> void:
+	_limpar_grade()
+	_sel_titulo.text = "Agora escolha a linha"
+	for i in Estilos.LINHAS.size():
+		var l: Dictionary = Estilos.LINHAS[i]
+		var b := _cartao("", [])
+		b.custom_minimum_size = Vector2(200.0, 230.0)
+		var caixa: VBoxContainer = b.get_meta("caixa")
+		var c: Control = Carretel.new()
+		c.custom_minimum_size = Vector2(0.0, 110.0)
+		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		c.set("grossura", float(l["grossura"]))
+		c.set("cor", l["cor"])
+		caixa.add_child(c)
+		_linha_info(caixa, String(l["nome"]), true)
+		_linha_info(caixa, "Resistência %d%%" % roundi(float(l["resistencia"]) * 100.0))
+		_linha_info(caixa, "Peso %s" % ("leve" if float(l["peso"]) < 0.9 else ("pesada" if float(l["peso"]) > 1.2 else "médio")))
+		b.pressed.connect(_escolheu_linha.bind(i))
+		_sel_grade.add_child(b)
+
+
+func _escolheu_linha(i: int) -> void:
+	modo.you_line = i
+	_selecao.visible = false
+	_colocar_no_alto()
+
+
+func _fechar_selecao() -> void:
+	_selecao.visible = false
 
 
 func _colocar_no_alto() -> void:
 	if not modo.you_on_hand:
 		return
-	modo.launch_you()
+	modo.launch_you(modo.you_style, modo.you_line)
 	_dedos.clear()
 	_embalo = 0.0
 	_painel_mao.visible = false

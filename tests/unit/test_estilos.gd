@@ -7,7 +7,7 @@ const LinesView := preload("res://game/views/lines_view.gd")
 
 
 func test_todos_os_desenhos_montam_a_pipa() -> void:
-	assert_true(Estilos.ESTILOS.size() >= 18, "vários modelos de pipa")
+	assert_true(Estilos.ESTILOS.size() >= 40, "muitos modelos de pipa (D-064)")
 	for e in Estilos.ESTILOS:
 		var estilo: Dictionary = e
 		var v: Node3D = KiteView.new()
@@ -15,7 +15,11 @@ func test_todos_os_desenhos_montam_a_pipa() -> void:
 		var vela: MeshInstance3D = v.get_node("Vela")
 		assert_not_null(vela, "%s tem vela" % estilo["nome"])
 		var tris: int = vela.mesh.surface_get_array_len(0) / 3
-		assert_eq(tris, 2 * 16 * 6 * 2, "%s: caixa e rabeta em grade (o bico não tem papel)" % estilo["nome"])
+		var faixas := 2 if Estilos.aberto(estilo) else 3
+		var m0: Array = estilo["m"]
+		if float(m0[4]) <= 0.0:
+			faixas = 3   # losango: bico e rabeta com papel (a caixa tem altura 0)
+		assert_eq(tris, faixas * 16 * 6 * 2, "%s: vela em grade" % estilo["nome"])
 		var m: Array = estilo["m"]
 		assert_true(absf(float(m[3]) + float(m[4]) + float(m[5]) - float(m[0])) < 1.0, "%s: medidas somam a vareta central" % estilo["nome"])
 		# a estampa usa mais de uma cor na caixa e na rabeta
@@ -59,3 +63,17 @@ func test_rabiola_de_longe_nao_engrossa() -> void:
 		n = vertices.size()
 	assert_eq(n, 0, "a 120 m as fitinhas não aparecem maiores que a pipa")
 	l.free()
+
+
+
+## D-064: cada pipa do catálogo tem velocidade, força e rabiola, e vira física.
+func test_catalogo_tem_dados_e_vira_fisica() -> void:
+	for i in Estilos.ESTILOS.size():
+		var e: Dictionary = Estilos.ESTILOS[i]
+		assert_true(int(e["velocidade"]) > 0 and int(e["forca"]) > 0 and int(e["rabiola"]) >= 0, String(e["nome"]))
+		var d := FreeMode.kite_for(i)
+		assert_true(d.tail_length >= 1.5 and d.tail_length <= 8.0, "%s: rabiola na física" % e["nome"])
+	assert_true(Estilos.LINHAS.size() >= 8, "várias linhas")
+	for l in Estilos.LINHAS:
+		var nome := String((l as Dictionary)["nome"]).to_lower()
+		assert_false(nome.contains("cerol") or nome.contains("chilena"), "linhas fictícias, sem cerol/chilena")

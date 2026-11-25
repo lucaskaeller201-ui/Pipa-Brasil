@@ -33,6 +33,24 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-064 — Catálogo de pipas e linhas; escolher como no Pipa Combate (2026-11-25)
+O Lucas mandou as telas de escolha do Pipa Combate e pediu igual. Agora o
+botão COLOCAR NO ALTO abre a tela de pipas (cartões com o desenho, nome,
+velocidade, força e rabiola) e, depois de escolher, a de linhas (carretel na
+cor, resistência e peso); escolhida a linha, a pipa sobe.
+- 48 pipas, com desenhos NOSSOS (não copiamos artes do outro jogo nem
+  personagens de filme): os tipos (Flechinha, Patang, Tukkal, Volantines,
+  Raia, GT, Britt, Latão, Come Rato, Pizza, Veloster...) com medidas de pipeiro
+  e estampas por código (estrela, olhos, raios, xadrez, coração, V, X...).
+  Raias e losangos têm papel no corpo todo; pipas de caixa têm o bico aberto.
+- Os números viram física (FreeMode.kite_for): velocidade muda puxada, giro e
+  freio; rabiola muda o tamanho e o peso da rabiola (as "0 m" levam uma
+  curtinha de 1,5 m para a física ficar estável); força soma na resistência
+  da linha no relô.
+- 10 linhas fictícias (4, 10 e 24, em cores), com resistência, peso e
+  grossura; a cor aparece na sua linha no céu. Sem cerol, chilena, "pó de
+  ferro" ou nada de linha cortante de verdade — regra do projeto.
+
 ### D-063 — Página inicial, mapa da praia, horas do dia (2026-11-25)
 O Lucas pediu gráficos melhores e leves, céu azul, sol, pôr do sol, pisos com
 verniz leve, mapas e uma página inicial criativa. Tudo por código:

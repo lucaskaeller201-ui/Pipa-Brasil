@@ -19,6 +19,7 @@ const RAIO_MAXIMO := 450.0
 const RECOLHER_LINHA := Pilot.MIN_LINE + 0.5   ## m: linha toda recolhida, a pipa chega na mão (D-037)
 ## Escolhas antes de subir a pipa (D-037). As pipas brasileiras novas entram
 ## aqui quando chegarem as fotos; por enquanto, a do Rio em três montagens.
+const Estilos := preload("res://game/views/estilos_pipa.gd")
 const PIPAS := ["Rabiola média", "Rabiola curta", "Rabiola longa"]
 const PIPAS_INFO := ["a de sempre", "mais ágil: gira e tenteia mais rápido", "mais firme: gira mais devagar"]
 const LINHAS := ["Leve", "Comum", "Forte"]
@@ -43,7 +44,7 @@ var screen_events: Array = []
 var you_on_hand := false
 var _coices_vistos := 0
 var you_kite := 0
-var you_line := 1
+var you_line := 2
 var you_style := 0     ## desenho da sua pipa (estilos_pipa.gd)
 var _you_bot := false
 ## Jeitos de jogar dos bots (Prompt 2 do Lucas): "alto" fica lá em cima
@@ -72,7 +73,7 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 			"base": (Bairro.LAJES[i] as Vector3) + Vector3(0.0, Bairro.ALTURA_LAJE, 0.0),
 			"flyer": null, "bot": null, "cuts": 0, "catches": 0, "losses": 0, "respawn": -1.0, "stock": 0,
 			"streak": 0, "profile": "jogador" if i == 0 else String(PERFIS[(i - 1) % PERFIS.size()]),
-			"style": 0 if i == 0 else (i * 3 + seed_) % 20,
+			"style": 0 if i == 0 else (i * 7 + seed_) % 48,
 		}
 		if i > 0 or you_bot:
 			var niveis := [BotDifficulty.Level.NORMAL, BotDifficulty.Level.DIFICIL, BotDifficulty.Level.FACIL]
@@ -247,11 +248,12 @@ func _mira(i: int) -> float:
 
 
 ## Coloca a sua pipa no alto com a pipa e a linha escolhidas.
+## kite: pipa do catálogo (Estilos.ESTILOS); line_kind: linha (Estilos.LINHAS).
 func launch_you(kite := -1, line_kind := -1) -> void:
 	if kite >= 0:
-		you_kite = clampi(kite, 0, PIPAS.size() - 1)
+		you_style = clampi(kite, 0, Estilos.ESTILOS.size() - 1)
 	if line_kind >= 0:
-		you_line = clampi(line_kind, 0, LINHAS.size() - 1)
+		you_line = clampi(line_kind, 0, Estilos.LINHAS.size() - 1)
 	you_on_hand = false
 	players[0]["style"] = you_style
 	_lancar(0)
@@ -303,27 +305,37 @@ func _recolher() -> void:
 		_messages.append("Pipa na mão. Escolha e coloque no alto de novo.")
 
 
-## Montagens da pipa (escolha antes de subir).
-static func kite_for(k: int) -> KiteDefinition:
+## A pipa do catálogo vira física (D-064): velocidade muda o quanto ela anda
+## e gira; rabiola muda o tamanho e o peso da rabiola (as "sem rabiola" levam
+## uma curtinha, de 1,5 m, para a física continuar estável).
+static func kite_for(estilo_i: int) -> KiteDefinition:
 	var d := KiteDefinition.pipa_rio()
-	if k == 1:
-		d.tail_length *= 0.6
-		d.tail_mass *= 0.6
-		d.spin_give_rate_deg *= 1.25
-	elif k == 2:
-		d.tail_length *= 1.4
-		d.tail_mass *= 1.4
-		d.spin_give_rate_deg *= 0.8
+	var e: Dictionary = Estilos.ESTILOS[clampi(estilo_i, 0, Estilos.ESTILOS.size() - 1)]
+	var v := float(e.get("velocidade", 55)) / 55.0
+	d.pull_assist *= v
+	d.spin_give_rate_deg *= clampf(v, 0.7, 1.4)
+	d.nose_drag_rate /= clampf(v, 0.6, 1.4)
+	var r := clampf(float(e.get("rabiola", 5)), 1.5, 8.0)
+	d.tail_length = r
+	d.tail_mass = 0.0015 * r
+	d.tail_segments = clampi(roundi(r * 4.0), 8, 28)
 	return d
 
 
-## Linhas fictícias do jogo: só resistência, espessura e peso mudam.
-static func apply_line(f: Flyer, k: int) -> void:
+## Força da pipa (g) no relô: multiplica a resistência da linha.
+static func kite_strength(estilo_i: int) -> float:
+	var e: Dictionary = Estilos.ESTILOS[clampi(estilo_i, 0, Estilos.ESTILOS.size() - 1)]
+	return clampf(0.8 + float(e.get("forca", 100)) / 500.0, 0.85, 1.15)
+
+
+## Linhas fictícias do jogo: resistência, espessura e peso (D-064).
+static func apply_line(f: Flyer, k: int, estilo_i := -1) -> void:
 	if f.line == null:
 		return
-	var forca: float = [0.85, 1.0, 1.3][k]
-	var grossura: float = [0.75, 1.0, 1.4][k]
-	var peso: float = [0.75, 1.0, 1.5][k]
+	var l: Dictionary = Estilos.LINHAS[clampi(k, 0, Estilos.LINHAS.size() - 1)]
+	var forca: float = float(l["resistencia"]) * (kite_strength(estilo_i) if estilo_i >= 0 else 1.0)
+	var grossura: float = float(l["grossura"])
+	var peso: float = float(l["peso"])
 	f.line.strength *= forca
 	f.line.thickness *= grossura
 	f.line.mass_per_particle *= peso
@@ -340,12 +352,12 @@ func _lancar(i: int) -> void:
 		velha.line = null        # o pedaço que ficou na mão vai junto com o pipeiro
 	var def := KiteDefinition.pipa_rio()
 	if i == 0:
-		def = kite_for(you_kite)
+		def = kite_for(you_style)
 		def.spin_give_rate_deg = your_spin_rate * def.spin_give_rate_deg / KiteDefinition.pipa_rio().spin_give_rate_deg
 		def.spin_kick_rate_deg = your_kick_deg
 	var f := world.add_flyer(def, p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
 	if i == 0:
-		apply_line(f, you_line)
+		apply_line(f, you_line, you_style)
 	f.tag = i
 	p["flyer"] = f
 	p["respawn"] = -1.0

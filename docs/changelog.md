@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.20.0 — 2026-11-25
+
+- COLOCAR NO ALTO abre a escolha da pipa (48 pipas com velocidade, força e
+  rabiola) e depois a da linha (10 linhas em cores), como no Pipa Combate.
+- Cada pipa voa diferente; a sua linha aparece na cor escolhida.
+
 ## 0.19.0 — 2026-11-25
 
 - Página inicial com a cidade ao vivo atrás, JOGAR, escolha de mapa e de hora.
