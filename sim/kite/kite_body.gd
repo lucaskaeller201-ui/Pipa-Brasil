@@ -50,7 +50,7 @@ const LUNGE_KICK := 4.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _tenteio_base := 0.0    ## direção do bico quando o tenteio começou (rad)
-var _give_dir := 1.0        ## sentido do giro mandando linha (escolhido no começo)
+var _give_dir := -1.0       ## sentido do giro mandando linha (escolhido no começo)
 var _giving_prev := false
 var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque duplo)
 var _kick_prev := false
@@ -223,7 +223,9 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 			tau += d.bow_stability * b * 0.5 * RHO * speed * speed * area * d.reference_chord * s_th * (vt_len / speed)
 	if d.spin_bias != 0.0:
 		var vw := last_wind.length()
-		tau += d.spin_bias * (1.0 - b) * (1.0 - b) * 0.5 * RHO * vw * vw * area * d.reference_chord
+		# o empurrão do vento segue o sentido do giro escolhido (D-055), não um
+		# lado fixo
+		tau += -_give_dir * d.spin_bias * (1.0 - b) * (1.0 - b) * 0.5 * RHO * vw * vw * area * d.reference_chord
 	return n * tau
 
 

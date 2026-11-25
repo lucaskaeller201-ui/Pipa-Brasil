@@ -38,8 +38,8 @@ O Lucas notou que quase tudo ia para a esquerda. Causas: o giro mandando linha
 tinha sentido fixo (spin_give_sign) e a pipa do Rio tinha um torque de vento
 para um lado só (spin_bias 1,0); e o toque duplo virava conforme a paridade
 dos toques anteriores. Agora: mandando linha, o sentido é escolhido no começo
-pelo lado em que o bico aponta (bico em pé: o do último tenteio); spin_bias
-da pipa do Rio = 0; o toque duplo vira para o lado em que o bico estava antes
+pelo lado em que o bico aponta (bico em pé: o do último tenteio); o torque
+do spin_bias passa a seguir esse sentido; o toque duplo vira para o lado em que o bico estava antes
 do 1º toque dele (bico à direita + duplo = mais para a direita).
 
 ### D-054 — Pipa mais calma sem puxar (2026-11-24)
