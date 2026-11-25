@@ -411,8 +411,8 @@ static func _morro(pai: Node3D) -> void:
 		var malha := SphereMesh.new()
 		malha.radius = d.z
 		malha.height = d.w * 2.0
-		malha.radial_segments = 24
-		malha.rings = 12
+		malha.radial_segments = 40
+		malha.rings = 20
 		m.mesh = malha
 		m.material_override = mat
 		m.position = Vector3(d.x, 0.0, d.y)
@@ -479,6 +479,7 @@ static func _morros_verdes(pai: Node3D) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://game/world/shaders/morro.gdshader")
 	mat.set_shader_parameter("topo_verde", -60.0)
+	mat.set_shader_parameter("so_mata", true)
 	for d in [Vector4(-330.0, -420.0, 90.0, 150.0), Vector4(-250.0, -470.0, 60.0, 90.0),
 			Vector4(320.0, -450.0, 110.0, 120.0), Vector4(40.0, -900.0, 260.0, 70.0)]:
 		var m := MeshInstance3D.new()

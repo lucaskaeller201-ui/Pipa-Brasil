@@ -3,7 +3,8 @@
 ## 0.20.1 — 2026-11-25
 
 - Árvores com folhagem de verdade e balançando; coqueiros com palha; telhados
-  de telha; nuvens com volume e luz; paredes com manchas e vidro que reflete.
+  de telha; nuvens com volume e luz; paredes com manchas e vidro que reflete; morros da praia com mata (sem
+  quadradinhos).
 
 ## 0.20.0 — 2026-11-25
 
