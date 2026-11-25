@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.18.6 — 2026-11-25
+
+- Afundando ou com o bico de lado, poucos toques tiram a pipa: cada toque
+  desbica para cima.
+
 ## 0.18.5 — 2026-11-25
 
 - Com a avoada no seu aparo pela linha, dá para embolar também pela rabiola

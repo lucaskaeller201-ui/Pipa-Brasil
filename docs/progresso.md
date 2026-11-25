@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-25 (versão 0.18.5).
+Atualizado em 2026-11-25 (versão 0.18.6).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -43,6 +43,7 @@ Atualizado em 2026-11-25 (versão 0.18.5).
 | Toque duplo mais rigoroso; câmera acompanha a pipa afundando | Feito (D-059), aguardando teste do Lucas |
 | Tenteio traz o bico de volta para cima; mureta baixa na sua laje | Feito (D-060), aguardando teste do Lucas |
 | No aparo pela linha, embolar também pela rabiola | Feito (D-061), aguardando teste do Lucas |
+| Desistir do mergulho com poucos toques | Feito (D-062), aguardando teste do Lucas |
 | Próximos (pedidos do Lucas): gráfico, chão, casas, boneco, andar, mapas, mais pipas e modelos, linhas cortantes e escolha de linha, andar e pegar pipa, aparar de novo depois de decepar | Pendente |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |

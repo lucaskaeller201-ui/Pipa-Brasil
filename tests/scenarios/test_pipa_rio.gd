@@ -465,3 +465,29 @@ func test_bico_de_lado_volta_para_cima_tenteando() -> void:
 	assert_true(absf(de_lado) > 60.0, "o bico foi para o lado (%.0f°)" % de_lado)
 	assert_true(menor < 15.0, "tenteando ele volta para cima")
 	assert_true(passou, "e passa para o outro lado")
+
+
+## D-062: com o bico para baixo (afundando), poucos toques simples tiram a
+## pipa: o bico volta para cima.
+func test_bico_para_baixo_poucos_toques_tiram() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	for k in 6:   # leva o bico para baixo com toques duplos (6 × 30°)
+		f.input.kick_spin = 1.0
+		f.input.kick_base_shift = 30.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		_rodar(w, 0.35)
+	var baixo := f.nose_angle_deg()
+	f.input.kick_base_shift = 0.0
+	var toques := 0
+	var lado := -1.0
+	while absf(f.nose_angle_deg()) > 40.0 and toques < 10:
+		f.input.kick_spin = lado
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		lado = -lado
+		_rodar(w, 0.3)
+		toques += 1
+	f.input.kick_spin = 0.0
+	print("      [tirar do mergulho] bico em %.0f°: %d toques para voltar a %.0f°" % [baixo, toques, f.nose_angle_deg()])
+	assert_true(absf(baixo) > 120.0, "o bico foi para baixo (%.0f°)" % baixo)
+	assert_true(toques <= 4, "poucos toques tiram (%d)" % toques)

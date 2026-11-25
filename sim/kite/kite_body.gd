@@ -58,7 +58,8 @@ var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque dup
 var slack_spin := false
 var _kick_prev := false
 var _ultima_volta := 0.0   ## quanto o último toque simples trouxe a direção para cima (rad)
-const TENTEIO_VOLTA_DEG := 20.0   ## cada toque simples traz a direção isso para cima (D-060)
+const TENTEIO_VOLTA_DEG := 20.0
+const TENTEIO_LONGE_DEG := 45.0    ## acima disso o toque desbica para cima (D-062)   ## cada toque simples traz a direção isso para cima (D-060)
 const KICK_HOLD := 3.0 ## s: depois do último toque o bico fica onde parou (D-052)
 var _spin_controlado := false
 var _spin_alvo := 0.0
@@ -317,11 +318,20 @@ func integrate(h: float) -> void:
 					# D-060: toque simples (tenteio) traz a direção de volta para
 					# cima aos poucos — com o bico para um lado, tenteando ele
 					# volta para cima e passa para o outro lado.
+					var lado := kick_sign
 					if kick_base_shift == 0.0:
-						var volta := minf(absf(_tenteio_base), deg_to_rad(TENTEIO_VOLTA_DEG))
+						# D-062: com o bico bem de lado ou para baixo (martelão,
+						# afundando), cada toque é um desbico PARA CIMA: a direção
+						# volta metade do caminho e o bico vai para o lado de cima —
+						# dá para desistir e tirar a pipa em poucos toques.
+						var longe := absf(_tenteio_base) > deg_to_rad(TENTEIO_LONGE_DEG)
+						var passo := maxf(deg_to_rad(TENTEIO_VOLTA_DEG), 0.5 * absf(_tenteio_base)) if longe else deg_to_rad(TENTEIO_VOLTA_DEG)
+						var volta := minf(absf(_tenteio_base), passo)
+						if longe:
+							lado = signf(_tenteio_base)
 						_ultima_volta = signf(_tenteio_base) * volta
 						_tenteio_base -= _ultima_volta
-					_hold_ang = wrapf(_tenteio_base - kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
+					_hold_ang = wrapf(_tenteio_base - lado * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
 					_tenteio_ativo = true
 			SpinMode.SPIN_LOCK:
 				novo = 0.0   # puxando: trava seca, o bico fica onde está (D-033)

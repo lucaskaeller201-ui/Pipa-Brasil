@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-062 — Desistir do mergulho com poucos toques (2026-11-25)
+O Lucas: dando martelão ou afundando para aparar, se desistia no meio só
+conseguia voltar mandando linha; os toques mudavam pouco a trajetória. Agora,
+com o bico a mais de 45° do alto, cada toque simples é um desbico PARA CIMA:
+a direção do tenteio volta metade do caminho (no mínimo 20°) e o bico vai
+para o lado de cima (não alterna). Do bico para baixo, uns 3 ou 4 toques
+tiram a pipa. Perto do alto, o tenteio continua alternando como antes.
+
 ### D-061 — No aparo pela linha, embola também pela rabiola (2026-11-25)
 O Lucas: com a avoada no seu aparo pela linha dela, dá para embolar e aparar
 também pela rabiola (e vice-versa). Antes, qualquer avoada já enroscada não
