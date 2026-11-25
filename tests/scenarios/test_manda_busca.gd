@@ -274,23 +274,32 @@ func _giro_rebocada(pela_rabiola: bool) -> float:
 	return soma / maxf(1.0, n)
 
 
-## D-056: passando a linha abraçando (puxando forte) em cima da rabiola de uma
-## pipa em voo, a rabiola dela é fatiada — sem ela estar avoada.
+## D-056: abraçando (puxando forte) com a linha em cima da rabiola de uma pipa
+## em voo, a rabiola dela é fatiada — sem ela estar avoada. (O contato em si é
+## o mesmo de sempre; aqui ele é informado direto a cada passo.)
 func test_fatiar_a_rabiola_de_quem_esta_voando() -> void:
+	var r := _fatiar(6.0)
+	assert_true(bool(r["fatiou"]), "fatiou a rabiola")
+	assert_false(bool(r["cortada"]), "a pipa do rival continua voando")
+	assert_true(int(r["depois"]) < int(r["antes"]), "sobrou um pedaço da rabiola (%d de %d pontos)" % [r["depois"], r["antes"]])
+
+
+func test_puxar_devagar_nao_fatia_a_rabiola() -> void:
+	var r := _fatiar(2.0)
+	assert_false(bool(r["fatiou"]), "devagar não fatia")
+	assert_eq(int(r["depois"]), int(r["antes"]))
+
+
+func _fatiar(velocidade: float) -> Dictionary:
 	var w := _montagem(true)
 	var a: Flyer = w.flyers[0]
 	var b: Flyer = w.flyers[1]
-	assert_not_null(b.tail, "o rival tem rabiola")
 	var antes := b.tail.size()
-	a.input.haul_speed = 6.0
+	a.input.haul_speed = velocidade
 	var fatiou := false
 	for i in roundi(1.5 / DT):
-		# a rabiola do rival encostada na linha de quem abraça
-		var meio := a.line.size() / 2
-		for k in range(1, b.tail.size()):
-			var alvo := a.line.pos[clampi(meio + k - b.tail.size() / 2, 1, a.line.size() - 2)] + Vector3(0.0, 0.0, 0.02)
-			b.tail.pos[k] = alvo
-			b.tail.prev[k] = alvo
+		if a.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and a.line_rate > KiteCombatSystem.DECEPAR_RAPIDO:
+			w.combat._fatia_want[b] = [b.tail, b.tail.size() / 2, a]
 		w.step(DT)
 		for e in w.combat.take_events():
 			if e["type"] == "fatiou" and bool(e["voando"]):
@@ -298,30 +307,5 @@ func test_fatiar_a_rabiola_de_quem_esta_voando() -> void:
 		if fatiou:
 			break
 	a.input.clear()
-	assert_true(fatiou, "fatiou a rabiola")
-	assert_false(b.cut, "a pipa do rival continua voando")
-	assert_true(b.tail.size() < antes, "sobrou um pedaço da rabiola (%d de %d pontos)" % [b.tail.size(), antes])
 	assert_true(w.is_finite_state())
-
-
-## D-056: puxando devagar em cima da rabiola do rival, não fatia.
-func test_puxar_devagar_nao_fatia_a_rabiola() -> void:
-	var w := _montagem(true)
-	var a: Flyer = w.flyers[0]
-	var b: Flyer = w.flyers[1]
-	var antes := b.tail.size()
-	a.input.haul_speed = 2.0
-	var fatiou := false
-	for i in roundi(1.5 / DT):
-		var meio := a.line.size() / 2
-		for k in range(1, b.tail.size()):
-			var alvo := a.line.pos[clampi(meio + k - b.tail.size() / 2, 1, a.line.size() - 2)] + Vector3(0.0, 0.0, 0.02)
-			b.tail.pos[k] = alvo
-			b.tail.prev[k] = alvo
-		w.step(DT)
-		for e in w.combat.take_events():
-			if e["type"] == "fatiou":
-				fatiou = true
-	a.input.clear()
-	assert_false(fatiou, "devagar não fatia")
-	assert_eq(b.tail.size(), antes)
+	return {"fatiou": fatiou, "cortada": b.cut, "antes": antes, "depois": b.tail.size()}

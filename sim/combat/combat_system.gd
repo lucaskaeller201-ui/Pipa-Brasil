@@ -58,6 +58,7 @@ var _clock := 0.0
 var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
 var _fatia_want := {}          ## pipa em voo -> [rabiola, segmento, quem] (neste subpasso)
 var _fatia_acc := {}           ## pipa em voo -> m puxados rápido em cima da rabiola dela
+var _fatia_last := {}          ## pipa em voo -> [instante do último contato, rabiola, segmento, quem]
 var _cut_acc := {}             ## avoada -> m puxados rápido em contato
 var _solta_acc := {}           ## avoada -> s de tenteio de quem aparou
 var _chao := {}                ## avoada -> s com a pipa no chão
@@ -147,17 +148,28 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 			_cut_acc.erase(av)
 	_cut_want.clear()
 	# Fatiar a rabiola de quem está em voo (D-056).
+	for f in _fatia_want:
+		var fw0: Array = _fatia_want[f]
+		_fatia_last[f] = [_clock, fw0[0], fw0[1], fw0[2]]
 	for f in _fatia_acc.keys():
-		if not _fatia_want.has(f):
+		if not _fatia_last.has(f) or _clock - float((_fatia_last[f] as Array)[0]) > TANGLE_GAP:
 			_fatia_acc[f] = float(_fatia_acc[f]) - 1.5 * h
 			if float(_fatia_acc[f]) <= 0.0:
 				_fatia_acc.erase(f)
-	for f in _fatia_want:
-		var fw: Array = _fatia_want[f]
+	# contato recente (menos de TANGLE_GAP) e ainda abraçando: vai fatiando
+	for f in _fatia_last.keys():
+		var fl0: Array = _fatia_last[f]
+		var q0: Flyer = fl0[3]
+		if _clock - float(fl0[0]) > TANGLE_GAP or q0.cut or q0.kite.spin_mode != KiteBody.SpinMode.SPIN_LOCK or q0.line_rate <= DECEPAR_RAPIDO:
+			if _clock - float(fl0[0]) > TANGLE_GAP:
+				_fatia_last.erase(f)
+			continue
+		var fw: Array = [fl0[1], fl0[2], fl0[3]]
 		var quem2: Flyer = fw[2]
 		_fatia_acc[f] = float(_fatia_acc.get(f, 0.0)) + quem2.line_rate * h
 		if float(_fatia_acc[f]) >= FATIAR_METROS:
 			_fatia_acc.erase(f)
+			_fatia_last.erase(f)
 			var dono: Flyer = f
 			var rab: ParticleChain = fw[0]
 			if rab == dono.tail and rab.size() >= 3 and _clock - float(_last_cut.get(dono, -10.0)) >= 0.5:
@@ -423,6 +435,7 @@ func take_events() -> Array:
 func forget(f: Flyer) -> void:
 	_cut_acc.erase(f)
 	_fatia_acc.erase(f)
+	_fatia_last.erase(f)
 	_solta_acc.erase(f)
 	_chao.erase(f)
 	_last_cut.erase(f)
