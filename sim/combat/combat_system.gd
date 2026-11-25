@@ -53,7 +53,7 @@ var engagements: Array = []
 var contact_points: PackedVector3Array = PackedVector3Array()
 
 var _pairs: Array = []
-var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
+var _tangle := {}              ## [avoada, pipeiro, pedaço] -> embolo em formação
 var _clock := 0.0
 var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
 var _fatia_want := {}          ## pipa em voo -> [rabiola, segmento, quem] (neste subpasso)
@@ -208,7 +208,12 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 				and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > DECEPAR_RAPIDO:
 			_fatia_want[av] = [chain, av_seg, ct]
 			continue
-		if av == null or ct == null or not av.cut or av.caught_by != null or av.lost or ct.cut:
+		if av == null or ct == null or not av.cut or av.lost or ct.cut:
+			continue
+		# D-061: já no seu aparo (pela linha), dá para embolar também pela
+		# rabiola (e vice-versa) — só não emaranha de novo no mesmo pedaço,
+		# nem com outro pipeiro.
+		if av.caught_by != null and (av.caught_by != ct or _tem_link(av, chain)):
 			continue
 		if not (chain == av.trailing_line or chain == av.tail):
 			continue
@@ -222,7 +227,7 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 		if not _girando(ct):
 			return
 		# Encostou mandando linha: o embolo começa (ou continua) a se formar.
-		var chave := Vector2i(av.get_instance_id(), ct.get_instance_id())
+		var chave := [av.get_instance_id(), ct.get_instance_id(), chain.get_instance_id()]
 		var st := LineContact.closest_params(chain.pos[av_seg], chain.pos[av_seg + 1], cchain.pos[ct_seg], cchain.pos[ct_seg + 1])
 		var t: Dictionary = _tangle.get(chave, {"t": 0.0})
 		t["last"] = _clock
@@ -245,10 +250,11 @@ func _advance_tangles(h: float) -> void:
 		var ct: Flyer = t["ct"]
 		var ativo := _clock - float(t["last"]) < TANGLE_GAP and _girando(ct)
 		t["t"] = float(t["t"]) + (h if ativo else -0.5 * h)
-		if float(t["t"]) <= 0.0 or av.caught_by != null or ct.cut or not av.cut:
+		var chain: ParticleChain = t["chain"]
+		if float(t["t"]) <= 0.0 or ct.cut or not av.cut \
+				or (av.caught_by != null and (av.caught_by != ct or _tem_link(av, chain))):
 			_tangle.erase(chave)
 			continue
-		var chain: ParticleChain = t["chain"]
 		var cchain: ParticleChain = t["cchain"]
 		if chain != av.trailing_line and chain != av.tail or (cchain != ct.line and cchain != ct.tail):
 			_tangle.erase(chave)
@@ -319,6 +325,8 @@ func _solve_links() -> void:
 func check_snags(flyers: Array) -> void:
 	var dt := clampf(_clock - _snag_clock, 0.0, 0.1)
 	_snag_clock = _clock
+	for f in flyers:
+		(f as Flyer).caught_by_tail = false
 	for l in links.duplicate():
 		var av: Flyer = l["avoada"]
 		var ct: Flyer = l["catcher"]
@@ -329,7 +337,8 @@ func check_snags(flyers: Array) -> void:
 			av.caught_by = null
 			ct.holding = maxi(0, ct.holding - 1)
 			continue
-		av.caught_by_tail = l["chain"] == av.tail
+		if l["chain"] == av.tail:
+			av.caught_by_tail = true   # presa (também) pela rabiola: vem rodando
 		if bool(l["captured"]):
 			continue
 		# Sair do aparo (D-044): tenteando sem parar uns 3 s, o embolo solta.
@@ -527,3 +536,11 @@ func _largada(f: Flyer) -> float:
 ## Girando a pipa para embolar: mandando linha ou tenteando.
 func _girando(f: Flyer) -> bool:
 	return f.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE or f.kite.spin_mode == KiteBody.SpinMode.SPIN_KICK or f.tenteio_age < 0.4
+
+
+## A avoada já tem um embolo neste pedaço (linha solta ou rabiola)?
+func _tem_link(av: Flyer, chain: ParticleChain) -> bool:
+	for l in links:
+		if l["avoada"] == av and l["chain"] == chain:
+			return true
+	return false

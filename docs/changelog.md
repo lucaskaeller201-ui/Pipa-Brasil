@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.18.5 — 2026-11-25
+
+- Com a avoada no seu aparo pela linha, dá para embolar também pela rabiola
+  (e ela vem rodando).
+
 ## 0.18.4 — 2026-11-25
 
 - Com o bico para um lado, tenteando ele volta para cima e passa para o outro

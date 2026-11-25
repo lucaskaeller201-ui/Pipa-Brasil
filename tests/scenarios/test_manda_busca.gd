@@ -309,3 +309,31 @@ func _fatiar(velocidade: float) -> Dictionary:
 	a.input.clear()
 	assert_true(w.is_finite_state())
 	return {"fatiou": fatiou, "cortada": b.cut, "antes": antes, "depois": b.tail.size()}
+
+
+## D-061: já no seu aparo pela linha, dá para embolar também pela rabiola.
+func test_aparada_pela_linha_tambem_embola_pela_rabiola() -> void:
+	var w := _montagem(true)
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	assert_true(_embolar(w))
+	assert_eq(b.caught_by, a)
+	var primeiro: ParticleChain = w.combat.links[0]["chain"]
+	var outro: ParticleChain = b.tail if primeiro != b.tail else b.trailing_line
+	assert_not_null(outro, "a avoada tem o outro pedaço")
+	# o embolo do outro pedaço já formado (o contato em si é o de sempre)
+	var chave := [b.get_instance_id(), a.get_instance_id(), outro.get_instance_id()]
+	w.combat._tangle[chave] = {"t": KiteCombatSystem.TANGLE_TIME + 0.1, "last": w.time, "av": b, "ct": a,
+		"chain": outro, "idx": 2, "cchain": a.line, "m": 1.0}
+	a.input.haul_speed = -1.0   # mandando linha (girando)
+	w.step(DT)
+	a.input.clear()
+	var dela := 0
+	for l in w.combat.links:
+		if l["avoada"] == b:
+			dela += 1
+	assert_eq(dela, 2, "presa pela linha e pela rabiola")
+	if outro == b.tail:
+		w.step(DT)
+		assert_true(b.caught_by_tail, "presa pela rabiola: vem rodando")
+	assert_true(w.is_finite_state())

@@ -33,6 +33,13 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-061 — No aparo pela linha, embola também pela rabiola (2026-11-25)
+O Lucas: com a avoada no seu aparo pela linha dela, dá para embolar e aparar
+também pela rabiola (e vice-versa). Antes, qualquer avoada já enroscada não
+embolava de novo. Agora quem já aparou pode embolar no outro pedaço (o mesmo
+pedaço não embola duas vezes; outro pipeiro não embola numa avoada já
+aparada). Presa também pela rabiola, ela vem rodando (D-053).
+
 ### D-060 — Tenteio traz o bico de volta para cima; mureta baixa na sua laje (2026-11-25)
 O Lucas: com o bico para a direita não conseguia desbicar de volta para cima
 ou para a esquerda; e a mureta da frente da sua laje tapava a pipa quando ele
