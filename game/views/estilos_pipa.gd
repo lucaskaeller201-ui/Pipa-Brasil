@@ -72,7 +72,7 @@ const ESTILOS := [
 	{"nome": "Pião Raia", "m": [60, 56, 24, 25, 15, 20], "padrao": "v",
 		"cores": [AMARELO, Color(0.08, 0.15, 0.55), AMARELO, AMARELO], "fitas": [AMARELO, Color(0.08, 0.15, 0.55)], "velocidade": 47, "forca": 133, "rabiola": 0},
 	{"nome": "Baruel", "m": [60, 56, 56, 12, 30, 18], "padrao": "borda",
-		"cores": [AMARELO, AMARELO, AMARELO, BRANCO], "fitas": [AMARELO, AMARELO], "velocidade": 50, "forca": 133, "rabiola": 10},
+		"cores": [AMARELO, Color(0.85, 0.7, 0.05), AMARELO, BRANCO], "fitas": [AMARELO, PRETO], "velocidade": 50, "forca": 133, "rabiola": 10},
 	{"nome": "Caixão", "m": [60, 58, 50, 12, 22, 26], "padrao": "metades",
 		"cores": [PRETO, Color(0.3, 0.3, 0.32), PRETO, BRANCO], "fitas": [PRETO, Color(0.3, 0.3, 0.32)], "velocidade": 38, "forca": 97, "rabiola": 0},
 	{"nome": "Latão 70", "m": [70, 58, 58, 15.8, 39.7, 14.5], "padrao": "grade_larga",
