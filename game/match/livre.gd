@@ -16,6 +16,9 @@ extends Node3D
 const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
 const Bairro := preload("res://game/world/bairro.gd")
+const Boneco := preload("res://game/world/boneco.gd")
+const PELES := [Color(0.55, 0.36, 0.24), Color(0.85, 0.64, 0.48), Color(0.4, 0.26, 0.18), Color(0.72, 0.5, 0.35)]
+const BERMUDAS := [Color(0.15, 0.25, 0.55), Color(0.2, 0.2, 0.22), Color(0.5, 0.42, 0.3), Color(0.1, 0.45, 0.25)]
 const KiteView := preload("res://game/views/kite_view.gd")
 const Estilos := preload("res://game/views/estilos_pipa.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
@@ -111,8 +114,10 @@ func _ready() -> void:
 	Ambiente.criar_por_do_sol(self, false)
 	Bairro.criar(self, modo.players.size())
 	for i in modo.players.size():
-		var corpo := _boneco(CORES[i].darkened(0.2))
-		corpo.position = (modo.players[i]["base"] as Vector3) + Vector3(0.0, 0.8, 0.25)
+		var corpo: Node3D = Boneco.new()
+		add_child(corpo)
+		corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
+		corpo.position = (modo.players[i]["base"] as Vector3) + Vector3(0.0, 0.0, 0.25)
 		_corpos.append(corpo)
 	_linhas = LinesView.new()
 	_linhas.name = "Linhas"
@@ -171,6 +176,7 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_ver_toque_pendente()
+	_animar_bonecos(delta)
 	# Velocidade da mão a partir do deslizar deste quadro.
 	var altura := maxf(1.0, get_viewport().get_visible_rect().size.y)
 	var alvo := (_dy_quadro / altura) * LINHA_POR_TELA / maxf(delta, 1e-3)
@@ -595,6 +601,20 @@ func _botao(pai: Control, texto: String) -> Button:
 	return b
 
 
+## Bonecos (D-057): viram para a pipa, um braço na linha, o outro abraça ao
+## puxar.
+func _animar_bonecos(delta: float) -> void:
+	for i in mini(_corpos.size(), modo.players.size()):
+		var corpo: Node3D = _corpos[i]
+		var fl: Flyer = modo.players[i]["flyer"]
+		var base: Vector3 = modo.players[i]["base"]
+		if fl == null or fl.cut or fl.line == null:
+			corpo.call("atualizar", base + Vector3(0.3, 1.0, -0.4), base + Vector3(0.0, 10.0, -20.0), 0.0, delta)
+			continue
+		var puxando := 1.0 if fl.input.haul_speed > 0.1 or fl.input.pull > 0.05 else 0.0
+		corpo.call("atualizar", fl.hand_position, fl.kite.position, puxando, delta)
+
+
 func _boneco(cor: Color) -> MeshInstance3D:
 	var m := MeshInstance3D.new()
 	var cap := CapsuleMesh.new()
@@ -626,7 +646,7 @@ func _ao_ajustar(v: float, qual: String, rotulo: Label, nome: String) -> void:
 		modo.your_kick_deg = v
 		if modo.you() != null:
 			modo.you().kite.definition.spin_kick_rate_deg = v
-	if qual == "giro":
+	elif qual == "giro":
 		velocidade_giro_mandando_linha = v
 		_aplicar_giro()
 	else:

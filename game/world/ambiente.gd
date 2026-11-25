@@ -4,14 +4,9 @@ extends RefCounted
 
 
 static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
-	var ceu_material := ProceduralSkyMaterial.new()
-	ceu_material.sky_top_color = Color(0.20, 0.30, 0.55)
-	ceu_material.sky_horizon_color = Color(1.00, 0.62, 0.30)
-	ceu_material.sky_curve = 0.12
-	ceu_material.ground_horizon_color = Color(0.85, 0.52, 0.28)
-	ceu_material.ground_bottom_color = Color(0.18, 0.11, 0.08)
-	ceu_material.sun_angle_max = 25.0
-	ceu_material.sun_curve = 0.1
+	# Céu por shader (D-057): degradê de fim de tarde, sol e nuvens que andam.
+	var ceu_material := ShaderMaterial.new()
+	ceu_material.shader = load("res://game/world/shaders/ceu.gdshader")
 
 	var ceu := Sky.new()
 	ceu.sky_material = ceu_material
@@ -23,6 +18,12 @@ static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.glow_enabled = true
+	env.ambient_light_energy = 0.9
+	# Névoa leve de fim de tarde: o bairro some no horizonte (profundidade).
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.95, 0.66, 0.45)
+	env.fog_density = 0.0035
+	env.fog_sky_affect = 0.0
 
 	var mundo := WorldEnvironment.new()
 	mundo.name = "Ambiente"
@@ -37,14 +38,15 @@ static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
 	sol.light_color = Color(1.0, 0.74, 0.42)
 	sol.light_energy = 1.4
 	sol.shadow_enabled = true
+	sol.directional_shadow_max_distance = 90.0
 	sol.rotation_degrees = Vector3(-14.0, 60.0, 0.0)
 	pai.add_child(sol)
 
 	var malha := PlaneMesh.new()
 	malha.size = Vector2(600.0, 600.0)
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.50, 0.36, 0.26)
-	material.roughness = 0.25
+	# Chão com ruas, calçadas e terra (D-057).
+	var material := ShaderMaterial.new()
+	material.shader = load("res://game/world/shaders/chao.gdshader")
 	var chao := MeshInstance3D.new()
 	chao.name = "Chao"
 	chao.mesh = malha

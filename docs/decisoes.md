@@ -33,6 +33,22 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-057 — Cenário e boneco por código (2026-11-25)
+O Lucas pediu foco no visual (gráfico, boneco, cenário, chão, casas, árvores,
+céu, shaders). Tudo feito por código, sem modelos externos (custo zero):
+- Céu por shader: degradê de fim de tarde, sol com brilho e nuvens andando;
+  névoa leve no horizonte.
+- Chão por shader: ruas de asfalto com faixa tracejada, calçadas de lajota e
+  terra com manchas (as ruas são as mesmas em Bairro.RUAS).
+- Casas com shader de parede: reboco pintado ou tijolo aparente, janelas (às
+  vezes acesas), portas, laje de concreto; muretas, ferragem saindo da laje,
+  caixas d'água com tampa, antenas e varais com roupas.
+- Árvores e coqueiros nas calçadas; postes com luminária e fios com barriga.
+- Morros ao fundo com casinhas coladas e mato no alto.
+- Boneco de peças: pele, camisa, bermuda, chinelo e boné; vira para a pipa,
+  um braço vai até a mão da física (a linha), o outro segura a carretilha e
+  "abraça" ao puxar. Só visual.
+
 ### D-056 — Fatiar (2026-11-25)
 O Lucas explicou o "fatiar": passando a linha abraçando (puxando forte) em
 cima da linha ou da rabiola de uma avoada, ela é decepada; e na RABIOLA de uma

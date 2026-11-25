@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.18.0 — 2026-11-25
+
+- Céu com nuvens e sol; chão com ruas, calçadas e terra; casas com reboco ou
+  tijolo, janelas e portas; árvores, coqueiros, postes com fios, varais e
+  morros com casinhas ao fundo.
+- Boneco novo: vira para a pipa, segura a linha e a carretilha e abraça ao
+  puxar.
+
 ## 0.17.0 — 2026-11-25
 
 - Fatiar: abraçando (puxando forte) com a linha em cima da rabiola do rival,
