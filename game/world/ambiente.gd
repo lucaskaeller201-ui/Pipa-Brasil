@@ -6,11 +6,11 @@ extends RefCounted
 ## Horas do dia (D-063): cores do céu, do sol e da névoa.
 const HORAS := {
 	"manha": {"nome": "Manhã", "topo": Color(0.22, 0.47, 0.86), "horizonte": Color(0.78, 0.86, 0.95),
-		"baixo": Color(0.5, 0.55, 0.6), "nuvens": 0.42, "sol_cor": Color(1.0, 0.94, 0.84), "sol_forca": 1.35,
-		"sol_rot": Vector3(-32.0, 75.0, 0.0), "nevoa": Color(0.78, 0.86, 0.95), "nevoa_d": 0.0022, "ambiente": 0.8},
+		"baixo": Color(0.5, 0.55, 0.6), "nuvens": 0.42, "sol_cor": Color(1.0, 0.94, 0.84), "sol_forca": 1.05,
+		"sol_rot": Vector3(-32.0, 75.0, 0.0), "nevoa": Color(0.62, 0.72, 0.85), "nevoa_d": 0.0012, "ambiente": 0.45, "brilho": false},
 	"meio_dia": {"nome": "Meio-dia", "topo": Color(0.12, 0.36, 0.82), "horizonte": Color(0.66, 0.8, 0.95),
-		"baixo": Color(0.5, 0.55, 0.6), "nuvens": 0.38, "sol_cor": Color(1.0, 0.98, 0.94), "sol_forca": 1.5,
-		"sol_rot": Vector3(-62.0, 50.0, 0.0), "nevoa": Color(0.7, 0.82, 0.95), "nevoa_d": 0.0018, "ambiente": 0.75},
+		"baixo": Color(0.5, 0.55, 0.6), "nuvens": 0.38, "sol_cor": Color(1.0, 0.98, 0.94), "sol_forca": 1.1,
+		"sol_rot": Vector3(-62.0, 50.0, 0.0), "nevoa": Color(0.6, 0.72, 0.88), "nevoa_d": 0.001, "ambiente": 0.4, "brilho": false},
 	"por_do_sol": {"nome": "Pôr do sol", "topo": Color(0.13, 0.24, 0.52), "horizonte": Color(1.0, 0.58, 0.28),
 		"baixo": Color(0.32, 0.22, 0.16), "nuvens": 0.5, "sol_cor": Color(1.0, 0.74, 0.42), "sol_forca": 1.4,
 		"sol_rot": Vector3(-14.0, 60.0, 0.0), "nevoa": Color(0.95, 0.66, 0.45), "nevoa_d": 0.0035, "ambiente": 0.9},
@@ -42,8 +42,11 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.glow_enabled = true
+	# Brilho (glow) só no pôr do sol: de dia ele estourava as cores claras.
+	env.glow_enabled = bool(h.get("brilho", true))
 	env.ambient_light_energy = float(h["ambiente"])
+	env.ambient_light_sky_contribution = 0.7
+	env.tonemap_exposure = 0.95
 	# Névoa leve: a cidade some no horizonte (profundidade).
 	env.fog_enabled = true
 	env.fog_light_color = h["nevoa"]

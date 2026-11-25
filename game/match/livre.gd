@@ -106,6 +106,8 @@ const ARQUIVO_PREFERENCIAS := "user://preferencias.json"
 var _mapa_arg := ""
 var _hora_arg := ""
 var _inicio_arg := false
+var _cantos: Control
+var _inicio_jogo := 0.0
 var _botoes_pipa: Array = []
 var _botoes_linha: Array = []
 var _botao_desenho: Button
@@ -488,8 +490,13 @@ func _atualizar_textos(eu: Flyer) -> void:
 	else:
 		var extra := "   ENROSCOU: puxe a linha toda para trazer!" if eu.holding > 0 else ""
 		_info.text = "Linha %d m · altura %d m%s" % [roundi(eu.line_length()), roundi(eu.kite.position.y - (p0["base"] as Vector3).y), extra]
-	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate
-	_dica.visible = modo.world.time < 15.0
+	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate and not _no_lobby
+	_dica.visible = modo.world.time - _inicio_jogo < 15.0 and not _no_lobby
+	# na página inicial, só a cidade e os botões (D-063)
+	_placar.visible = not _no_lobby
+	_info.visible = not _no_lobby
+	_sobreposicao.visible = not _no_lobby
+	_cantos.visible = not _no_lobby
 
 
 func _avisar(texto: String) -> void:
@@ -633,6 +640,7 @@ func _criar_interface() -> void:
 	cantos.offset_top = 12.0
 	cantos.alignment = BoxContainer.ALIGNMENT_END
 	raiz.add_child(cantos)
+	_cantos = cantos
 	var cam := _botao(cantos, "Câmera")
 	cam.pressed.connect(func() -> void: _primeira_pessoa = not _primeira_pessoa)
 	var ajustes := _botao(cantos, "Ajustes")
@@ -1111,6 +1119,7 @@ func _trocar_hora() -> void:
 
 func _jogar() -> void:
 	_no_lobby = false
+	_inicio_jogo = modo.world.time
 	_lobby.visible = false
 	_posicionar_camera(true)
 
