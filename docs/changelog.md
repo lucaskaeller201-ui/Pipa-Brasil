@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.22.0 — 2026-11-25
+
+- Modelos 3D reais (CC0): cadeiras de plástico, engradados, bombona e vasos
+  na laje; luminárias, caixas de luz e lixo nos postes; portas de enrolar e
+  arbustos nas casas; copas de árvore e de coqueiro com folhas de verdade.
+- Morros com centenas de casinhas 3D em vez de desenho.
+
 ## 0.21.0 — 2026-11-25
 
 - Texturas de fotos reais (CC0, Poly Haven): asfalto com rachaduras, calçada

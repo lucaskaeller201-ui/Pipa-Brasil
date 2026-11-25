@@ -5,6 +5,8 @@ shader_type spatial;
 uniform vec3 cor : source_color = vec3(0.9, 0.8, 0.6);
 uniform float tijolo = 0.0;      // 1 = tijolo aparente
 uniform float semente = 0.0;
+uniform float por_instancia = 0.0;   // D-068: cor vem de cada casinha (MultiMesh)
+varying vec3 cor_inst;
 
 varying vec3 mundo;
 varying vec3 normal_mundo;
@@ -28,6 +30,7 @@ float hash(vec2 p) {
 void vertex() {
 	mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	normal_mundo = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	cor_inst = COLOR.rgb;
 }
 
 void fragment() {
@@ -35,6 +38,7 @@ void fragment() {
 	vec3 c;
 	float rug = 0.92;
 	vec3 nm = vec3(0.5, 0.5, 1.0);
+	vec3 base_cor = por_instancia > 0.5 ? cor_inst : cor;
 	if (n.y > 0.5) {
 		// laje: concreto com manchas
 		float m = hash(floor(mundo.xz * 1.5));
@@ -63,10 +67,10 @@ void fragment() {
 			// reboco com manchas suaves e escorrido de chuva (D-065)
 			float mancha = hash(floor(vec2(u * 0.7, v * 0.25))) * 0.08;
 			float escorre = smoothstep(0.7, 1.0, hash(vec2(floor(u * 1.3), 3.0))) * smoothstep(0.0, 2.5, fract(-v / 3.0) * 3.0) * 0.12;
-			c = cor * (0.97 - sujo - mancha - escorre + 0.04 * hash(floor(vec2(u, v) * 6.0)));
+			c = base_cor * (0.97 - sujo - mancha - escorre + 0.04 * hash(floor(vec2(u, v) * 6.0)));
 			if (texturas > 0.5) {
 				vec3 det = texture(t_reboco, vec2(u, -v) / 2.0).rgb / m_reboco;
-				c = cor * (0.97 - sujo - mancha * 0.5 - escorre) * mix(vec3(1.0), det, 0.85);
+				c = base_cor * (0.97 - sujo - mancha * 0.5 - escorre) * mix(vec3(1.0), det, 0.85);
 				nm = texture(n_reboco, vec2(u, -v) / 2.0).rgb;
 			}
 		}

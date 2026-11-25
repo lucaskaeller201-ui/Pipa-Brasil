@@ -6,6 +6,7 @@ extends RefCounted
 ## Só visual: a física ainda não colide com casas (o chão da física é y = 0).
 
 const Texturas := preload("res://game/world/texturas.gd")
+const Modelos := preload("res://game/world/modelos.gd")
 const ALTURA_LAJE := 6.0
 ## Lajes de onde se solta pipa (a primeira é a sua). O vento sopra para -Z.
 const LAJES := [Vector3(0.0, 0.0, 0.0), Vector3(16.0, 0.0, -4.0), Vector3(-16.0, 0.0, -2.0),
@@ -125,6 +126,19 @@ static func _material_parede(cor: Color, tijolo: bool) -> ShaderMaterial:
 static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijolo: bool, rng: RandomNumberGenerator) -> void:
 	var corpo := _caixa(pai, base + Vector3(0.0, tamanho.y * 0.5, 0.0), tamanho, cor, 0.9)
 	corpo.material_override = _material_parede(cor, tijolo)
+	# D-068: porta de enrolar (comércio) e plantas na frente de algumas casas
+	var frente := 1.0 if rng.randf() < 0.5 else -1.0
+	if rng.randf() < 0.3:
+		Modelos.por_variante(pai, "rollershutter_door", "rollershutter_door" if rng.randf() < 0.6 else "rollershutter_door_graffiti",
+			base + Vector3(rng.randf_range(-0.25, 0.25) * tamanho.x, 0.0, frente * tamanho.z * 0.5 - frente * 0.05),
+			0.0 if frente > 0.0 else PI, Vector3(1.6, 1.15, 1.0))
+	if rng.randf() < 0.45:
+		var esc := rng.randf_range(4.0, 6.5)
+		Modelos.por_variante(pai, "shrub_03", "shrub_03_" + "abcd"[rng.randi() % 4],
+			base + Vector3(tamanho.x * 0.5 - 0.6, 0.0, frente * (tamanho.z * 0.5 + 0.7)), rng.randf() * TAU, Vector3(esc * 1.3, esc, esc * 1.3))
+	if rng.randf() < 0.3:
+		Modelos.por_variante(pai, "fern_02", "fern_02_" + "abcd"[rng.randi() % 4],
+			base + Vector3(-tamanho.x * 0.5 + 0.8, 0.0, frente * (tamanho.z * 0.5 + 0.8)), rng.randf() * TAU, Vector3.ONE * 1.6)
 	var topo := base + Vector3(0.0, tamanho.y, 0.0)
 	# D-065: parte das casas com telhado de telha de barro (menos "caixote")
 	if tamanho.y < 7.0 and rng.randf() < 0.45:
@@ -189,6 +203,15 @@ static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumb
 	for lado in [Vector3(4.0, 0, 0), Vector3(-4.0, 0, 0)]:
 		_caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.15, 0.9, 8.2), cor_parede.darkened(0.1), 0.9)
 	_caixa_dagua(pai, base + Vector3(-2.8, h, 2.8))
+	# D-068: coisas de laje — cadeira de plástico, engradado, bombona, vasos
+	Modelos.por(pai, "plastic_monobloc_chair_01", base + Vector3(2.6, h, 2.6), PI + rng.randf_range(-0.5, 0.5))
+	Modelos.por(pai, "plastic_monobloc_chair_01", base + Vector3(1.6, h, 3.1), PI + rng.randf_range(-0.6, 0.6))
+	var eng := Modelos.por(pai, "plastic_crate_02", base + Vector3(3.3, h, 0.8), rng.randf() * TAU)
+	if eng != null:
+		Modelos.por(pai, "plastic_crate_02", base + Vector3(3.3, h + 0.25, 0.8), rng.randf() * TAU)
+	Modelos.por(pai, "Barrel_02", base + Vector3(-3.3, h, -0.5), 0.0)
+	Modelos.por(pai, "potted_plant_04", base + Vector3(-3.5, h, -3.4), 0.0, 2.2)
+	Modelos.por(pai, "planter_pot_clay", base + Vector3(3.5, h, -3.4), 0.0, 2.0)
 	if rng.randf() < 0.6:
 		_varal(pai, base + Vector3(0.0, h, 3.0), 5.0, rng)
 
@@ -310,6 +333,27 @@ static func _arvore(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> v
 		galho.rotation = Vector3(0.0, ang, 0.0)
 		galho.rotate_object_local(Vector3.RIGHT, 0.8)
 		pai.add_child(galho)
+	# D-068: copa com folhas de verdade (arbusto CC0 do Poly Haven, ampliado)
+	if Modelos.existe("shrub_03"):
+		for k in 4:
+			var var_nome := "shrub_03_" + "abcd"[rng.randi() % 4]
+			var esc := rng.randf_range(9.0, 12.0)
+			var ang3 := TAU * k / 4.0 + rng.randf() * 0.6
+			var desl := Vector3(sin(ang3), 0.0, cos(ang3)) * (0.0 if k == 0 else rng.randf_range(0.5, 1.0))
+			Modelos.por_variante(pai, "shrub_03", var_nome, topo + desl + Vector3(0.0, -2.2 + rng.randf_range(0.0, 0.6), 0.0),
+				rng.randf() * TAU, Vector3(esc * 1.3, esc, esc * 1.3))
+		# miolo escuro para a copa não ficar vazada demais
+		var miolo := MeshInstance3D.new()
+		var bm := SphereMesh.new()
+		bm.radius = 1.1
+		bm.height = 1.8
+		bm.radial_segments = 12
+		bm.rings = 6
+		miolo.mesh = bm
+		miolo.material_override = mat_f
+		miolo.position = topo + Vector3(0.0, 0.6, 0.0)
+		pai.add_child(miolo)
+		return
 	# copa: bolas de folhagem
 	var raio := rng.randf_range(1.6, 2.3)
 	for k in 6:
@@ -357,7 +401,14 @@ static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) ->
 		pai.add_child(seg)
 		anterior = p
 	var topo := anterior
-	for k in 9:
+	# D-068: copa de folhas de verdade (samambaia CC0 ampliada parece palma)
+	var com_modelo := Modelos.existe("fern_02")
+	if com_modelo:
+		for k in 3:
+			var esc := rng.randf_range(5.0, 6.2)
+			Modelos.por_variante(pai, "fern_02", "fern_02_" + "abcd"[rng.randi() % 4], topo + Vector3(0.0, -1.0 + k * 0.15, 0.0),
+				k * 2.1 + rng.randf() * 0.5, Vector3(esc, esc * 1.1, esc))
+	for k in (0 if com_modelo else 9):
 		var ang := TAU * k / 9.0 + rng.randf() * 0.25
 		var folha := MeshInstance3D.new()
 		var plano := PlaneMesh.new()
@@ -388,6 +439,13 @@ static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) ->
 static func _poste(pai: Node3D, base: Vector3) -> Vector3:
 	_cilindro(pai, base, 0.16, 0.11, 9.0, Color(0.62, 0.62, 0.6), 8)
 	_caixa(pai, base + Vector3(0.0, 8.6, 0.0), Vector3(1.6, 0.1, 0.1), Color(0.55, 0.55, 0.52), 0.8)
+	# D-068: luminária de verdade virada para a rua, caixa de luz e lixo
+	if Modelos.por(pai, "street_lamp_02", base + Vector3(0.0, 7.6, 0.12), 0.0, 1.3) != null:
+		if int(base.x) % 40 == 0:
+			Modelos.por(pai, "utility_box_01", base + Vector3(0.0, 1.2, -0.2), PI, 1.0)
+		else:
+			Modelos.por(pai, "trashbag", base + Vector3(0.6, 0.0, 0.3), base.x, 1.0)
+		return base + Vector3(0.0, 8.55, 0.0)
 	# luminária
 	_caixa(pai, base + Vector3(0.0, 8.2, 0.9), Vector3(0.25, 0.12, 0.6), Color(0.3, 0.3, 0.3), 0.6)
 	return base + Vector3(0.0, 8.55, 0.0)
@@ -416,6 +474,7 @@ static func _fio(pai: Node3D, a: Vector3, b: Vector3) -> void:
 static func _morro(pai: Node3D) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://game/world/shaders/morro.gdshader")
+	mat.set_shader_parameter("so_mata", true)   # D-068: as casinhas agora são 3D
 	# [x, z, raio, altura]: longe e baixos, uma serra no horizonte
 	for d in [Vector4(-260.0, -520.0, 170.0, 55.0), Vector4(-40.0, -600.0, 230.0, 80.0), Vector4(200.0, -540.0, 190.0, 60.0),
 			Vector4(420.0, -480.0, 160.0, 45.0), Vector4(-460.0, -450.0, 150.0, 40.0)]:
@@ -430,6 +489,54 @@ static func _morro(pai: Node3D) -> void:
 		m.position = Vector3(d.x, 0.0, d.y)
 		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		pai.add_child(m)
+		_casinhas_no_morro(pai, d)
+
+
+## D-068: casinhas de verdade (caixas 3D) subindo o morro, em vez de
+## desenho na encosta. Um MultiMesh por morro: milhares de casas, um só
+## desenho para a placa de vídeo.
+static func _casinhas_no_morro(pai: Node3D, d: Vector4) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(absf(d.x * 13.0 + d.y))
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	var caixa := BoxMesh.new()
+	caixa.size = Vector3.ONE
+	mm.mesh = caixa
+	var quantas := int(d.z * 2.2)
+	mm.instance_count = quantas
+	var feitas := 0
+	for k in quantas * 3:
+		if feitas >= quantas:
+			break
+		var a := rng.randf() * TAU
+		var r := sqrt(rng.randf()) * 0.92
+		# só na frente do morro (o lado que se vê do bairro) e até 75% da altura
+		var px := d.x + sin(a) * r * d.z
+		var pz := d.y + cos(a) * r * d.z
+		if pz < d.y - d.z * 0.2:
+			continue
+		var y := d.w * sqrt(maxf(0.0, 1.0 - r * r))
+		if y > d.w * 0.78:
+			continue
+		var t := Vector3(rng.randf_range(4.0, 8.0), rng.randf_range(3.0, 3.0 * rng.randi_range(1, 3)), rng.randf_range(4.0, 8.0))
+		var b := Basis(Vector3.UP, rng.randf_range(-0.15, 0.15)).scaled(t)
+		mm.set_instance_transform(feitas, Transform3D(b, Vector3(px, y + t.y * 0.5 - 1.5, pz)))
+		var c: Color = CORES_PAREDE[rng.randi() % CORES_PAREDE.size()]
+		if rng.randf() < 0.35:
+			c = Color(0.66, 0.36, 0.24)   # tijolo sem reboco
+		mm.set_instance_color(feitas, c.darkened(rng.randf() * 0.15))
+		feitas += 1
+	mm.visible_instance_count = feitas
+	var no := MultiMeshInstance3D.new()
+	no.name = "Casinhas"
+	no.multimesh = mm
+	var mat := _material_parede(Color.WHITE, false).duplicate() as ShaderMaterial
+	mat.set_shader_parameter("por_instancia", 1.0)
+	no.material_override = mat
+	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pai.add_child(no)
 
 
 ## Orla da praia (D-063): coqueiros no calçadão, quiosques, guarda-sóis

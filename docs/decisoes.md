@@ -33,6 +33,18 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-068 — Modelos 3D CC0 do Poly Haven e morro com casinhas 3D (2026-11-25)
+Modelos fotográficos leves (poucos milhares de triângulos) baixados pelo
+GitHub Actions (tools/baixar_modelos.py; créditos em
+assets/modelos/CREDITOS.md): cadeira de plástico, engradado, bombona e vasos
+nas lajes; luminária de rua, caixa de luz e saco de lixo nos postes; portas
+de enrolar e arbustos nas casas. As árvores do Poly Haven têm milhões de
+triângulos (pesadas demais para o celular), então a copa das árvores usa o
+arbusto ampliado e a copa dos coqueiros usa a samambaia ampliada (a folha
+parece palma). As folhas vêm em PNG com transparência (o JPG não tem).
+Os morros do bairro deixaram de ser desenho na encosta: são centenas de
+casinhas 3D (MultiMesh, um só desenho por morro) com o shader de parede.
+
 ### D-067 — Texturas fotográficas CC0 do Poly Haven (2026-11-25)
 Para sair do visual "desenhado por código", o chão (asfalto, calçada,
 terra, mato, areia, calçadão), as paredes (reboco, tijolo, laje), os

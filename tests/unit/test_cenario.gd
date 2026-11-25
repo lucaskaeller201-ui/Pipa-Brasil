@@ -29,6 +29,30 @@ func test_texturas_fotograficas() -> void:
 	raiz.free()
 
 
+## D-068: modelos 3D CC0 carregam e entram no cenário.
+func test_modelos_3d() -> void:
+	var M = load("res://game/world/modelos.gd")
+	for n in ["plastic_monobloc_chair_01", "plastic_crate_02", "Barrel_02", "shrub_03", "fern_02", "potted_plant_04",
+			"planter_pot_clay", "rollershutter_door", "utility_box_01", "trashbag", "street_lamp_02"]:
+		assert_true(M.existe(n), "modelo %s existe" % n)
+	assert_not_null(M.malha("shrub_03", "shrub_03_a"), "variante do arbusto")
+	assert_not_null(M.malha("fern_02", "fern_02_b"), "variante da samambaia")
+	var raiz := Node3D.new()
+	Bairro.criar(raiz, 8, 7)
+	var bairro: Node3D = raiz.get_node("Bairro")
+	var cadeiras := 0
+	var casinhas := 0
+	for filho in bairro.get_children():
+		if String(filho.name).begins_with("plastic_monobloc_chair_01"):
+			cadeiras += 1
+		if filho is MultiMeshInstance3D:
+			casinhas += (filho as MultiMeshInstance3D).multimesh.visible_instance_count
+	print("      [cenário] %d cadeiras de laje, %d casinhas nos morros" % [cadeiras, casinhas])
+	assert_true(cadeiras >= 8, "cadeiras nas lajes")
+	assert_true(casinhas > 500, "morros cheios de casinhas 3D")
+	raiz.free()
+
+
 func test_bairro_monta_com_casas_arvores_e_morro() -> void:
 	var raiz := Node3D.new()
 	Ambiente.criar_por_do_sol(raiz, false)
