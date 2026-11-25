@@ -43,7 +43,7 @@ func test_modelos_3d() -> void:
 	var cadeiras := 0
 	var casinhas := 0
 	for filho in bairro.get_children():
-		if String(filho.name).begins_with("plastic_monobloc_chair_01"):
+		if filho.scene_file_path.contains("plastic_monobloc_chair_01"):
 			cadeiras += 1
 		if filho is MultiMeshInstance3D:
 			casinhas += (filho as MultiMeshInstance3D).multimesh.visible_instance_count
