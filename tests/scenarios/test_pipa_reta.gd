@@ -47,13 +47,18 @@ func test_toques_giram_o_bico_e_a_puxada_vai_para_onde_ele_aponta() -> void:
 	var f := _f(w)
 	var toques := 0
 	var giros: Array[float] = []
-	# Toques de desbicar, um a cada 0,5 s, até o bico apontar uns 60° ou mais para o lado.
+	# Toques duplos (D-050/D-058: cada um leva a direção 30°), um a cada 0,5 s,
+	# até o bico apontar uns 60° ou mais para o lado.
+	f.input.kick_spin = 1.0
+	f.input.kick_base_shift = 30.0
 	while absf(f.nose_angle_deg()) < 60.0 and toques < 12:
 		var antes := f.nose_angle_deg()
-		f.pilot.trigger(Pilot.Impulse.DESBICAR, w.time)
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
 		_rodar(w, 0.5)
 		toques += 1
 		giros.append(_dif(f.nose_angle_deg(), antes))
+	f.input.kick_spin = 0.0
+	f.input.kick_base_shift = 0.0
 	var bico := f.nose_angle_deg()
 	print("      [desbicar] %d toques; giro por toque: %s; bico em %.0f°" % [toques, giros, bico])
 	assert_true(absf(bico) >= 60.0, "com toques o bico chega ao lado (%.0f°)" % bico)

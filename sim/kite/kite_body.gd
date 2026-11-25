@@ -53,6 +53,9 @@ var _tenteio_base := 0.0    ## direção do bico quando o tenteio começou (rad)
 var _give_dir := -1.0       ## sentido do giro mandando linha (escolhido no começo)
 var _giving_prev := false
 var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque duplo)
+## Linha frouxa de propósito (folga / carretilha solta, usado pelos bots): o
+## vento faz a pipa girar, como mandando linha (D-058).
+var slack_spin := false
 var _kick_prev := false
 const KICK_HOLD := 3.0 ## s: depois do último toque o bico fica onde parou (D-052)
 var _spin_controlado := false
@@ -224,7 +227,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 	# D-058: o empurrão de giro só vale MANDANDO LINHA. Parada ou tenteando
 	# com o bico para cima, a pipa não tende a rodar para lado nenhum: só roda
 	# se o jogador levar o bico (toques duplos) ou mandar linha.
-	if d.spin_bias != 0.0 and spin_mode == SpinMode.SPIN_GIVE:
+	if d.spin_bias != 0.0 and (spin_mode == SpinMode.SPIN_GIVE or slack_spin):
 		var vw := last_wind.length()
 		# o empurrão do vento segue o sentido do giro escolhido (D-055), não um
 		# lado fixo

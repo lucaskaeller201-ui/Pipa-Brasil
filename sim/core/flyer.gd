@@ -94,6 +94,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		k.spin_mode = KiteBody.SpinMode.SPIN_FREE
 	k.towed = cut and caught_by != null
 	k.towed_tail = k.towed and caught_by_tail
+	k.slack_spin = not cut and (input.slack > 0.1 or input.free_spool)
 	k.drifting = cut and caught_by == null and not lost
 	k.give_speed = maxf(0.0, -input.haul_speed)
 	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
