@@ -395,3 +395,40 @@ func _giro_mandando(lado: float) -> float:
 		antes = agora
 	f.input.clear()
 	return giro
+
+
+## D-058: parada, sem comando, a pipa não roda para lado nenhum.
+func test_parada_nao_tende_a_rodar() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var giro := 0.0
+	var antes := f.nose_angle_deg()
+	for i in roundi(8.0 / DT):
+		w.step(DT)
+		var agora := f.nose_angle_deg()
+		giro += wrapf(agora - antes, -180.0, 180.0)
+		antes = agora
+	print("      [parada] 8 s sem comando: o bico girou %.0f° no total, está em %.0f°" % [giro, f.nose_angle_deg()])
+	assert_true(absf(giro) < 90.0, "não rodou sozinha (%.0f°)" % giro)
+	assert_true(absf(f.nose_angle_deg()) < 35.0, "bico para cima")
+
+
+## D-058: tenteando com o bico para cima (toques simples), a pipa não roda.
+func test_tentear_com_bico_para_cima_nao_roda() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var giro := 0.0
+	var antes := f.nose_angle_deg()
+	var lado := 1.0
+	for k in 16:
+		f.input.kick_spin = lado
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		lado = -lado
+		for i in roundi(0.4 / DT):
+			w.step(DT)
+			var agora := f.nose_angle_deg()
+			giro += wrapf(agora - antes, -180.0, 180.0)
+			antes = agora
+	f.input.kick_spin = 0.0
+	print("      [tenteio para cima] 16 toques: o bico terminou a %.0f° (giro somado %.0f°)" % [f.nose_angle_deg(), giro])
+	assert_true(absf(giro) < 60.0, "não rodou (%.0f°)" % giro)

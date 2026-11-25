@@ -33,6 +33,12 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-058 — Parada ou tenteando para cima, a pipa não tende a rodar (2026-11-25)
+O Lucas: tenteando com o bico para cima a pipa parecia sempre querer rodar
+(mais para a esquerda); ela só deve rodar quando ele leva o bico (toques
+duplos) ou manda linha. O empurrão de giro do vento (spin_bias) agora só vale
+mandando linha; parada ou tenteando, o vento traz o bico para cima.
+
 ### D-057 — Cenário e boneco por código (2026-11-25)
 O Lucas pediu foco no visual (gráfico, boneco, cenário, chão, casas, árvores,
 céu, shaders). Tudo feito por código, sem modelos externos (custo zero):

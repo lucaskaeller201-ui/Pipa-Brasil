@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.18.2 — 2026-11-25
+
+- Tenteando com o bico para cima a pipa não tende mais a rodar (nem para a
+  esquerda): só roda quando você leva o bico ou manda linha.
+
 ## 0.18.1 — 2026-11-25
 
 - Morros mais longe e mais baixos, como uma serra no horizonte.
