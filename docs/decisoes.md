@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-051 — Toque duplo no iPhone (2026-11-24)
+No celular do Lucas o toque duplo não virava o bico. Provável causa: o Safari
+do iPhone usa o toque duplo para dar zoom e engole o segundo toque, ou os
+toques dele vêm com mais de 0,2 s. Agora a página do jogo bloqueia o zoom e
+os gestos do Safari (viewport sem zoom, touch-action: none, dblclick e
+gesturestart bloqueados), o intervalo do duplo subiu para 0,3 s e aparece um
+aviso "↻ 30°" quando o toque duplo é reconhecido.
+
 ### D-050 — Toque duplo vira a direção de 30 em 30 (2026-11-24)
 O Lucas aprovou o tenteio da D-049 ("é exatamente assim que se tenteia") e
 explicou o que faltava: com os cliques dá para pôr o bico em qualquer direção

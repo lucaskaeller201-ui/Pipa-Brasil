@@ -68,7 +68,7 @@ var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## faz rodar). Toque DUPLO (dois toques bem juntos): a direção anda 30° para
 ## o lado do toque — de 30 em 30 o bico vai para o lado, para baixo, ou dá a
 ## volta (12 duplos = 360°).
-const TOQUE_DUPLO_S := 0.2      ## s entre os dois toques do toque duplo
+const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
 @export var graus_por_toque := 30.0
 
 # interface
@@ -322,6 +322,7 @@ func _tentear() -> void:
 		# 2º toque do duplo: mesmo lado, e a direção anda 30° (D-050)
 		_ultimo_duplo = true
 		_desbicar(_sentido, _sentido, 1.0, graus_por_toque)
+		_avisar("↻ %d°" % roundi(graus_por_toque) if _sentido > 0.0 else "↺ %d°" % roundi(graus_por_toque))
 	else:
 		# toque simples: o bico vai ~30° para o outro lado (na hora)
 		_ultimo_duplo = false

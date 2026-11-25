@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.16.6 — 2026-11-24
+
+- Toque duplo funcionando no iPhone (o Safari não dá mais zoom no toque duplo);
+  aviso "↻ 30°" quando o duplo vira o bico.
+
 ## 0.16.5 — 2026-11-24
 
 - Toque duplo vira o bico 30° (de 30 em 30 dá para pôr o bico para o lado,
