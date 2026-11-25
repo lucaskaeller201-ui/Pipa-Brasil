@@ -329,6 +329,8 @@ func check_snags(flyers: Array) -> void:
 		(f as Flyer).caught_by_tail = false
 	var contadas := {}
 	for l in links.duplicate():
+		if not links.has(l):
+			continue   # já solto neste passo (outro embolo da mesma avoada)
 		var av: Flyer = l["avoada"]
 		var ct: Flyer = l["catcher"]
 		var cchain: ParticleChain = l["cchain"]
