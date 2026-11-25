@@ -76,6 +76,14 @@ def main():
 						with open(caminho, "w") as f:
 							json.dump(gltf, f, indent=1)
 						os.remove(os.path.join(pasta, f"textures/{nome}_diff_1k.jpg"))
+						alfa = os.path.join(pasta, f"textures/{nome}_alpha_1k.jpg")
+						if os.path.exists(alfa):
+							from PIL import Image  # pip install pillow (no workflow)
+							cor = Image.open(os.path.join(pasta, rel_png)).convert("RGB")
+							a = Image.open(alfa).convert("L").resize(cor.size)
+							cor.putalpha(a)
+							cor.save(os.path.join(pasta, rel_png), optimize=True)
+							os.remove(alfa)
 						print(f"  {nome}: folhas com transparência (PNG)")
 			info = j(f"{API}/info/{nome}")
 			autores = ", ".join(info.get("authors", {}).keys())
