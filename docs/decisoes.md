@@ -33,6 +33,13 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-053 — Aparada pela rabiola vem rodando (2026-11-24)
+O Lucas: aparada pela rabiola a avoada tem que vir rodando (puxada pela
+traseira, sem o cabresto segurando), diferente da aparada pela linha, que
+vem reta (D-037). O combate marca a avoada como enroscada pela rabiola
+(Flyer.caught_by_tail) e a pipa rebocada assim gira 300°/s em volta da
+vareta central (parafuso), com o resto do balanço limitado a 60°/s.
+
 ### D-052 — Duplos seguidos viram para o mesmo lado; bico segura 3 s (2026-11-24)
 No celular o bico só ia para a direita e para a esquerda: o 1º toque de cada
 duplo troca de lado (é tenteio), então o duplo seguinte virava para o lado

@@ -21,6 +21,9 @@ enum SpinMode { SPIN_FREE, SPIN_GIVE, SPIN_LOCK, SPIN_KICK }
 var spin_mode: SpinMode = SpinMode.SPIN_FREE
 ## Pipa avoada embolada na linha de alguém: rebocada com muito arrasto, sem girar.
 var towed := false
+## Rebocada pela RABIOLA (D-053): vem rodando em volta do próprio eixo.
+var towed_tail := false
+const TAIL_TOW_SPIN_DEG := 300.0
 ## Velocidade com que a linha está saindo (m/s) enquanto manda linha: o giro é
 ## proporcional a ela (D-032).
 var give_speed := 0.0
@@ -339,8 +342,11 @@ func integrate(h: float) -> void:
 		velocity *= exp(-3.5 * h)
 		angular_velocity *= exp(-6.0 * h)
 	if towed:
-		# Rebocada: balança como um pêndulo amortecido, sem girar.
-		angular_velocity *= exp(-20.0 * h)
+		# Rebocada: balança como um pêndulo amortecido. Pela linha vem sem girar;
+		# pela rabiola o giro em volta do eixo (vareta central) continua.
+		var eixo := rotation * Vector3.UP
+		var we := angular_velocity.dot(eixo)
+		angular_velocity = (angular_velocity - eixo * we) * exp(-20.0 * h) + eixo * (we if towed_tail else we * exp(-20.0 * h))
 		velocity *= exp(-1.5 * h)
 	_prev_rotation = rotation
 	_step_delta = velocity * h
@@ -378,13 +384,26 @@ func update_velocities(h: float) -> void:
 			rotation = (Quaternion(n2, (alvo2 - wn2) * h) * rotation).normalized()
 			angular_velocity += n2 * (alvo2 - wn2)
 		_spin_teto = -1.0
-	if towed:
-		# Aparada vindo para a mão: vem reta, sem girar no próprio plano (D-037).
+	if towed and towed_tail:
+		# Aparada pela rabiola (D-053): puxada pela traseira, sem o cabresto para
+		# segurar, ela vem rodando em volta da vareta central (parafuso) e
+		# balançando. O giro é imposto como o giro comandado.
+		var eixo2 := rotation * Vector3.UP
+		var we2 := angular_velocity.dot(eixo2)
+		var alvo3 := deg_to_rad(TAIL_TOW_SPIN_DEG)
+		rotation = (Quaternion(eixo2, (alvo3 - we2) * h) * rotation).normalized()
+		angular_velocity += eixo2 * (alvo3 - we2)
+		var resto := angular_velocity - eixo2 * alvo3
+		var lim_r := deg_to_rad(60.0)
+		if resto.length() > lim_r:
+			angular_velocity = eixo2 * alvo3 + resto.normalized() * lim_r
+	elif towed:
+		# Aparada pela linha: vem reta, sem girar no próprio plano (D-037).
 		var n3 := rotation * Vector3(0.0, 0.0, 1.0)
 		var wn3 := angular_velocity.dot(n3)
 		rotation = (Quaternion(n3, -wn3 * h) * rotation).normalized()
 		angular_velocity -= n3 * wn3
-	if towed or drifting:
+	if (towed and not towed_tail) or drifting:
 		# Avoada ou rebocada: balança, mas sem giro de furacão.
 		var lim := deg_to_rad(25.0 if towed else 90.0)
 		if angular_velocity.length() > lim:

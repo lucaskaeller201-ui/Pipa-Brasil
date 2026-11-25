@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.16.8 — 2026-11-24
+
+- Aparada pela rabiola: a avoada vem rodando. Pela linha continua vindo reta.
+
 ## 0.16.7 — 2026-11-24
 
 - Toques duplos seguidos viram o bico sempre para o mesmo lado: 30°, 60°, 90°,

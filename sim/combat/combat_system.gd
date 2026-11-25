@@ -285,6 +285,7 @@ func check_snags(flyers: Array) -> void:
 			av.caught_by = null
 			ct.holding = maxi(0, ct.holding - 1)
 			continue
+		av.caught_by_tail = l["chain"] == av.tail
 		if bool(l["captured"]):
 			continue
 		# Sair do aparo (D-044): tenteando sem parar uns 3 s, o embolo solta.

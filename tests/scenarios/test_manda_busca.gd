@@ -244,3 +244,31 @@ func test_tentear_sai_do_aparo() -> void:
 	print("      [sair do aparo] soltou depois de %.1f s tenteando" % soltou)
 	assert_true(soltou >= 2.5 and soltou <= 4.5, "sai do aparo tenteando uns 3 s (%.1f s)" % soltou)
 	assert_eq(_eventos_do_tipo(w.combat.take_events(), "soltou").size(), 1)
+
+
+## D-053: aparada pela rabiola vem rodando em volta do eixo; pela linha, reta.
+func test_aparada_pela_rabiola_vem_rodando() -> void:
+	var giro_rabiola := _giro_rebocada(true)
+	var giro_linha := _giro_rebocada(false)
+	print("      [aparada] giro em volta do eixo: pela rabiola %.0f°/s, pela linha %.0f°/s" % [giro_rabiola, giro_linha])
+	assert_true(giro_rabiola > 150.0, "pela rabiola vem rodando (%.0f°/s)" % giro_rabiola)
+	assert_true(giro_linha < 40.0, "pela linha vem sem rodar (%.0f°/s)" % giro_linha)
+
+
+func _giro_rebocada(pela_rabiola: bool) -> float:
+	var w := _montagem(true)
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	b.cut_line(12)
+	b.caught_by = a
+	b.caught_by_tail = pela_rabiola
+	var soma := 0.0
+	var n := 0
+	for i in roundi(2.0 / DT):
+		w.step(DT)
+		if i > 60:
+			var eixo := b.kite.rotation * Vector3.UP
+			soma += absf(rad_to_deg(b.kite.angular_velocity.dot(eixo)))
+			n += 1
+	assert_true(w.is_finite_state())
+	return soma / maxf(1.0, n)

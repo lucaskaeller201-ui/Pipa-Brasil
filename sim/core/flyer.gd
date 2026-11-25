@@ -21,6 +21,7 @@ var trailing_line: ParticleChain  ## pedaço de linha que ficou preso à pipa de
 
 ## Aparagem ("manda busca").
 var caught_by: Flyer      ## quem enroscou esta pipa avoada (null = livre)
+var caught_by_tail := false   ## enroscada pela rabiola (vem rodando, D-053)
 var captured := false     ## a avoada chegou na mão de quem aparou
 var lost := false         ## a avoada caiu no chão sem ninguém aparar
 var holding := 0          ## quantas avoadas estão enroscadas na linha deste pipeiro
@@ -92,6 +93,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	else:
 		k.spin_mode = KiteBody.SpinMode.SPIN_FREE
 	k.towed = cut and caught_by != null
+	k.towed_tail = k.towed and caught_by_tail
 	k.drifting = cut and caught_by == null and not lost
 	k.give_speed = maxf(0.0, -input.haul_speed)
 	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
