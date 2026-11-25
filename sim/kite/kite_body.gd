@@ -57,6 +57,7 @@ var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque dup
 ## vento faz a pipa girar, como mandando linha (D-058).
 var slack_spin := false
 var _kick_prev := false
+const TENTEIO_VOLTA_DEG := 20.0   ## cada toque simples traz a direção isso para cima (D-060)
 const KICK_HOLD := 3.0 ## s: depois do último toque o bico fica onde parou (D-052)
 var _spin_controlado := false
 var _spin_alvo := 0.0
@@ -307,6 +308,12 @@ func integrate(h: float) -> void:
 					# Toque duplo (D-050): a direção anda 30° junto, de 30 em 30
 					# dá para pôr o bico para o lado, para baixo, dar a volta.
 					_tenteio_base = wrapf(_tenteio_base - kick_sign * deg_to_rad(kick_base_shift), -PI, PI)
+					# D-060: toque simples (tenteio) traz a direção de volta para
+					# cima aos poucos — com o bico para um lado, tenteando ele
+					# volta para cima e passa para o outro lado.
+					if kick_base_shift == 0.0:
+						var volta := minf(absf(_tenteio_base), deg_to_rad(TENTEIO_VOLTA_DEG))
+						_tenteio_base -= signf(_tenteio_base) * volta
 					_hold_ang = wrapf(_tenteio_base - kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
 					_tenteio_ativo = true
 			SpinMode.SPIN_LOCK:

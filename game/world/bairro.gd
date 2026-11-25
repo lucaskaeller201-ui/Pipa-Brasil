@@ -34,7 +34,7 @@ static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
 	raiz.name = "Bairro"
 	pai.add_child(raiz)
 	for i in mini(lajes, LAJES.size()):
-		_laje(raiz, LAJES[i], CORES_LAJE[i], rng)
+		_laje(raiz, LAJES[i], CORES_LAJE[i], rng, i == 0)
 	# Casas em quadras, fora das ruas e do espaço das lajes.
 	var feitas := 0
 	var tentativas := 0
@@ -128,16 +128,18 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 		_varal(pai, topo + Vector3(0.0, 0.0, tamanho.z * 0.2), tamanho.x * 0.7, rng)
 
 
-static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumberGenerator) -> void:
+static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumberGenerator, sua := false) -> void:
 	var h := ALTURA_LAJE
 	var corpo := _caixa(pai, base + Vector3(0.0, h * 0.5 - 0.1, 0.0), Vector3(8.0, h - 0.2, 8.0), cor_parede, 0.9)
 	corpo.material_override = _material_parede(cor_parede, false)
 	# Piso de cerâmica avermelhada, pouco rugosa (brilho do sol baixo).
 	var piso := _caixa(pai, base + Vector3(0.0, h - 0.05, 0.0), Vector3(8.2, 0.1, 8.2), Color(0.62, 0.27, 0.18), 0.14)
 	(piso.material_override as StandardMaterial3D).metallic_specular = 0.7
-	# Mureta.
+	# Mureta. Na SUA laje a da frente (para onde a pipa vai) é baixinha, para
+	# não tapar a pipa quando você afunda (D-060).
 	for lado in [Vector3(0, 0, 4.0), Vector3(0, 0, -4.0)]:
-		_caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(8.2, 0.9, 0.15), cor_parede.darkened(0.1), 0.9)
+		var alta := 0.25 if (sua and lado.z < 0.0) else 0.9
+		_caixa(pai, base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.2, alta, 0.15), cor_parede.darkened(0.1), 0.9)
 	for lado in [Vector3(4.0, 0, 0), Vector3(-4.0, 0, 0)]:
 		_caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.15, 0.9, 8.2), cor_parede.darkened(0.1), 0.9)
 	_caixa_dagua(pai, base + Vector3(-2.8, h, 2.8))

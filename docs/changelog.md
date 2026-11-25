@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.18.4 — 2026-11-25
+
+- Com o bico para um lado, tenteando ele volta para cima e passa para o outro
+  lado.
+- A mureta da frente da sua laje ficou baixinha (não tapa a pipa).
+
 ## 0.18.3 — 2026-11-25
 
 - Tentear rápido não faz mais a pipa rodar com o bico para cima; o toque

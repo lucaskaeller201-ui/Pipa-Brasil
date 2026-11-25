@@ -432,3 +432,36 @@ func test_tentear_com_bico_para_cima_nao_roda() -> void:
 	f.input.kick_spin = 0.0
 	print("      [tenteio para cima] 16 toques: o bico terminou a %.0f° (giro somado %.0f°)" % [f.nose_angle_deg(), giro])
 	assert_true(absf(giro) < 60.0, "não rodou (%.0f°)" % giro)
+
+
+## D-060: com o bico para a direita (toques duplos), tenteando com toques
+## simples ele volta para cima e dá para passar para a esquerda.
+func test_bico_de_lado_volta_para_cima_tenteando() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	# leva o bico uns 90° para um lado com toques duplos
+	for k in 3:
+		f.input.kick_spin = 1.0
+		f.input.kick_base_shift = 30.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		_rodar(w, 0.4)
+	var de_lado := f.nose_angle_deg()
+	# agora só toques simples, um para cada lado
+	f.input.kick_base_shift = 0.0
+	var lado := -1.0
+	var menor := absf(de_lado)
+	var passou := false
+	for k in 12:
+		f.input.kick_spin = lado
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		lado = -lado
+		_rodar(w, 0.35)
+		var b := f.nose_angle_deg()
+		menor = minf(menor, absf(b))
+		if signf(b) != signf(de_lado) and absf(b) > 10.0:
+			passou = true
+	f.input.kick_spin = 0.0
+	print("      [volta para cima] de %.0f°: tenteando chegou a %.0f° do alto; passou para o outro lado: %s" % [de_lado, menor, passou])
+	assert_true(absf(de_lado) > 60.0, "o bico foi para o lado (%.0f°)" % de_lado)
+	assert_true(menor < 15.0, "tenteando ele volta para cima")
+	assert_true(passou, "e passa para o outro lado")

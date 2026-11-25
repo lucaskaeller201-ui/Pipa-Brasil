@@ -33,6 +33,13 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-060 — Tenteio traz o bico de volta para cima; mureta baixa na sua laje (2026-11-25)
+O Lucas: com o bico para a direita não conseguia desbicar de volta para cima
+ou para a esquerda; e a mureta da frente da sua laje tapava a pipa quando ele
+afundava. Agora cada toque simples traz a direção do tenteio 20° de volta para
+cima (os duplos continuam levando 30° para o lado): tenteando, o bico volta e
+passa para o outro lado. Na sua laje a mureta da frente tem 25 cm.
+
 ### D-059 — Toque duplo mais rigoroso; câmera acompanha a pipa afundando (2026-11-25)
 O Lucas: tenteando rápido a pipa ainda rodava com o bico para cima (toques
 rápidos viravam "duplos"); e a câmera perdia a pipa quando ele afundava.
