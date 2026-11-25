@@ -33,6 +33,23 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-063 — Página inicial, mapa da praia, horas do dia (2026-11-25)
+O Lucas pediu gráficos melhores e leves, céu azul, sol, pôr do sol, pisos com
+verniz leve, mapas e uma página inicial criativa. Tudo por código:
+- Página inicial: título PIPA BRASIL com uma pipinha desenhada voando, e a
+  cidade ao vivo atrás (a câmera passeia em volta das lajes, as pipas dos
+  rivais voando). Botões: JOGAR, Mapa, Hora e Laboratório; o recorde aparece
+  embaixo. Mapa e hora ficam guardados (user://preferencias.json).
+- Horas: Manhã e Meio-dia de céu azul (sol mais alto, névoa azulada) e o Pôr do
+  sol de antes.
+- Mapa Praia: avenida da orla, calçadão com as ondas pretas e brancas, areia
+  (mais escura e molhada perto do mar), mar com ondinhas, brilho do sol e
+  espuma, coqueiros, quiosques, guarda-sóis, prédios mais altos e morros
+  verdes saindo do mar. As lajes de soltar pipa são as mesmas.
+- Pisos das lajes com verniz leve (brilham com o sol, sem ofuscar).
+- Boneco mais arredondado (cápsulas), com mãos, olhos, cabelo e faixa na
+  camisa.
+
 ### D-062 — Desistir do mergulho com poucos toques (2026-11-25)
 O Lucas: dando martelão ou afundando para aparar, se desistia no meio só
 conseguia voltar mandando linha; os toques mudavam pouco a trajetória. Agora,

@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.19.0 — 2026-11-25
+
+- Página inicial com a cidade ao vivo atrás, JOGAR, escolha de mapa e de hora.
+- Mapa novo: Praia (calçadão de ondas, areia, mar, coqueiros, quiosques,
+  guarda-sóis, morros verdes).
+- Horas do dia: Manhã, Meio-dia (céu azul) e Pôr do sol.
+- Pisos com verniz leve; boneco mais arredondado com mãos e rosto.
+
 ## 0.18.6 — 2026-11-25
 
 - Afundando ou com o bico de lado, poucos toques tiram a pipa: cada toque

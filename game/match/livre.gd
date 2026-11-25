@@ -93,6 +93,16 @@ var _banner_ate := 0.0
 var _tremor := 0.0              # força do tremor da câmera (decai)
 var _lenta_ate := 0.0           # até quando (tempo real) fica em câmera lenta
 var _painel_mao: PanelContainer     # escolher pipa e linha e colocar no alto (D-037)
+# Página inicial (D-063): mapa, hora do dia e JOGAR, com a cidade ao vivo atrás.
+var _lobby: Control
+var _no_lobby := false
+var _mapa := "bairro"
+var _hora := "por_do_sol"
+var _cenario: Node3D
+var _botao_mapa: Button
+var _botao_hora: Button
+var _titulo_pipa: Control
+const ARQUIVO_PREFERENCIAS := "user://preferencias.json"
 var _botoes_pipa: Array = []
 var _botoes_linha: Array = []
 var _botao_desenho: Button
@@ -113,8 +123,9 @@ func _ready() -> void:
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	_carregar_estatisticas()
 	_aplicar_giro()
-	Ambiente.criar_por_do_sol(self, false)
-	Bairro.criar(self, modo.players.size())
+	_carregar_preferencias()
+	_no_lobby = not _automatico
+	_montar_cenario()
 	for i in modo.players.size():
 		var corpo: Node3D = Boneco.new()
 		add_child(corpo)
@@ -134,6 +145,39 @@ func _ready() -> void:
 		modo.put_you_on_hand()
 	_criar_interface()
 	_posicionar_camera(true)
+
+
+## Céu, chão, casas e enfeites do mapa e da hora escolhidos (D-063).
+func _montar_cenario() -> void:
+	if _cenario != null:
+		remove_child(_cenario)
+		_cenario.queue_free()
+	_cenario = Node3D.new()
+	_cenario.name = "Cenario"
+	add_child(_cenario)
+	move_child(_cenario, 0)
+	Ambiente.criar(_cenario, _hora, _mapa)
+	Bairro.criar(_cenario, modo.players.size(), 7, _mapa)
+
+
+func _carregar_preferencias() -> void:
+	if not FileAccess.file_exists(ARQUIVO_PREFERENCIAS):
+		return
+	var f := FileAccess.open(ARQUIVO_PREFERENCIAS, FileAccess.READ)
+	if f == null:
+		return
+	var dados = JSON.parse_string(f.get_as_text())
+	if dados is Dictionary:
+		if Bairro.MAPAS.has(String((dados as Dictionary).get("mapa", ""))):
+			_mapa = String(dados["mapa"])
+		if Ambiente.HORAS.has(String((dados as Dictionary).get("hora", ""))):
+			_hora = String(dados["hora"])
+
+
+func _salvar_preferencias() -> void:
+	var f := FileAccess.open(ARQUIVO_PREFERENCIAS, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify({"mapa": _mapa, "hora": _hora}))
 
 
 ## Avança o jogo (também usado pelos testes).
@@ -179,6 +223,8 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 func _process(delta: float) -> void:
 	_ver_toque_pendente()
 	_animar_bonecos(delta)
+	if _no_lobby and _titulo_pipa != null:
+		_titulo_pipa.queue_redraw()
 	# Velocidade da mão a partir do deslizar deste quadro.
 	var altura := maxf(1.0, get_viewport().get_visible_rect().size.y)
 	var alvo := (_dy_quadro / altura) * LINHA_POR_TELA / maxf(delta, 1e-3)
@@ -210,7 +256,7 @@ func _process(delta: float) -> void:
 	_banner.visible = agora_real < _banner_ate
 	if eu != null:
 		_giro_carretilha += eu.input.haul_speed * delta * 3.0
-	_painel_mao.visible = modo.you_on_hand
+	_painel_mao.visible = modo.you_on_hand and not _no_lobby
 	if modo.you_on_hand:
 		_atualizar_painel_mao()
 	_atualizar_textos(eu)
@@ -240,6 +286,14 @@ func _atualizar_vistas() -> void:
 # ---------------- câmera ----------------
 
 func _posicionar_camera(imediato: bool) -> void:
+	if _no_lobby:
+		# Página inicial: a câmera passeia devagar em volta das lajes.
+		var t := Time.get_ticks_msec() / 1000.0 * 0.06
+		var centro := Vector3(6.0, 8.0, -6.0)
+		var olho2 := centro + Vector3(sin(t) * 46.0, 16.0 + sin(t * 0.7) * 4.0, cos(t) * 46.0)
+		_camera.global_transform = Transform3D(Basis.looking_at(centro + Vector3(0.0, 10.0, -20.0) - olho2, Vector3.UP), olho2)
+		_camera.fov = 55.0
+		return
 	var eu := modo.you()
 	var base: Vector3 = modo.players[0]["base"]
 	var olho := base + Pilot.SHOULDER + Vector3(0.0, 0.2, 0.15)
@@ -589,6 +643,7 @@ func _criar_interface() -> void:
 	_ajuste(caixa, "Giro por toque no tenteio (°)", 15.0, 90.0, 3.0, graus_por_toque, "toque")
 
 	_criar_painel_mao(raiz)
+	_criar_lobby(raiz)
 
 	var versao := Label.new()
 	versao.text = "PIPA BRASIL %s · build %s" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT]
@@ -939,3 +994,135 @@ func _colocar_no_alto() -> void:
 	_dedos.clear()
 	_embalo = 0.0
 	_painel_mao.visible = false
+
+
+# ---------------- página inicial (D-063) ----------------
+
+func _criar_lobby(raiz: Control) -> void:
+	_lobby = Control.new()
+	_lobby.name = "PaginaInicial"
+	_lobby.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_lobby.mouse_filter = Control.MOUSE_FILTER_STOP
+	_lobby.add_to_group("botao_livre")
+	raiz.add_child(_lobby)
+	# faixa escura atrás do título e dos botões, deixando a cidade aparecer
+	var fundo := ColorRect.new()
+	fundo.color = Color(0.02, 0.03, 0.08, 0.45)
+	fundo.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	fundo.offset_right = 520.0
+	fundo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lobby.add_child(fundo)
+	# pipinha voando ao lado do título (desenhada)
+	_titulo_pipa = Control.new()
+	_titulo_pipa.position = Vector2(395.0, 40.0)
+	_titulo_pipa.custom_minimum_size = Vector2(110.0, 170.0)
+	_titulo_pipa.size = Vector2(110.0, 170.0)
+	_titulo_pipa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_titulo_pipa.draw.connect(_desenhar_pipinha)
+	_lobby.add_child(_titulo_pipa)
+	var titulo := Label.new()
+	titulo.text = "PIPA\nBRASIL"
+	titulo.add_theme_font_size_override("font_size", 78)
+	titulo.add_theme_color_override("font_color", Color(1.0, 0.86, 0.2))
+	titulo.add_theme_color_override("font_outline_color", Color(0.55, 0.12, 0.05))
+	titulo.add_theme_constant_override("outline_size", 14)
+	titulo.add_theme_constant_override("line_spacing", -18)
+	titulo.position = Vector2(48.0, 34.0)
+	titulo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lobby.add_child(titulo)
+	var sub := Label.new()
+	sub.text = "solta · tenteia · apara · fatia"
+	sub.add_theme_font_size_override("font_size", 22)
+	sub.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.9))
+	sub.position = Vector2(52.0, 232.0)
+	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lobby.add_child(sub)
+	var caixa := VBoxContainer.new()
+	caixa.position = Vector2(48.0, 290.0)
+	caixa.custom_minimum_size = Vector2(400.0, 0.0)
+	caixa.add_theme_constant_override("separation", 12)
+	_lobby.add_child(caixa)
+	var jogar := _botao(caixa, "JOGAR")
+	jogar.name = "Jogar"
+	jogar.add_theme_font_size_override("font_size", 40)
+	jogar.custom_minimum_size = Vector2(400.0, 84.0)
+	var verde := StyleBoxFlat.new()
+	verde.bg_color = Color(0.1, 0.62, 0.28)
+	verde.set_corner_radius_all(22)
+	verde.border_color = Color(1.0, 0.86, 0.2)
+	verde.set_border_width_all(4)
+	jogar.add_theme_stylebox_override("normal", verde)
+	jogar.add_theme_stylebox_override("hover", verde)
+	jogar.add_theme_stylebox_override("pressed", verde)
+	jogar.pressed.connect(_jogar)
+	_botao_mapa = _botao(caixa, "")
+	_botao_mapa.add_theme_font_size_override("font_size", 24)
+	_botao_mapa.custom_minimum_size = Vector2(400.0, 56.0)
+	_botao_mapa.pressed.connect(_trocar_mapa)
+	_botao_hora = _botao(caixa, "")
+	_botao_hora.add_theme_font_size_override("font_size", 24)
+	_botao_hora.custom_minimum_size = Vector2(400.0, 56.0)
+	_botao_hora.pressed.connect(_trocar_hora)
+	var lab := _botao(caixa, "Laboratório de voo")
+	lab.add_theme_font_size_override("font_size", 18)
+	lab.pressed.connect(_ir_laboratorio)
+	var total := Label.new()
+	total.add_theme_font_size_override("font_size", 16)
+	total.add_theme_color_override("font_color", Color(1.0, 0.95, 0.75))
+	total.text = "Seu recorde: %d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]]
+	caixa.add_child(total)
+	_atualizar_lobby()
+	_lobby.visible = _no_lobby
+
+
+func _atualizar_lobby() -> void:
+	_botao_mapa.text = "Mapa: %s  ›" % String(Bairro.NOMES_MAPAS[_mapa])
+	_botao_hora.text = "Hora: %s  ›" % String(Ambiente.HORAS[_hora]["nome"])
+
+
+func _trocar_mapa() -> void:
+	var i := Bairro.MAPAS.find(_mapa)
+	_mapa = String(Bairro.MAPAS[(i + 1) % Bairro.MAPAS.size()])
+	_montar_cenario()
+	_salvar_preferencias()
+	_atualizar_lobby()
+
+
+func _trocar_hora() -> void:
+	var i := Ambiente.ORDEM_HORAS.find(_hora)
+	_hora = String(Ambiente.ORDEM_HORAS[(i + 1) % Ambiente.ORDEM_HORAS.size()])
+	_montar_cenario()
+	_salvar_preferencias()
+	_atualizar_lobby()
+
+
+func _jogar() -> void:
+	_no_lobby = false
+	_lobby.visible = false
+	_posicionar_camera(true)
+
+
+func _ir_laboratorio() -> void:
+	get_tree().change_scene_to_file("res://scenes/lab/lab.tscn")
+
+
+## A pipinha do título, balançando no vento.
+func _desenhar_pipinha() -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	var c := Vector2(55.0, 60.0)
+	var ang := sin(t * 1.6) * 0.25
+	var b := Transform2D(ang, c + Vector2(sin(t * 0.9) * 6.0, cos(t * 1.3) * 4.0))
+	var topo := b * Vector2(0.0, -42.0)
+	var esq := b * Vector2(-34.0, -6.0)
+	var dir := b * Vector2(34.0, -6.0)
+	var baixo := b * Vector2(0.0, 48.0)
+	_titulo_pipa.draw_colored_polygon(PackedVector2Array([topo, dir, b * Vector2(0.0, -6.0)]), Color(0.95, 0.2, 0.15))
+	_titulo_pipa.draw_colored_polygon(PackedVector2Array([topo, b * Vector2(0.0, -6.0), esq]), Color(1.0, 0.85, 0.15))
+	_titulo_pipa.draw_colored_polygon(PackedVector2Array([esq, dir, baixo]), Color(0.1, 0.45, 0.9))
+	# rabiola de fitinhas
+	var p := baixo
+	for k in 9:
+		var q := p + Vector2(sin(t * 4.0 + k * 0.8) * 5.0, 9.0)
+		_titulo_pipa.draw_line(p, q, Color(1, 1, 1, 0.8), 1.5)
+		_titulo_pipa.draw_line(q + Vector2(-5.0, 0.0), q + Vector2(5.0, 0.0), [Color(0.95, 0.2, 0.15), Color(1.0, 0.85, 0.15)][k % 2], 3.0)
+		p = q

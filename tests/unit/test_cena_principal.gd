@@ -78,6 +78,7 @@ func test_deslizar_para_baixo_puxa() -> void:
 	assert_true(modo.you_on_hand, "o jogo começa com a pipa na mão (D-037)")
 	assert_null(modo.you(), "nenhuma pipa sua no alto antes de escolher")
 	raiz.call("_process", 1.0 / 60.0)   # a tela sem pipa no alto não quebra
+	raiz.call("_jogar")   # sai da página inicial (D-063)
 	raiz.call("_colocar_no_alto")
 	raiz.call("avancar", 3.0)
 	var eu := modo.you()
@@ -115,6 +116,7 @@ func test_toque_duplo_so_depois_de_pausa_e_com_bico_de_lado() -> void:
 	var cena: PackedScene = load("res://scenes/main/main.tscn")
 	var raiz := cena.instantiate()
 	tree.root.add_child(raiz)
+	raiz.call("_jogar")   # sai da página inicial (D-063)
 	raiz.call("_colocar_no_alto")
 	raiz.call("avancar", 3.0)
 	var t := 100.0
@@ -130,4 +132,31 @@ func test_toque_duplo_so_depois_de_pausa_e_com_bico_de_lado() -> void:
 	var modo: FreeMode = raiz.get("modo")
 	var bico := absf(modo.you().nose_angle_deg())
 	assert_eq(bool(raiz.call("_eh_toque_duplo", t)), bico >= 20.0, "duplo só com o bico de lado (bico %.0f°)" % bico)
+	raiz.queue_free()
+
+
+
+## D-063: o jogo abre na página inicial; trocar mapa e hora remonta o cenário.
+func test_pagina_inicial_mapa_e_hora() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	assert_true(bool(raiz.get("_no_lobby")), "abre na página inicial")
+	var lobby: Control = raiz.get("_lobby")
+	assert_true(lobby.visible)
+	var mapa_antes := String(raiz.get("_mapa"))
+	raiz.call("_trocar_mapa")
+	assert_true(String(raiz.get("_mapa")) != mapa_antes, "trocou o mapa")
+	raiz.call("_trocar_mapa")
+	assert_eq(String(raiz.get("_mapa")), mapa_antes, "volta ao primeiro mapa")
+	for k in 3:
+		raiz.call("_trocar_hora")
+	raiz.set("_mapa", "praia")
+	raiz.call("_montar_cenario")
+	var cenario: Node3D = raiz.get("_cenario")
+	assert_not_null(cenario.get_node_or_null("Mar"), "a praia tem mar")
+	raiz.call("_process", 1.0 / 60.0)
+	raiz.call("_jogar")
+	assert_false(lobby.visible, "JOGAR fecha a página inicial")
+	raiz.call("_process", 1.0 / 60.0)
 	raiz.queue_free()

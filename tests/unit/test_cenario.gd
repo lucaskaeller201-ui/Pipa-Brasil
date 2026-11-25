@@ -7,7 +7,7 @@ const Boneco := preload("res://game/world/boneco.gd")
 
 
 func test_shaders_carregam() -> void:
-	for nome in ["ceu", "chao", "parede", "morro"]:
+	for nome in ["ceu", "chao", "parede", "morro", "agua"]:
 		var s: Shader = load("res://game/world/shaders/%s.gdshader" % nome)
 		assert_not_null(s, "%s carrega" % nome)
 		assert_true(s.code.length() > 100, "%s tem código" % nome)
@@ -40,4 +40,26 @@ func test_boneco_monta_e_aponta_o_braco_para_a_mao() -> void:
 	b.call("construir", Color(0.5, 0.35, 0.25), Color.RED, Color.BLUE, true)
 	b.call("atualizar", Vector3(0.4, 1.4, -0.5), Vector3(0.0, 20.0, -30.0), 1.0, 0.1)
 	assert_true(b.get_child_count() > 0)
+	raiz.free()
+
+
+
+func test_praia_monta_com_mar_e_orla() -> void:
+	var raiz := Node3D.new()
+	Ambiente.criar(raiz, "meio_dia", "praia")
+	Bairro.criar(raiz, 8, 7, "praia")
+	assert_not_null(raiz.get_node_or_null("Mar"), "tem mar")
+	var bairro: Node3D = raiz.get_node("Bairro")
+	var na_areia := 0
+	for filho in bairro.get_children():
+		var m := filho as MeshInstance3D
+		if m != null and m.mesh is BoxMesh and (m.mesh as BoxMesh).size.y > 2.5 and (m.mesh as BoxMesh).size.x > 4.0:
+			if m.position.z < -21.0:
+				na_areia += 1
+	assert_eq(na_areia, 0, "nenhuma casa na areia")
+	for h in Ambiente.ORDEM_HORAS:
+		var r2 := Node3D.new()
+		Ambiente.criar(r2, h, "bairro")
+		assert_not_null(r2.get_node_or_null("Sol"))
+		r2.free()
 	raiz.free()

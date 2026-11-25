@@ -7,6 +7,10 @@ uniform vec4 rua_x2 = vec4(-1000.0, 1000.0, -62.0, -54.0);
 uniform vec4 rua_z1 = vec4(-60.0, -52.0, -1000.0, 1000.0);
 uniform vec4 rua_z2 = vec4(62.0, 70.0, -1000.0, 1000.0);
 
+uniform float praia = 0.0;       // 1 = mapa da praia (D-063)
+uniform float calcadao_z = -30.0; // começa o calçadão (para o mar é -Z)
+uniform float areia_z = -37.0;    // começa a areia
+
 varying vec3 mundo;
 
 float hash(vec2 p) {
@@ -40,6 +44,22 @@ void vertex() {
 void fragment() {
 	vec2 p = mundo.xz;
 	float n = ruido(p * 0.35) * 0.6 + ruido(p * 2.1) * 0.4;
+	if (praia > 0.5 && p.y < calcadao_z) {
+		if (p.y > areia_z) {
+			// calçadão de pedra portuguesa: as ondas pretas e brancas
+			float onda = sin(p.x * 0.55) * 1.1;
+			float faixa = fract((p.y + onda) / 1.6);
+			ALBEDO = faixa < 0.5 ? vec3(0.08, 0.08, 0.09) : vec3(0.92, 0.9, 0.85);
+			ROUGHNESS = 0.55;
+		} else {
+			// areia clara, mais escura e molhada perto do mar
+			float molhada = smoothstep(-80.0, -95.0, p.y);
+			vec3 seca = mix(vec3(0.93, 0.85, 0.66), vec3(0.97, 0.9, 0.74), n);
+			ALBEDO = mix(seca, vec3(0.7, 0.6, 0.45), molhada);
+			ROUGHNESS = mix(0.95, 0.35, molhada);
+		}
+		return;
+	}
 	vec3 terra = mix(vec3(0.42, 0.32, 0.24), vec3(0.55, 0.47, 0.38), n);
 	vec3 cor = terra;
 	float rug = 0.95;

@@ -23,11 +23,20 @@ const CORES_PAREDE := [
 const RUAS := [Vector4(-1000.0, 1000.0, 26.0, 34.0), Vector4(-1000.0, 1000.0, -62.0, -54.0),
 	Vector4(-60.0, -52.0, -1000.0, 1000.0), Vector4(62.0, 70.0, -1000.0, 1000.0)]
 
+## Na praia a rua de baixo vira a avenida da orla (D-063).
+const RUAS_PRAIA := [Vector4(-1000.0, 1000.0, 26.0, 34.0), Vector4(-1000.0, 1000.0, -29.0, -21.0),
+	Vector4(-60.0, -52.0, -21.0, 1000.0), Vector4(62.0, 70.0, -21.0, 1000.0)]
+const MAPAS := ["bairro", "praia"]
+const NOMES_MAPAS := {"bairro": "Bairro", "praia": "Praia"}
+
 static var _mats := {}
+static var _ruas: Array = RUAS
 
 
-static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
+static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
 	_mats.clear()
+	var praia := mapa == "praia"
+	_ruas = RUAS_PRAIA if praia else RUAS
 	var rng := RandomNumberGenerator.new()
 	rng.seed = semente
 	var raiz := Node3D.new()
@@ -41,25 +50,27 @@ static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
 	while feitas < 85 and tentativas < 600:
 		tentativas += 1
 		var x := rng.randf_range(-100.0, 110.0)
-		var z := rng.randf_range(-120.0, 70.0)
+		var z := rng.randf_range(-16.0, 75.0) if praia else rng.randf_range(-120.0, 70.0)
 		var largura := rng.randf_range(5.0, 9.0)
 		var fundo := rng.randf_range(6.0, 11.0)
 		if _perto_de_laje(x, z, lajes) or _na_rua(x, z, largura, fundo):
 			continue
-		var andares := rng.randi_range(1, 3)
+		var andares := rng.randi_range(3, 8) if praia and z > 36.0 else rng.randi_range(1, 3)
 		var altura := andares * 3.0 - rng.randf_range(0.0, 0.3)
 		var cor: Color = CORES_PAREDE[rng.randi() % CORES_PAREDE.size()]
 		_casa(raiz, Vector3(x, 0.0, z), Vector3(largura, altura, fundo), cor, rng.randf() < 0.3, rng)
 		feitas += 1
 	# Árvores e coqueiros nas calçadas.
 	for k in 26:
-		var r: Vector4 = RUAS[k % RUAS.size()]
+		var r: Vector4 = _ruas[k % _ruas.size()]
 		var ao_longo_x := r.x < -500.0
 		var t := rng.randf_range(-90.0, 100.0)
 		var lado := r.z - 2.4 if rng.randf() < 0.5 else r.w + 2.4
 		if not ao_longo_x:
 			lado = r.x - 2.4 if rng.randf() < 0.5 else r.y + 2.4
 		var pos := Vector3(t, 0.0, lado) if ao_longo_x else Vector3(lado, 0.0, t)
+		if praia and pos.z < -19.0:
+			continue   # na praia, da avenida para o mar só o que é da orla
 		if rng.randf() < 0.35:
 			_coqueiro(raiz, pos, rng)
 		else:
@@ -71,7 +82,11 @@ static func criar(pai: Node3D, lajes := 2, semente := 7) -> void:
 		if topo_anterior != Vector3.INF:
 			_fio(raiz, topo_anterior, topo)
 		topo_anterior = topo
-	_morro(raiz)
+	if praia:
+		_orla(raiz, rng)
+		_morros_verdes(raiz)
+	else:
+		_morro(raiz)
 
 
 static func _perto_de_laje(x: float, z: float, lajes: int) -> bool:
@@ -83,7 +98,7 @@ static func _perto_de_laje(x: float, z: float, lajes: int) -> bool:
 
 
 static func _na_rua(x: float, z: float, largura: float, fundo: float) -> bool:
-	for r in RUAS:
+	for r in _ruas:
 		var rr: Vector4 = r
 		if x + largura * 0.5 > rr.x - 2.0 and x - largura * 0.5 < rr.y + 2.0 and z + fundo * 0.5 > rr.z - 2.0 and z - fundo * 0.5 < rr.w + 2.0:
 			return true
@@ -133,8 +148,9 @@ static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumb
 	var corpo := _caixa(pai, base + Vector3(0.0, h * 0.5 - 0.1, 0.0), Vector3(8.0, h - 0.2, 8.0), cor_parede, 0.9)
 	corpo.material_override = _material_parede(cor_parede, false)
 	# Piso de cerâmica avermelhada, pouco rugosa (brilho do sol baixo).
-	var piso := _caixa(pai, base + Vector3(0.0, h - 0.05, 0.0), Vector3(8.2, 0.1, 8.2), Color(0.62, 0.27, 0.18), 0.14)
-	(piso.material_override as StandardMaterial3D).metallic_specular = 0.7
+	# Piso de cerâmica com verniz leve: brilha com o sol, sem ofuscar (D-063).
+	var piso := _caixa(pai, base + Vector3(0.0, h - 0.05, 0.0), Vector3(8.2, 0.1, 8.2), Color(0.62, 0.27, 0.18), 0.32)
+	(piso.material_override as StandardMaterial3D).metallic_specular = 0.6
 	# Mureta. Na SUA laje a da frente (para onde a pipa vai) é baixinha, para
 	# não tapar a pipa quando você afunda (D-060).
 	for lado in [Vector3(0, 0, 4.0), Vector3(0, 0, -4.0)]:
@@ -280,6 +296,80 @@ static func _morro(pai: Node3D) -> void:
 	# [x, z, raio, altura]: longe e baixos, uma serra no horizonte
 	for d in [Vector4(-260.0, -520.0, 170.0, 55.0), Vector4(-40.0, -600.0, 230.0, 80.0), Vector4(200.0, -540.0, 190.0, 60.0),
 			Vector4(420.0, -480.0, 160.0, 45.0), Vector4(-460.0, -450.0, 150.0, 40.0)]:
+		var m := MeshInstance3D.new()
+		var malha := SphereMesh.new()
+		malha.radius = d.z
+		malha.height = d.w * 2.0
+		malha.radial_segments = 24
+		malha.rings = 12
+		m.mesh = malha
+		m.material_override = mat
+		m.position = Vector3(d.x, 0.0, d.y)
+		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		pai.add_child(m)
+
+
+## Orla da praia (D-063): coqueiros no calçadão, quiosques, guarda-sóis
+## coloridos na areia e postes da avenida.
+static func _orla(pai: Node3D, rng: RandomNumberGenerator) -> void:
+	for x in range(-150, 151, 14):
+		_coqueiro(pai, Vector3(float(x) + rng.randf_range(-2.0, 2.0), 0.0, -31.0), rng)
+	for x in range(-140, 141, 45):
+		_quiosque(pai, Vector3(float(x) + 7.0, 0.0, -34.0), rng)
+	var cores := [Color(0.95, 0.2, 0.2), Color(1.0, 0.85, 0.1), Color(0.15, 0.45, 0.95), Color(0.2, 0.75, 0.35), Color(1.0, 0.5, 0.1)]
+	for k in 40:
+		var p := Vector3(rng.randf_range(-150.0, 150.0), 0.0, rng.randf_range(-78.0, -42.0))
+		_guarda_sol(pai, p, cores[rng.randi() % cores.size()])
+	var anterior := Vector3.INF
+	for x in range(-120, 121, 24):
+		var topo := _poste(pai, Vector3(float(x), 0.0, -20.0))
+		if anterior != Vector3.INF:
+			_fio(pai, anterior, topo)
+		anterior = topo
+
+
+static func _quiosque(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> void:
+	_caixa(pai, base + Vector3(0.0, 1.2, 0.0), Vector3(3.0, 2.4, 2.4), Color(0.95, 0.95, 0.92), 0.6)
+	var telhado := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.1
+	cone.bottom_radius = 2.4
+	cone.height = 1.0
+	cone.radial_segments = 4
+	telhado.mesh = cone
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = [Color(0.1, 0.5, 0.3), Color(0.85, 0.3, 0.2), Color(0.2, 0.4, 0.8)][rng.randi() % 3]
+	mat.roughness = 0.7
+	telhado.material_override = mat
+	telhado.position = base + Vector3(0.0, 2.9, 0.0)
+	telhado.rotation.y = PI * 0.25
+	pai.add_child(telhado)
+
+
+static func _guarda_sol(pai: Node3D, base: Vector3, cor: Color) -> void:
+	_cilindro(pai, base, 0.03, 0.03, 2.1, Color(0.9, 0.9, 0.9), 5)
+	var m := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.05
+	cone.bottom_radius = 1.2
+	cone.height = 0.45
+	cone.radial_segments = 10
+	m.mesh = cone
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = cor
+	mat.roughness = 0.8
+	m.material_override = mat
+	m.position = base + Vector3(0.0, 2.1, 0.0)
+	pai.add_child(m)
+
+
+## Morros verdes saindo do mar (como os do Rio), dos dois lados da praia.
+static func _morros_verdes(pai: Node3D) -> void:
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://game/world/shaders/morro.gdshader")
+	mat.set_shader_parameter("topo_verde", -60.0)
+	for d in [Vector4(-330.0, -420.0, 90.0, 150.0), Vector4(-250.0, -470.0, 60.0, 90.0),
+			Vector4(320.0, -450.0, 110.0, 120.0), Vector4(40.0, -900.0, 260.0, 70.0)]:
 		var m := MeshInstance3D.new()
 		var malha := SphereMesh.new()
 		malha.radius = d.z
