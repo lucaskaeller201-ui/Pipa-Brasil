@@ -106,6 +106,7 @@ const ARQUIVO_PREFERENCIAS := "user://preferencias.json"
 var _mapa_arg := ""
 var _hora_arg := ""
 var _inicio_arg := false
+var _escolha_arg := false
 var _cantos: Control
 var _inicio_jogo := 0.0
 var _rotulo_mao: Label
@@ -126,6 +127,8 @@ func _ready() -> void:
 			_hora_arg = arg.trim_prefix("--hora=")
 		elif arg == "--inicio":
 			_inicio_arg = true
+		elif arg == "--escolha":
+			_escolha_arg = true
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	_carregar_estatisticas()
 	_aplicar_giro()
@@ -155,6 +158,8 @@ func _ready() -> void:
 		modo.put_you_on_hand()
 	_criar_interface()
 	_posicionar_camera(true)
+	if _escolha_arg:
+		_abrir_pipas()   # captura da tela de escolha
 
 
 ## Céu, chão, casas e enfeites do mapa e da hora escolhidos (D-063).
