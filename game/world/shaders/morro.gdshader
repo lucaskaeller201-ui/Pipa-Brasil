@@ -3,7 +3,7 @@ shader_type spatial;
 // com mato verde no alto. Visto de longe, por código.
 
 varying vec3 mundo;
-uniform float topo_verde = 60.0;
+uniform float topo_verde = 38.0;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -14,7 +14,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec2 cel = vec2(mundo.x / 4.0, mundo.y / 3.2 + floor(mundo.z / 9.0) * 0.37);
+	vec2 cel = vec2(mundo.x / 6.0, mundo.y / 4.5 + floor(mundo.z / 12.0) * 0.37);
 	vec2 i = floor(cel);
 	vec2 f = fract(cel);
 	float h = hash(i);
@@ -29,6 +29,6 @@ void fragment() {
 	if (f.x > 0.35 && f.x < 0.6 && f.y > 0.3 && f.y < 0.6) c *= 0.35;  // janela
 	float verde = smoothstep(topo_verde - 12.0, topo_verde + 6.0, mundo.y + hash(i * 0.37) * 10.0);
 	c = mix(c, mix(vec3(0.16, 0.32, 0.14), vec3(0.24, 0.42, 0.18), hash(i * 1.7)), verde);
-	ALBEDO = c;
+	ALBEDO = c * 0.8;
 	ROUGHNESS = 1.0;
 }

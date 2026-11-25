@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.18.1 — 2026-11-25
+
+- Morros mais longe e mais baixos, como uma serra no horizonte.
+
 ## 0.18.0 — 2026-11-25
 
 - Céu com nuvens e sol; chão com ruas, calçadas e terra; casas com reboco ou

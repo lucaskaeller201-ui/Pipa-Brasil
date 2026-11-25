@@ -275,7 +275,9 @@ static func _fio(pai: Node3D, a: Vector3, b: Vector3) -> void:
 static func _morro(pai: Node3D) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://game/world/shaders/morro.gdshader")
-	for d in [Vector4(-120.0, -330.0, 140.0, 70.0), Vector4(60.0, -380.0, 190.0, 95.0), Vector4(230.0, -300.0, 120.0, 55.0)]:
+	# [x, z, raio, altura]: longe e baixos, uma serra no horizonte
+	for d in [Vector4(-260.0, -520.0, 170.0, 55.0), Vector4(-40.0, -600.0, 230.0, 80.0), Vector4(200.0, -540.0, 190.0, 60.0),
+			Vector4(420.0, -480.0, 160.0, 45.0), Vector4(-460.0, -450.0, 150.0, 40.0)]:
 		var m := MeshInstance3D.new()
 		var malha := SphereMesh.new()
 		malha.radius = d.z
