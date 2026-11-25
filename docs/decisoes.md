@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-054 — Pipa mais calma sem puxar (2026-11-24)
+O Lucas: tenteando, e mesmo com a tela parada, a pipa ia rápido demais "como
+vento forte", e a volta fazia um círculo grande. A vela solta (sem puxar)
+ganha um freio ao longo do bico (KiteDefinition.nose_drag_rate = 6/s na pipa
+do Rio): a pipa não dispara sozinha para onde o bico aponta. Puxando, no
+coice da largada, avoada e rebocada, o freio não vale. A puxadinha do toque
+caiu de 3 m/s por 0,3 s para 1,5 m/s por 0,2 s (círculo da volta menor).
+
 ### D-053 — Aparada pela rabiola vem rodando (2026-11-24)
 O Lucas: aparada pela rabiola a avoada tem que vir rodando (puxada pela
 traseira, sem o cabresto segurando), diferente da aparada pela linha, que

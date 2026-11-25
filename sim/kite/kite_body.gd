@@ -242,6 +242,10 @@ func integrate(h: float) -> void:
 		# e vai embora levando linha — nunca de volta para a mão.
 		f += lunge_dir() * (m * LUNGE_ACCEL * lunge / LUNGE_TIME)
 		lunge = maxf(0.0, lunge - h)
+	if definition.nose_drag_rate > 0.0 and spin_mode != SpinMode.SPIN_LOCK and lunge <= 0.0 and not towed and not drifting:
+		# Sem puxar, a pipa não acelera sozinha para onde o bico aponta (D-054).
+		var bico_n := rotation * Vector3.UP
+		f -= bico_n * (m * definition.nose_drag_rate * velocity.dot(bico_n))
 	if d_pull_assist() > 0.0 and pull_taut and pull_speed > 0.1:
 		# Pressão da puxada: a pipa ganha velocidade na direção do bico.
 		f += (rotation * Vector3.UP) * (d_pull_assist() * pull_speed)

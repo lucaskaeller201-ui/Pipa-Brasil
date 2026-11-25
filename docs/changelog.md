@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.16.9 — 2026-11-24
+
+- Pipa mais calma: sem puxar ela não acelera sozinha; a volta com toques
+  duplos fica num círculo menor.
+
 ## 0.16.8 — 2026-11-24
 
 - Aparada pela rabiola: a avoada vem rodando. Pela linha continua vindo reta.

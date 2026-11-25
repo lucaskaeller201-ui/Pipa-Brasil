@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.16.8).
+Atualizado em 2026-11-24 (versão 0.16.9).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -35,6 +35,8 @@ Atualizado em 2026-11-24 (versão 0.16.8).
 | Toque duplo vira o bico de 30 em 30 | Feito (D-050, D-051); no iPhone não funcionou na 0.16.5, corrigido, aguardando teste |
 | Duplos seguidos viram para o mesmo lado; bico segura 3 s | Feito (D-052), aguardando teste do Lucas |
 | Aparada pela rabiola vem rodando | Feito (D-053), aguardando teste do Lucas |
+| Pipa mais calma sem puxar; volta menor | Feito (D-054), aguardando teste do Lucas |
+| Próximos (pedidos do Lucas): gráfico, chão, casas, boneco, andar, mapas, mais pipas e modelos, linhas cortantes e escolha de linha, andar e pegar pipa, aparar de novo depois de decepar | Pendente |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

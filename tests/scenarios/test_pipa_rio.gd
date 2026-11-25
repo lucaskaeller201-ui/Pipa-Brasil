@@ -339,3 +339,32 @@ func test_duplos_seguidos_levam_o_bico_longe() -> void:
 	print("      [duplos seguidos] 4 duplos: o bico foi a %.0f°" % absf(giro))
 	assert_true(absf(giro) > 120.0 and absf(giro) < 200.0, "4 duplos = bico em ~150° (%.0f°)" % absf(giro))
 	assert_true(w.is_finite_state())
+
+
+## D-054: depois do tenteio, sem puxar, a pipa não dispara para onde o bico
+## aponta (antes acelerava sozinha, "como vento forte").
+func test_tenteio_sem_puxar_nao_dispara() -> void:
+	var com := _velocidade_depois_do_tenteio(true)
+	var sem := _velocidade_depois_do_tenteio(false)
+	print("      [sem puxar] velocidade máxima depois do tenteio: com freio %.1f m/s, sem freio %.1f m/s" % [com, sem])
+	assert_true(com < 0.8 * sem, "o freio deixa a pipa mais calma")
+	assert_true(com > 0.5, "mas ela ainda anda")
+
+
+func _velocidade_depois_do_tenteio(com_freio: bool) -> float:
+	var def := KiteDefinition.pipa_rio()
+	if not com_freio:
+		def.nose_drag_rate = 0.0
+	var w := SimWorld.create_flight(WindField.new(5.0, 0.15, 2), def, 30.0, 45.0, 0.0, 4, true, 3.0)
+	_rodar(w, 12.0)
+	var f: Flyer = w.flyers[0]
+	f.input.kick_spin = 1.0
+	f.input.kick_base_shift = 60.0
+	f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+	var maior := 0.0
+	for i in roundi(2.5 / DT):
+		w.step(DT)
+		maior = maxf(maior, f.kite.velocity.length())
+	f.input.kick_spin = 0.0
+	f.input.kick_base_shift = 0.0
+	return maior

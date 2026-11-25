@@ -99,8 +99,8 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 	k.pull_speed = maxf(0.0, input.haul_speed) if not cut else 0.0
 	# Tenteio (D-037): o toque leva uma puxadinha; logo depois do pulo do bico
 	# a pipa já sai andando para onde ele aponta.
-	if not cut and tenteio_age > 0.04 and tenteio_age < 0.35:
-		k.pull_speed = maxf(k.pull_speed, 3.0)   # vai para a frente, para onde desbicou (D-042)
+	if not cut and tenteio_age > 0.04 and tenteio_age < 0.25:
+		k.pull_speed = maxf(k.pull_speed, 1.5)   # puxadinha curta (D-042, D-054)
 	k.line_dir = (k.position - hand_position).normalized() if not cut else Vector3.UP
 	# Largada (D-042): puxou forte e logo em seguida mandou linha: coice.
 	if not cut and input.haul_speed > 2.5:

@@ -40,6 +40,9 @@ extends Resource
 ## Força lateral contra a derrapagem (ar ao longo da envergadura): a pipa não
 ## anda de lado; vai na direção da espinha, como uma flecha (D-026).
 @export var side_force_coefficient := 0.0
+## Freio ao longo do bico sem puxar (1/s, D-054): a vela solta arrasta mais e a
+## pipa não dispara sozinha para onde o bico aponta; puxando, ele some.
+@export var nose_drag_rate := 0.0
 ## Giro de dois estados (D-028, pedido do Lucas; 0 = desligado):
 ## mandando linha com a mão, o bico gira direto nesta velocidade (graus/s,
 ## "velocidadeGiroMandandoLinha"); puxando, o giro zera na hora (trava seca).
@@ -148,6 +151,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_damping_taut = 12.0
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
+	d.nose_drag_rate = 6.0
 	d.spin_give_rate_deg = 360.0
 	d.pull_assist = 0.12
 	d.spin_return = 4.0
