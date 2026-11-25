@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-25 (versão 0.18.2).
+Atualizado em 2026-11-25 (versão 0.18.3).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -40,6 +40,7 @@ Atualizado em 2026-11-25 (versão 0.18.2).
 | Fatiar a rabiola de quem está voando e a linha/rabiola da avoada | Feito (D-056), aguardando teste do Lucas |
 | Cenário por código (céu, chão, casas, árvores, postes, morros) e boneco novo | Feito (D-057), aguardando teste do Lucas |
 | Sem tendência de rodar parada/tenteando para cima | Feito (D-058), aguardando teste do Lucas |
+| Toque duplo mais rigoroso; câmera acompanha a pipa afundando | Feito (D-059), aguardando teste do Lucas |
 | Próximos (pedidos do Lucas): gráfico, chão, casas, boneco, andar, mapas, mais pipas e modelos, linhas cortantes e escolha de linha, andar e pegar pipa, aparar de novo depois de decepar | Pendente |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |

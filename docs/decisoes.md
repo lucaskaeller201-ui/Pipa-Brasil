@@ -33,6 +33,16 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-059 — Toque duplo mais rigoroso; câmera acompanha a pipa afundando (2026-11-25)
+O Lucas: tenteando rápido a pipa ainda rodava com o bico para cima (toques
+rápidos viravam "duplos"); e a câmera perdia a pipa quando ele afundava.
+Agora o toque duplo só conta se: os dois toques vêm juntos (menos de 0,3 s)
+depois de uma pausa (pelo menos 0,35 s e o dobro do intervalo do par — no
+ritmo do tenteio não conta), e o bico já está para o lado (20° ou mais).
+Duplos seguidos na volta continuam valendo. Câmera: pode olhar até 45° para
+baixo do horizonte (antes não descia do horizonte), segue a pipa mais rápido
+e o zoom ficou um pouco mais aberto (a pipa em ~7% da altura da tela).
+
 ### D-058 — Parada ou tenteando para cima, a pipa não tende a rodar (2026-11-25)
 O Lucas: tenteando com o bico para cima a pipa parecia sempre querer rodar
 (mais para a esquerda); ela só deve rodar quando ele leva o bico (toques

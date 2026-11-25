@@ -107,3 +107,27 @@ func test_deslizar_para_baixo_puxa() -> void:
 	raiz.call("_physics_process", 1.0 / 120.0)
 	assert_true(eu.input.haul_speed >= 0.0, "dedo de puxar parado não descarrega")
 	raiz.queue_free()
+
+
+## D-059: tentear rápido (toques no mesmo ritmo) não vira toque duplo; o duplo
+## precisa de pausa antes e do bico já para o lado.
+func test_toque_duplo_so_depois_de_pausa_e_com_bico_de_lado() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("_colocar_no_alto")
+	raiz.call("avancar", 3.0)
+	var t := 100.0
+	# ritmo de tenteio: toques a cada 0,2 s
+	raiz.set("_duplo_t", -99.0)
+	raiz.set("_ultimo_duplo", false)
+	raiz.set("_penultimo_toque", t - 0.4)
+	raiz.set("_ultimo_toque", t - 0.2)
+	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "tenteio rápido não é duplo")
+	# par depois de pausa, mas com o bico para cima (a pipa acabou de subir)
+	raiz.set("_penultimo_toque", t - 1.5)
+	raiz.set("_ultimo_toque", t - 0.12)
+	var modo: FreeMode = raiz.get("modo")
+	var bico := absf(modo.you().nose_angle_deg())
+	assert_eq(bool(raiz.call("_eh_toque_duplo", t)), bico >= 20.0, "duplo só com o bico de lado (bico %.0f°)" % bico)
+	raiz.queue_free()

@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.18.3 — 2026-11-25
+
+- Tentear rápido não faz mais a pipa rodar com o bico para cima; o toque
+  duplo só vira a pipa com o bico já para o lado.
+- Câmera acompanha a pipa quando ela afunda (olha para baixo do horizonte),
+  segue mais rápido e com um pouco menos de zoom.
+
 ## 0.18.2 — 2026-11-25
 
 - Tenteando com o bico para cima a pipa não tende mais a rodar (nem para a

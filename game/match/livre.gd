@@ -68,6 +68,8 @@ var _ultimo_duplo := false      # o último toque fechou um toque duplo
 var _duplo_t := -99.0           # instante do último toque duplo (s)
 var _dir_volta := 0.0           # sentido em que os toques duplos estão virando
 var _sentido_antes := 1.0       # lado do bico antes do último toque simples
+var _penultimo_toque := -99.0   # instante do toque antes do último (s)
+const BICO_DE_LADO_DEG := 20.0  ## o duplo só vira a pipa com o bico já para o lado (D-059)
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## Tenteio (D-049, D-050): cada toque balança o bico ~30° para um lado e o
 ## próximo para o outro, em volta da direção em que a pipa estava (tocar não
@@ -250,20 +252,22 @@ func _posicionar_camera(imediato: bool) -> void:
 	# Zoom (1ª pessoa): a pipa ocupa uns 10% da altura da tela (dá para ver o modelo). Na 3ª pessoa,
 	# visão aberta para ver as lajes e as outras pipas.
 	var envergadura := 0.6
-	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.10, 8.0, 55.0)
+	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.07, 12.0, 55.0)
 	if not _primeira_pessoa:
 		fov = 50.0
 	var guinada := atan2(-alvo.x, -alvo.z)
 	var elevacao := rad_to_deg(atan2(alvo.y, Vector2(alvo.x, alvo.z).length()))
-	# A pipa fica um pouco acima do meio; com pouca linha aparece o horizonte.
-	var inclinacao := clampf(elevacao - fov * 0.18, 2.0, 70.0)
+	# A pipa fica um pouco acima do meio (acima dos textos de baixo). A câmera
+	# também olha para baixo do horizonte: afundando a pipa, ela continua na
+	# tela (D-059).
+	var inclinacao := clampf(elevacao - fov * 0.12, -45.0, 75.0)
 	var desejada := Transform3D(Basis.from_euler(Vector3(deg_to_rad(inclinacao), guinada, 0.0)), olho)
 	if imediato:
 		_camera.global_transform = desejada
 		_camera.fov = fov
 	else:
-		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.1)
-		_camera.fov = lerpf(_camera.fov, fov, 0.05)
+		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.2)
+		_camera.fov = lerpf(_camera.fov, fov, 0.08)
 	# Tremor (corte): deslocamento pequeno da imagem, que some rápido.
 	_camera.h_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
 	_camera.v_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
@@ -328,7 +332,7 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 ## Tenteio pelo toque (D-041).
 func _tentear() -> void:
 	var agora := Time.get_ticks_msec() / 1000.0
-	if agora - _ultimo_toque < TOQUE_DUPLO_S and not _ultimo_duplo:
+	if _eh_toque_duplo(agora):
 		# 2º toque do duplo: a direção anda 30° (D-050). Duplos seguidos
 		# continuam virando para o MESMO lado (D-052): 60°, 90°, 120°...
 		_ultimo_duplo = true
@@ -347,8 +351,30 @@ func _tentear() -> void:
 		_sentido_antes = _sentido
 		_sentido = -_sentido
 		_desbicar(_sentido, _sentido, 1.0)
+	_penultimo_toque = _ultimo_toque
 	_ultimo_toque = agora
 
+
+## Toque duplo de verdade (D-059): dois toques bem juntos DEPOIS de uma pausa
+## (tentear rápido, com os toques no mesmo ritmo, é só tenteio), e só com o
+## bico já para o lado — com o bico para cima o duplo é tenteio e a pipa não
+## roda. Duplos seguidos (a volta) continuam valendo.
+func _eh_toque_duplo(agora: float) -> bool:
+	if _ultimo_duplo:
+		return false
+	var junto := agora - _ultimo_toque
+	if junto >= TOQUE_DUPLO_S:
+		return false
+	var na_volta := agora - _duplo_t < VOLTA_SEGUE_S
+	if na_volta:
+		return true
+	var antes := _ultimo_toque - _penultimo_toque
+	if antes < maxf(0.35, junto * 2.0):
+		return false   # ritmo de tenteio, não é duplo
+	var eu := modo.you()
+	if eu == null:
+		return false
+	return absf(eu.nose_angle_deg()) >= BICO_DE_LADO_DEG
 
 func _ver_toque_pendente() -> void:
 	pass
