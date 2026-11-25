@@ -391,9 +391,17 @@ func _evento(e: Dictionary) -> void:
 			if quem >= 0:
 				var parte := "rabiola" if bool(e["tail"]) else "linha"
 				if quem > 0:
-					_messages.append("%s decepou a %s da avoada." % [_nome(quem), parte])
+					_messages.append("%s fatiou a %s da avoada." % [_nome(quem), parte])
 				else:
-					_messages.append("Decepou a %s! A avoada escapou." % parte)
+					_messages.append("FATIOU a %s da avoada!" % parte)
+		"fatiou":
+			if bool(e.get("voando", false)):
+				var quem3 := _dono(int(e["catcher"]))
+				var vitima := _dono(int(e["flyer"]))
+				if quem3 == 0:
+					_messages.append("FATIOU a rabiola de %s!" % _nome(vitima))
+				elif vitima == 0:
+					_messages.append("%s fatiou a sua rabiola!" % _nome(quem3))
 		"soltou":
 			if _dono(int(e["catcher"])) == 0:
 				_messages.append("Tenteou e a avoada saiu do aparo.")

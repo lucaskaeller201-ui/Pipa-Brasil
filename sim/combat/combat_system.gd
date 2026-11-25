@@ -31,6 +31,7 @@ const TANGLE_TIME := 0.25      ## s mandando linha em contato para embolar (D-02
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
 const DECEPAR_METROS := 3.0   ## m de linha puxada rápido em contato para decepar (D-044)
 const DECEPAR_RAPIDO := 3.5   ## m/s: com a avoada no aparo, puxar acima disso vai decepando
+const FATIAR_METROS := 1.5    ## m puxados rápido (abraçando) em cima da rabiola do rival para fatiá-la (D-056)
 const SAIR_APARO := 3.0       ## s tenteando sem parar para a avoada sair do aparo (D-044)
 const PERDIDA_CHAO := 5.0     ## s com a pipa no chão até virar perdida (a linha ainda cai)
 const CUT_RATE := 5.5          ## m/s de linha puxada acima dos quais o contato decepa
@@ -55,6 +56,8 @@ var _pairs: Array = []
 var _tangle := {}              ## (avoada, pipeiro) -> embolo em formação
 var _clock := 0.0
 var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
+var _fatia_want := {}          ## pipa em voo -> [rabiola, segmento, quem] (neste subpasso)
+var _fatia_acc := {}           ## pipa em voo -> m puxados rápido em cima da rabiola dela
 var _cut_acc := {}             ## avoada -> m puxados rápido em contato
 var _solta_acc := {}           ## avoada -> s de tenteio de quem aparou
 var _chao := {}                ## avoada -> s com a pipa no chão
@@ -143,6 +146,26 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 			_pending_cuts.append([av, c[0], c[1], c[2]])
 			_cut_acc.erase(av)
 	_cut_want.clear()
+	# Fatiar a rabiola de quem está em voo (D-056).
+	for f in _fatia_acc.keys():
+		if not _fatia_want.has(f):
+			_fatia_acc[f] = float(_fatia_acc[f]) - 1.5 * h
+			if float(_fatia_acc[f]) <= 0.0:
+				_fatia_acc.erase(f)
+	for f in _fatia_want:
+		var fw: Array = _fatia_want[f]
+		var quem2: Flyer = fw[2]
+		_fatia_acc[f] = float(_fatia_acc.get(f, 0.0)) + quem2.line_rate * h
+		if float(_fatia_acc[f]) >= FATIAR_METROS:
+			_fatia_acc.erase(f)
+			var dono: Flyer = f
+			var rab: ParticleChain = fw[0]
+			if rab == dono.tail and rab.size() >= 3 and _clock - float(_last_cut.get(dono, -10.0)) >= 0.5:
+				_last_cut[dono] = _clock
+				var pedaco := rab.split(clampi(int(fw[1]), 0, rab.size() - 2))
+				loose.append(pedaco)
+				events.append({"type": "fatiou", "flyer": dono.id, "catcher": quem2.id, "tail": true, "voando": true})
+	_fatia_want.clear()
 	for c in _pending_cuts:
 		var av: Flyer = c[0]
 		if _clock - float(_last_cut.get(av, -10.0)) < 0.5 or (c[1] != av.trailing_line and c[1] != av.tail):
@@ -164,15 +187,23 @@ func _maybe_snag(ia: int, i: int, ib: int, j: int) -> void:
 		var ct_seg := j if ordem == 0 else i
 		var av: Flyer = _owners[av_idx]
 		var ct: Flyer = _owners[ct_idx]
-		if av == null or ct == null or not av.cut or av.caught_by != null or av.lost or ct.cut:
-			continue
 		var chain: ParticleChain = _chains[av_idx]
 		var cchain: ParticleChain = _chains[ct_idx]
+		# Fatiar (D-056): passando a linha em cima da RABIOLA de uma pipa em voo,
+		# abraçando (puxando forte), a rabiola dela é fatiada — não precisa
+		# estar avoada.
+		if av != null and ct != null and not av.cut and not ct.cut and chain == av.tail and cchain == ct.line \
+				and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > DECEPAR_RAPIDO:
+			_fatia_want[av] = [chain, av_seg, ct]
+			continue
+		if av == null or ct == null or not av.cut or av.caught_by != null or av.lost or ct.cut:
+			continue
 		if not (chain == av.trailing_line or chain == av.tail):
 			continue
 		if not (cchain == ct.line or cchain == ct.tail):
 			continue
-		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > CUT_RATE:
+		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > DECEPAR_RAPIDO:
+			# abraçando em cima da linha ou da rabiola da avoada: fatia (D-056)
 			if av.cut_age > DECEPAR_GRACE:
 				_cut_want[av] = [chain, av_seg, ct]
 			return
@@ -238,6 +269,7 @@ func _decepar(av: Flyer, chain: ParticleChain, seg: int, ct: Flyer, loose: Array
 	else:
 		loose.append(pedaco)
 	events.append({"type": "decepou", "flyer": av.id, "catcher": ct.id, "tail": chain == av.tail})
+	events.append({"type": "fatiou", "flyer": av.id, "catcher": ct.id, "tail": chain == av.tail, "voando": false})
 
 
 ## Mantém cada ponto enroscado preso ao seu lugar no material da outra linha.
@@ -390,6 +422,7 @@ func take_events() -> Array:
 ## Esquece enroscos que envolvem um pipeiro que saiu do mundo.
 func forget(f: Flyer) -> void:
 	_cut_acc.erase(f)
+	_fatia_acc.erase(f)
 	_solta_acc.erase(f)
 	_chao.erase(f)
 	_last_cut.erase(f)

@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.17.0 — 2026-11-25
+
+- Fatiar: abraçando (puxando forte) com a linha em cima da rabiola do rival,
+  mesmo com a pipa dele voando, a rabiola é fatiada. Na avoada, fatia a linha
+  ou a rabiola.
+
 ## 0.16.10 — 2026-11-25
 
 - Sem lado preferido: mandando linha a pipa gira para onde o bico aponta;

@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-056 — Fatiar (2026-11-25)
+O Lucas explicou o "fatiar": passando a linha abraçando (puxando forte) em
+cima da linha ou da rabiola de uma avoada, ela é decepada; e na RABIOLA de uma
+pipa em voo também — não precisa estar avoada. Agora: com a linha em cima da
+rabiola de um rival em voo, puxando acima de 3,5 m/s, ao somar 1,5 m puxados
+a rabiola é fatiada no ponto de contato (o pedaço cai; a pipa segue voando com
+o que sobrou). Na avoada, o decepar ao passar abraçando vale a partir de
+3,5 m/s (era 5,5) e o aviso diz "fatiou". Combate só virtual, como sempre.
+
 ### D-055 — Sem lado preferido: gira para onde o bico aponta (2026-11-25)
 O Lucas notou que quase tudo ia para a esquerda. Causas: o giro mandando linha
 tinha sentido fixo (spin_give_sign) e a pipa do Rio tinha um torque de vento
