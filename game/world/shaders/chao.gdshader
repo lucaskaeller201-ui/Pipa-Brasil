@@ -60,7 +60,9 @@ void fragment() {
 		}
 		return;
 	}
-	vec3 terra = mix(vec3(0.42, 0.32, 0.24), vec3(0.55, 0.47, 0.38), n);
+	// terra batida mais escura, com manchas de mato (de dia não fica branca)
+	vec3 terra = mix(vec3(0.3, 0.24, 0.18), vec3(0.4, 0.34, 0.26), n);
+	terra = mix(terra, vec3(0.22, 0.34, 0.14), smoothstep(0.55, 0.72, ruido(p * 0.045 + vec2(7.0, 3.0))) * 0.85);
 	vec3 cor = terra;
 	float rug = 0.95;
 	vec3 r = na_rua(rua_x1, p, true);

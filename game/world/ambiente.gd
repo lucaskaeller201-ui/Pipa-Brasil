@@ -69,7 +69,7 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	pai.add_child(sol)
 
 	var malha := PlaneMesh.new()
-	malha.size = Vector2(600.0, 600.0)
+	malha.size = Vector2(1600.0, 1600.0)
 	# Chão com ruas, calçadas e terra (D-057); na praia, calçadão e areia.
 	var material := ShaderMaterial.new()
 	material.shader = load("res://game/world/shaders/chao.gdshader")
