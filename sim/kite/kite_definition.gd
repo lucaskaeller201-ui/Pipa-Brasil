@@ -147,7 +147,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.bow_stability = 0.0
 	d.spin_damping_quadratic = 1.0
 	d.spin_damping_linear = 0.3
-	d.spin_bias = 1.0
+	d.spin_bias = 0.0   # sem lado preferido (D-055)
 	d.spin_damping_taut = 12.0
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco

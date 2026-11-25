@@ -50,6 +50,8 @@ const LUNGE_KICK := 4.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _tenteio_base := 0.0    ## direção do bico quando o tenteio começou (rad)
+var _give_dir := 1.0        ## sentido do giro mandando linha (escolhido no começo)
+var _giving_prev := false
 var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque duplo)
 var _kick_prev := false
 const KICK_HOLD := 3.0 ## s: depois do último toque o bico fica onde parou (D-052)
@@ -268,7 +270,16 @@ func integrate(h: float) -> void:
 			SpinMode.SPIN_GIVE:
 				var bico_cima := (rotation * Vector3.UP).dot(Vector3.UP)
 				var taxa := minf(d.spin_give_rate_deg, d.spin_per_line_speed_deg * give_speed)
-				var alvo := d.spin_give_sign * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
+				# D-055: gira para o lado em que o bico aponta (não sempre para o
+				# mesmo lado). Escolhido no começo de mandar linha; com o bico em
+				# pé, segue o último tenteio.
+				if not _giving_prev:
+					var ang := _nose_ang(nn)
+					if absf(ang) > deg_to_rad(8.0):
+						_give_dir = -signf(ang)
+					elif kick_sign != 0.0:
+						_give_dir = kick_sign
+				var alvo := _give_dir * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
 				# acelera aos poucos até o comando, mas nunca passa dele (nem gira
 				# ao contrário): vento e rabiola não fazem furacão
 				var teto := absf(alvo)
@@ -307,6 +318,7 @@ func integrate(h: float) -> void:
 						var volta := clampf(ang * d.spin_return, -deg_to_rad(160.0), deg_to_rad(160.0))
 						novo = lerpf(novo, volta, 1.0 - exp(-8.0 * h))
 		_kick_prev = spin_mode == SpinMode.SPIN_KICK
+		_giving_prev = spin_mode == SpinMode.SPIN_GIVE
 		if spin_mode == SpinMode.SPIN_GIVE or spin_mode == SpinMode.SPIN_LOCK or drifting or towed \
 				or (spin_mode == SpinMode.SPIN_FREE and since_kick >= KICK_HOLD):
 			_tenteio_ativo = false

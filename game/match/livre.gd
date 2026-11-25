@@ -64,6 +64,7 @@ var _ultimo_toque := -99.0      # instante do último toque (s)
 var _ultimo_duplo := false      # o último toque fechou um toque duplo
 var _duplo_t := -99.0           # instante do último toque duplo (s)
 var _dir_volta := 0.0           # sentido em que os toques duplos estão virando
+var _sentido_antes := 1.0       # lado do bico antes do último toque simples
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## Tenteio (D-049, D-050): cada toque balança o bico ~30° para um lado e o
 ## próximo para o outro, em volta da direção em que a pipa estava (tocar não
@@ -325,6 +326,9 @@ func _tentear() -> void:
 		# 2º toque do duplo: a direção anda 30° (D-050). Duplos seguidos
 		# continuam virando para o MESMO lado (D-052): 60°, 90°, 120°...
 		_ultimo_duplo = true
+		# D-055: o duplo vira para o lado em que o bico já estava (antes do 1º
+		# toque dele): bico para a direita + duplo = mais para a direita.
+		_sentido = _sentido_antes
 		if agora - _duplo_t < VOLTA_SEGUE_S and _dir_volta != 0.0:
 			_sentido = _dir_volta
 		_dir_volta = _sentido
@@ -334,6 +338,7 @@ func _tentear() -> void:
 	else:
 		# toque simples: o bico vai ~30° para o outro lado (na hora)
 		_ultimo_duplo = false
+		_sentido_antes = _sentido
 		_sentido = -_sentido
 		_desbicar(_sentido, _sentido, 1.0)
 	_ultimo_toque = agora

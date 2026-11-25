@@ -368,3 +368,30 @@ func _velocidade_depois_do_tenteio(com_freio: bool) -> float:
 	f.input.kick_spin = 0.0
 	f.input.kick_base_shift = 0.0
 	return maior
+
+
+## D-055: mandando linha a pipa gira para o lado em que o bico aponta —
+## tanto para a direita quanto para a esquerda.
+func test_mandar_linha_gira_para_o_lado_do_bico() -> void:
+	var dir := _giro_mandando(1.0)
+	var esq := _giro_mandando(-1.0)
+	print("      [lados] mandando linha com o bico para a direita: %.0f°; para a esquerda: %.0f°" % [dir, esq])
+	assert_true(dir > 20.0, "bico à direita: gira para a direita (%.0f°)" % dir)
+	assert_true(esq < -20.0, "bico à esquerda: gira para a esquerda (%.0f°)" % esq)
+
+
+func _giro_mandando(lado: float) -> float:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	_tentear(w, f, lado)
+	var b0 := f.nose_angle_deg()
+	f.input.haul_speed = -3.0
+	var giro := 0.0
+	var antes := b0
+	for i in roundi(0.4 / DT):
+		w.step(DT)
+		var agora := f.nose_angle_deg()
+		giro += wrapf(agora - antes, -180.0, 180.0)
+		antes = agora
+	f.input.clear()
+	return giro
