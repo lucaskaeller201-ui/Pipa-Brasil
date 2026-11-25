@@ -59,6 +59,12 @@ def main():
 			with open(caminho) as f:
 				gltf = json.load(f)
 			if any(m.get("alphaMode") == "MASK" for m in gltf.get("materials", [])):
+				print(f"  {nome}: mapas disponíveis {list(arq.keys())}")
+				for chave in arq:
+					if chave.lower() in ("alpha", "opacity", "mask"):
+						total += baixar(arq[chave]["1k"]["jpg"]["url"] if "jpg" in arq[chave]["1k"] else arq[chave]["1k"]["png"]["url"],
+							os.path.join(pasta, f"textures/{nome}_alpha_1k.jpg"))
+						print(f"  {nome}: baixou o recorte ({chave})")
 				for chave in arq:
 					if chave.lower() in ("diffuse", "diff"):
 						png = arq[chave]["1k"]["png"]["url"]
