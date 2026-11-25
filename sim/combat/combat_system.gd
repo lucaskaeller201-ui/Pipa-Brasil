@@ -327,6 +327,7 @@ func check_snags(flyers: Array) -> void:
 	_snag_clock = _clock
 	for f in flyers:
 		(f as Flyer).caught_by_tail = false
+	var contadas := {}
 	for l in links.duplicate():
 		var av: Flyer = l["avoada"]
 		var ct: Flyer = l["catcher"]
@@ -341,13 +342,18 @@ func check_snags(flyers: Array) -> void:
 			av.caught_by_tail = true   # presa (também) pela rabiola: vem rodando
 		if bool(l["captured"]):
 			continue
-		# Sair do aparo (D-044): tenteando sem parar uns 3 s, o embolo solta.
-		if ct.tenteio_age < 0.6:
-			_solta_acc[av] = float(_solta_acc.get(av, 0.0)) + dt
-		else:
-			_solta_acc[av] = maxf(0.0, float(_solta_acc.get(av, 0.0)) - 0.5 * dt)
-		if float(_solta_acc[av]) >= SAIR_APARO:
-			links.erase(l)
+		# Sair do aparo (D-044): tenteando sem parar uns 3 s, o embolo solta
+		# (todos os embolos da avoada; conta uma vez por avoada, D-061).
+		if not contadas.has(av):
+			contadas[av] = true
+			if ct.tenteio_age < 0.6:
+				_solta_acc[av] = float(_solta_acc.get(av, 0.0)) + dt
+			else:
+				_solta_acc[av] = maxf(0.0, float(_solta_acc.get(av, 0.0)) - 0.5 * dt)
+		if float(_solta_acc.get(av, 0.0)) >= SAIR_APARO:
+			for l2 in links.duplicate():
+				if l2["avoada"] == av:
+					links.erase(l2)
 			av.caught_by = null
 			_solta_acc.erase(av)
 			_cut_acc.erase(av)

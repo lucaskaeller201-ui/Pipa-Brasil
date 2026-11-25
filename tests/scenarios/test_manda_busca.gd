@@ -261,7 +261,10 @@ func _giro_rebocada(pela_rabiola: bool) -> float:
 	var b: Flyer = w.flyers[1]
 	b.cut_line(12)
 	b.caught_by = a
-	b.caught_by_tail = pela_rabiola
+	# um embolo de verdade, pela rabiola ou pela linha da avoada
+	var pedaco: ParticleChain = b.tail if pela_rabiola else b.trailing_line
+	w.combat.links.append({"avoada": b, "chain": pedaco, "idx": mini(3, pedaco.size() - 1), "catcher": a,
+		"cchain": a.line, "m": a.line.rest_total() * 0.5, "captured": false})
 	var soma := 0.0
 	var n := 0
 	for i in roundi(2.0 / DT):
