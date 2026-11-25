@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-052 — Duplos seguidos viram para o mesmo lado; bico segura 3 s (2026-11-24)
+No celular o bico só ia para a direita e para a esquerda: o 1º toque de cada
+duplo troca de lado (é tenteio), então o duplo seguinte virava para o lado
+contrário e desfazia o anterior. Agora um duplo até 1,5 s depois de outro
+continua virando para o MESMO lado (60°, 90°, 120°, 150°, 180°...), e o bico
+fica onde parou por 3 s depois do último toque (era 1,5 s), dando tempo de
+puxar.
+
 ### D-051 — Toque duplo no iPhone (2026-11-24)
 No celular do Lucas o toque duplo não virava o bico. Provável causa: o Safari
 do iPhone usa o toque duplo para dar zoom e engole o segundo toque, ou os

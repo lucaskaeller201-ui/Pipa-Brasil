@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.16.6).
+Atualizado em 2026-11-24 (versão 0.16.7).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -33,6 +33,7 @@ Atualizado em 2026-11-24 (versão 0.16.6).
 | Rabiola fina de longe | Feito (D-048) |
 | Tenteio que balança e não roda | Feito (D-049), Lucas aprovou |
 | Toque duplo vira o bico de 30 em 30 | Feito (D-050, D-051); no iPhone não funcionou na 0.16.5, corrigido, aguardando teste |
+| Duplos seguidos viram para o mesmo lado; bico segura 3 s | Feito (D-052), aguardando teste do Lucas |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

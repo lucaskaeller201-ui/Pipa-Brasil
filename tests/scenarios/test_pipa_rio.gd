@@ -122,7 +122,7 @@ func test_tenteio_cada_toque_para_um_lado_e_o_vento_traz_de_volta() -> void:
 	var b3 := f.nose_angle_deg()
 	_rodar(w, 0.4)
 	var b_pausa := f.nose_angle_deg()
-	_rodar(w, 1.6)
+	_rodar(w, 3.6)
 	var b4 := f.nose_angle_deg()
 	print("      [tenteio] bico %.0f° → (direita) %.0f° → (esquerda) %.0f° → (esquerda) %.0f°; parado 1 s: %.0f°; linha %.1f → %.1f m" % [b0, b1, b2, b3, b4, l0, f.line_length()])
 	assert_true(_dif(b1, b0) > 25.0 and _dif(b1, b0) < 50.0, "toque para a direita: pulo firme (%.0f°)" % _dif(b1, b0))
@@ -304,4 +304,38 @@ func test_toques_duplos_viram_o_bico_de_30_em_30() -> void:
 	f.input.kick_base_shift = 0.0
 	print("      [toques duplos] 12 duplos: o bico virou %.0f°" % giro)
 	assert_true(absf(giro) > 330.0 and absf(giro) < 420.0, "de 30 em 30, 12 duplos = uma volta (%.0f°)" % giro)
+	assert_true(w.is_finite_state())
+
+
+## D-052: duplos seguidos viram sempre para o mesmo lado, mesmo com o 1º
+## toque de cada duplo indo para o outro lado (como acontece na tela).
+func test_duplos_seguidos_levam_o_bico_longe() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var giro := 0.0
+	var antes := f.nose_angle_deg()
+	var sentido := -1.0
+	var dir_volta := 0.0
+	for k in 4:
+		sentido = -sentido
+		f.input.kick_spin = sentido
+		f.input.kick_base_shift = 0.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.15 / DT):
+			w.step(DT)
+		if dir_volta != 0.0:
+			sentido = dir_volta
+		dir_volta = sentido
+		f.input.kick_spin = sentido
+		f.input.kick_base_shift = 30.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		for i in roundi(0.5 / DT):
+			w.step(DT)
+			var agora := f.nose_angle_deg()
+			giro += wrapf(agora - antes, -180.0, 180.0)
+			antes = agora
+	f.input.kick_spin = 0.0
+	f.input.kick_base_shift = 0.0
+	print("      [duplos seguidos] 4 duplos: o bico foi a %.0f°" % absf(giro))
+	assert_true(absf(giro) > 120.0 and absf(giro) < 200.0, "4 duplos = bico em ~150° (%.0f°)" % absf(giro))
 	assert_true(w.is_finite_state())

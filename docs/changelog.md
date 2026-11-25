@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.16.7 — 2026-11-24
+
+- Toques duplos seguidos viram o bico sempre para o mesmo lado: 30°, 60°, 90°,
+  120°... até a volta inteira. O bico fica parado 3 s depois do último toque.
+
 ## 0.16.6 — 2026-11-24
 
 - Toque duplo funcionando no iPhone (o Safari não dá mais zoom no toque duplo);
