@@ -280,10 +280,12 @@ jobs:
         run: |
           mkdir -p capturas
           # Modo livre (cena principal), celular deitado: um bot pilota a sua pipa.
-          for vista in primeira terceira; do
+          for vista in primeira terceira praia inicio; do
             mkdir -p "quadros_$vista"
             extra=""
             if [ "$vista" = terceira ]; then extra="--terceira"; fi
+            if [ "$vista" = praia ]; then extra="--terceira --mapa=praia --hora=meio_dia"; fi
+            if [ "$vista" = inicio ]; then extra="--inicio --hora=manha"; fi
             timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
               --rendering-method gl_compatibility --resolution 1280x720 \
               --fixed-fps 15 --quit-after 330 --write-movie "quadros_$vista/q.png" \

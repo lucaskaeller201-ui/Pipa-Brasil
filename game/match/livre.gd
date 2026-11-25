@@ -103,6 +103,9 @@ var _botao_mapa: Button
 var _botao_hora: Button
 var _titulo_pipa: Control
 const ARQUIVO_PREFERENCIAS := "user://preferencias.json"
+var _mapa_arg := ""
+var _hora_arg := ""
+var _inicio_arg := false
 var _botoes_pipa: Array = []
 var _botoes_linha: Array = []
 var _botao_desenho: Button
@@ -120,11 +123,21 @@ func _ready() -> void:
 			_primeira_pessoa = false
 		elif arg.begins_with("--semente="):
 			_semente = arg.trim_prefix("--semente=").to_int()
+		elif arg.begins_with("--mapa="):
+			_mapa_arg = arg.trim_prefix("--mapa=")
+		elif arg.begins_with("--hora="):
+			_hora_arg = arg.trim_prefix("--hora=")
+		elif arg == "--inicio":
+			_inicio_arg = true
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	_carregar_estatisticas()
 	_aplicar_giro()
 	_carregar_preferencias()
-	_no_lobby = not _automatico
+	if Bairro.MAPAS.has(_mapa_arg):
+		_mapa = _mapa_arg
+	if Ambiente.HORAS.has(_hora_arg):
+		_hora = _hora_arg
+	_no_lobby = not _automatico or _inicio_arg
 	_montar_cenario()
 	for i in modo.players.size():
 		var corpo: Node3D = Boneco.new()
