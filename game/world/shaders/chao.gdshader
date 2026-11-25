@@ -44,22 +44,6 @@ void vertex() {
 void fragment() {
 	vec2 p = mundo.xz;
 	float n = ruido(p * 0.35) * 0.6 + ruido(p * 2.1) * 0.4;
-	if (praia > 0.5 && p.y < calcadao_z) {
-		if (p.y > areia_z) {
-			// calçadão de pedra portuguesa: as ondas pretas e brancas
-			float onda = sin(p.x * 0.55) * 1.1;
-			float faixa = fract((p.y + onda) / 1.6);
-			ALBEDO = faixa < 0.5 ? vec3(0.08, 0.08, 0.09) : vec3(0.92, 0.9, 0.85);
-			ROUGHNESS = 0.55;
-		} else {
-			// areia clara, mais escura e molhada perto do mar
-			float molhada = smoothstep(-80.0, -95.0, p.y);
-			vec3 seca = mix(vec3(0.93, 0.85, 0.66), vec3(0.97, 0.9, 0.74), n);
-			ALBEDO = mix(seca, vec3(0.7, 0.6, 0.45), molhada);
-			ROUGHNESS = mix(0.95, 0.35, molhada);
-		}
-		return;
-	}
 	// terra batida mais escura, com manchas de mato (de dia não fica branca)
 	vec3 terra = mix(vec3(0.3, 0.24, 0.18), vec3(0.4, 0.34, 0.26), n);
 	terra = mix(terra, vec3(0.22, 0.34, 0.14), smoothstep(0.55, 0.72, ruido(p * 0.045 + vec2(7.0, 3.0))) * 0.85);
@@ -72,7 +56,21 @@ void fragment() {
 	if (r3.x > r.x) { r = r3; }
 	vec3 r4 = na_rua(rua_z2, p, false);
 	if (r4.x > r.x) { r = r4; }
-	if (r.x > 1.5) {
+	if (praia > 0.5 && p.y < calcadao_z) {
+		if (p.y > areia_z) {
+			// calçadão de pedra portuguesa: as ondas pretas e brancas
+			float ondinha = sin(p.x * 0.55) * 1.1;
+			float faixa = fract((p.y + ondinha) / 1.6);
+			cor = faixa < 0.5 ? vec3(0.08, 0.08, 0.09) : vec3(0.92, 0.9, 0.85);
+			rug = 0.55;
+		} else {
+			// areia clara, mais escura e molhada perto do mar
+			float molhada = smoothstep(-80.0, -95.0, p.y);
+			vec3 seca = mix(vec3(0.86, 0.77, 0.58), vec3(0.92, 0.84, 0.66), n);
+			cor = mix(seca, vec3(0.62, 0.52, 0.38), molhada);
+			rug = mix(0.95, 0.35, molhada);
+		}
+	} else if (r.x > 1.5) {
 		float lajota = step(0.94, fract(p.x * 0.5)) + step(0.94, fract(p.y * 0.5));
 		cor = mix(vec3(0.68, 0.66, 0.62), vec3(0.5, 0.49, 0.47), clamp(lajota, 0.0, 1.0)) * (0.9 + 0.1 * n);
 		rug = 0.9;

@@ -46,6 +46,8 @@ verniz leve, mapas e uma página inicial criativa. Tudo por código:
   (mais escura e molhada perto do mar), mar com ondinhas, brilho do sol e
   espuma, coqueiros, quiosques, guarda-sóis, prédios mais altos e morros
   verdes saindo do mar. As lajes de soltar pipa são as mesmas.
+- O shader do chão tinha um "return" no meio e não compilava no navegador
+  (chão branco nas capturas); reescrito sem ele.
 - De dia (manhã e meio-dia) sem glow e com menos luz ambiente: nas capturas
   as cores claras estouravam (chão e morros brancos).
 - Na página inicial o placar, os avisos e os botões do canto somem.
