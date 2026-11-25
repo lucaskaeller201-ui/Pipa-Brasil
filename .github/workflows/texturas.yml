@@ -1,0 +1,40 @@
+# Baixa as texturas fotográficas CC0 do Poly Haven (D-067) e guarda no
+# repositório. Roda sozinho quando a lista muda, ou pelo botão "Run workflow".
+# Depois chama o CI para gerar os builds com as texturas novas.
+
+name: Texturas
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/baixar_texturas.py
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  baixar:
+    name: Baixar texturas CC0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar
+        run: python3 tools/baixar_texturas.py
+      - name: Guardar no repositório
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add assets/texturas
+          if git diff --cached --quiet; then
+            echo "Nada mudou."
+          else
+            git commit -q -m "Texturas CC0 do Poly Haven (D-067)"
+            git pull -q --rebase origin main
+            git push -q origin HEAD:main
+          fi
+          gh workflow run ci.yml --ref main
