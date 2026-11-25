@@ -47,6 +47,7 @@ const LUNGE_KICK := 4.0         ## m/s de tranco na hora da largada
 const MURCHA_MAX_DEG := 20.0    ## tenteio: um lado da pipa "murcha" (inclina)
 var _tenteio_ativo := false ## o bico está seguindo o ângulo-alvo do tenteio
 var _tenteio_base := 0.0    ## direção do bico quando o tenteio começou (rad)
+var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque duplo)
 var _kick_prev := false
 const KICK_HOLD := 1.5 ## s: depois do último toque o bico fica onde parou
 var _spin_controlado := false
@@ -277,6 +278,9 @@ func integrate(h: float) -> void:
 					# manda linha (ela gira) e tenteia na direção nova.
 					if not _tenteio_ativo:
 						_tenteio_base = _nose_ang(nn)
+					# Toque duplo (D-050): a direção anda 30° junto, de 30 em 30
+					# dá para pôr o bico para o lado, para baixo, dar a volta.
+					_tenteio_base = wrapf(_tenteio_base - kick_sign * deg_to_rad(kick_base_shift), -PI, PI)
 					_hold_ang = wrapf(_tenteio_base - kick_sign * kick_scale * deg_to_rad(d.spin_kick_rate_deg), -PI, PI)
 					_tenteio_ativo = true
 			SpinMode.SPIN_LOCK:

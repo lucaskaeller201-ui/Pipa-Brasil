@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.16.5 — 2026-11-24
+
+- Toque duplo vira o bico 30° (de 30 em 30 dá para pôr o bico para o lado,
+  para baixo ou dar a volta); toques simples continuam tenteando.
+
 ## 0.16.4 — 2026-11-24
 
 - Tenteio: tocar várias vezes balança o bico para os lados, sem a pipa rodar.

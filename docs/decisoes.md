@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-050 — Toque duplo vira a direção de 30 em 30 (2026-11-24)
+O Lucas aprovou o tenteio da D-049 ("é exatamente assim que se tenteia") e
+explicou o que faltava: com os cliques dá para pôr o bico em qualquer direção
+(360°), de 30 em 30 a cada dois cliques. Agora o toque duplo (dois toques com
+menos de 0,2 s) faz a direção em volta da qual o bico balança andar 30° para
+o lado do toque (PilotInput.kick_base_shift). Toques simples continuam só
+balançando; 12 duplos = uma volta.
+
 ### D-049 — Tenteio balança em volta da direção, não roda (2026-11-24)
 O Lucas: dando vários toques a pipa ainda girava; girar é consequência, não o
 tenteio. Agora cada toque leva o bico ~30° para um lado e o próximo para o

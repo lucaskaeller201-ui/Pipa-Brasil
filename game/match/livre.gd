@@ -60,12 +60,15 @@ var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
-var _pendente := -1.0           # instante de um toque esperando para ver se vira duplo
+var _ultimo_toque := -99.0      # instante do último toque (s)
+var _ultimo_duplo := false      # o último toque fechou um toque duplo
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
-## Tenteio (D-049): cada toque balança o bico ~30° para um lado e o próximo
-## para o outro, em volta da direção em que a pipa estava. Tocar rápido não
-## faz a pipa rodar. Rodar / virar a pipa para outra direção: mandar linha.
-const TOQUE_DUPLO_S := 0.22     ## s entre os dois toques do toque duplo
+## Tenteio (D-049, D-050): cada toque balança o bico ~30° para um lado e o
+## próximo para o outro, em volta da direção em que a pipa estava (tocar não
+## faz rodar). Toque DUPLO (dois toques bem juntos): a direção anda 30° para
+## o lado do toque — de 30 em 30 o bico vai para o lado, para baixo, ou dá a
+## volta (12 duplos = 360°).
+const TOQUE_DUPLO_S := 0.2      ## s entre os dois toques do toque duplo
 @export var graus_por_toque := 30.0
 
 # interface
@@ -314,16 +317,24 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 
 ## Tenteio pelo toque (D-041).
 func _tentear() -> void:
-	# cada toque: o bico vai ~30° para o outro lado (na hora, sem esperar)
-	_sentido = -_sentido
-	_desbicar(_sentido, _sentido, 1.0)
+	var agora := Time.get_ticks_msec() / 1000.0
+	if agora - _ultimo_toque < TOQUE_DUPLO_S and not _ultimo_duplo:
+		# 2º toque do duplo: mesmo lado, e a direção anda 30° (D-050)
+		_ultimo_duplo = true
+		_desbicar(_sentido, _sentido, 1.0, graus_por_toque)
+	else:
+		# toque simples: o bico vai ~30° para o outro lado (na hora)
+		_ultimo_duplo = false
+		_sentido = -_sentido
+		_desbicar(_sentido, _sentido, 1.0)
+	_ultimo_toque = agora
 
 
 func _ver_toque_pendente() -> void:
 	pass
 
 
-func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
+func _desbicar(lado: float, sentido := 0.0, escala := 1.0, anda := 0.0) -> void:
 	var eu := modo.you()
 	if _automatico or eu == null or eu.cut or eu.pilot == null:
 		return
@@ -333,6 +344,7 @@ func _desbicar(lado: float, sentido := 0.0, escala := 1.0) -> void:
 	eu.input.kick_side = lado
 	eu.input.kick_spin = sentido
 	eu.input.kick_scale = escala
+	eu.input.kick_base_shift = anda
 	eu.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, modo.world.time)
 	_embalo = 0.0
 
@@ -494,7 +506,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · para virar a pipa, mande linha"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · TOQUE DUPLO: o bico vira 30° (de 30 em 30)"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0

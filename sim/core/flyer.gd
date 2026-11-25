@@ -122,6 +122,7 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 		if input.kick_spin != 0.0:
 			k.kick_sign = signf(input.kick_spin)   # volta: continua no mesmo sentido (D-039)
 		k.kick_scale = input.kick_scale
+		k.kick_base_shift = input.kick_base_shift
 	# Memória da pressão: para a largada (puxa, e solta de uma vez no relô).
 	tension_memo = maxf(tension, tension_memo - 6.0 * h)
 	tenteio_age = 0.0 if k.spin_mode == KiteBody.SpinMode.SPIN_KICK else tenteio_age + h

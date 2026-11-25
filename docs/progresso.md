@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-24 (versão 0.16.4).
+Atualizado em 2026-11-24 (versão 0.16.5).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -31,7 +31,8 @@ Atualizado em 2026-11-24 (versão 0.16.4).
 | Prévia do modelo na tela de pipa na mão; câmera mais perto | Feito (D-046) |
 | Bico sem papel; tenteio 30° sem rodar, toque duplo segue virando | Feito (D-047), Lucas aprovou |
 | Rabiola fina de longe | Feito (D-048) |
-| Tenteio que balança e não roda | Feito (D-049), aguardando teste do Lucas |
+| Tenteio que balança e não roda | Feito (D-049), Lucas aprovou |
+| Toque duplo vira o bico de 30 em 30 | Feito (D-050), aguardando teste do Lucas |
 | Próximo no visual: cenário, boneco, animações | Pendente |
 | Pipa do Rio com rabiola; giro constante dando linha; toque trava e arranca | Feito (D-026) |
 | Linhas laçadas até alguém cortar; relo (quem corre gasta a parada); faísca | Feito (D-027) |

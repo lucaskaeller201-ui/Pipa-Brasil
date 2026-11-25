@@ -21,6 +21,9 @@ var kick_side := 1.0
 var kick_spin := 0.0
 ## Tamanho do pulo do tenteio (1 = normal).
 var kick_scale := 1.0
+## Toque duplo (D-050): quantos graus a direção do tenteio anda junto, no
+## sentido do toque (0 = só balança em volta da direção).
+var kick_base_shift := 0.0
 
 
 func clear() -> void:

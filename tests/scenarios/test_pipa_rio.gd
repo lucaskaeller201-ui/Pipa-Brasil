@@ -281,3 +281,27 @@ func _coice(puxar_antes: bool) -> float:
 	if puxar_antes:
 		assert_eq(f.lunges, 1, "deu uma largada")
 	return dp.dot(dir0)
+
+
+## D-050: cada toque duplo anda 30° a direção do bico; 12 duplos = uma volta.
+## Entre os duplos o bico pode balançar, mas a direção vai andando.
+func test_toques_duplos_viram_o_bico_de_30_em_30() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var giro := 0.0
+	var antes := f.nose_angle_deg()
+	for k in 12:
+		for toque in 2:
+			f.input.kick_spin = 1.0
+			f.input.kick_base_shift = 0.0 if toque == 0 else 30.0
+			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+			for i in roundi((0.12 if toque == 0 else 0.3) / DT):
+				w.step(DT)
+				var agora := f.nose_angle_deg()
+				giro += wrapf(agora - antes, -180.0, 180.0)
+				antes = agora
+	f.input.kick_spin = 0.0
+	f.input.kick_base_shift = 0.0
+	print("      [toques duplos] 12 duplos: o bico virou %.0f°" % giro)
+	assert_true(absf(giro) > 330.0 and absf(giro) < 420.0, "de 30 em 30, 12 duplos = uma volta (%.0f°)" % giro)
+	assert_true(w.is_finite_state())

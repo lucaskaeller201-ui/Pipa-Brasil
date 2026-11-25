@@ -122,6 +122,7 @@ func update(dt: float) -> void:
 				f.input.kick_side = lado
 				f.input.kick_spin = 0.0
 				f.input.kick_scale = 1.0
+				f.input.kick_base_shift = 0.0
 				f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, t)
 			# Fujão: com a linha laçada (dá para ver), descarrega para escapar.
 			if p["profile"] == "fujao" and _lacado(f):
