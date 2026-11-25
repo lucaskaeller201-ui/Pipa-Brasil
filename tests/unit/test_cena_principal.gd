@@ -153,6 +153,12 @@ func test_pagina_inicial_mapa_e_hora() -> void:
 	assert_eq(String(raiz.get("_mapa")), mapa_antes, "volta ao primeiro mapa")
 	for k in 3:
 		raiz.call("_trocar_hora")
+	# D-066: começa em ULTRA (antisserrilhado ligado) e troca de qualidade
+	assert_eq(String(raiz.get("_graficos")), "ultra")
+	assert_eq(raiz.get_viewport().msaa_3d, Viewport.MSAA_4X, "ULTRA liga o antisserrilhado")
+	for k in 3:
+		raiz.call("_trocar_graficos")
+	assert_eq(String(raiz.get("_graficos")), "ultra", "volta ao ULTRA")
 	raiz.set("_mapa", "praia")
 	raiz.call("_montar_cenario")
 	var cenario: Node3D = raiz.get("_cenario")

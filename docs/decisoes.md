@@ -33,6 +33,13 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-066 — Gráficos ULTRA: antisserrilhado e sombras nítidas (2026-11-25)
+O Lucas achou o jogo "pixelado". A causa principal era o serrilhado das bordas
+(o jogo rodava sem antisserrilhado) e a sombra em baixa resolução. Agora há um
+botão "Gráficos" na página inicial: ULTRA (padrão: MSAA 4x + FXAA, filtro
+anisotrópico 16x, sombra 4096 com 4 faixas e borda macia), Alto e Leve (para
+celular fraco: sem MSAA e resolução 80%). Fica salvo nas preferências.
+
 ### D-065 — Visual mais realista: árvores, coqueiros, telhados, nuvens (2026-11-25)
 O Lucas achou tudo com cara de Minecraft. Ainda por código (leve, de graça):
 - Árvores: tronco que afina, galhos e copa de várias bolas de folhagem com um

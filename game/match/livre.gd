@@ -101,6 +101,11 @@ var _hora := "por_do_sol"
 var _cenario: Node3D
 var _botao_mapa: Button
 var _botao_hora: Button
+var _botao_graficos: Button
+## D-066: qualidade dos gráficos (ULTRA por padrão).
+const GRAFICOS := ["ultra", "alto", "leve"]
+const NOMES_GRAFICOS := {"ultra": "ULTRA", "alto": "Alto", "leve": "Leve (celular fraco)"}
+var _graficos := "ultra"
 var _titulo_pipa: Control
 const ARQUIVO_PREFERENCIAS := "user://preferencias.json"
 var _mapa_arg := ""
@@ -138,6 +143,7 @@ func _ready() -> void:
 	if Ambiente.HORAS.has(_hora_arg):
 		_hora = _hora_arg
 	_no_lobby = not _automatico or _inicio_arg
+	_aplicar_graficos()
 	_montar_cenario()
 	for i in modo.players.size():
 		var corpo: Node3D = Boneco.new()
@@ -175,6 +181,43 @@ func _montar_cenario() -> void:
 	Bairro.criar(_cenario, modo.players.size(), 7, _mapa)
 
 
+## D-066: suavização das bordas (antisserrilhado), sombras nítidas e
+## texturas nítidas de longe. É isso que tira o "pixelado"/serrilhado.
+func _aplicar_graficos() -> void:
+	var vp := get_viewport()
+	if vp == null:
+		return
+	match _graficos:
+		"ultra":
+			vp.msaa_3d = Viewport.MSAA_4X
+			vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+			vp.scaling_3d_scale = 1.0
+			vp.anisotropic_filtering_level = Viewport.ANISOTROPY_16X
+			RenderingServer.directional_shadow_atlas_set_size(4096, true)
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_HIGH)
+		"alto":
+			vp.msaa_3d = Viewport.MSAA_2X
+			vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+			vp.scaling_3d_scale = 1.0
+			vp.anisotropic_filtering_level = Viewport.ANISOTROPY_4X
+			RenderingServer.directional_shadow_atlas_set_size(2048, true)
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
+		_:
+			vp.msaa_3d = Viewport.MSAA_DISABLED
+			vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+			vp.scaling_3d_scale = 0.8
+			vp.anisotropic_filtering_level = Viewport.ANISOTROPY_DISABLED
+			RenderingServer.directional_shadow_atlas_set_size(1024, true)
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_HARD)
+
+
+func _trocar_graficos() -> void:
+	_graficos = String(GRAFICOS[(GRAFICOS.find(_graficos) + 1) % GRAFICOS.size()])
+	_aplicar_graficos()
+	_salvar_preferencias()
+	_atualizar_lobby()
+
+
 func _carregar_preferencias() -> void:
 	if not FileAccess.file_exists(ARQUIVO_PREFERENCIAS):
 		return
@@ -187,12 +230,14 @@ func _carregar_preferencias() -> void:
 			_mapa = String(dados["mapa"])
 		if Ambiente.HORAS.has(String((dados as Dictionary).get("hora", ""))):
 			_hora = String(dados["hora"])
+		if GRAFICOS.has(String((dados as Dictionary).get("graficos", ""))):
+			_graficos = String(dados["graficos"])
 
 
 func _salvar_preferencias() -> void:
 	var f := FileAccess.open(ARQUIVO_PREFERENCIAS, FileAccess.WRITE)
 	if f != null:
-		f.store_string(JSON.stringify({"mapa": _mapa, "hora": _hora}))
+		f.store_string(JSON.stringify({"mapa": _mapa, "hora": _hora, "graficos": _graficos}))
 
 
 ## Avança o jogo (também usado pelos testes).
@@ -1146,6 +1191,10 @@ func _criar_lobby(raiz: Control) -> void:
 	_botao_hora.add_theme_font_size_override("font_size", 24)
 	_botao_hora.custom_minimum_size = Vector2(400.0, 56.0)
 	_botao_hora.pressed.connect(_trocar_hora)
+	_botao_graficos = _botao(caixa, "")
+	_botao_graficos.add_theme_font_size_override("font_size", 24)
+	_botao_graficos.custom_minimum_size = Vector2(400.0, 56.0)
+	_botao_graficos.pressed.connect(_trocar_graficos)
 	var lab := _botao(caixa, "Laboratório de voo")
 	lab.add_theme_font_size_override("font_size", 18)
 	lab.pressed.connect(_ir_laboratorio)
@@ -1161,6 +1210,7 @@ func _criar_lobby(raiz: Control) -> void:
 func _atualizar_lobby() -> void:
 	_botao_mapa.text = "Mapa: %s  ›" % String(Bairro.NOMES_MAPAS[_mapa])
 	_botao_hora.text = "Hora: %s  ›" % String(Ambiente.HORAS[_hora]["nome"])
+	_botao_graficos.text = "Gráficos: %s  ›" % String(NOMES_GRAFICOS[_graficos])
 
 
 func _trocar_mapa() -> void:

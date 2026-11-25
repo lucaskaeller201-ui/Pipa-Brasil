@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.20.2 — 2026-11-25
+
+- Gráficos ULTRA (padrão): bordas suaves, sem serrilhado; sombras nítidas e
+  macias; texturas nítidas de longe. Botão "Gráficos" na página inicial
+  (ULTRA / Alto / Leve).
+
 ## 0.20.1 — 2026-11-25
 
 - Árvores com folhagem de verdade e balançando; coqueiros com palha; telhados

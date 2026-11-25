@@ -64,7 +64,9 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	sol.light_color = h["sol_cor"]
 	sol.light_energy = float(h["sol_forca"])
 	sol.shadow_enabled = true
-	sol.directional_shadow_max_distance = 90.0
+	sol.directional_shadow_max_distance = 120.0
+	sol.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sol.shadow_blur = 1.5   # D-066: sombra com borda macia, não serrilhada
 	sol.rotation_degrees = h["sol_rot"]
 	pai.add_child(sol)
 
