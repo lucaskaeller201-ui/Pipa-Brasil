@@ -5,6 +5,12 @@ shader_type spatial;
 varying vec3 mundo;
 varying vec3 nm;
 
+uniform float texturas = 0.0;   // D-067
+uniform sampler2D t_telha : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_telha : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec3 m_telha = vec3(0.36);
+uniform vec3 tom_barro : source_color = vec3(0.62, 0.3, 0.17);
+
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -27,6 +33,15 @@ void fragment() {
 	barro *= 0.75 + 0.25 * onda;
 	barro *= 0.65 + 0.35 * sombra;
 	barro = mix(barro, vec3(0.3, 0.28, 0.25), hash(floor(mundo.xz * 0.7)) * 0.15);
+	if (texturas > 0.5) {
+		// foto de telhado: mantém o desenho das telhas, repintado de barro
+		vec2 uvt = vec2(u, -v) / 3.0;
+		vec3 det = texture(t_telha, uvt).rgb / m_telha;
+		float l = dot(det, vec3(0.33));
+		barro = tom_barro * mix(0.85, 1.15, tom) * mix(vec3(l), det, 0.25);
+		NORMAL_MAP = texture(n_telha, uvt).rgb;
+		NORMAL_MAP_DEPTH = 1.0;
+	}
 	ALBEDO = barro;
 	ROUGHNESS = 0.8;
 }

@@ -13,6 +13,22 @@ func test_shaders_carregam() -> void:
 		assert_true(s.code.length() > 100, "%s tem código" % nome)
 
 
+## D-067: as fotos CC0 estão no projeto e chegam aos shaders.
+func test_texturas_fotograficas() -> void:
+	var T = load("res://game/world/texturas.gd")
+	for v in ["asfalto", "concreto", "terra", "grama", "areia", "reboco", "tijolo", "telha", "casca"]:
+		assert_true(T.existe(v), "foto de %s existe" % v)
+		assert_not_null(T.cor(v), "foto de %s carrega" % v)
+		assert_not_null(T.relevo(v), "relevo de %s carrega" % v)
+	var raiz := Node3D.new()
+	Ambiente.criar(raiz, "meio_dia", "bairro")
+	var chao: MeshInstance3D = raiz.get_node("Chao")
+	var mat: ShaderMaterial = chao.material_override
+	assert_eq(float(mat.get_shader_parameter("texturas")), 1.0, "chão usa as fotos")
+	assert_not_null(mat.get_shader_parameter("t_asfalto"))
+	raiz.free()
+
+
 func test_bairro_monta_com_casas_arvores_e_morro() -> void:
 	var raiz := Node3D.new()
 	Ambiente.criar_por_do_sol(raiz, false)

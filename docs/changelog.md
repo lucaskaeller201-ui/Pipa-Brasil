@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.21.0 — 2026-11-25
+
+- Texturas de fotos reais (CC0, Poly Haven): asfalto com rachaduras, calçada
+  de concreto, terra com mato, areia, reboco, tijolo, telha e casca de árvore,
+  com relevo que reage à luz do sol.
+
 ## 0.20.2 — 2026-11-25
 
 - Gráficos ULTRA (padrão): bordas suaves, sem serrilhado; sombras nítidas e

@@ -13,6 +13,32 @@ uniform float areia_z = -37.0;    // começa a areia
 
 varying vec3 mundo;
 
+// D-067: fotos CC0 (Poly Haven). "m_" = cor média da foto, para repintar.
+uniform float texturas = 0.0;
+uniform sampler2D t_asfalto : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_asfalto : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_concreto : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_concreto : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_terra : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_terra : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_grama : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_grama : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_areia : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_areia : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec3 m_asfalto = vec3(0.35);
+uniform vec3 m_concreto = vec3(0.45);
+uniform vec3 m_terra = vec3(0.4);
+uniform vec3 m_grama = vec3(0.4);
+uniform vec3 m_areia = vec3(0.5);
+
+// Duas leituras em escalas/ângulos diferentes: esconde a repetição da foto.
+vec3 foto(sampler2D t, vec2 p, float metros) {
+	vec2 uv = p / metros;
+	vec3 a = texture(t, uv).rgb;
+	vec2 uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * uv * 0.37 + vec2(0.31, 0.17);
+	return mix(a, texture(t, uv2).rgb, 0.35);
+}
+
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -81,6 +107,41 @@ void fragment() {
 			cor = vec3(0.85, 0.7, 0.15);
 		}
 		rug = 0.8;
+	}
+	if (texturas > 0.5) {
+		// D-067: mesmas áreas, agora com foto de verdade repintada na cor certa
+		vec3 nm = vec3(0.5, 0.5, 1.0);
+		float macro = 0.85 + 0.3 * ruido(p * 0.02);
+		if (praia > 0.5 && p.y < calcadao_z) {
+			if (p.y > areia_z) {
+				vec3 det = foto(t_concreto, p, 2.0) / m_concreto;
+				cor *= mix(vec3(1.0), det, 0.6);
+				nm = texture(n_concreto, p / 2.0).rgb;
+			} else {
+				float molhada = smoothstep(-80.0, -95.0, p.y);
+				vec3 det = foto(t_areia, p, 2.5) / m_areia;
+				cor = mix(vec3(0.9, 0.82, 0.64), vec3(0.6, 0.5, 0.37), molhada) * det;
+				nm = texture(n_areia, p / 2.5).rgb;
+			}
+		} else if (r.x > 1.5) {
+			float lajota = step(0.96, fract(p.x * 0.5)) + step(0.96, fract(p.y * 0.5));
+			cor = foto(t_concreto, p, 2.0) / m_concreto * vec3(0.62, 0.6, 0.57) * (1.0 - 0.3 * clamp(lajota, 0.0, 1.0));
+			nm = texture(n_concreto, p / 2.0).rgb;
+		} else if (r.x > 0.5) {
+			cor = foto(t_asfalto, p, 3.0) / m_asfalto * vec3(0.2, 0.2, 0.21) * macro;
+			if (r.z < 0.08 && fract(r.y * 0.25) < 0.5) {
+				cor = vec3(0.8, 0.66, 0.15) * (0.7 + 0.3 * foto(t_asfalto, p, 3.0) / m_asfalto);
+			}
+			nm = texture(n_asfalto, p / 3.0).rgb;
+		} else {
+			float mato = smoothstep(0.5, 0.72, ruido(p * 0.045 + vec2(7.0, 3.0)));
+			vec3 chao_terra = foto(t_terra, p, 3.0) / m_terra * vec3(0.34, 0.27, 0.19);
+			vec3 chao_grama = foto(t_grama, p, 4.0) / m_grama * vec3(0.24, 0.32, 0.13);
+			cor = mix(chao_terra, chao_grama, mato) * macro;
+			nm = mix(texture(n_terra, p / 3.0).rgb, texture(n_grama, p / 4.0).rgb, mato);
+		}
+		NORMAL_MAP = nm;
+		NORMAL_MAP_DEPTH = 1.0;
 	}
 	ALBEDO = cor;
 	ROUGHNESS = rug;

@@ -9,6 +9,18 @@ uniform float semente = 0.0;
 varying vec3 mundo;
 varying vec3 normal_mundo;
 
+// D-067: fotos CC0 de reboco, tijolo e concreto (laje)
+uniform float texturas = 0.0;
+uniform sampler2D t_reboco : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_reboco : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_tijolo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_tijolo : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D t_concreto : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D n_concreto : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec3 m_reboco = vec3(0.68);
+uniform vec3 m_tijolo = vec3(0.4);
+uniform vec3 m_concreto = vec3(0.45);
+
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233)) + semente) * 43758.5453);
 }
@@ -22,10 +34,15 @@ void fragment() {
 	vec3 n = normal_mundo;
 	vec3 c;
 	float rug = 0.92;
+	vec3 nm = vec3(0.5, 0.5, 1.0);
 	if (n.y > 0.5) {
 		// laje: concreto com manchas
 		float m = hash(floor(mundo.xz * 1.5));
 		c = mix(vec3(0.55, 0.54, 0.52), vec3(0.45, 0.44, 0.43), m * 0.6);
+		if (texturas > 0.5) {
+			c = texture(t_concreto, mundo.xz / 2.0).rgb / m_concreto * vec3(0.52, 0.51, 0.49);
+			nm = texture(n_concreto, mundo.xz / 2.0).rgb;
+		}
 	} else {
 		vec2 t2 = normalize(vec2(-n.z, n.x));
 		float u = dot(mundo.xz, t2);
@@ -37,12 +54,21 @@ void fragment() {
 			float tom = hash(vec2(floor(uu), fila));
 			c = mix(vec3(0.66, 0.3, 0.18), vec3(0.78, 0.4, 0.24), tom);
 			c = mix(c, vec3(0.62, 0.58, 0.52), clamp(junta, 0.0, 1.0));
+			if (texturas > 0.5) {
+				c = texture(t_tijolo, vec2(u, -v) / 1.1).rgb / m_tijolo * vec3(0.55, 0.3, 0.22);
+				nm = texture(n_tijolo, vec2(u, -v) / 1.1).rgb;
+			}
 		} else {
 			float sujo = smoothstep(0.0, 1.2, 1.0 - fract(v / 3.0)) * 0.08;
 			// reboco com manchas suaves e escorrido de chuva (D-065)
 			float mancha = hash(floor(vec2(u * 0.7, v * 0.25))) * 0.08;
 			float escorre = smoothstep(0.7, 1.0, hash(vec2(floor(u * 1.3), 3.0))) * smoothstep(0.0, 2.5, fract(-v / 3.0) * 3.0) * 0.12;
 			c = cor * (0.97 - sujo - mancha - escorre + 0.04 * hash(floor(vec2(u, v) * 6.0)));
+			if (texturas > 0.5) {
+				vec3 det = texture(t_reboco, vec2(u, -v) / 2.0).rgb / m_reboco;
+				c = cor * (0.97 - sujo - mancha * 0.5 - escorre) * mix(vec3(1.0), det, 0.85);
+				nm = texture(n_reboco, vec2(u, -v) / 2.0).rgb;
+			}
 		}
 		// janelas: uma por módulo de 3 m de largura e 3 m de altura
 		vec2 cel = vec2(u / 3.0, v / 3.0);
@@ -56,6 +82,7 @@ void fragment() {
 			float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 			vec3 vidro = mix(vec3(0.1, 0.14, 0.2), vec3(0.55, 0.68, 0.85), fres * 0.8 + 0.1);
 			c = moldura ? vec3(0.85, 0.85, 0.82) : mix(vidro, vec3(1.0, 0.82, 0.5), acesa);
+			nm = vec3(0.5, 0.5, 1.0);
 			rug = moldura ? 0.6 : 0.08;
 		}
 		// porta (térreo)
@@ -67,4 +94,8 @@ void fragment() {
 	c *= mix(0.62, 1.0, smoothstep(0.0, 1.4, mundo.y));
 	ALBEDO = c;
 	ROUGHNESS = rug;
+	if (texturas > 0.5) {
+		NORMAL_MAP = nm;
+		NORMAL_MAP_DEPTH = 0.8;
+	}
 }

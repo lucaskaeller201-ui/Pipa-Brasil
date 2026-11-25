@@ -5,6 +5,7 @@ extends RefCounted
 ## fundo. Tudo gerado por código, sem modelos externos (custo zero).
 ## Só visual: a física ainda não colide com casas (o chão da física é y = 0).
 
+const Texturas := preload("res://game/world/texturas.gd")
 const ALTURA_LAJE := 6.0
 ## Lajes de onde se solta pipa (a primeira é a sua). O vento sopra para -Z.
 const LAJES := [Vector3(0.0, 0.0, 0.0), Vector3(16.0, 0.0, -4.0), Vector3(-16.0, 0.0, -2.0),
@@ -116,6 +117,7 @@ static func _material_parede(cor: Color, tijolo: bool) -> ShaderMaterial:
 	m.set_shader_parameter("cor", cor)
 	m.set_shader_parameter("tijolo", 1.0 if tijolo else 0.0)
 	m.set_shader_parameter("semente", float(_mats.size()) * 1.7)
+	Texturas.aplicar(m, ["reboco", "tijolo", "concreto"])
 	_mats[chave] = m
 	return m
 
@@ -156,6 +158,7 @@ static func _telhado(pai: Node3D, topo: Vector3, tamanho: Vector3, rng: RandomNu
 	if _mat_telha == null:
 		_mat_telha = ShaderMaterial.new()
 		_mat_telha.shader = load("res://game/world/shaders/telha.gdshader")
+		Texturas.aplicar(_mat_telha, ["telha"])
 	var m := MeshInstance3D.new()
 	var prisma := PrismMesh.new()
 	var ao_longo_x := tamanho.x >= tamanho.z
@@ -271,6 +274,15 @@ static func _materiais_arvore() -> void:
 	_mat_tronco = StandardMaterial3D.new()
 	_mat_tronco.albedo_color = Color(0.33, 0.24, 0.17)
 	_mat_tronco.roughness = 0.95
+	if Texturas.existe("casca"):
+		# D-067: casca de árvore de verdade, projetada nos três eixos
+		_mat_tronco.albedo_color = Color(1.0, 0.95, 0.9)
+		_mat_tronco.albedo_texture = Texturas.cor("casca")
+		_mat_tronco.normal_enabled = true
+		_mat_tronco.normal_texture = Texturas.relevo("casca")
+		_mat_tronco.uv1_triplanar = true
+		_mat_tronco.uv1_scale = Vector3(0.8, 0.8, 0.8)
+		_mat_tronco.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 
 
 ## Árvore (D-065): tronco que afina, galhos, e uma copa feita de várias bolas

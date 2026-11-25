@@ -75,6 +75,7 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	# Chão com ruas, calçadas e terra (D-057); na praia, calçadão e areia.
 	var material := ShaderMaterial.new()
 	material.shader = load("res://game/world/shaders/chao.gdshader")
+	load("res://game/world/texturas.gd").aplicar(material, ["asfalto", "concreto", "terra", "grama", "areia"])
 	if mapa == "praia":
 		material.set_shader_parameter("praia", 1.0)
 		material.set_shader_parameter("rua_x2", Vector4(-1000.0, 1000.0, -29.0, -21.0))  # avenida da orla

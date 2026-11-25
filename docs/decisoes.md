@@ -33,6 +33,18 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-067 — Texturas fotográficas CC0 do Poly Haven (2026-11-25)
+Para sair do visual "desenhado por código", o chão (asfalto, calçada,
+terra, mato, areia, calçadão), as paredes (reboco, tijolo, laje), os
+telhados e os troncos usam fotos de materiais reais do Poly Haven
+(licença CC0: grátis e livre). O workflow "Texturas" baixa as fotos (1k JPG,
+cor + relevo) com tools/baixar_texturas.py e guarda em assets/texturas,
+com os créditos em CREDITOS.md. Os shaders mantêm o desenho do mapa (ruas,
+janelas, cores das casas) e "repintam" a foto pela cor média, para cada
+casa continuar com sua cor. Duas leituras em escalas diferentes escondem
+a repetição. Sem as fotos, volta o visual por código. Importadas com
+mipmaps e compressão de GPU (ETC2/ASTC no iPhone).
+
 ### D-066 — Gráficos ULTRA: antisserrilhado e sombras nítidas (2026-11-25)
 O Lucas achou o jogo "pixelado". A causa principal era o serrilhado das bordas
 (o jogo rodava sem antisserrilhado) e a sombra em baixa resolução. Agora há um
