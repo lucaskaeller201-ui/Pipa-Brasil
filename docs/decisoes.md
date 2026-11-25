@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-065 — Visual mais realista: árvores, coqueiros, telhados, nuvens (2026-11-25)
+O Lucas achou tudo com cara de Minecraft. Ainda por código (leve, de graça):
+- Árvores: tronco que afina, galhos e copa de várias bolas de folhagem com um
+  shader que fura a bola com ruído (vira um monte de folhas recortado), tons
+  variados, topo mais claro e balanço com o vento.
+- Coqueiros: tronco curvado em gomos, folhas de palha que vergam com o peso e
+  se dividem em folíolos (shader), balançando; cocos.
+- Telhados de telha de barro (fileiras, canais e sombra) em parte das casas.
+- Nuvens com forma de cúmulo (ruído dobrado) e luz: topo claro, barriga
+  cinza, borda prateada perto do sol.
+- Paredes com manchas, escorrido de chuva, sombra no pé da parede e vidro que
+  reflete o céu.
+- Boneco mais liso (mais segmentos).
+
 ### D-064 — Catálogo de pipas e linhas; escolher como no Pipa Combate (2026-11-25)
 O Lucas mandou as telas de escolha do Pipa Combate e pediu igual. Agora o
 botão COLOCAR NO ALTO abre a tela de pipas (cartões com o desenho, nome,

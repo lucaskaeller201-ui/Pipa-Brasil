@@ -35,6 +35,8 @@ static var _ruas: Array = RUAS
 
 static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
 	_mats.clear()
+	_mat_folha.clear()
+	_mat_telha = null
 	var praia := mapa == "praia"
 	_ruas = RUAS_PRAIA if praia else RUAS
 	var rng := RandomNumberGenerator.new()
@@ -122,6 +124,10 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 	var corpo := _caixa(pai, base + Vector3(0.0, tamanho.y * 0.5, 0.0), tamanho, cor, 0.9)
 	corpo.material_override = _material_parede(cor, tijolo)
 	var topo := base + Vector3(0.0, tamanho.y, 0.0)
+	# D-065: parte das casas com telhado de telha de barro (menos "caixote")
+	if tamanho.y < 7.0 and rng.randf() < 0.45:
+		_telhado(pai, topo, tamanho, rng)
+		return
 	# mureta da laje em algumas casas
 	if rng.randf() < 0.5:
 		var mc := cor.darkened(0.08)
@@ -141,6 +147,27 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 		_antena(pai, topo + Vector3(-tamanho.x * 0.3, 0.0, 0.0))
 	if rng.randf() < 0.25:
 		_varal(pai, topo + Vector3(0.0, 0.0, tamanho.z * 0.2), tamanho.x * 0.7, rng)
+
+
+static var _mat_telha: ShaderMaterial
+
+
+static func _telhado(pai: Node3D, topo: Vector3, tamanho: Vector3, rng: RandomNumberGenerator) -> void:
+	if _mat_telha == null:
+		_mat_telha = ShaderMaterial.new()
+		_mat_telha.shader = load("res://game/world/shaders/telha.gdshader")
+	var m := MeshInstance3D.new()
+	var prisma := PrismMesh.new()
+	var ao_longo_x := tamanho.x >= tamanho.z
+	var vao := tamanho.z if ao_longo_x else tamanho.x
+	var comp := tamanho.x if ao_longo_x else tamanho.z
+	prisma.size = Vector3(vao + 0.6, vao * rng.randf_range(0.28, 0.4), comp + 0.6)
+	m.mesh = prisma
+	m.material_override = _mat_telha
+	m.position = topo + Vector3(0.0, prisma.size.y * 0.5, 0.0)
+	if ao_longo_x:
+		m.rotation.y = PI * 0.5
+	pai.add_child(m)
 
 
 static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumberGenerator, sua := false) -> void:
@@ -222,44 +249,128 @@ static func _varal(pai: Node3D, base: Vector3, largura: float, rng: RandomNumber
 		x += w + rng.randf_range(0.1, 0.5)
 
 
+static var _mat_folha: Array = []
+static var _mat_palha: ShaderMaterial
+static var _mat_tronco: StandardMaterial3D
+
+
+static func _materiais_arvore() -> void:
+	if not _mat_folha.is_empty():
+		return
+	var sh: Shader = load("res://game/world/shaders/folhagem.gdshader")
+	for par in [[Color(0.09, 0.24, 0.07), Color(0.33, 0.52, 0.15)], [Color(0.12, 0.28, 0.06), Color(0.45, 0.58, 0.18)],
+			[Color(0.07, 0.2, 0.09), Color(0.26, 0.46, 0.2)]]:
+		var m := ShaderMaterial.new()
+		m.shader = sh
+		m.set_shader_parameter("verde_escuro", par[0])
+		m.set_shader_parameter("verde_claro", par[1])
+		_mat_folha.append(m)
+	_mat_palha = ShaderMaterial.new()
+	_mat_palha.shader = load("res://game/world/shaders/palha.gdshader")
+	_mat_palha.set_shader_parameter("comprimento", 3.0)
+	_mat_tronco = StandardMaterial3D.new()
+	_mat_tronco.albedo_color = Color(0.33, 0.24, 0.17)
+	_mat_tronco.roughness = 0.95
+
+
+## Árvore (D-065): tronco que afina, galhos, e uma copa feita de várias bolas
+## de folhagem furadas por ruído (parece um monte de folhas), balançando.
 static func _arvore(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> void:
-	var altura := rng.randf_range(3.0, 5.0)
-	_cilindro(pai, base, 0.18, 0.12, altura, Color(0.35, 0.24, 0.15), 7)
-	var verde := Color(0.18, 0.4, 0.15).lerp(Color(0.32, 0.52, 0.2), rng.randf())
+	_materiais_arvore()
+	var altura := rng.randf_range(3.2, 5.2)
+	var tronco := _cilindro(pai, base, 0.2, 0.11, altura, Color(0.33, 0.24, 0.17), 10)
+	tronco.material_override = _mat_tronco
+	var mat_f: ShaderMaterial = _mat_folha[rng.randi() % _mat_folha.size()]
+	var topo := base + Vector3(0.0, altura, 0.0)
+	# galhos abrindo para os lados
 	for k in 3:
+		var ang := TAU * k / 3.0 + rng.randf() * 0.8
+		var galho := MeshInstance3D.new()
+		var cil := CylinderMesh.new()
+		cil.top_radius = 0.04
+		cil.bottom_radius = 0.08
+		cil.height = 1.5
+		cil.radial_segments = 6
+		cil.rings = 1
+		galho.mesh = cil
+		galho.material_override = _mat_tronco
+		galho.position = topo + Vector3(sin(ang) * 0.45, -0.3, cos(ang) * 0.45)
+		galho.rotation = Vector3(0.0, ang, 0.0)
+		galho.rotate_object_local(Vector3.RIGHT, 0.8)
+		pai.add_child(galho)
+	# copa: bolas de folhagem
+	var raio := rng.randf_range(1.6, 2.3)
+	for k in 6:
 		var m := MeshInstance3D.new()
-		var copa := SphereMesh.new()
-		var r := rng.randf_range(1.2, 1.9)
-		copa.radius = r
-		copa.height = r * 1.6
-		copa.radial_segments = 10
-		copa.rings = 6
-		m.mesh = copa
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = verde.darkened(rng.randf_range(0.0, 0.2))
-		mat.roughness = 1.0
-		m.material_override = mat
-		m.position = base + Vector3(rng.randf_range(-0.8, 0.8), altura + rng.randf_range(-0.3, 0.6), rng.randf_range(-0.8, 0.8))
+		var bola := SphereMesh.new()
+		var r := raio * rng.randf_range(0.55, 0.85)
+		bola.radius = r
+		bola.height = r * 1.7
+		bola.radial_segments = 14
+		bola.rings = 8
+		m.mesh = bola
+		m.material_override = mat_f
+		var ang2 := rng.randf() * TAU
+		var d := raio * rng.randf_range(0.2, 0.6) if k > 0 else 0.0
+		m.position = topo + Vector3(sin(ang2) * d, rng.randf_range(-0.2, 0.9) + (0.5 if k == 0 else 0.0), cos(ang2) * d)
 		pai.add_child(m)
 
 
+## Coqueiro (D-065): tronco curvado em gomos e folhas de palha que vergam.
 static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> void:
+	_materiais_arvore()
 	var altura := rng.randf_range(6.0, 9.0)
-	_cilindro(pai, base, 0.2, 0.13, altura, Color(0.48, 0.38, 0.27), 7)
-	var topo := base + Vector3(0.0, altura, 0.0)
-	for k in 7:
-		var ang := TAU * k / 7.0 + rng.randf() * 0.3
-		var folha := MeshInstance3D.new()
-		var malha := BoxMesh.new()
-		malha.size = Vector3(0.5, 0.05, 2.6)
-		folha.mesh = malha
+	var inclina := Vector3(rng.randf_range(-0.6, 0.6), 0.0, rng.randf_range(-0.6, 0.6))
+	var gomos := 6
+	var anterior := base
+	for k in gomos:
+		var t := (k + 1.0) / gomos
+		var p := base + Vector3(0.0, altura * t, 0.0) + inclina * t * t
+		var seg := MeshInstance3D.new()
+		var cil := CylinderMesh.new()
+		cil.top_radius = lerpf(0.2, 0.13, t)
+		cil.bottom_radius = lerpf(0.2, 0.13, t - 1.0 / gomos) + 0.015
+		cil.height = anterior.distance_to(p)
+		cil.radial_segments = 9
+		cil.rings = 1
+		seg.mesh = cil
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.2, 0.45, 0.16)
-		mat.roughness = 1.0
-		folha.material_override = mat
-		folha.position = topo + Vector3(sin(ang), -0.35, cos(ang)) * 1.2
-		folha.rotation = Vector3(0.45, ang, 0.0)
+		mat.albedo_color = Color(0.5, 0.41, 0.3).darkened(0.08 * float(k % 2))
+		mat.roughness = 0.95
+		seg.material_override = mat
+		seg.position = (anterior + p) * 0.5
+		var dir := (p - anterior).normalized()
+		if absf(dir.dot(Vector3.UP)) < 0.999:
+			seg.basis = Basis(Vector3.UP.cross(dir).normalized(), Vector3.UP.angle_to(dir))
+		pai.add_child(seg)
+		anterior = p
+	var topo := anterior
+	for k in 9:
+		var ang := TAU * k / 9.0 + rng.randf() * 0.25
+		var folha := MeshInstance3D.new()
+		var plano := PlaneMesh.new()
+		plano.size = Vector2(0.9, 3.0)
+		plano.subdivide_depth = 10
+		plano.orientation = PlaneMesh.FACE_Y
+		folha.mesh = plano
+		folha.material_override = _mat_palha
+		folha.position = topo + Vector3(sin(ang), 0.15, cos(ang)) * 1.45
+		folha.rotation = Vector3(-0.25 + rng.randf() * 0.3, ang, 0.0)
 		pai.add_child(folha)
+	# cocos
+	for k in 3:
+		var coco := MeshInstance3D.new()
+		var b := SphereMesh.new()
+		b.radius = 0.13
+		b.height = 0.26
+		b.radial_segments = 8
+		b.rings = 4
+		coco.mesh = b
+		var mc := StandardMaterial3D.new()
+		mc.albedo_color = Color(0.32, 0.4, 0.12)
+		coco.material_override = mc
+		coco.position = topo + Vector3(sin(k * 2.1) * 0.22, -0.25, cos(k * 2.1) * 0.22)
+		pai.add_child(coco)
 
 
 static func _poste(pai: Node3D, base: Vector3) -> Vector3:

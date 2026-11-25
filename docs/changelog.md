@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.20.1 — 2026-11-25
+
+- Árvores com folhagem de verdade e balançando; coqueiros com palha; telhados
+  de telha; nuvens com volume e luz; paredes com manchas e vidro que reflete.
+
 ## 0.20.0 — 2026-11-25
 
 - COLOCAR NO ALTO abre a escolha da pipa (48 pipas com velocidade, força e

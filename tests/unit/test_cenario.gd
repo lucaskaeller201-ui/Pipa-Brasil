@@ -7,7 +7,7 @@ const Boneco := preload("res://game/world/boneco.gd")
 
 
 func test_shaders_carregam() -> void:
-	for nome in ["ceu", "chao", "parede", "morro", "agua"]:
+	for nome in ["ceu", "chao", "parede", "morro", "agua", "folhagem", "palha", "telha"]:
 		var s: Shader = load("res://game/world/shaders/%s.gdshader" % nome)
 		assert_not_null(s, "%s carrega" % nome)
 		assert_true(s.code.length() > 100, "%s tem código" % nome)

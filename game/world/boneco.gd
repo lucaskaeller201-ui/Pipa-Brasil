@@ -37,8 +37,8 @@ func construir(pele: Color, camisa: Color, bermuda: Color, bone := true) -> void
 	var esfera := SphereMesh.new()
 	esfera.radius = 0.13
 	esfera.height = 0.3
-	esfera.radial_segments = 12
-	esfera.rings = 8
+	esfera.radial_segments = 20
+	esfera.rings = 12
 	cabeca.mesh = esfera
 	cabeca.material_override = _material(pele)
 	_cabeca.add_child(cabeca)
@@ -132,8 +132,8 @@ func _capsula(pai: Node3D, centro: Vector3, raio: float, altura: float, cor: Col
 	var c := CapsuleMesh.new()
 	c.radius = raio
 	c.height = maxf(altura, raio * 2.0)
-	c.radial_segments = 10
-	c.rings = 2
+	c.radial_segments = 16
+	c.rings = 4
 	m.mesh = c
 	m.material_override = _material(cor)
 	m.position = centro

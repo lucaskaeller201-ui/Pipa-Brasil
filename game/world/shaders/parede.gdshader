@@ -39,7 +39,10 @@ void fragment() {
 			c = mix(c, vec3(0.62, 0.58, 0.52), clamp(junta, 0.0, 1.0));
 		} else {
 			float sujo = smoothstep(0.0, 1.2, 1.0 - fract(v / 3.0)) * 0.08;
-			c = cor * (0.95 - sujo + 0.05 * hash(floor(vec2(u, v) * 2.0)));
+			// reboco com manchas suaves e escorrido de chuva (D-065)
+			float mancha = hash(floor(vec2(u * 0.7, v * 0.25))) * 0.08;
+			float escorre = smoothstep(0.7, 1.0, hash(vec2(floor(u * 1.3), 3.0))) * smoothstep(0.0, 2.5, fract(-v / 3.0) * 3.0) * 0.12;
+			c = cor * (0.97 - sujo - mancha - escorre + 0.04 * hash(floor(vec2(u, v) * 6.0)));
 		}
 		// janelas: uma por módulo de 3 m de largura e 3 m de altura
 		vec2 cel = vec2(u / 3.0, v / 3.0);
@@ -49,14 +52,19 @@ void fragment() {
 		if (andar >= 0.0 && tem > 0.5 && f.x > 0.3 && f.x < 0.7 && f.y > 0.35 && f.y < 0.75) {
 			bool moldura = f.x < 0.33 || f.x > 0.67 || f.y < 0.38 || f.y > 0.72;
 			float acesa = step(0.85, hash(floor(cel) + vec2(11.0, 5.0)));
-			c = moldura ? vec3(0.85, 0.85, 0.82) : mix(vec3(0.12, 0.16, 0.22), vec3(1.0, 0.82, 0.5), acesa);
-			rug = moldura ? 0.6 : 0.15;
+			// vidro reflete o céu (mais na beirada, como de verdade)
+			float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+			vec3 vidro = mix(vec3(0.1, 0.14, 0.2), vec3(0.55, 0.68, 0.85), fres * 0.8 + 0.1);
+			c = moldura ? vec3(0.85, 0.85, 0.82) : mix(vidro, vec3(1.0, 0.82, 0.5), acesa);
+			rug = moldura ? 0.6 : 0.08;
 		}
 		// porta (térreo)
 		if (andar < 0.5 && andar >= 0.0 && f.x > 0.08 && f.x < 0.24 && f.y < 0.7 && hash(floor(cel) + vec2(1.0, 9.0)) > 0.6) {
 			c = vec3(0.35, 0.22, 0.12);
 		}
 	}
+	// sombra de contato no pé da parede e na quina com a laje
+	c *= mix(0.62, 1.0, smoothstep(0.0, 1.4, mundo.y));
 	ALBEDO = c;
 	ROUGHNESS = rug;
 }
