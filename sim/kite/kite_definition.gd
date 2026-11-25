@@ -43,6 +43,9 @@ extends Resource
 ## Freio ao longo do bico sem puxar (1/s, D-054): a vela solta arrasta mais e a
 ## pipa não dispara sozinha para onde o bico aponta; puxando, ele some.
 @export var nose_drag_rate := 0.0
+## D-058: o empurrão de giro (spin_bias) só vale mandando linha ou com folga
+## de propósito; parada ou tenteando, a pipa não tende a rodar.
+@export var spin_bias_only_giving := false
 ## Giro de dois estados (D-028, pedido do Lucas; 0 = desligado):
 ## mandando linha com a mão, o bico gira direto nesta velocidade (graus/s,
 ## "velocidadeGiroMandandoLinha"); puxando, o giro zera na hora (trava seca).
@@ -152,6 +155,7 @@ static func pipa_rio() -> KiteDefinition:
 	d.spin_rate_max_deg = 240.0
 	d.side_force_coefficient = 2.0  # deixa derrapar um pouco: curvas em arco
 	d.nose_drag_rate = 6.0
+	d.spin_bias_only_giving = true
 	d.spin_give_rate_deg = 360.0
 	d.pull_assist = 0.12
 	d.spin_return = 4.0

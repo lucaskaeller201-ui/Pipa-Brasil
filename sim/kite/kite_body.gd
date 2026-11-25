@@ -227,7 +227,7 @@ func _spin_moments(wind: WindField, t: float) -> Vector3:
 	# D-058: o empurrão de giro só vale MANDANDO LINHA. Parada ou tenteando
 	# com o bico para cima, a pipa não tende a rodar para lado nenhum: só roda
 	# se o jogador levar o bico (toques duplos) ou mandar linha.
-	if d.spin_bias != 0.0 and (spin_mode == SpinMode.SPIN_GIVE or slack_spin):
+	if d.spin_bias != 0.0 and (not d.spin_bias_only_giving or spin_mode == SpinMode.SPIN_GIVE or slack_spin):
 		var vw := last_wind.length()
 		# o empurrão do vento segue o sentido do giro escolhido (D-055), não um
 		# lado fixo

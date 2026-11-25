@@ -37,7 +37,9 @@ topo da seção correspondente. A especificação original fica em
 O Lucas: tenteando com o bico para cima a pipa parecia sempre querer rodar
 (mais para a esquerda); ela só deve rodar quando ele leva o bico (toques
 duplos) ou manda linha. O empurrão de giro do vento (spin_bias) agora só vale
-mandando linha; parada ou tenteando, o vento traz o bico para cima.
+mandando linha ou com folga de propósito (afrouxar/largar, usados pelos
+bots) na pipa do Rio (spin_bias_only_giving); parada ou tenteando, o vento
+traz o bico para cima. A raia de laboratório não muda.
 
 ### D-057 — Cenário e boneco por código (2026-11-25)
 O Lucas pediu foco no visual (gráfico, boneco, cenário, chão, casas, árvores,
