@@ -53,6 +53,24 @@ def main():
 			total = baixar(g["url"], os.path.join(pasta, f"{nome}.gltf"))
 			for rel, inc in g.get("include", {}).items():
 				total += baixar(inc["url"], os.path.join(pasta, rel))
+			# Folhas usam recorte (alphaMode MASK), mas o JPG não tem
+			# transparência: baixa a cor em PNG e aponta o glTF para ela.
+			caminho = os.path.join(pasta, f"{nome}.gltf")
+			with open(caminho) as f:
+				gltf = json.load(f)
+			if any(m.get("alphaMode") == "MASK" for m in gltf.get("materials", [])):
+				for chave in arq:
+					if chave.lower() in ("diffuse", "diff"):
+						png = arq[chave]["1k"]["png"]["url"]
+						rel_png = f"textures/{nome}_diff_1k.png"
+						total += baixar(png, os.path.join(pasta, rel_png))
+						for im in gltf.get("images", []):
+							if im.get("uri", "").endswith("_diff_1k.jpg"):
+								im["uri"] = rel_png
+						with open(caminho, "w") as f:
+							json.dump(gltf, f, indent=1)
+						os.remove(os.path.join(pasta, f"textures/{nome}_diff_1k.jpg"))
+						print(f"  {nome}: folhas com transparência (PNG)")
 			info = j(f"{API}/info/{nome}")
 			autores = ", ".join(info.get("authors", {}).keys())
 			linhas.append(f"| [{nome}](https://polyhaven.com/a/{nome}) | {info.get('polycount', '?')} | {autores} |")
