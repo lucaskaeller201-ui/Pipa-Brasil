@@ -62,6 +62,8 @@ var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
 var _ultimo_lado := 1.0         # lado do último tenteio
 var _ultimo_toque := -99.0      # instante do último toque (s)
 var _ultimo_duplo := false      # o último toque fechou um toque duplo
+var _duplo_t := -99.0           # instante do último toque duplo (s)
+var _dir_volta := 0.0           # sentido em que os toques duplos estão virando
 var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## Tenteio (D-049, D-050): cada toque balança o bico ~30° para um lado e o
 ## próximo para o outro, em volta da direção em que a pipa estava (tocar não
