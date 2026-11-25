@@ -280,7 +280,7 @@ func integrate(h: float) -> void:
 					if absf(ang) > deg_to_rad(8.0):
 						_give_dir = signf(ang)
 					elif kick_sign != 0.0:
-						_give_dir = kick_sign
+						_give_dir = -kick_sign   # o lado para onde o último tenteio levou o bico
 				var alvo := _give_dir * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
 				# acelera aos poucos até o comando, mas nunca passa dele (nem gira
 				# ao contrário): vento e rabiola não fazem furacão
