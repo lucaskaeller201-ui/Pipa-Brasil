@@ -278,7 +278,7 @@ func integrate(h: float) -> void:
 				if not _giving_prev:
 					var ang := _nose_ang(nn)
 					if absf(ang) > deg_to_rad(8.0):
-						_give_dir = -signf(ang)
+						_give_dir = signf(ang)
 					elif kick_sign != 0.0:
 						_give_dir = kick_sign
 				var alvo := _give_dir * deg_to_rad(taxa) * (1.0 - d.spin_gravity_mod * bico_cima)
