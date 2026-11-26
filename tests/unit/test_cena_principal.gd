@@ -216,10 +216,10 @@ func test_escolher_pipa_e_linha() -> void:
 	assert_eq(grade.get_child_count() > 0, true)
 	raiz.call("_process", 1.0 / 60.0)
 	raiz.call("_escolheu_linha", 3)
-	assert_false(modo.you_on_hand, "a pipa subiu")
+	# D-078: escolher a linha começa a largada animada (amarra, vai, larga)
+	assert_eq(int(raiz.get("_lanc_fase")), 1, "começou a colocar no alto")
 	assert_eq(modo.you_style, 13)
 	assert_eq(modo.you_line, 3)
-	assert_not_null(modo.you())
 	raiz.queue_free()
 
 
@@ -292,7 +292,7 @@ func test_colocar_no_alto_animado_e_lista_rola() -> void:
 		if largou_em < 0.0 and int(raiz.get("_lanc_fase")) == 4:
 			largou_em = t
 	var eu: Flyer = modo.you()
-	print("      [colocar no alto] largou em %.1f s, no alto em %.1f s, linha %.1f m" % [largou_em, t, eu.line_length() if eu != null else -1.0])
+	print("      [colocar no alto] largou em %.1f s, no alto em %.1f s, linha %.1f m, motivo '%s'" % [largou_em, t, eu.line_length() if eu != null else -1.0, modo.subir_motivo])
 	assert_true(largou_em > 2.5, "antes de largar: amarra e vai até a beira")
 	assert_eq(int(raiz.get("_lanc_fase")), 0, "terminou")
 	assert_false(modo.you_on_hand, "a pipa ficou no alto")

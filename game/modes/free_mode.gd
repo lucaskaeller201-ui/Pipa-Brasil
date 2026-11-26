@@ -274,6 +274,7 @@ func launch_you(kite := -1, line_kind := -1, da_mao := false) -> void:
 const SUBIDA_LINHA_INICIAL := 3.0
 const SUBIDA_LINHA := 20.0
 var subindo := false
+var subir_motivo := ""
 var _sub_t := 0.0
 var _sub_toque := 0.0
 var _sub_lado := 1.0
@@ -282,6 +283,7 @@ var _sub_lado := 1.0
 func subir(dt: float) -> int:
 	var f := you()
 	if f == null or f.cut or f.line == null:
+		subir_motivo = "sem pipa" if f == null else ("cortada" if f.cut else "sem linha")
 		subindo = false
 		return -1
 	_sub_t += dt
@@ -307,6 +309,7 @@ func subir(dt: float) -> int:
 		return 1
 	if f.kite.position.y < (players[0]["base"] as Vector3).y - 1.0:
 		e.haul_speed = 0.0
+		subir_motivo = "caiu (y %.1f)" % f.kite.position.y
 		subindo = false
 		return -1
 	return 0
