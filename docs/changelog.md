@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.29.1 — 2026-11-26
+
+- Dá para instalar na tela de início do iPhone (app da web): abre em tela
+  cheia, deitado, sem a barra do Safari.
+
 ## 0.29.0 — 2026-11-26
 
 - A linha enrosca nos fios dos postes.

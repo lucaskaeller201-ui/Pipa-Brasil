@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-081 — Jogo instalável no iPhone como app da web (2026-11-26)
+O Lucas quer jogar no celular sem ser no Safari. App de verdade no iPhone
+(App Store/TestFlight) exige a conta de desenvolvedor da Apple, paga — fora
+da regra de custo zero; instalar sem loja precisa de um Mac. O caminho
+grátis é o app da web (PWA): a exportação Web agora gera o manifesto e o
+service worker do Godot (tela cheia "standalone", deitado). No Safari:
+Compartilhar → Adicionar à Tela de Início. No Android continua o .apk da
+release.
+
 ### D-080 — Fios que enroscam a linha, toques mais confiáveis, cerâmica e tecido (2026-11-26)
 - Fios dos postes: cada fio vira pedacinhos retos (Obstacles.add_fio). A
   linha é testada segmento a segmento contra eles (pontos mais próximos entre
