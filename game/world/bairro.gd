@@ -220,16 +220,22 @@ static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumb
 	# Piso de cerâmica avermelhada, pouco rugosa (brilho do sol baixo).
 	# Piso de cerâmica com verniz leve: brilha com o sol, sem ofuscar (D-063).
 	var piso := _caixa(pai, base + Vector3(0.0, h - 0.05, 0.0), Vector3(8.2, 0.1, 8.2), Color(0.62, 0.27, 0.18), 0.32)
-	(piso.material_override as StandardMaterial3D).metallic_specular = 0.6
+	# D-080: cerâmica de verdade (foto CC0), avermelhada, com verniz leve
+	var mp := Texturas.material("piso", Color(0.62, 0.3, 0.2), 2.0, true, 0.25)
+	mp.roughness = 0.3
+	mp.metallic_specular = 0.6
+	piso.material_override = mp
 	# Mureta. Na SUA laje a da frente (para onde a pipa vai) é baixinha, para
 	# não tapar a pipa quando você afunda (D-060).
 	for lado in [Vector3(0, 0, 4.0), Vector3(0, 0, -4.0)]:
 		var alta := 0.25 if (sua and lado.z < 0.0) else 0.9
-		_caixa(pai, base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.2, alta, 0.15), cor_parede.darkened(0.1), 0.9)
+		var mu := _caixa(pai, base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.2, alta, 0.15), cor_parede.darkened(0.1), 0.9)
+		mu.material_override = _material_parede(cor_parede.darkened(0.1), false)   # D-080: reboco
 		# (obstáculo mais grosso que o muro: a linha não "pula" entre dois pontos)
 		obstaculos.add_caixa(base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.4, alta, 0.4), 0.5)
 	for lado in [Vector3(4.0, 0, 0), Vector3(-4.0, 0, 0)]:
-		_caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.15, 0.9, 8.2), cor_parede.darkened(0.1), 0.9)
+		var mu2 := _caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.15, 0.9, 8.2), cor_parede.darkened(0.1), 0.9)
+		mu2.material_override = _material_parede(cor_parede.darkened(0.1), false)
 		obstaculos.add_caixa(base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.4, 0.9, 8.4), 0.5)
 	_caixa_dagua(pai, base + Vector3(-2.8, h, 2.8))
 	# D-068: coisas de laje — cadeira de plástico, engradado, bombona, vasos
@@ -472,7 +478,8 @@ static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) ->
 
 
 static func _poste(pai: Node3D, base: Vector3) -> Vector3:
-	_cilindro(pai, base, 0.16, 0.11, 9.0, Color(0.62, 0.62, 0.6), 8)
+	var pc := _cilindro(pai, base, 0.16, 0.11, 9.0, Color(0.62, 0.62, 0.6), 8)
+	pc.material_override = Texturas.material("concreto", Color(0.6, 0.6, 0.58), 1.5)   # D-080
 	obstaculos.add_haste(base, base + Vector3(0.0, 9.0, 0.0), 0.2, 0.4)
 	_caixa(pai, base + Vector3(0.0, 8.6, 0.0), Vector3(1.6, 0.1, 0.1), Color(0.55, 0.55, 0.52), 0.8)
 	# D-068: luminária de verdade virada para a rua, caixa de luz e lixo
@@ -495,10 +502,14 @@ static func _fio(pai: Node3D, a: Vector3, b: Vector3) -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	for desvio in [-0.7, 0.7]:
 		im.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, mat)
+		var antes := Vector3.INF
 		for k in 13:
 			var t := k / 12.0
 			var p := a.lerp(b, t) + Vector3(desvio, -1.1 * 4.0 * t * (1.0 - t), 0.0)
 			im.surface_add_vertex(p)
+			if antes != Vector3.INF:
+				obstaculos.add_fio(antes, p)   # D-080: a linha enrosca no fio
+			antes = p
 		im.surface_end()
 	var m := MeshInstance3D.new()
 	m.mesh = im

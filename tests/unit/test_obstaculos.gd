@@ -100,3 +100,28 @@ func test_linha_escorrega_no_telhado_de_duas_aguas() -> void:
 	print("      [linha no telhado] %d pontos dentro; na cumeeira a %.2f m (cumeeira em 5 m)" % [dentro, no_meio])
 	assert_eq(dentro, 0, "nenhum ponto dentro do telhado")
 	assert_true(no_meio > 4.85, "a linha passa por cima da cumeeira")
+
+
+
+## D-080: a linha cai em cima de um fio de poste e fica enroscada nele (não
+## atravessa nem escorrega para o chão).
+func test_linha_enrosca_no_fio() -> void:
+	var w := SimWorld.new()
+	w.wind = WindField.new(0.0, 0.0, 1)
+	var obs := Obstacles.new()
+	# fio ao longo de x, a 6 m de altura
+	for k in 10:
+		obs.add_fio(Vector3(-10.0 + k * 2.0, 6.0, 0.0), Vector3(-8.0 + k * 2.0, 6.0, 0.0))
+	w.obstacles = obs
+	# linha atravessada (ao longo de z), com as pontas abaixo do fio: cai nele
+	var c := w.add_fixed_line(Vector3(0.0, 7.0, -4.0), Vector3(0.0, 7.0, 4.0), 30)
+	c.inv_mass[0] = c.inv_mass[1]   # uma ponta solta, como uma linha caindo
+	c.scale_rest(1.1)
+	for k in roundi(3.0 / DT):
+		w.step(DT)
+	var meio := 99.0
+	for p in c.pos:
+		if absf(p.z) < 0.3:
+			meio = minf(meio, p.y)
+	print("      [fio] a linha no fio ficou a %.2f m (fio a 6 m)" % meio)
+	assert_true(meio > 5.85, "a linha não atravessa o fio (%.2f m)" % meio)

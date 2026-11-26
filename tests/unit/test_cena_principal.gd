@@ -298,3 +298,27 @@ func test_colocar_no_alto_animado_e_lista_rola() -> void:
 	assert_false(modo.you_on_hand, "a pipa ficou no alto")
 	assert_true(eu.line_length() > 9.0, "com linha dada")
 	raiz.queue_free()
+
+
+## D-080: soltar o dedo em cima de um botão não deixa "dedo fantasma"
+## (antes ele ficava na lista e puxava linha / dava puxão sozinho).
+func test_soltar_em_cima_de_botao_nao_deixa_dedo_fantasma() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("_jogar")
+	raiz.call("_colocar_no_alto")
+	raiz.call("avancar", 2.0)
+	raiz.call("_toque", 0, Vector2(640, 400), true)
+	var dedos: Dictionary = raiz.get("_dedos")
+	assert_eq(dedos.size(), 1)
+	# solta num canto onde há botão (Câmera/Ajustes ficam no canto de cima)
+	var botao: Control = null
+	for b in raiz.get_tree().get_nodes_in_group("botao_livre"):
+		if (b as Control).visible and (b as Control).get_global_rect().size.x > 10.0:
+			botao = b
+			break
+	var onde := botao.get_global_rect().get_center() if botao != null else Vector2(1240, 30)
+	raiz.call("_toque", 0, onde, false)
+	assert_eq(dedos.size(), 0, "o dedo saiu da lista")
+	raiz.queue_free()

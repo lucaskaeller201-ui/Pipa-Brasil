@@ -20,6 +20,8 @@ var _cabeca: Node3D
 var _t := 0.0
 var _inclinar := 0.0   ## rad: o corpo se debruça para a mão alcançar a linha
 var _mats := {}
+var _tecidos := {}   ## D-080: cores que são roupa (levam a textura de tecido)
+const Texturas := preload("res://game/world/texturas.gd")
 
 
 ## pele, camisa, bermuda: cores; bone: com boné.
@@ -27,6 +29,9 @@ func construir(pele: Color, camisa: Color, bermuda: Color, bone := true) -> void
 	for filho in get_children():
 		filho.queue_free()
 	_mats.clear()
+	_tecidos.clear()
+	for c in [camisa, bermuda, camisa.darkened(0.15), camisa.darkened(0.35), camisa.darkened(0.45), bermuda.darkened(0.2)]:
+		_tecidos[(c as Color).to_html()] = true
 	var cabelo_cor := Color(0.07, 0.05, 0.04)
 	_quadril = Node3D.new()
 	_quadril.position = Vector3(0.0, 0.92, 0.0)
@@ -259,7 +264,10 @@ func _material(cor: Color) -> StandardMaterial3D:
 	if _mats.has(chave):
 		return _mats[chave]
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = cor
+	if _tecidos.has(chave):
+		mat = Texturas.material("tecido", cor, 0.25, false)   # D-080: malha de algodão
+	else:
+		mat.albedo_color = cor
 	mat.roughness = 0.8
 	# luz de contorno suave: dá volume de pele/tecido sob o sol
 	mat.rim_enabled = true

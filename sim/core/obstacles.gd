@@ -19,12 +19,26 @@ var bolas: Array = []    ## [centro: Vector3, raio, atrito]
 var hastes: Array = []   ## [a: Vector3, b: Vector3, raio, atrito]
 ## telhados de duas águas: [mín, máx, cumeeira ao longo de x?, altura, meio vão, atrito]
 var telhados: Array = []
+## D-080: fios dos postes, em pedacinhos retos [a, b]. A linha (segmento a
+## segmento, não só nos pontos) enrosca neles: atrito alto, agarra.
+var fios: Array = []
+var fios_altura_max := -INF
+const FIO_RAIO := 0.05
+const FIO_ATRITO := 0.15
 var altura_max := 0.0
 var _grade := {}         ## Vector2i -> Array de [tipo (0 caixa, 1 bola, 2 haste), índice]
 
 
 func vazio() -> bool:
-	return caixas.is_empty() and bolas.is_empty() and hastes.is_empty() and telhados.is_empty()
+	return caixas.is_empty() and bolas.is_empty() and hastes.is_empty() and telhados.is_empty() and fios.is_empty()
+
+
+func add_fio(a: Vector3, b: Vector3) -> void:
+	fios.append([a, b])
+	fios_altura_max = maxf(fios_altura_max, maxf(a.y, b.y) + 0.5)
+	var pad := Vector3.ONE * 1.5   # a linha de um lado pega o fio do outro lado da célula
+	_registrar(4, fios.size() - 1, Vector3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)) - pad,
+		Vector3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)) + pad)
 
 
 ## Telhado de duas águas (D-079): `base` é o meio do pé do telhado (em cima
@@ -110,6 +124,17 @@ func _contato_forma(tipo: int, i: int, p: Vector3) -> Array:
 		return [n, float(b[1]) - dist, float(b[2])]
 	if tipo == 3:
 		return _contato_telhado(i, p)
+	if tipo == 4:
+		# ponto (canto da pipa, ponto da linha) encostando no fio
+		var fa: Vector3 = fios[i][0]
+		var fab: Vector3 = (fios[i][1] as Vector3) - fa
+		var ft := clampf((p - fa).dot(fab) / maxf(fab.length_squared(), 1e-9), 0.0, 1.0)
+		var fd: Vector3 = p - (fa + fab * ft)
+		var fdist := fd.length()
+		var r := FIO_RAIO * 2.0
+		if fdist >= r:
+			return []
+		return [fd / fdist if fdist > 1e-6 else Vector3.UP, r - fdist, FIO_ATRITO]
 	var hs: Array = hastes[i]
 	var a: Vector3 = hs[0]
 	var ab: Vector3 = (hs[1] as Vector3) - a
@@ -149,6 +174,64 @@ func _contato_telhado(i: int, p: Vector3) -> Array:
 	if ate_fim < fundo:
 		return [Vector3.RIGHT if ao_longo_x else Vector3.BACK, ate_fim, float(t[5])]
 	return [n, fundo, float(t[5])]
+
+
+## D-080: segmento da linha contra os fios (a linha passa ENTRE dois pontos
+## dela por cima do fio). Devolve [ponto no segmento s (0..1), normal,
+## profundidade] do contato mais fundo, ou [] se não encosta.
+func contato_segmento_fio(a: Vector3, b: Vector3) -> Array:
+	if minf(a.y, b.y) > fios_altura_max:
+		return []
+	var meio := (a + b) * 0.5
+	var lista = _grade.get(Vector2i(floori(meio.x / CELULA), floori(meio.z / CELULA)))
+	if lista == null:
+		return []
+	var melhor: Array = []
+	var fundo := 0.0
+	for item in lista:
+		if int(item[0]) != 4:
+			continue
+		var f: Array = fios[int(item[1])]
+		var r := _mais_perto_segmentos(a, b, f[0], f[1])
+		var d: Vector3 = (r[2] as Vector3) - (r[3] as Vector3)
+		var dist := d.length()
+		if dist < FIO_RAIO and FIO_RAIO - dist > fundo:
+			fundo = FIO_RAIO - dist
+			var n := d / dist if dist > 1e-6 else Vector3.UP
+			melhor = [float(r[0]), n, fundo]
+	return melhor
+
+
+## Pontos mais perto entre os segmentos p1-q1 e p2-q2: [s, t, c1, c2].
+static func _mais_perto_segmentos(p1: Vector3, q1: Vector3, p2: Vector3, q2: Vector3) -> Array:
+	var d1 := q1 - p1
+	var d2 := q2 - p2
+	var r := p1 - p2
+	var a := d1.dot(d1)
+	var e := d2.dot(d2)
+	var f := d2.dot(r)
+	var s := 0.0
+	var t := 0.0
+	if a <= 1e-9 and e <= 1e-9:
+		return [0.0, 0.0, p1, p2]
+	if a <= 1e-9:
+		t = clampf(f / e, 0.0, 1.0)
+	else:
+		var c := d1.dot(r)
+		if e <= 1e-9:
+			s = clampf(-c / a, 0.0, 1.0)
+		else:
+			var b := d1.dot(d2)
+			var den := a * e - b * b
+			s = clampf((b * f - c * e) / den, 0.0, 1.0) if den > 1e-9 else 0.0
+			t = (b * s + f) / e
+			if t < 0.0:
+				t = 0.0
+				s = clampf(-c / a, 0.0, 1.0)
+			elif t > 1.0:
+				t = 1.0
+				s = clampf((b - c) / a, 0.0, 1.0)
+	return [s, t, p1 + d1 * s, p2 + d2 * t]
 
 
 ## Partícula de linha/rabiola: empurrada para fora, com atrito ao longo da

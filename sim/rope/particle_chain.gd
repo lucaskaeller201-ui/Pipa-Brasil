@@ -298,6 +298,34 @@ func solve_obstacles(obs: Obstacles) -> void:
 		if p.y > obs.altura_max:
 			continue
 		pos[i] = obs.resolver(p, prev[i])
+	# D-080: a linha entre dois pontos pega no fio do poste e enrosca
+	if obs.fios.is_empty():
+		return
+	for i in pos.size() - 1:
+		var a := pos[i]
+		var b := pos[i + 1]
+		if minf(a.y, b.y) > obs.fios_altura_max:
+			continue
+		var c := obs.contato_segmento_fio(a, b)
+		if c.is_empty():
+			continue
+		var s: float = c[0]
+		var n: Vector3 = c[1]
+		var wa := inv_mass[i] * (1.0 - s)
+		var wb := inv_mass[i + 1] * s
+		var soma := wa * (1.0 - s) + wb * s
+		if soma <= 1e-9:
+			continue
+		var k := float(c[2]) / soma
+		pos[i] += n * k * wa
+		pos[i + 1] += n * k * wb
+		# enroscada: quase não escorrega ao longo do fio
+		for j in [i, i + 1]:
+			if inv_mass[j] == 0.0:
+				continue
+			var d: Vector3 = pos[j] - prev[j]
+			var tang := d - n * d.dot(n)
+			pos[j] -= tang * (1.0 - Obstacles.FIO_ATRITO)
 
 
 func update_velocities(h: float) -> void:

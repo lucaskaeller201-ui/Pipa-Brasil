@@ -39,8 +39,8 @@ const TOQUE_TENSAO := 2.5       ## N: linha esticada de novo
 const EMBALO := 0.35            ## s que a carretilha leva para parar depois de mandar linha
 const DAR_LINHA_MAX := 4.0      ## m/s: o mais rápido que se dá linha (segurando e deslizando para cima)
 const PUXOU_PX := 6.0           ## px para baixo que transformam o dedo em dedo de puxar
-const TOQUE_MAX_S := 0.25
-const TOQUE_MAX_PX := 18.0
+const TOQUE_MAX_S := 0.35    ## D-080: toque um pouco mais demorado ainda vale (era 0,25 s)
+const TOQUE_MAX_PX := 32.0   ## D-080: o dedo pode escorregar um pouco no toque rápido (era 18)
 const CORES := [Color(0.97, 0.97, 0.97), Color(1.0, 0.82, 0.25), Color(0.45, 0.85, 1.0),
 	Color(0.6, 1.0, 0.5), Color(1.0, 0.55, 0.8), Color(0.85, 0.7, 1.0), Color(1.0, 0.6, 0.3), Color(0.7, 0.7, 0.7)]
 
@@ -460,19 +460,49 @@ func _input(evento: InputEvent) -> void:
 
 
 func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
-	if _sobre_botao(posicao):
-		return
 	var agora := Time.get_ticks_msec() / 1000.0
 	if apertou:
+		if _sobre_botao(posicao):
+			return
 		_dedos[indice] = {"ini": posicao, "t0": agora, "ult": posicao, "puxou": false}
 		return
 	if not _dedos.has(indice):
 		return
+	# D-080: o dedo sempre sai da lista ao soltar (antes, soltar em cima de um
+	# botão deixava um "dedo fantasma": puxava linha ou dava puxão sozinho)
 	var d: Dictionary = _dedos[indice]
 	_dedos.erase(indice)
 	if agora - float(d["t0"]) < TOQUE_MAX_S and posicao.distance_to(d["ini"]) < TOQUE_MAX_PX:
-		# toque na metade esquerda da tela: bico para a esquerda; direita: direita
 		_tentear()
+		_marcar_toque(posicao, _ultimo_duplo)
+
+
+## D-080: um círculo onde o dedo tocou: branco = tenteio, amarelo = toque
+## duplo. Mostra na hora se o jogo entendeu o toque.
+class MarcaToque extends Control:
+	var vida := 0.35
+	var cor := Color.WHITE
+	func _process(delta: float) -> void:
+		vida -= delta
+		if vida <= 0.0:
+			queue_free()
+		queue_redraw()
+	func _draw() -> void:
+		var f := clampf(vida / 0.35, 0.0, 1.0)
+		draw_arc(Vector2.ZERO, 18.0 + (1.0 - f) * 26.0, 0.0, TAU, 32, Color(cor.r, cor.g, cor.b, 0.85 * f), 4.0)
+
+
+var _camada_marcas: CanvasLayer
+
+
+func _marcar_toque(posicao: Vector2, duplo: bool) -> void:
+	if _camada_marcas == null or _automatico:
+		return
+	var m := MarcaToque.new()
+	m.position = posicao
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	m.cor = Color(1.0, 0.85, 0.2) if duplo else Color.WHITE
+	_camada_marcas.add_child(m)
 
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
@@ -701,6 +731,7 @@ func _seta_do_bico(f: Flyer) -> void:
 
 func _criar_interface() -> void:
 	var camada := CanvasLayer.new()
+	_camada_marcas = camada
 	camada.name = "Interface"
 	add_child(camada)
 	var raiz := Control.new()

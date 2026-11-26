@@ -33,6 +33,22 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-080 — Fios que enroscam a linha, toques mais confiáveis, cerâmica e tecido (2026-11-26)
+- Fios dos postes: cada fio vira pedacinhos retos (Obstacles.add_fio). A
+  linha é testada segmento a segmento contra eles (pontos mais próximos entre
+  dois segmentos), então ela pega no fio mesmo passando entre dois pontos
+  dela; o atrito é alto (enrosca). Cantos da pipa também encostam no fio.
+- Tenteio que às vezes não respondia: (1) soltar o dedo em cima de um botão
+  deixava um "dedo fantasma" na lista (puxava linha e até dava puxão
+  sozinho); agora o dedo sempre sai ao soltar. (2) Toque vale até 0,35 s
+  (era 0,25) e com até 32 px de escorregão (era 18 px), comum no toque
+  rápido do celular. (3) Um círculo aparece onde o dedo tocou: branco =
+  tenteio, amarelo = toque duplo — mostra se o jogo entendeu.
+- Gráficos com fotos CC0 do Poly Haven: piso de cerâmica das lajes
+  (floor_tiles_06, repintado de vermelho, com verniz leve), muros das lajes
+  com o reboco das paredes, postes de concreto e a roupa do boneco com malha
+  de algodão (cotton_jersey).
+
 ### D-079 — Linha e pipa não atravessam o cenário; bots sobem da mão; 10 m (2026-11-26)
 O Lucas: a pipa e a linha atravessavam casas, postes e árvores; os bots
 apareciam no alto; 20 m de subida era muito.

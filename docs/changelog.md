@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.29.0 — 2026-11-26
+
+- A linha enrosca nos fios dos postes.
+- Toques mais confiáveis (sem "dedo fantasma") e um círculo mostra cada
+  toque: branco = tenteio, amarelo = duplo.
+- Piso de cerâmica nas lajes, muros com reboco, postes de concreto e roupa do
+  boneco com tecido.
+
 ## 0.28.1 — 2026-11-26
 
 - Telhados de duas águas e muros das lajes também seguram a linha e a pipa.

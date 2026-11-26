@@ -48,7 +48,7 @@ func test_pipa_de_papel_de_seda() -> void:
 ## D-067: as fotos CC0 estão no projeto e chegam aos shaders.
 func test_texturas_fotograficas() -> void:
 	var T = load("res://game/world/texturas.gd")
-	for v in ["asfalto", "concreto", "terra", "grama", "areia", "reboco", "tijolo", "telha", "casca"]:
+	for v in ["asfalto", "concreto", "terra", "grama", "areia", "reboco", "tijolo", "telha", "casca", "piso", "tecido"]:
 		assert_true(T.existe(v), "foto de %s existe" % v)
 		assert_not_null(T.cor(v), "foto de %s carrega" % v)
 		assert_not_null(T.relevo(v), "relevo de %s carrega" % v)
