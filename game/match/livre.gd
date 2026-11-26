@@ -143,6 +143,9 @@ func _ready() -> void:
 		elif arg == "--escolha":
 			_escolha_arg = true
 	modo = FreeMode.new(BOTS, _semente, _automatico)
+	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
+	# segundo de processador por segundo de jogo e o celular travava
+	modo.world.substeps = 2
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()

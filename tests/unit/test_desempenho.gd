@@ -10,6 +10,7 @@ func test_custo_do_passo_da_fisica() -> void:
 	var B = load("res://game/world/bairro.gd")
 	var raiz := Node3D.new()
 	var modo := FreeMode.new(6, 7, true)
+	modo.world.substeps = 2   # como no jogo (D-082)
 	B.criar(raiz, modo.players.size(), 7)
 	modo.world.obstacles = B.obstaculos
 	for k in roundi(8.0 / DT):
@@ -44,3 +45,25 @@ func test_custo_do_passo_da_fisica() -> void:
 	print("      [desempenho] por segundo de jogo: %.0f ms de física (no celular, uns %.0f–%.0f ms)" % [por_passo * 120.0, por_passo * 240.0, por_passo * 360.0])
 	assert_true(por_passo < 20.0, "passo de física razoável")
 	raiz.free()
+
+
+
+## D-082: com 2 subpassos (como no jogo) as pipas voam estáveis: sobem,
+## ficam no alto e nada explode.
+func test_voo_estavel_com_dois_subpassos() -> void:
+	var modo := FreeMode.new(6, 3, true)
+	modo.world.substeps = 2
+	for k in roundi(30.0 / DT):
+		modo.update(DT)
+	var ok := 0
+	var pior := 0.0
+	for f in modo.world.flyers:
+		var fl: Flyer = f
+		if fl.cut or fl.line == null:
+			continue
+		pior = maxf(pior, fl.kite.velocity.length())
+		if fl.elevation_deg() > 25.0 and is_finite(fl.kite.position.y):
+			ok += 1
+	print("      [2 subpassos] %d pipas voando bem depois de 30 s; maior velocidade %.1f m/s" % [ok, pior])
+	assert_true(ok >= 4, "as pipas voam")
+	assert_true(pior < 40.0, "nada explode")
