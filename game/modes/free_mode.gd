@@ -279,6 +279,7 @@ var subir_motivo := ""
 var _sub_t := 0.0
 var _sub_toque := 0.0
 var _sub_lado := 1.0
+var _sub_dar := 0.0
 
 
 func subir(dt: float) -> int:
@@ -290,22 +291,30 @@ func subir(dt: float) -> int:
 	_sub_t += dt
 	var e := f.input
 	var elev := f.elevation_deg()
-	e.kick_base_shift = 0.0
-	if elev < 30.0:
-		e.haul_speed = 1.2      # caindo: puxadinha, ela sobe
-	else:
-		e.haul_speed = -2.5     # subindo bem: dá linha
-	# tenteio leve só com o bico já para cima (balança uns 10°); com o bico de
-	# lado, não tenteia: o vento traz o bico de volta para cima (spin_return)
-	# — com o bico de lado ela anda de lado e não sobe (visto no teste).
+	var bico := f.nose_angle_deg()
 	_sub_toque -= dt
-	if _sub_toque <= 0.0 and absf(f.nose_angle_deg()) < 12.0 and elev >= 30.0:
-		_sub_toque = 0.6
-		e.kick_side = _sub_lado
-		e.kick_spin = _sub_lado
-		e.kick_scale = 0.3
-		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
-		_sub_lado = -_sub_lado
+	_sub_dar -= dt
+	e.kick_base_shift = 0.0
+	if absf(bico) > 20.0:
+		# bico de lado: desbica para cima (como o pipeiro faz), sem dar linha
+		# — dar linha faz a pipa girar (D-055) e ela não sobe de lado
+		e.haul_speed = 0.6
+		_sub_dar = 0.0
+		if _sub_toque <= 0.0:
+			_sub_toque = 0.35
+			e.kick_side = signf(bico)
+			e.kick_spin = signf(bico)
+			e.kick_scale = 0.5
+			e.kick_base_shift = minf(30.0, absf(bico))
+			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
+	elif elev < 30.0:
+		e.haul_speed = 1.2      # baixa: puxadinha, ela sobe
+		_sub_dar = 0.0
+	else:
+		# bico para cima e subindo bem: dá linha em embaladas curtas
+		if _sub_dar <= -0.3:
+			_sub_dar = 0.45
+		e.haul_speed = -2.5 if _sub_dar > 0.0 else 0.0
 	if (f.line_length() >= SUBIDA_LINHA and elev >= 35.0) or _sub_t > 30.0:
 		e.haul_speed = 0.0
 		e.kick_spin = 0.0
