@@ -37,11 +37,16 @@ topo da seção correspondente. A especificação original fica em
 - A pipa aparecia pronta no alto. Agora, depois de escolher pipa e linha: o
   pipeiro pega a pipa e amarra a linha no cabresto (1,6 s), vai até a beira
   da laje (1,2 s), ergue e larga (0,5 s). A pipa entra na física saindo da
-  mão com 3 m de linha e sobe pela física: o pipeiro dá linha quando ela
-  está subindo bem (elevação ≥ 30°), dá uma puxadinha quando cai e tenteia
-  para manter o bico para cima (FreeMode.subir, mesmos comandos do jogador),
-  até ~20 m e 35° de elevação. Aí o controle é do jogador. Se cair, volta
-  para a mão. Os toques ficam parados durante a largada.
+  mão com 5 m de linha (a mínima) e sobe pela física (FreeMode.subir, mesmos
+  comandos do jogador): com o bico para cima e elevação ≥ 35° manda linha;
+  abaixo disso dá uma puxadinha; com o bico mais de 35° de lado segura a
+  linha e desbica para cima. Medido no teste (sem bot): 5 → 20 m em ~11,5 s,
+  13 m de altura, 35° de elevação — aí o controle é do jogador. Se cair,
+  volta para a mão. Os toques ficam parados durante a largada. (Primeiras
+  tentativas, vistas no teste: tentear de lado deixava o bico a 60° e ela
+  não subia; dar linha com o bico de lado fazia girar e cair.)
+- CI: o importador do Godot às vezes caía ("double free") importando as
+  texturas; agora importa sem threads e repete até 3 vezes.
 - Lista de pipas/linhas: no iPhone o dedo não rolava (os cartões pegavam o
   toque). Agora arrastar rola a lista, e soltar depois de rolar não escolhe.
 
