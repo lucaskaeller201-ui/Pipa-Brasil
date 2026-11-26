@@ -49,7 +49,7 @@ static func _ceu_foto(hora: String) -> Dictionary:
 	# exposição: o céu (sem o sol) fica com o mesmo brilho do céu de antes
 	m.set_shader_parameter("energia", 0.6 / maxf(float(info["mediana_ceu"]), 0.02))
 	var hz: Array = info["horizonte"]
-	var nevoa := Color(float(hz[0]), float(hz[1]), float(hz[2])) * 0.85
+	var nevoa := Color(float(hz[0]), float(hz[1]), float(hz[2])) * 0.7
 	m.set_shader_parameter("cor_baixo", nevoa)
 	return {"material": m, "elevacao": clampf(float(info["sol_elevacao"]), 4.0, 75.0), "nevoa": nevoa}
 
@@ -76,6 +76,11 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 		var rot: Vector3 = h["sol_rot"]
 		h["sol_rot"] = Vector3(-float(foto["elevacao"]), rot.y, rot.z)
 		h["nevoa"] = foto["nevoa"]
+		# o céu de foto ilumina muito mais que o de código: menos luz ambiente
+		# e névoa mais leve, senão a cena fica lavada (vimos nas capturas)
+		h["ambiente"] = float(h["ambiente"]) * 0.5
+		h["nevoa_d"] = minf(float(h["nevoa_d"]), 0.0016)
+		h["sol_forca"] = minf(float(h["sol_forca"]), 1.15)
 	ceu.radiance_size = Sky.RADIANCE_SIZE_128
 
 	var env := Environment.new()
@@ -87,8 +92,8 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	# Brilho (glow) só no pôr do sol: de dia ele estourava as cores claras.
 	env.glow_enabled = bool(h.get("brilho", true))
 	env.ambient_light_energy = float(h["ambiente"])
-	env.ambient_light_sky_contribution = 0.7
-	env.tonemap_exposure = 0.95
+	env.ambient_light_sky_contribution = 0.7 if foto.is_empty() else 0.55
+	env.tonemap_exposure = 0.95 if foto.is_empty() else 0.85
 	# Névoa leve: a cidade some no horizonte (profundidade).
 	env.fog_enabled = true
 	env.fog_light_color = h["nevoa"]

@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.26.1 — 2026-11-26
+
+- Luz acertada para o céu de foto (cena menos lavada, névoa mais leve).
+
 ## 0.26.0 — 2026-11-26
 
 - Céu de foto real em cada hora do dia, com o sol no lugar certo.

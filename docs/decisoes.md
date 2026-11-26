@@ -51,6 +51,9 @@ morro ao fundo.
   altos) no lugar das bolas lisas; pedra nas encostas íngremes; favela de
   ~2.600 casinhas 3D pequenas e grudadas (55% tijolo), caixas d'água azuis,
   manchas de mata e árvores — tudo em MultiMesh (poucas chamadas de desenho).
+- Nas primeiras capturas a cena ficou lavada (o céu de foto ilumina bem
+  mais): com céu de foto, metade da luz ambiente, névoa no máximo 0,0016,
+  sol no máximo 1,15 e exposição 0,85.
 - Oclusão de ambiente (sombra nos cantos) não existe no renderizador do
   navegador; ficam as sombras do sol (4096) e a sombra no pé das paredes.
 

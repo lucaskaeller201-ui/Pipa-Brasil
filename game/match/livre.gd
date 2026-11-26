@@ -704,7 +704,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · TOQUE DUPLO: o bico vira 30° e fica · SEGURAR parado 1 s: puxão"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~40° para cada lado) · TOQUE DUPLO: o bico vira 45° e fica · SEGURAR parado 1 s: puxão"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
