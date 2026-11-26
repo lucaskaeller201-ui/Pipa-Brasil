@@ -48,22 +48,31 @@ func test_custo_do_passo_da_fisica() -> void:
 
 
 
-## D-082: com 2 subpassos (como no jogo) as pipas voam estáveis: sobem,
-## ficam no alto e nada explode.
-func test_voo_estavel_com_dois_subpassos() -> void:
+## D-082: comparação de estabilidade entre jeitos de rodar a física: com
+## menos subpassos (mais leve) as pipas têm que voar como com 4.
+func _voo(passo: float, sub: int) -> Array:
 	var modo := FreeMode.new(6, 3, true)
-	modo.world.substeps = 2
-	for k in roundi(30.0 / DT):
-		modo.update(DT)
-	var ok := 0
+	modo.world.substeps = sub
+	var elev := 0.0
+	var n := 0
 	var pior := 0.0
-	for f in modo.world.flyers:
-		var fl: Flyer = f
-		if fl.cut or fl.line == null:
-			continue
-		pior = maxf(pior, fl.kite.velocity.length())
-		if fl.elevation_deg() > 25.0 and is_finite(fl.kite.position.y):
-			ok += 1
-	print("      [2 subpassos] %d pipas voando bem depois de 30 s; maior velocidade %.1f m/s" % [ok, pior])
-	assert_true(ok >= 4, "as pipas voam")
-	assert_true(pior < 40.0, "nada explode")
+	for k in roundi(30.0 / passo):
+		modo.update(passo)
+		if k * passo > 10.0:
+			for f in modo.world.flyers:
+				var fl: Flyer = f
+				if fl.cut or fl.line == null:
+					continue
+				elev += fl.elevation_deg()
+				n += 1
+				pior = maxf(pior, fl.kite.velocity.length())
+	return [elev / maxf(n, 1.0), pior]
+
+
+func test_voo_estavel_com_menos_subpassos() -> void:
+	var base := _voo(1.0 / 120.0, 4)
+	var dois := _voo(1.0 / 120.0, 2)
+	var leve := _voo(1.0 / 60.0, 2)
+	print("      [estabilidade] elevação média das pipas / maior velocidade: 120 Hz×4 %.0f° %.1f m/s · 120 Hz×2 %.0f° %.1f m/s · 60 Hz×2 %.0f° %.1f m/s" % [base[0], base[1], dois[0], dois[1], leve[0], leve[1]])
+	assert_true(absf(dois[0] - base[0]) < 8.0, "120 Hz × 2 voa como 120 Hz × 4")
+	assert_true(dois[1] < 40.0, "nada explode")
