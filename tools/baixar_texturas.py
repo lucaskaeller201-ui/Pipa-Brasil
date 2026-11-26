@@ -26,6 +26,9 @@ VAGAS = {
 	"tijolo": (["red_brick_03", "red_brick", "brick_wall_02", "red_bricks_04"], "brick"),
 	"telha": (["roof_tiles_14", "clay_roof_tiles", "clay_roof_tiles_02", "roof_07"], "roof"),
 	"casca": (["bark_willow", "pine_bark", "bark_brown_02", "tree_bark_03"], "bark"),
+	# D-080: piso de cerâmica das lajes e tecido da roupa do boneco
+	"piso": (["floor_tiles_06", "floor_tiles_08", "terracotta_tiles", "red_floor_tiles", "floor_tiles_02"], "tiles"),
+	"tecido": (["cotton_jersey", "fabric_pattern_05", "denim_fabric", "fabric_pattern_07", "jersey_fabric"], "fabric"),
 }
 
 
