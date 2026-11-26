@@ -33,6 +33,21 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-076 — Tentear de lado sem afundar nem rodar (2026-11-26)
+O Lucas: tenteando para a direita ou esquerda (para ir até a mão do outro)
+a pipa afunda e roda sozinha. Medido no teste: com a direção a 90°, 4 s de
+tenteio, ela caía 9,5 m. Duas causas e duas correções:
+- Afundar: o pipeiro de verdade mira o bico um pouco acima para seguir de
+  lado. Agora, tenteando com a direção entre 25° e 115°, o alvo do bico sobe
+  conforme a pipa cai abaixo da altura em que começou a ir de lado (e
+  conforme a velocidade de queda), até 80°. Só muda para onde o bico mira; o
+  movimento continua sendo do vento e da linha (KiteBody.segura_altura).
+  Resultado no teste: cai 3,6 m em vez de 9,5 m e anda 7,8 m de lado.
+- Rodar sozinha: tentear num ritmo irregular às vezes formava um "par" e
+  virava toque duplo (a direção andava 45°). O duplo agora precisa dos dois
+  toques a menos de 0,28 s e com o intervalo antes 2× maior (era 0,4 s e
+  1,6×).
+
 ### D-075 — Céu de foto, pipa de papel de seda, serra com favela (2026-11-26)
 O Lucas pediu para focar em deixar tudo mais bonito, inclusive as casas do
 morro ao fundo.

@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.26.2 — 2026-11-26
+
+- Tenteando para o lado, a pipa vai para o lado sem afundar.
+- Tentear rápido não vira toque duplo sem querer (a pipa não roda sozinha).
+
 ## 0.26.1 — 2026-11-26
 
 - Luz acertada para o céu de foto (cena menos lavada, névoa mais leve).

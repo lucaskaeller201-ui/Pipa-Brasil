@@ -461,7 +461,8 @@ func test_bico_de_lado_fica_tenteando() -> void:
 	print("      [bico fica] de %.0f°: tenteando, média %.0f°, o mais perto do alto %.0f°" % [de_lado, soma / 12.0, menor])
 	assert_true(absf(de_lado) > 60.0, "o bico foi para o lado (%.0f°)" % de_lado)
 	assert_true(absf(soma / 12.0 - de_lado) < 25.0, "tenteando, fica em volta da direção escolhida")
-	assert_true(menor > 40.0, "não volta para cima sozinho com os toques")
+	# (D-076: mira um pouco para cima para não afundar, mas não volta ao alto)
+	assert_true(menor > 20.0, "não volta para cima sozinho com os toques")
 
 
 ## D-070: para voltar o bico para cima, toques duplos para o outro lado.
