@@ -272,7 +272,7 @@ func launch_you(kite := -1, line_kind := -1, da_mao := false) -> void:
 ## subindo bem e dá uma puxadinha quando ela cai; tenteia para manter o bico
 ## para cima. Tudo pelos mesmos comandos do jogador (PilotInput/Pilot).
 ## Devolve 0 = subindo, 1 = no alto (o jogador assume), -1 = caiu.
-const SUBIDA_LINHA_INICIAL := 3.0
+const SUBIDA_LINHA_INICIAL := 5.0   ## a linha mínima da carretilha
 const SUBIDA_LINHA := 20.0
 var subindo := false
 var subir_motivo := ""
@@ -295,12 +295,15 @@ func subir(dt: float) -> int:
 		e.haul_speed = 1.2      # caindo: puxadinha, ela sobe
 	else:
 		e.haul_speed = -2.5     # subindo bem: dá linha
+	# tenteio leve só com o bico já para cima (balança uns 10°); com o bico de
+	# lado, não tenteia: o vento traz o bico de volta para cima (spin_return)
+	# — com o bico de lado ela anda de lado e não sobe (visto no teste).
 	_sub_toque -= dt
-	if _sub_toque <= 0.0:
-		_sub_toque = 0.45
+	if _sub_toque <= 0.0 and absf(f.nose_angle_deg()) < 12.0 and elev >= 30.0:
+		_sub_toque = 0.6
 		e.kick_side = _sub_lado
 		e.kick_spin = _sub_lado
-		e.kick_scale = 0.6
+		e.kick_scale = 0.3
 		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
 		_sub_lado = -_sub_lado
 	if (f.line_length() >= SUBIDA_LINHA and elev >= 35.0) or _sub_t > 30.0:

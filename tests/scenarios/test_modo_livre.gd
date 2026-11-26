@@ -168,7 +168,7 @@ func test_largada_da_mao_sobe_pela_fisica() -> void:
 				print("        t %.0f s: linha %.1f m, elevação %.0f°, tensão %.1f N, bico %.0f°, haul %.1f, vento na pipa %.1f m/s" % [t, eu.line_length(), eu.elevation_deg(), eu.tension, eu.nose_angle_deg(), eu.input.haul_speed, eu.kite.velocity.length()])
 		var base: Vector3 = modo.players[0]["base"]
 		print("      [largada, semente %d] linha %.1f → %.1f m em %.1f s; altura %.1f m; elevação %.0f° (r=%d)" % [semente, l0, eu.line_length(), t, eu.kite.position.y - base.y, eu.elevation_deg(), r])
-		assert_true(l0 < 5.0, "sai da mão com pouca linha")
+		assert_true(l0 <= 6.0, "sai da mão com pouca linha")
 		assert_eq(r, 1, "chegou no alto")
 		assert_true(eu.line_length() > 15.0, "deu linha até o alto (%.1f m)" % eu.line_length())
 		assert_true(eu.kite.position.y - base.y > 8.0, "está no alto")
