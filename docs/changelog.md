@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.24.2 — 2026-11-25
+
+- Controle da 0.24.0 de volta (toque duplo sempre vale, bico fica, puxão
+  segurando 1 s), a pedido do Lucas.
+
 ## 0.24.1 — 2026-11-25
 
 - Tenteio, desbico e mandar linha voltaram a ser como na 0.23.0 (a mudança

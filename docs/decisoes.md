@@ -33,6 +33,11 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-072 — Volta a D-070 (2026-11-25)
+Depois de pedir para desfazer, o Lucas aprendeu a usar a 0.24.0 e achou boa:
+o controle voltou ao da 0.24.0 (D-070: duplo sem travas, bico que fica,
+puxão segurando 1 s). D-071 fica sem efeito.
+
 ### D-071 — Volta do tenteio da 0.23.0 (desfaz D-070) (2026-11-25)
 O Lucas testou a 0.24.0 e achou que mandar linha, desbicar e tentear
 ficaram piores. Pediu para voltar como era: o código de controle (livre.gd,
