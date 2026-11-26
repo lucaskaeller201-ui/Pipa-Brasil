@@ -289,6 +289,17 @@ func solve_ground() -> void:
 			pos[i] = Vector3(q.x + (p.x - q.x) * GROUND_FRICTION, 0.0, q.z + (p.z - q.z) * GROUND_FRICTION)
 
 
+## D-079: não atravessa casas, postes, árvores (ver Obstacles).
+func solve_obstacles(obs: Obstacles) -> void:
+	for i in pos.size():
+		if inv_mass[i] == 0.0:
+			continue
+		var p := pos[i]
+		if p.y > obs.altura_max:
+			continue
+		pos[i] = obs.resolver(p, prev[i])
+
+
 func update_velocities(h: float) -> void:
 	for i in pos.size():
 		vel[i] = (pos[i] - prev[i]) / h

@@ -170,5 +170,28 @@ func test_largada_da_mao_sobe_pela_fisica() -> void:
 		print("      [largada, semente %d] linha %.1f → %.1f m em %.1f s; altura %.1f m; elevação %.0f° (r=%d)" % [semente, l0, eu.line_length(), t, eu.kite.position.y - base.y, eu.elevation_deg(), r])
 		assert_true(l0 <= 6.0, "sai da mão com pouca linha")
 		assert_eq(r, 1, "chegou no alto")
-		assert_true(eu.line_length() > 15.0, "deu linha até o alto (%.1f m)" % eu.line_length())
-		assert_true(eu.kite.position.y - base.y > 8.0, "está no alto")
+		assert_true(eu.line_length() >= 9.5, "deu linha até o alto (%.1f m)" % eu.line_length())
+		assert_true(eu.kite.position.y - base.y > 4.0, "está no alto")
+
+
+## D-079: os bots também começam com a pipa na mão e sobem pela física.
+func test_bots_colocam_no_alto_pela_fisica() -> void:
+	var modo := FreeMode.new(4, 9, false)
+	modo.bots_para_a_mao()
+	for i in range(1, modo.players.size()):
+		assert_null(modo.players[i]["flyer"], "bot %d começa sem pipa no alto" % i)
+	var curta := 0
+	for k in roundi(40.0 / DT):
+		modo.update(DT)
+		for i in range(1, modo.players.size()):
+			var f: Flyer = modo.players[i]["flyer"]
+			if f != null and f.line_length() < 6.0:
+				curta += 1
+	var no_alto := 0
+	for i in range(1, modo.players.size()):
+		var f: Flyer = modo.players[i]["flyer"]
+		if f != null and not f.cut and f.line_length() > 9.0 and not bool(modo.players[i].get("sub", false)):
+			no_alto += 1
+	print("      [bots] %d de %d no alto depois de 40 s (todos saíram da mão)" % [no_alto, modo.players.size() - 1])
+	assert_true(curta > 0, "saíram da mão com linha curta")
+	assert_true(no_alto >= modo.players.size() - 2, "subiram")

@@ -22,6 +22,7 @@ var wind: WindField
 var flyers: Array = []          ## Array[Flyer]
 var loose_chains: Array = []    ## pedaços de linha soltos (Array[ParticleChain])
 var combat := KiteCombatSystem.new()
+var obstacles: Obstacles = null   ## D-079: casas, postes, árvores (null = campo aberto)
 var substeps := 4
 var time := 0.0
 
@@ -150,6 +151,11 @@ func _substep(h: float) -> void:
 		(f as Flyer).solve_ground()
 	for c in loose_chains:
 		(c as ParticleChain).solve_ground()
+	if obstacles != null and not obstacles.vazio():
+		for f in flyers:
+			(f as Flyer).solve_obstacles(obstacles)
+		for c in loose_chains:
+			(c as ParticleChain).solve_obstacles(obstacles)
 	for f in flyers:
 		(f as Flyer).end_substep(h)
 	for c in loose_chains:

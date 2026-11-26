@@ -296,5 +296,5 @@ func test_colocar_no_alto_animado_e_lista_rola() -> void:
 	assert_true(largou_em > 2.5, "antes de largar: amarra e vai até a beira")
 	assert_eq(int(raiz.get("_lanc_fase")), 0, "terminou")
 	assert_false(modo.you_on_hand, "a pipa ficou no alto")
-	assert_true(eu.line_length() > 15.0, "com linha dada")
+	assert_true(eu.line_length() > 9.0, "com linha dada")
 	raiz.queue_free()

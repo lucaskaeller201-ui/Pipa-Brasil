@@ -32,6 +32,7 @@ var tension := 0.0
 ## Direção da força da linha sobre a pipa (unitária).
 var tension_direction := Vector3.ZERO
 var kite_on_ground := false
+var kite_snagged := 0.0   ## D-079: 0 solta · 1 agarrada (copa de árvore)
 ## Quão rápido a linha está correndo na mão (m/s): dando ou puxando linha.
 ## É o que decide o relo (D-027).
 var line_rate := 0.0
@@ -172,6 +173,24 @@ func solve_ground() -> void:
 			kite_on_ground = true
 
 
+## D-079: linha, rabiola e pipa contra os obstáculos do cenário. A pipa é
+## empurrada para fora pelos 4 pontos da armação; numa copa de árvore (atrito
+## baixo) ela agarra: quase para, até ser puxada com força.
+func solve_obstacles(obs: Obstacles) -> void:
+	for c in chains():
+		c.solve_obstacles(obs)
+	kite_snagged = 0.0
+	for c in kite.definition.corners:
+		var wp := kite.world_point(c)
+		if wp.y > obs.altura_max:
+			continue
+		var ct := obs.contato(wp)
+		if ct.is_empty():
+			continue
+		_push_kite(c, ct[0], float(ct[1]))
+		kite_snagged = maxf(kite_snagged, 1.0 - float(ct[2]))
+
+
 func end_substep(h: float) -> void:
 	for c in chains():
 		c.update_velocities(h)
@@ -179,6 +198,11 @@ func end_substep(h: float) -> void:
 	if kite_on_ground:
 		kite.velocity = Vector3(kite.velocity.x * GROUND_KITE_DAMPING, kite.velocity.y, kite.velocity.z * GROUND_KITE_DAMPING)
 		kite.angular_velocity *= GROUND_KITE_DAMPING
+	if kite_snagged > 0.0:
+		# encostada/agarrada: atrito do telhado ou da copa da árvore
+		var fica := 1.0 - 0.6 * kite_snagged
+		kite.velocity *= fica
+		kite.angular_velocity *= fica
 
 
 ## Prende a partícula idx da cadeia ao ponto local da pipa (comprimento zero,

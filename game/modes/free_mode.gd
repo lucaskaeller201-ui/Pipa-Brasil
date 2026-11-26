@@ -87,6 +87,14 @@ func _init(n_bots := 3, seed_ := 1, you_bot := false) -> void:
 		_lancar(i)
 
 
+## Pipa nova para um bot: da mão, subindo (jogo), ou já no alto (testes).
+func _relancar(i: int) -> void:
+	if largada_da_mao and i > 0:
+		_lancar_da_mao(i)
+	else:
+		_lancar(i)
+
+
 func you() -> Flyer:
 	return players[0]["flyer"]
 
@@ -111,6 +119,16 @@ func update(dt: float) -> void:
 		var p: Dictionary = players[i]
 		var f: Flyer = p["flyer"]
 		var bot: BotPilot = p["bot"]
+		if i > 0 and float(p.get("espera", -1.0)) >= 0.0:
+			# D-079: bot esperando a vez de colocar a dele no alto
+			p["espera"] = float(p["espera"]) - dt
+			if float(p["espera"]) < 0.0:
+				_lancar_da_mao(i)
+			continue
+		if i > 0 and bool(p.get("sub", false)):
+			if _subir(i, dt) == -1:
+				p["respawn"] = 2.0
+			continue
 		if bot != null and f != null and not f.cut:
 			bot.target_azimuth = _mira(i)
 			bot.update(f, t)
@@ -146,7 +164,7 @@ func update(dt: float) -> void:
 					you_on_hand = true
 					_messages.append("Sua pipa caiu. Escolha e coloque outra no alto.")
 					continue
-				_lancar(i)
+				_relancar(i)
 				if i == 0:
 					_messages.append("Sua pipa caiu. Pipa nova no alto!")
 				continue
@@ -158,7 +176,7 @@ func update(dt: float) -> void:
 				if i == 0 and not _you_bot:
 					_para_a_mao()
 				else:
-					_lancar(i)
+					_relancar(i)
 	# Tirar do alto: recolheu a linha toda, a pipa chegou na mão (D-037).
 	var eu := you()
 	# (durante a subida a linha começa curta: não é "tirar do alto", D-078)
@@ -260,47 +278,71 @@ func launch_you(kite := -1, line_kind := -1, da_mao := false) -> void:
 	if da_mao:
 		# D-078: largada de verdade — a pipa sai da mão com pouca linha e sobe
 		# pela física, com o pipeiro dando linha e tenteando (subir()).
-		_lancar(0, SUBIDA_LINHA_INICIAL, 30.0, 0.0)
-		subindo = true
-		_sub_t = 0.0
-		_sub_toque = 0.3
+		_lancar_da_mao(0)
 	else:
 		_lancar(0)
 
 
-## D-078: subida depois da largada. O pipeiro dá linha quando a pipa está
-## subindo bem e dá uma puxadinha quando ela cai; tenteia para manter o bico
-## para cima. Tudo pelos mesmos comandos do jogador (PilotInput/Pilot).
-## Devolve 0 = subindo, 1 = no alto (o jogador assume), -1 = caiu.
+## D-078: subida depois da largada. O pipeiro dá linha com o bico para cima
+## e ela alta; dá uma puxadinha quando cai; com o bico de lado, segura e
+## desbica para cima. Tudo pelos mesmos comandos do jogador (PilotInput/
+## Pilot) — os bots sobem do mesmo jeito (D-079).
+## Devolve 0 = subindo, 1 = no alto (o controle volta), -1 = caiu.
 const SUBIDA_LINHA_INICIAL := 5.0   ## a linha mínima da carretilha
-const SUBIDA_LINHA := 20.0
-var subindo := false
+const SUBIDA_LINHA := 10.0          ## D-079: com 10 m o controle é seu (o Lucas achou 20 m muito)
 var subir_motivo := ""
-var _sub_t := 0.0
-var _sub_toque := 0.0
-var _sub_lado := 1.0
-var _sub_dar := 0.0
+## true: os bots também começam com a pipa na mão e sobem pela física (o jogo
+## liga; os testes de combate deixam desligado para começar já no alto).
+var largada_da_mao := false
+
+var subindo: bool:
+	get:
+		return players.size() > 0 and bool(players[0].get("sub", false))
 
 
 func subir(dt: float) -> int:
-	var f := you()
+	return _subir(0, dt)
+
+
+func _lancar_da_mao(i: int) -> void:
+	_lancar(i, SUBIDA_LINHA_INICIAL, 30.0, 0.0)
+	var p: Dictionary = players[i]
+	p["sub"] = true
+	p["sub_t"] = 0.0
+	p["sub_toque"] = 0.3
+
+
+## Os bots descem para a laje e cada um coloca a sua no alto, um de cada vez.
+func bots_para_a_mao() -> void:
+	largada_da_mao = true
+	for i in range(1, players.size()):
+		var p: Dictionary = players[i]
+		var f: Flyer = p["flyer"]
+		if f != null:
+			world.remove_flyer(f)
+			p["flyer"] = null
+		p["espera"] = 1.0 + 2.5 * i + _rng.randf_range(0.0, 1.5)
+
+
+func _subir(i: int, dt: float) -> int:
+	var p: Dictionary = players[i]
+	var f: Flyer = p["flyer"]
 	if f == null or f.cut or f.line == null:
 		subir_motivo = "sem pipa" if f == null else ("cortada" if f.cut else "sem linha")
-		subindo = false
+		p["sub"] = false
 		return -1
-	_sub_t += dt
+	p["sub_t"] = float(p.get("sub_t", 0.0)) + dt
+	p["sub_toque"] = float(p.get("sub_toque", 0.0)) - dt
 	var e := f.input
 	var elev := f.elevation_deg()
 	var bico := f.nose_angle_deg()
-	_sub_toque -= dt
-	_sub_dar -= dt
 	e.kick_base_shift = 0.0
 	if absf(bico) > 35.0:
 		# bico de lado: segura a linha e desbica para cima (como o pipeiro
 		# faz); dar linha agora faria a pipa girar mais (D-055)
 		e.haul_speed = 0.0
-		if _sub_toque <= 0.0:
-			_sub_toque = 0.35
+		if float(p["sub_toque"]) <= 0.0:
+			p["sub_toque"] = 0.35
 			e.kick_side = signf(bico)
 			e.kick_spin = signf(bico)
 			e.kick_scale = 0.3
@@ -310,15 +352,15 @@ func subir(dt: float) -> int:
 		e.haul_speed = 1.2      # baixa: puxadinha, ela sobe
 	else:
 		e.haul_speed = -2.0     # bico para cima e alta: manda linha
-	if (f.line_length() >= SUBIDA_LINHA and elev >= 28.0) or _sub_t > 30.0:
+	if (f.line_length() >= SUBIDA_LINHA and elev >= 28.0) or float(p["sub_t"]) > 30.0:
 		e.haul_speed = 0.0
 		e.kick_spin = 0.0
-		subindo = false
+		p["sub"] = false
 		return 1
-	if f.kite.position.y < (players[0]["base"] as Vector3).y - 1.0:
+	if f.kite.position.y < (p["base"] as Vector3).y - 1.0:
 		e.haul_speed = 0.0
 		subir_motivo = "caiu (y %.1f)" % f.kite.position.y
-		subindo = false
+		p["sub"] = false
 		return -1
 	return 0
 

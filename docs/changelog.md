@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.28.0 — 2026-11-26
+
+- A linha e a pipa não atravessam mais casas, telhados, caixas d'água, postes
+  e árvores: a linha dobra por cima do telhado e a copa da árvore agarra.
+- Os bots também colocam a pipa no alto saindo da mão.
+- O controle é seu com 10 m de linha (era 20 m).
+- Casas da frente das lajes mais baixas.
+
 ## 0.27.0 — 2026-11-26
 
 - Colocar no alto com animação: amarra a linha, vai até a beira da laje,

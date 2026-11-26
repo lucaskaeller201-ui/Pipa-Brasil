@@ -33,6 +33,27 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-079 — Linha e pipa não atravessam o cenário; bots sobem da mão; 10 m (2026-11-26)
+O Lucas: a pipa e a linha atravessavam casas, postes e árvores; os bots
+apareciam no alto; 20 m de subida era muito.
+- Obstáculos (sim/core/obstacles.gd, GDScript puro): caixas (casas, lajes,
+  telhados, caixas d'água), bolas (copas de árvore e de coqueiro) e hastes
+  (postes, troncos). Linha e rabiola (cada partícula) são empurradas para
+  fora com atrito na superfície — a linha dobra por cima do telhado; a copa
+  da árvore tem atrito baixo e agarra. A pipa é empurrada pelos 4 pontos da
+  armação e perde velocidade encostada (agarrada na copa). Uma grade de
+  8 m e a altura máxima dos obstáculos deixam rápido (quase toda a linha
+  está no alto). Bairro monta os obstáculos junto com o cenário e a cena
+  passa para SimWorld.obstacles; sem cenário (testes de voo), campo aberto.
+- Os fios dos postes ainda não pegam a linha (fio fino precisa de colisão
+  de segmento com segmento; fica para a próxima).
+- Casas na frente das lajes (para onde as pipas vão): só de 1 andar.
+- Subida termina com 10 m de linha (era 20 m). Escolhi 10 e não 6: com 6 m
+  a pipa fica a ~3 m acima da mão, quase no telhado das casas da frente.
+- Bots: no jogo começam com a pipa na mão, um de cada vez, e sobem pela
+  mesma física e os mesmos comandos (FreeMode.bots_para_a_mao); depois de
+  cortados, também. Nos testes de combate continuam começando no alto.
+
 ### D-078 — Colocar no alto de verdade e lista que rola com o dedo (2026-11-26)
 - A pipa aparecia pronta no alto. Agora, depois de escolher pipa e linha: o
   pipeiro pega a pipa e amarra a linha no cabresto (1,6 s), vai até a beira

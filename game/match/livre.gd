@@ -143,6 +143,8 @@ func _ready() -> void:
 		elif arg == "--escolha":
 			_escolha_arg = true
 	modo = FreeMode.new(BOTS, _semente, _automatico)
+	if not _automatico:
+		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()
 	_aplicar_giro()
 	_carregar_preferencias()
@@ -189,6 +191,7 @@ func _montar_cenario() -> void:
 	move_child(_cenario, 0)
 	Ambiente.criar(_cenario, _hora, _mapa)
 	Bairro.criar(_cenario, modo.players.size(), 7, _mapa)
+	modo.world.obstacles = Bairro.obstaculos   # D-079: a linha e a pipa não atravessam
 
 
 ## D-066: suavização das bordas (antisserrilhado), sombras nítidas e

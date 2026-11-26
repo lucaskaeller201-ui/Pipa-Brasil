@@ -35,7 +35,13 @@ static var _mats := {}
 static var _ruas: Array = RUAS
 
 
+## D-079: as formas que a linha e a pipa não atravessam, montadas junto com o
+## cenário (a cena passa para SimWorld.obstacles).
+static var obstaculos := Obstacles.new()
+
+
 static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
+	obstaculos = Obstacles.new()
 	_mats.clear()
 	_det = SurfaceTool.new()
 	_det.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -64,6 +70,10 @@ static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> vo
 		if _perto_de_laje(x, z, lajes) or _na_rua(x, z, largura, fundo):
 			continue
 		var andares := rng.randi_range(3, 8) if praia and z > 36.0 else rng.randi_range(1, 3)
+		# D-079: na frente das lajes (para onde as pipas vão) só casas baixas,
+		# de 1 andar: não tapam a pipa nem pegam a linha logo na saída
+		if not praia and z < -6.0 and z > -70.0 and absf(x) < 45.0:
+			andares = 1
 		var altura := andares * 3.0 - rng.randf_range(0.0, 0.3)
 		var cor: Color = CORES_PAREDE[rng.randi() % CORES_PAREDE.size()]
 		_casa(raiz, Vector3(x, 0.0, z), Vector3(largura, altura, fundo), cor, rng.randf() < 0.3, rng)
@@ -131,6 +141,7 @@ static func _material_parede(cor: Color, tijolo: bool) -> ShaderMaterial:
 
 static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijolo: bool, rng: RandomNumberGenerator) -> void:
 	var corpo := _caixa(pai, base + Vector3(0.0, tamanho.y * 0.5, 0.0), tamanho, cor, 0.9)
+	obstaculos.add_caixa(base + Vector3(0.0, tamanho.y * 0.5, 0.0), tamanho + Vector3(0.3, 0.0, 0.3), 0.55)
 	corpo.material_override = _material_parede(cor, tijolo)
 	# D-068: porta de enrolar (comércio) e plantas na frente de algumas casas
 	var frente := 1.0 if rng.randf() < 0.5 else -1.0
@@ -191,6 +202,9 @@ static func _telhado(pai: Node3D, topo: Vector3, tamanho: Vector3, rng: RandomNu
 	m.mesh = prisma
 	m.material_override = _mat_telha
 	m.position = topo + Vector3(0.0, prisma.size.y * 0.5, 0.0)
+	# telhado: a metade de baixo do prisma vira caixa (a linha apoia nele)
+	var tam_c := Vector3(comp + 0.6, prisma.size.y * 0.55, vao + 0.6) if ao_longo_x else Vector3(vao + 0.6, prisma.size.y * 0.55, comp + 0.6)
+	obstaculos.add_caixa(topo + Vector3(0.0, prisma.size.y * 0.27, 0.0), tam_c, 0.5)
 	if ao_longo_x:
 		m.rotation.y = PI * 0.5
 	pai.add_child(m)
@@ -199,6 +213,7 @@ static func _telhado(pai: Node3D, topo: Vector3, tamanho: Vector3, rng: RandomNu
 static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumberGenerator, sua := false) -> void:
 	var h := ALTURA_LAJE
 	var corpo := _caixa(pai, base + Vector3(0.0, h * 0.5 - 0.1, 0.0), Vector3(8.0, h - 0.2, 8.0), cor_parede, 0.9)
+	obstaculos.add_caixa(base + Vector3(0.0, h * 0.5 - 0.05, 0.0), Vector3(8.2, h - 0.1, 8.2), 0.55)
 	corpo.material_override = _material_parede(cor_parede, false)
 	_fachada(base, Vector3(8.0, h - 0.2, 8.0), false, -1.0, false, false, rng)
 	# Piso de cerâmica avermelhada, pouco rugosa (brilho do sol baixo).
@@ -259,6 +274,7 @@ static func _cilindro(pai: Node3D, base: Vector3, raio_baixo: float, raio_topo: 
 
 
 static func _caixa_dagua(pai: Node3D, base: Vector3) -> void:
+	obstaculos.add_caixa(base + Vector3(0.0, 0.57, 0.0), Vector3(1.4, 1.14, 1.4), 0.5)
 	# caixa d'água azul com a tampa mais clara
 	_cilindro(pai, base, 0.6, 0.68, 0.95, Color(0.12, 0.38, 0.85), 14)
 	_cilindro(pai, base + Vector3(0.0, 0.95, 0.0), 0.7, 0.45, 0.18, Color(0.25, 0.5, 0.95), 14)
@@ -324,6 +340,9 @@ static func _arvore(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> v
 	_materiais_arvore()
 	var altura := rng.randf_range(3.2, 5.2)
 	var tronco := _cilindro(pai, base, 0.2, 0.11, altura, Color(0.33, 0.24, 0.17), 10)
+	# tronco liso; a copa agarra (atrito baixo): linha e pipa ficam presas
+	obstaculos.add_haste(base, base + Vector3(0.0, altura, 0.0), 0.25, 0.5)
+	obstaculos.add_bola(base + Vector3(0.0, altura + 0.8, 0.0), 2.2, 0.12)
 	tronco.material_override = _mat_tronco
 	var mat_f: ShaderMaterial = _mat_folha[rng.randi() % _mat_folha.size()]
 	var topo := base + Vector3(0.0, altura, 0.0)
@@ -411,6 +430,8 @@ static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) ->
 		pai.add_child(seg)
 		anterior = p
 	var topo := anterior
+	obstaculos.add_haste(base, topo, 0.22, 0.5)
+	obstaculos.add_bola(topo + Vector3(0.0, -0.4, 0.0), 2.4, 0.15)
 	# D-068: copa de folhas de verdade (samambaia CC0 ampliada parece palma)
 	var com_modelo := Modelos.existe("fern_02")
 	if com_modelo:
@@ -448,6 +469,7 @@ static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) ->
 
 static func _poste(pai: Node3D, base: Vector3) -> Vector3:
 	_cilindro(pai, base, 0.16, 0.11, 9.0, Color(0.62, 0.62, 0.6), 8)
+	obstaculos.add_haste(base, base + Vector3(0.0, 9.0, 0.0), 0.2, 0.4)
 	_caixa(pai, base + Vector3(0.0, 8.6, 0.0), Vector3(1.6, 0.1, 0.1), Color(0.55, 0.55, 0.52), 0.8)
 	# D-068: luminária de verdade virada para a rua, caixa de luz e lixo
 	if Modelos.por(pai, "street_lamp_02", base + Vector3(0.0, 7.6, 0.12), 0.0, 1.3) != null:

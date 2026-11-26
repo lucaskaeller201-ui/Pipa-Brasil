@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-25 (versão 0.27.0).
+Atualizado em 2026-11-25 (versão 0.28.0).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
