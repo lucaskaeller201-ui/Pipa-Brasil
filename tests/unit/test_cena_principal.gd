@@ -248,3 +248,53 @@ func test_pipa_na_mao_olha_em_volta() -> void:
 	print("      [olhar em volta] arrastando 300 px a câmera girou %.0f°" % giro)
 	assert_true(absf(giro) > 40.0, "arrastar gira a câmera")
 	raiz.queue_free()
+
+
+## D-078: colocar no alto com animação: amarra, vai à beira, larga e sobe
+## pela física; só depois o controle é do jogador. E a lista rola com o dedo.
+func test_colocar_no_alto_animado_e_lista_rola() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("_jogar")
+	var modo: FreeMode = raiz.get("modo")
+	# lista de pipas: arrastar rola e não escolhe
+	raiz.call("_abrir_pipas")
+	var rol: ScrollContainer = raiz.get("_sel_rolagem")
+	# (sem desenhar quadros no teste, a barra não sabe o tamanho da lista)
+	rol.get_v_scroll_bar().max_value = 5000.0
+	rol.get_v_scroll_bar().page = 500.0
+	var toque := InputEventScreenTouch.new()
+	toque.pressed = true
+	toque.position = Vector2(640, 600)
+	raiz.call("_input", toque)
+	for k in 10:
+		var arr := InputEventScreenDrag.new()
+		arr.position = Vector2(640, 600 - 30 * (k + 1))
+		arr.relative = Vector2(0, -30)
+		raiz.call("_input", arr)
+	print("      [lista] rolou para %d px" % rol.scroll_vertical)
+	assert_true(rol.scroll_vertical > 100, "arrastar o dedo rola a lista")
+	var antes := modo.you_style
+	raiz.call("_escolheu_pipa", 7)
+	assert_eq(modo.you_style, antes, "soltar depois de rolar não escolhe")
+	raiz.set("_rolou", false)
+	(raiz.get("_selecao") as Control).visible = false
+	# largada animada
+	raiz.call("_colocar_no_alto_animado")
+	assert_eq(int(raiz.get("_lanc_fase")), 1, "começa amarrando")
+	assert_not_null(raiz.get("_pipa_mao"), "a pipa aparece na mão")
+	var t := 0.0
+	var largou_em := -1.0
+	while int(raiz.get("_lanc_fase")) != 0 and t < 40.0:
+		raiz.call("_physics_process", 1.0 / 60.0)
+		t += 1.0 / 60.0
+		if largou_em < 0.0 and int(raiz.get("_lanc_fase")) == 4:
+			largou_em = t
+	var eu: Flyer = modo.you()
+	print("      [colocar no alto] largou em %.1f s, no alto em %.1f s, linha %.1f m" % [largou_em, t, eu.line_length() if eu != null else -1.0])
+	assert_true(largou_em > 2.5, "antes de largar: amarra e vai até a beira")
+	assert_eq(int(raiz.get("_lanc_fase")), 0, "terminou")
+	assert_false(modo.you_on_hand, "a pipa ficou no alto")
+	assert_true(eu.line_length() > 15.0, "com linha dada")
+	raiz.queue_free()

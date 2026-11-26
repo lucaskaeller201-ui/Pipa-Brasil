@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.27.0 — 2026-11-26
+
+- Colocar no alto com animação: amarra a linha, vai até a beira da laje,
+  larga, e a pipa sobe de verdade (física) até uns 20 m; aí é com você.
+- Lista de pipas e de linhas rola com o dedo.
+
 ## 0.26.3 — 2026-11-26
 
 - Com a pipa na mão, arraste o dedo para olhar em volta; a câmera fica atrás

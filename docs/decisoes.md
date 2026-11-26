@@ -33,6 +33,18 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-078 — Colocar no alto de verdade e lista que rola com o dedo (2026-11-26)
+- A pipa aparecia pronta no alto. Agora, depois de escolher pipa e linha: o
+  pipeiro pega a pipa e amarra a linha no cabresto (1,6 s), vai até a beira
+  da laje (1,2 s), ergue e larga (0,5 s). A pipa entra na física saindo da
+  mão com 3 m de linha e sobe pela física: o pipeiro dá linha quando ela
+  está subindo bem (elevação ≥ 30°), dá uma puxadinha quando cai e tenteia
+  para manter o bico para cima (FreeMode.subir, mesmos comandos do jogador),
+  até ~20 m e 35° de elevação. Aí o controle é do jogador. Se cair, volta
+  para a mão. Os toques ficam parados durante a largada.
+- Lista de pipas/linhas: no iPhone o dedo não rolava (os cartões pegavam o
+  toque). Agora arrastar rola a lista, e soltar depois de rolar não escolhe.
+
 ### D-077 — Olhar em volta com a pipa na mão (2026-11-26)
 Com a pipa na mão a câmera olhava para o céu vazio (onde a pipa estaria) e
 não dava para girar. Agora, na mão, a câmera fica atrás do ombro do pipeiro

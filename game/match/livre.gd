@@ -258,7 +258,9 @@ func avancar(segundos: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	var eu := modo.you()
-	if not _automatico and eu != null and not eu.cut:
+	if _lanc_fase > 0:
+		_largada_passo(delta)   # a largada comanda; os dedos esperam
+	elif not _automatico and eu != null and not eu.cut:
 		_ler_comandos(eu, delta)
 	modo.update(delta)
 	for msg in modo.take_messages():
@@ -426,6 +428,8 @@ func _posicionar_camera(imediato: bool) -> void:
 # ---------------- gestos ----------------
 
 func _input(evento: InputEvent) -> void:
+	if _selecao != null and _selecao.visible and _rolar_lista(evento):
+		return
 	if evento is InputEventScreenTouch:
 		var t := evento as InputEventScreenTouch
 		_toque(t.index, t.position, t.pressed)
@@ -486,6 +490,8 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 
 ## Tenteio pelo toque (D-041).
 func _tentear() -> void:
+	if _lanc_fase > 0:
+		return
 	var agora := Time.get_ticks_msec() / 1000.0
 	if _eh_toque_duplo(agora):
 		# 2º toque do duplo: a direção anda 30° (D-050). Duplos seguidos
@@ -814,6 +820,19 @@ func _animar_bonecos(delta: float) -> void:
 		var corpo: Node3D = _corpos[i]
 		var fl: Flyer = modo.players[i]["flyer"]
 		var base: Vector3 = modo.players[i]["base"]
+		if i == 0 and _lanc_fase >= 1 and _lanc_fase <= 3:
+			var pose := _pose_largada()
+			corpo.position = pose["corpo"]
+			corpo.call("atualizar", pose["mao"], (pose["corpo"] as Vector3) + Vector3(0.0, 8.0, -20.0), 0.0, delta)
+			if _pipa_mao != null:
+				_pipa_mao.global_position = pose["pipa"]
+				_pipa_mao.global_rotation = Vector3(0.0, corpo.rotation.y, 0.0)
+				# amarrando: a pipa balança um pouco na mão
+				if _lanc_fase == 1:
+					_pipa_mao.rotate_object_local(Vector3.FORWARD, sin(_lanc_t * 9.0) * 0.08)
+			continue
+		if i == 0:
+			corpo.position = base
 		if fl == null or fl.cut or fl.line == null:
 			corpo.call("atualizar", base + Vector3(0.3, 1.0, -0.4), base + Vector3(0.0, 10.0, -20.0), 0.0, delta)
 			continue
@@ -1028,8 +1047,29 @@ var _selecao: Control
 var _sel_titulo: Label
 var _sel_grade: GridContainer
 var _sel_rolagem: ScrollContainer
+var _rolou := false          ## D-078: o dedo arrastou a lista (não é escolha)
+var _rol_ini := Vector2.ZERO
 const PreviaPipa := preload("res://game/ui/previa_pipa.gd")
 const Carretel := preload("res://game/ui/carretel.gd")
+
+
+## D-078: arrastar o dedo rola a lista de pipas/linhas (o iPhone não rolava:
+## os cartões pegavam o toque). Se o dedo andou, soltar não escolhe nada.
+func _rolar_lista(evento: InputEvent) -> bool:
+	if evento is InputEventScreenTouch:
+		var t := evento as InputEventScreenTouch
+		if t.pressed:
+			_rolou = false
+			_rol_ini = t.position
+		return false
+	if evento is InputEventScreenDrag:
+		var d := evento as InputEventScreenDrag
+		if d.position.distance_to(_rol_ini) > 14.0:
+			_rolou = true
+		if _rolou and _sel_rolagem != null:
+			_sel_rolagem.scroll_vertical -= roundi(d.relative.y)
+		return false
+	return false
 
 
 func _criar_selecao(raiz: Control) -> void:
@@ -1139,6 +1179,8 @@ func _abrir_pipas() -> void:
 
 
 func _escolheu_pipa(i: int) -> void:
+	if _rolou:
+		return   # D-078: o dedo estava rolando a lista, não escolhendo
 	modo.you_style = i
 	_abrir_linhas()
 
@@ -1165,13 +1207,92 @@ func _abrir_linhas() -> void:
 
 
 func _escolheu_linha(i: int) -> void:
+	if _rolou:
+		return   # D-078: o dedo estava rolando a lista, não escolhendo
 	modo.you_line = i
 	_selecao.visible = false
-	_colocar_no_alto()
+	_colocar_no_alto_animado()
 
 
 func _fechar_selecao() -> void:
 	_selecao.visible = false
+
+
+## D-078: colocar no alto como gente: pega a pipa, amarra a linha no
+## cabresto, vai até a beira da laje, larga — e ela sobe pela física, com o
+## pipeiro dando linha e tenteando (FreeMode.subir) até uns 20 m. Aí o
+## controle é seu.
+const LARGADA_AMARRAR := 1.6
+const LARGADA_ANDAR := 1.2
+const LARGADA_ERGUER := 0.5
+var _lanc_fase := 0         ## 0 parado · 1 amarrando · 2 indo para a beira · 3 erguendo · 4 subindo
+var _lanc_t := 0.0
+var _pipa_mao: Node3D
+
+
+func _colocar_no_alto_animado() -> void:
+	if not modo.you_on_hand or _lanc_fase != 0:
+		return
+	_painel_mao.visible = false
+	_dedos.clear()
+	_lanc_fase = 1
+	_lanc_t = 0.0
+	_pipa_mao = KiteView.new()
+	_pipa_mao.name = "PipaNaMao"
+	add_child(_pipa_mao)
+	_pipa_mao.call("construir", modo.kite_for(modo.you_style), Estilos.ESTILOS[modo.you_style])
+	_avisar("Amarrando a linha no cabresto…")
+
+
+func _largada_passo(delta: float) -> void:
+	_lanc_t += delta
+	match _lanc_fase:
+		1:
+			if _lanc_t >= LARGADA_AMARRAR:
+				_lanc_fase = 2
+				_lanc_t = 0.0
+				_avisar("Indo para a beira da laje…")
+		2:
+			if _lanc_t >= LARGADA_ANDAR:
+				_lanc_fase = 3
+				_lanc_t = 0.0
+		3:
+			if _lanc_t >= LARGADA_ERGUER:
+				if _pipa_mao != null:
+					_pipa_mao.queue_free()
+					_pipa_mao = null
+				modo.launch_you(modo.you_style, modo.you_line, true)
+				_embalo = 0.0
+				_lanc_fase = 4
+				_lanc_t = 0.0
+				_avisar("Largou! Dando linha e tenteando…")
+		4:
+			var r := modo.subir(delta)
+			if r == 1:
+				_lanc_fase = 0
+				_avisar("No alto! Agora é com você.")
+			elif r == -1:
+				_lanc_fase = 0
+				modo.put_you_on_hand()
+				_avisar("Não subiu… tenta de novo.")
+
+
+## Onde o boneco e a pipa na mão ficam durante a largada (fases 1 a 3).
+func _pose_largada() -> Dictionary:
+	var base: Vector3 = modo.players[0]["base"]
+	var atras := base + Vector3(0.0, 0.0, 1.8)
+	var pos := atras
+	if _lanc_fase == 2:
+		pos = atras.lerp(base, smoothstep(0.0, 1.0, _lanc_t / LARGADA_ANDAR))
+	elif _lanc_fase >= 3:
+		pos = base
+	var alto := 1.15
+	if _lanc_fase == 3:
+		alto = lerpf(1.6, 2.1, _lanc_t / LARGADA_ERGUER)
+	elif _lanc_fase == 2:
+		alto = 1.6
+	var pipa := pos + Vector3(0.0, alto, -0.45)
+	return {"corpo": pos, "pipa": pipa, "mao": pipa + Vector3(0.0, -0.25, 0.15)}
 
 
 func _colocar_no_alto() -> void:

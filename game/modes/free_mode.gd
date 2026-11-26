@@ -249,14 +249,67 @@ func _mira(i: int) -> float:
 
 ## Coloca a sua pipa no alto com a pipa e a linha escolhidas.
 ## kite: pipa do catálogo (Estilos.ESTILOS); line_kind: linha (Estilos.LINHAS).
-func launch_you(kite := -1, line_kind := -1) -> void:
+func launch_you(kite := -1, line_kind := -1, da_mao := false) -> void:
 	if kite >= 0:
 		you_style = clampi(kite, 0, Estilos.ESTILOS.size() - 1)
 	if line_kind >= 0:
 		you_line = clampi(line_kind, 0, Estilos.LINHAS.size() - 1)
 	you_on_hand = false
 	players[0]["style"] = you_style
-	_lancar(0)
+	if da_mao:
+		# D-078: largada de verdade — a pipa sai da mão com pouca linha e sobe
+		# pela física, com o pipeiro dando linha e tenteando (subir()).
+		_lancar(0, SUBIDA_LINHA_INICIAL, 30.0, 0.0)
+		subindo = true
+		_sub_t = 0.0
+		_sub_toque = 0.3
+	else:
+		_lancar(0)
+
+
+## D-078: subida depois da largada. O pipeiro dá linha quando a pipa está
+## subindo bem e dá uma puxadinha quando ela cai; tenteia para manter o bico
+## para cima. Tudo pelos mesmos comandos do jogador (PilotInput/Pilot).
+## Devolve 0 = subindo, 1 = no alto (o jogador assume), -1 = caiu.
+const SUBIDA_LINHA_INICIAL := 3.0
+const SUBIDA_LINHA := 20.0
+var subindo := false
+var _sub_t := 0.0
+var _sub_toque := 0.0
+var _sub_lado := 1.0
+
+
+func subir(dt: float) -> int:
+	var f := you()
+	if f == null or f.cut or f.line == null:
+		subindo = false
+		return -1
+	_sub_t += dt
+	var e := f.input
+	var elev := f.elevation_deg()
+	e.kick_base_shift = 0.0
+	if elev < 30.0:
+		e.haul_speed = 1.2      # caindo: puxadinha, ela sobe
+	else:
+		e.haul_speed = -2.5     # subindo bem: dá linha
+	_sub_toque -= dt
+	if _sub_toque <= 0.0:
+		_sub_toque = 0.45
+		e.kick_side = _sub_lado
+		e.kick_spin = _sub_lado
+		e.kick_scale = 0.6
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
+		_sub_lado = -_sub_lado
+	if (f.line_length() >= SUBIDA_LINHA and elev >= 35.0) or _sub_t > 30.0:
+		e.haul_speed = 0.0
+		e.kick_spin = 0.0
+		subindo = false
+		return 1
+	if f.kite.position.y < (players[0]["base"] as Vector3).y - 1.0:
+		e.haul_speed = 0.0
+		subindo = false
+		return -1
+	return 0
 
 
 ## Deixa você na laje sem pipa no alto (início do jogo ou depois do corte).
@@ -344,7 +397,7 @@ static func apply_line(f: Flyer, k: int, estilo_i := -1) -> void:
 			f.line.inv_mass[j] /= peso
 
 
-func _lancar(i: int) -> void:
+func _lancar(i: int, comprimento := LINHA_INICIAL, elevacao := 45.0, tensao := 3.0) -> void:
 	var p: Dictionary = players[i]
 	var velha: Flyer = p["flyer"]
 	if velha != null:
@@ -355,7 +408,7 @@ func _lancar(i: int) -> void:
 		def = kite_for(you_style)
 		def.spin_give_rate_deg = your_spin_rate * def.spin_give_rate_deg / KiteDefinition.pipa_rio().spin_give_rate_deg
 		def.spin_kick_rate_deg = your_kick_deg
-	var f := world.add_flyer(def, p["base"], LINHA_INICIAL, 45.0, 0.0, true, 3.0)
+	var f := world.add_flyer(def, p["base"], comprimento, elevacao, 0.0, true, tensao)
 	if i == 0:
 		apply_line(f, you_line, you_style)
 	f.tag = i
