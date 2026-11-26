@@ -23,7 +23,7 @@ var telhados: Array = []
 ## segmento, não só nos pontos) enrosca neles: atrito alto, agarra.
 var fios: Array = []
 var fios_altura_max := -INF
-const FIO_RAIO := 0.05
+const FIO_RAIO := 0.08
 const FIO_ATRITO := 0.15
 var altura_max := 0.0
 var _grade := {}         ## Vector2i -> Array de [tipo (0 caixa, 1 bola, 2 haste), índice]
@@ -179,7 +179,7 @@ func _contato_telhado(i: int, p: Vector3) -> Array:
 ## D-080: segmento da linha contra os fios (a linha passa ENTRE dois pontos
 ## dela por cima do fio). Devolve [ponto no segmento s (0..1), normal,
 ## profundidade] do contato mais fundo, ou [] se não encosta.
-func contato_segmento_fio(a: Vector3, b: Vector3) -> Array:
+func contato_segmento_fio(a: Vector3, b: Vector3, pa := Vector3.INF, pb := Vector3.INF) -> Array:
 	if minf(a.y, b.y) > fios_altura_max:
 		return []
 	var meio := (a + b) * 0.5
@@ -194,10 +194,17 @@ func contato_segmento_fio(a: Vector3, b: Vector3) -> Array:
 		var f: Array = fios[int(item[1])]
 		var r := _mais_perto_segmentos(a, b, f[0], f[1])
 		var d: Vector3 = (r[2] as Vector3) - (r[3] as Vector3)
-		var dist := d.length()
-		if dist < FIO_RAIO and FIO_RAIO - dist > fundo:
-			fundo = FIO_RAIO - dist
-			var n := d / dist if dist > 1e-6 else Vector3.UP
+		var n := d.normalized() if d.length() > 1e-6 else Vector3.UP
+		# de que lado do fio a linha estava no começo do subpasso: se passou
+		# para o outro lado (fio fino, passo de tempo), volta para o de antes
+		if pa != Vector3.INF:
+			var rp := _mais_perto_segmentos(pa, pb, f[0], f[1])
+			var dp: Vector3 = (rp[2] as Vector3) - (rp[3] as Vector3)
+			if dp.length() > 1e-6 and dp.length() < 1.0:
+				n = dp.normalized()
+		var lado := d.dot(n)   # distância do fio, medida para o lado de antes
+		if lado < FIO_RAIO and FIO_RAIO - lado > fundo and d.length() < 1.0:
+			fundo = FIO_RAIO - lado
 			melhor = [float(r[0]), n, fundo]
 	return melhor
 

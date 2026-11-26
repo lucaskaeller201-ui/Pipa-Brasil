@@ -306,7 +306,7 @@ func solve_obstacles(obs: Obstacles) -> void:
 		var b := pos[i + 1]
 		if minf(a.y, b.y) > obs.fios_altura_max:
 			continue
-		var c := obs.contato_segmento_fio(a, b)
+		var c := obs.contato_segmento_fio(a, b, prev[i], prev[i + 1])
 		if c.is_empty():
 			continue
 		var s: float = c[0]
