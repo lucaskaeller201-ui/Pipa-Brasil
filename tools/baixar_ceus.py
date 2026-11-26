@@ -21,8 +21,10 @@ UA = {"User-Agent": "pipa-brasil-ci (jogo gratuito; ceus CC0)"}
 
 HORAS = {
 	"manha": (["kloofendal_48d_partly_cloudy_puresky", "qwantani_morning_puresky", "kloofendal_overcast_puresky"], "morning-afternoon"),
-	"meio_dia": (["qwantani_noon_puresky", "kloppenheim_02_puresky", "rooitou_park_puresky", "kloofendal_43d_clear_puresky"], "midday"),
-	"por_do_sol": (["qwantani_sunset_puresky", "belfast_sunset_puresky", "kloppenheim_06_puresky", "spaichingen_hill_puresky"], "sunrise-sunset"),
+	# escolhidos olhando a folha de prévias (tools/previa_ceus.py): nuvens de
+	# verdade ao meio-dia e um pôr do sol dourado com nuvens
+	"meio_dia": (["sunflowers_puresky", "kloppenheim_05_puresky", "qwantani_noon_puresky"], "midday"),
+	"por_do_sol": (["kloppenheim_06_puresky", "wasteland_clouds_puresky", "qwantani_sunset_puresky"], "sunrise-sunset"),
 }
 
 
