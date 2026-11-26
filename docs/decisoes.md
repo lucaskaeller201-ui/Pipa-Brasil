@@ -33,6 +33,13 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-071 — Volta do tenteio da 0.23.0 (desfaz D-070) (2026-11-25)
+O Lucas testou a 0.24.0 e achou que mandar linha, desbicar e tentear
+ficaram piores. Pediu para voltar como era: o código de controle (livre.gd,
+kite_body.gd) e os testes voltaram exatamente ao da 0.23.0 (D-059, D-060,
+D-062 valem de novo). O puxão segurando 1 s saiu junto. O documento de
+análise dele fica em docs/analise-mecanicas-lucas.txt para consulta.
+
 ### D-070 — Tenteio sem travas, bico que fica e puxão segurando (2026-11-25)
 O Lucas mandou o documento de análise das mecânicas (Pipa Combate X/4) e
 disse que ainda não conseguia pôr o bico onde queria. Diagnóstico: o duplo

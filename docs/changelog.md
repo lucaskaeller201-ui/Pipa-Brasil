@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.24.1 — 2026-11-25
+
+- Tenteio, desbico e mandar linha voltaram a ser como na 0.23.0 (a mudança
+  da 0.24.0 foi desfeita a pedido do Lucas).
+
 ## 0.24.0 — 2026-11-25
 
 - Tenteio: o toque duplo vale sempre (bico para cima ou de lado, sem pausa)
