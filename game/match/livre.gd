@@ -80,7 +80,8 @@ var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## volta (12 duplos = 360°).
 const PUXAO_LINHA_S := 0.25      ## s em que o puxão recolhe linha no máximo da mão (~1,5 m)
 const PUXAO_SEGURAR_S := 1.0     ## D-070: segurar o dedo parado 1 s = puxão (tranco forte)
-const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
+const TOQUE_DUPLO_S := 0.4      ## s: o mais separado que os dois toques do duplo podem estar (D-073)
+const RITMO_DUPLO := 1.6        ## o intervalo antes do par tem que ser 1,6× maior que o do par      ## s entre os dois toques do toque duplo
 const VOLTA_SEGUE_S := 1.5      ## s: outro duplo logo depois continua virando para o mesmo lado (D-052)
 @export var graus_por_toque := 30.0
 
@@ -153,7 +154,9 @@ func _ready() -> void:
 		var corpo: Node3D = Boneco.new()
 		add_child(corpo)
 		corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
-		corpo.position = (modo.players[i]["base"] as Vector3) + Vector3(0.0, 0.0, 0.25)
+		# D-073: no lugar do pipeiro da física (antes ficava 25 cm atrás e o
+		# braço não alcançava a mão: parecia que a linha soltava da mão)
+		corpo.position = modo.players[i]["base"] as Vector3
 		_corpos.append(corpo)
 	_linhas = LinesView.new()
 	_linhas.name = "Linhas"
@@ -479,13 +482,21 @@ func _tentear() -> void:
 	_ultimo_toque = agora
 
 
-## Toque duplo (D-070, escolha do Lucas): dois toques com menos de 0,3 s
-## entre eles, na tela toda, com o bico em qualquer posição — sem a trava de
-## pausa e sem a de 20° (D-059). O toque seguinte a um duplo começa de novo.
+## Toque duplo (D-070, D-073): na tela toda, com o bico em qualquer posição.
+## O jeito do Lucas é "um toque... e dois rápidos": o par conta como duplo
+## quando é bem mais junto que o intervalo antes dele (ritmo diferente), até
+## 0,4 s — assim tentear num ritmo constante continua sendo tenteio, mesmo
+## rápido. Logo depois de um duplo, outro par continua a volta.
 func _eh_toque_duplo(agora: float) -> bool:
 	if _ultimo_duplo:
 		return false
-	return agora - _ultimo_toque < TOQUE_DUPLO_S
+	var junto := agora - _ultimo_toque
+	if junto >= TOQUE_DUPLO_S:
+		return false
+	if agora - _duplo_t < VOLTA_SEGUE_S:
+		return true
+	var antes := _ultimo_toque - _penultimo_toque
+	return antes >= RITMO_DUPLO * junto
 
 ## D-070: puxão — o dedo ficou parado na tela por PUXAO_SEGURAR_S, sem
 ## arrastar: a mão dá um tranco forte para trás (o mesmo puxão da física,

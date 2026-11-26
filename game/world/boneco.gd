@@ -18,6 +18,7 @@ var _braco_linha: Node3D
 var _braco_carretilha: Node3D
 var _cabeca: Node3D
 var _t := 0.0
+var _inclinar := 0.0   ## rad: o corpo se debruça para a mão alcançar a linha
 var _mats := {}
 
 
@@ -124,7 +125,7 @@ func atualizar(mao: Vector3, alvo: Vector3, puxando: float, delta: float) -> voi
 		var guinada := atan2(-para.x, -para.z)
 		rotation.y = lerp_angle(rotation.y, guinada, 1.0 - exp(-6.0 * delta))
 	# respiração / balanço leve
-	_tronco.rotation.x = -0.08 * clampf(puxando, 0.0, 1.0) + sin(_t * 1.7) * 0.015
+	_tronco.rotation.x = -0.08 * clampf(puxando, 0.0, 1.0) + sin(_t * 1.7) * 0.015 - _inclinar
 	if is_inside_tree() and (alvo - _cabeca.global_position).length() > 0.5:
 		_cabeca.look_at(alvo, Vector3.UP)
 		_cabeca.rotation.x = clampf(_cabeca.rotation.x, -0.5, 0.9)
@@ -147,6 +148,10 @@ func _alcancar(braco: Node3D, ponto: Vector3) -> void:
 	if d < 0.05:
 		return
 	var n := dir / d
+	# longe demais: o corpo inclina para a frente (dando linha, o pipeiro
+	# estica o braço e se debruça), em vez de a linha "sair" da mão
+	var falta := d - (BRACO + ANTEBRACO - 0.01)
+	_inclinar = clampf(_inclinar + (0.6 if falta > 0.0 else -0.3) * clampf(absf(falta) * 4.0, 0.05, 1.0) * 0.1, 0.0, 0.45)
 	var dd := clampf(d, 0.12, BRACO + ANTEBRACO - 0.002)
 	var cos_ombro := clampf((BRACO * BRACO + dd * dd - ANTEBRACO * ANTEBRACO) / (2.0 * BRACO * dd), -1.0, 1.0)
 	var cos_cot := clampf((BRACO * BRACO + ANTEBRACO * ANTEBRACO - dd * dd) / (2.0 * BRACO * ANTEBRACO), -1.0, 1.0)

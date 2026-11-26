@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.24.3 — 2026-11-25
+
+- "Um toque e dois rápidos" agora é reconhecido como toque duplo.
+- A linha não parece mais soltar da mão na largada (o boneco alcança).
+- Linha desenhada lisa, sem os "V".
+
 ## 0.24.2 — 2026-11-25
 
 - Controle da 0.24.0 de volta (toque duplo sempre vale, bico fica, puxão

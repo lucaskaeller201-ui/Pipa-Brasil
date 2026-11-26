@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-073 — "Um toque e dois rápidos", linha que não solta da mão, linha lisa (2026-11-25)
+- Duplo: o Lucas faz "um toque... e dois rápidos" e o jogo não pegava
+  quando o par passava de 0,3 s. Agora o par vale até 0,4 s desde que seja
+  bem mais junto (1,6×) que o intervalo antes dele; tentear num ritmo
+  constante continua sendo tenteio. Bico em qualquer posição (D-070).
+- "A largada solta minha linha" (desde a 0.23.0): o boneco novo tem braço
+  de tamanho real e ficava 25 cm atrás do pipeiro da física, então a mão não
+  alcançava o ponto da linha e parecia que a linha saía da mão. O boneco
+  agora fica no lugar certo e se debruça quando a mão vai longe (dando linha).
+  A física da largada não mudou.
+- "V" na linha: a fita era desenhada reta entre os pontos da física, com
+  quinas nas emendas. Agora a curva passa suave pelos mesmos pontos
+  (Catmull-Rom) e a fita é contínua. Só desenho; a simulação é a mesma.
+
 ### D-072 — Volta a D-070 (2026-11-25)
 Depois de pedir para desfazer, o Lucas aprendeu a usar a 0.24.0 e achou boa:
 o controle voltou ao da 0.24.0 (D-070: duplo sem travas, bico que fica,

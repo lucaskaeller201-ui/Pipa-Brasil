@@ -95,6 +95,16 @@ func test_boneco_monta_e_aponta_o_braco_para_a_mao() -> void:
 	var ponta := cot.global_transform * Vector3(0.0, -b.ANTEBRACO, 0.0)
 	print("      [boneco] mão a %.3f m do ponto da linha" % ponta.distance_to(mao))
 	assert_true(ponta.distance_to(mao) < 0.03, "a mão alcança a linha")
+	# longe do alcance (dando linha): o corpo se debruça para chegar mais perto
+	var longe := b.global_position + Vector3(0.0, 1.5, -0.75)
+	var erro_antes := (cot.global_transform * Vector3(0.0, -b.ANTEBRACO, 0.0)).distance_to(longe)
+	for k in 40:
+		b.call("atualizar", longe, Vector3(0.0, 20.0, -30.0), 0.0, 0.05)
+	var erro := (cot.global_transform * Vector3(0.0, -b.ANTEBRACO, 0.0)).distance_to(longe)
+	print("      [boneco] mão longe: faltava %.2f m, debruçando falta %.2f m" % [erro_antes, erro])
+	assert_true(erro < 0.06, "debruçando, a mão chega na linha")
+	for k in 60:
+		b.call("atualizar", mao, Vector3(0.0, 20.0, -30.0), 0.0, 0.05)
 	var cotovelo_y := cot.global_position.y
 	assert_true(cotovelo_y < maxf(braco.global_position.y, mao.y), "cotovelo para baixo")
 	raiz.queue_free()

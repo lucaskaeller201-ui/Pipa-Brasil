@@ -124,11 +124,20 @@ func test_toque_duplo_livre_e_puxao_segurando() -> void:
 	var t := 100.0
 	raiz.set("_duplo_t", -99.0)
 	raiz.set("_ultimo_duplo", false)
-	raiz.set("_penultimo_toque", t - 0.4)
-	raiz.set("_ultimo_toque", t - 0.2)
 	var modo: FreeMode = raiz.get("modo")
 	print("      [duplo] bico em %.0f°" % modo.you().nose_angle_deg())
-	assert_true(bool(raiz.call("_eh_toque_duplo", t)), "dois toques juntos = duplo, mesmo com o bico para cima e no ritmo")
+	# D-073: "um toque... e dois rápidos" (o jeito do Lucas), com o bico para cima
+	raiz.set("_penultimo_toque", t - 0.85)
+	raiz.set("_ultimo_toque", t - 0.25)
+	assert_true(bool(raiz.call("_eh_toque_duplo", t)), "toque, pausa, dois rápidos (0,25 s) = duplo, com o bico para cima")
+	raiz.set("_penultimo_toque", t - 0.5)
+	raiz.set("_ultimo_toque", t - 0.12)
+	assert_true(bool(raiz.call("_eh_toque_duplo", t)), "toque e logo dois bem rápidos = duplo")
+	# tentear num ritmo constante, mesmo rápido, é tenteio
+	raiz.set("_penultimo_toque", t - 0.5)
+	raiz.set("_ultimo_toque", t - 0.25)
+	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "ritmo constante (0,25 s) = tenteio")
+	raiz.set("_penultimo_toque", t - 2.0)
 	raiz.set("_ultimo_toque", t - 0.45)
 	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "toques separados = tenteio")
 	raiz.set("_ultimo_toque", t - 0.1)

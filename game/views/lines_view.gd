@@ -30,16 +30,24 @@ func limpar() -> void:
 func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, minimo := 1.0) -> void:
 	if pontos.size() < 2:
 		return
+	# D-073: curva suave passando pelos pontos da física (Catmull-Rom) e fita
+	# contínua nas emendas — sem os "V" nos nós. Só desenho: os pontos são os
+	# da simulação, nada é mexido nela.
+	var p := suavizar(pontos)
 	_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
 	_im.surface_set_color(cor)
-	for i in pontos.size() - 1:
-		var a := pontos[i]
-		var b := pontos[i + 1]
-		var dir := b - a
-		if dir.length_squared() < 1e-10:
+	var lados := PackedVector3Array()
+	lados.resize(p.size())
+	for i in p.size():
+		var dir := p[mini(i + 1, p.size() - 1)] - p[maxi(i - 1, 0)]
+		lados[i] = _lado(p[i], dir if dir.length_squared() > 1e-12 else Vector3.UP, largura, minimo)
+	for i in p.size() - 1:
+		var a := p[i]
+		var b := p[i + 1]
+		if (b - a).length_squared() < 1e-12:
 			continue
-		var la := _lado(a, dir, largura, minimo)
-		var lb := _lado(b, dir, largura, minimo)
+		var la := lados[i]
+		var lb := lados[i + 1]
 		_im.surface_add_vertex(a - la)
 		_im.surface_add_vertex(a + la)
 		_im.surface_add_vertex(b + lb)
@@ -47,6 +55,26 @@ func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, 
 		_im.surface_add_vertex(b + lb)
 		_im.surface_add_vertex(b - lb)
 	_im.surface_end()
+
+
+## Pontos intermediários numa curva Catmull-Rom (passa por todos os pontos).
+static func suavizar(pontos: PackedVector3Array, por_trecho := 4) -> PackedVector3Array:
+	var n := pontos.size()
+	if n < 3:
+		return pontos
+	var saida := PackedVector3Array()
+	for i in n - 1:
+		var p0 := pontos[maxi(i - 1, 0)]
+		var p1 := pontos[i]
+		var p2 := pontos[i + 1]
+		var p3 := pontos[mini(i + 2, n - 1)]
+		for k in por_trecho:
+			var t := float(k) / por_trecho
+			var t2 := t * t
+			var t3 := t2 * t
+			saida.append(0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t2 + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t3))
+	saida.append(pontos[n - 1])
+	return saida
 
 
 func _lado(p: Vector3, dir: Vector3, largura: float, minimo := 1.0) -> Vector3:
