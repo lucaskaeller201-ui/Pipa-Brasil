@@ -80,8 +80,8 @@ var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## volta (12 duplos = 360°).
 const PUXAO_LINHA_S := 0.25      ## s em que o puxão recolhe linha no máximo da mão (~1,5 m)
 const PUXAO_SEGURAR_S := 1.0     ## D-070: segurar o dedo parado 1 s = puxão (tranco forte)
-const TOQUE_DUPLO_S := 0.4      ## s: o mais separado que os dois toques do duplo podem estar (D-073)
-const RITMO_DUPLO := 1.6        ## o intervalo antes do par tem que ser 1,6× maior que o do par      ## s entre os dois toques do toque duplo
+const TOQUE_DUPLO_S := 0.28     ## s: o mais separado que os dois toques do duplo podem estar (D-073, D-076)
+const RITMO_DUPLO := 2.0        ## o intervalo antes do par tem que ser 2× maior (D-076: tentear num ritmo irregular não vira duplo)      ## s entre os dois toques do toque duplo
 const VOLTA_SEGUE_S := 1.5      ## s: outro duplo logo depois continua virando para o mesmo lado (D-052)
 @export var graus_por_toque := 45.0   ## quanto cada toque duplo vira a direção (D-074: medido no vídeo)
 @export var balanco_tenteio := 30.0   ## quanto o bico balança para cada lado no tenteio (D-074)

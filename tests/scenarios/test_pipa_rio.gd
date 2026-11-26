@@ -510,3 +510,42 @@ func test_balanco_do_tenteio_como_no_video() -> void:
 	assert_true(final > 32.0 and final < 50.0, "balança uns 40° (%.0f°)" % final)
 	assert_true(t90 > 0.0 and t90 < 0.22, "rápido: chega em ~0,15 s (%.2f s)" % t90)
 	assert_true(maior - final < 10.0, "para seco, sem passar muito (%.0f° a mais)" % (maior - final))
+
+
+
+## D-076: tenteando com o bico para o lado (para ir até a mão do outro), a
+## pipa vai para o lado sem afundar e sem rodar sozinha.
+func _de_lado_tenteando(segura: bool) -> Array:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	f.kite.segura_altura = segura
+	for k in 3:   # direção uns 90° para o lado (toques duplos)
+		f.input.kick_spin = 1.0
+		f.input.kick_base_shift = 30.0
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		_rodar(w, 0.3)
+	f.input.kick_base_shift = 0.0
+	var y0 := f.kite.position.y
+	var x0 := f.kite.position.x
+	var lado := -1.0
+	var bico_min := 999.0
+	var bico_max := -999.0
+	for k in 16:   # 4 s tenteando
+		f.input.kick_spin = lado
+		f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+		lado = -lado
+		_rodar(w, 0.25)
+		bico_min = minf(bico_min, absf(f.nose_angle_deg()))
+		bico_max = maxf(bico_max, absf(f.nose_angle_deg()))
+	f.input.kick_spin = 0.0
+	return [f.kite.position.y - y0, absf(f.kite.position.x - x0), bico_min, bico_max]
+
+
+func test_de_lado_tenteando_nao_afunda_nem_roda() -> void:
+	var sem: Array = _de_lado_tenteando(false)
+	var com: Array = _de_lado_tenteando(true)
+	print("      [de lado, 4 s tenteando] sem ajuda: altura %+.1f m, andou %.1f m, bico %.0f°–%.0f° | com: altura %+.1f m, andou %.1f m, bico %.0f°–%.0f°" % [sem[0], sem[1], sem[2], sem[3], com[0], com[1], com[2], com[3]])
+	assert_true(com[0] > -4.0, "não afunda (%.1f m)" % com[0])
+	assert_true(com[0] > sem[0], "afunda menos que sem a mira para cima")
+	assert_true(com[1] > 3.0, "vai para o lado (%.1f m)" % com[1])
+	assert_true(com[3] < 150.0, "não roda sozinha: o bico não passa de 150° (%.0f°)" % com[3])
