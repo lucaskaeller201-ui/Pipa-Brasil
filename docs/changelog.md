@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.30.0 — 2026-11-26
+
+- Jogo bem mais leve: a física gasta ~10× menos processador e o 3D do celular
+  é desenhado numa resolução mais leve. Mostra os fps no canto.
+
 ## 0.29.1 — 2026-11-26
 
 - Dá para instalar na tela de início do iPhone (app da web): abre em tela

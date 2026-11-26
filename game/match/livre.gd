@@ -145,7 +145,7 @@ func _ready() -> void:
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
 	# segundo de processador por segundo de jogo e o celular travava
-	modo.world.substeps = 2
+	modo.world.substeps = 2   # (com 60 passos por segundo: subpasso de 1/120 s)
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()
@@ -202,6 +202,34 @@ func _montar_cenario() -> void:
 func _aplicar_graficos() -> void:
 	var vp := get_viewport()
 	if vp == null:
+		return
+	# D-082: no navegador do celular a tela tem 3× mais pontos (iPhone): o 3D
+	# é desenhado numa resolução menor e ampliado — quase não se nota e pesa
+	# bem menos para a placa de vídeo.
+	var celular := OS.has_feature("web_ios") or OS.has_feature("web_android") or OS.has_feature("mobile")
+	if celular:
+		match _graficos:
+			"ultra":
+				vp.msaa_3d = Viewport.MSAA_2X
+				vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+				vp.scaling_3d_scale = 0.75
+				vp.anisotropic_filtering_level = Viewport.ANISOTROPY_4X
+				RenderingServer.directional_shadow_atlas_set_size(2048, true)
+				RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
+			"alto":
+				vp.msaa_3d = Viewport.MSAA_DISABLED
+				vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+				vp.scaling_3d_scale = 0.6
+				vp.anisotropic_filtering_level = Viewport.ANISOTROPY_2X
+				RenderingServer.directional_shadow_atlas_set_size(2048, true)
+				RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_HARD)
+			_:
+				vp.msaa_3d = Viewport.MSAA_DISABLED
+				vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+				vp.scaling_3d_scale = 0.45
+				vp.anisotropic_filtering_level = Viewport.ANISOTROPY_DISABLED
+				RenderingServer.directional_shadow_atlas_set_size(1024, true)
+				RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_HARD)
 		return
 	match _graficos:
 		"ultra":
@@ -302,7 +330,16 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
+var _versao: Label
+var _fps_t := 0.0
+
+
 func _process(delta: float) -> void:
+	# D-082: quadros por segundo ao lado da versão (para ver se está travando)
+	_fps_t += delta
+	if _versao != null and _fps_t > 0.5:
+		_fps_t = 0.0
+		_versao.text = "PIPA BRASIL %s · build %s · %d fps" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT, Engine.get_frames_per_second()]
 	_ver_toque_pendente()
 	_animar_bonecos(delta)
 	if _no_lobby and _titulo_pipa != null:
@@ -814,6 +851,7 @@ func _criar_interface() -> void:
 	_criar_lobby(raiz)
 
 	var versao := Label.new()
+	_versao = versao
 	versao.text = "PIPA BRASIL %s · build %s" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT]
 	versao.add_theme_font_size_override("font_size", 12)
 	versao.position = Vector2(16.0, 6.0)

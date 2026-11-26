@@ -33,6 +33,25 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-082 — Jogo mais leve: física 60 Hz × 2 subpassos, gráficos do celular (2026-11-26)
+O Lucas sentiu o jogo travando num iPhone 17. Medido no CI (tests/unit/
+test_desempenho.gd): um passo de física custava 8–9,5 ms — com 120 passos
+por segundo, quase 1 s de processador por segundo de jogo (no celular, mais),
+e com até 8 passos de recuperação por quadro o jogo afundava. Onde ia o
+tempo: forças/integração 3 ms, contato entre linhas 3 ms, obstáculos 2,8 ms.
+- Obstáculos resolvidos só no último subpasso de cada passo (2,8 → 0,9 ms).
+- No jogo, física a 60 passos por segundo com 2 subpassos (subpasso de
+  1/120 s; era 120 × 4, subpasso de 1/480 s): ~10× menos trabalho por
+  segundo. O teste de estabilidade compara: elevação média das pipas igual
+  (12–18°) e nada explode. Os testes de física continuam a 1/120 × 4.
+- No máximo 3 passos de recuperação por quadro (era 8).
+- Testei ler o vento e os pares de contato uma vez por passo: ganho pequeno,
+  e mudava a trajetória de referência (test_regressao) — desfeito.
+- Gráficos no navegador do celular: 3D desenhado em 75% (ULTRA), 60% (Alto)
+  ou 45% (Leve) da resolução da tela (o iPhone tem 3× mais pontos), MSAA 2×,
+  sombra 2048.
+- A versão no canto mostra os quadros por segundo (fps).
+
 ### D-081 — Jogo instalável no iPhone como app da web (2026-11-26)
 O Lucas quer jogar no celular sem ser no Safari. App de verdade no iPhone
 (App Store/TestFlight) exige a conta de desenvolvedor da Apple, paga — fora
