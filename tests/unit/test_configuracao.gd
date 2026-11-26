@@ -2,8 +2,9 @@ extends "res://tests/test_case.gd"
 ## Garante que configurações importantes do projeto não mudem sem querer.
 
 
-func test_fisica_em_passo_fixo_de_120_hz() -> void:
-	assert_eq(ProjectSettings.get_setting("physics/common/physics_ticks_per_second"), 120,
+## D-082: passo fixo de 60 Hz no jogo (com 2 subpassos de 1/120 s).
+func test_fisica_em_passo_fixo() -> void:
+	assert_eq(ProjectSettings.get_setting("physics/common/physics_ticks_per_second"), 60,
 		"o passo fixo da física é a base da física independente do FPS (D-004)")
 
 
