@@ -161,7 +161,8 @@ func update(dt: float) -> void:
 					_lancar(i)
 	# Tirar do alto: recolheu a linha toda, a pipa chegou na mão (D-037).
 	var eu := you()
-	if eu != null and not eu.cut and not _you_bot and eu.line != null and eu.line_length() < RECOLHER_LINHA:
+	# (durante a subida a linha começa curta: não é "tirar do alto", D-078)
+	if eu != null and not eu.cut and not _you_bot and not subindo and eu.line != null and eu.line_length() < RECOLHER_LINHA:
 		_recolher()
 	# Avoadas: somem depois de aparadas, perdidas ou muito longe.
 	for f in world.flyers:
