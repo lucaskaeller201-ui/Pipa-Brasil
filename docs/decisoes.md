@@ -33,6 +33,27 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-075 — Céu de foto, pipa de papel de seda, serra com favela (2026-11-26)
+O Lucas pediu para focar em deixar tudo mais bonito, inclusive as casas do
+morro ao fundo.
+- Céu de foto real (HDRI CC0 do Poly Haven, 2k), escolhido numa folha de
+  prévias: manhã com cúmulos (kloofendal_48d_partly_cloudy), meio-dia com
+  nuvens (sunflowers), pôr do sol dourado (kloppenheim_06). O CI acha o sol
+  na foto e mede o brilho do céu e a cor do horizonte (assets/ceus/ceus.json).
+  A luz do sol fica na mesma altura do sol da foto e o céu gira para o sol
+  da foto ficar onde está a luz (sombras batem com o céu). A névoa usa a cor
+  do horizonte da foto. Sem as fotos, volta o céu por código.
+- Pipa: papel de seda num shader próprio — fibra, manchas, amassado
+  (relevo), brilho leve e luz atravessando o papel: contra o sol a pipa acende
+  na cor dela e as varetas aparecem como sombra por dentro. Varetas de bambu
+  com volume (a de cima e a de baixo vergam). A vela não faz sombra em si.
+- Serra ao fundo: terreno com picos e vales (ruído + dois morros mais
+  altos) no lugar das bolas lisas; pedra nas encostas íngremes; favela de
+  ~2.600 casinhas 3D pequenas e grudadas (55% tijolo), caixas d'água azuis,
+  manchas de mata e árvores — tudo em MultiMesh (poucas chamadas de desenho).
+- Oclusão de ambiente (sombra nos cantos) não existe no renderizador do
+  navegador; ficam as sombras do sol (4096) e a sombra no pé das paredes.
+
 ### D-074 — Tenteio e câmera medidos no vídeo do Pipa Combate (2026-11-26)
 O Lucas mandou um vídeo de tela do Pipa Combate. Analisado quadro a quadro
 (30 por segundo, pela letra "B" e pela armação do bico):

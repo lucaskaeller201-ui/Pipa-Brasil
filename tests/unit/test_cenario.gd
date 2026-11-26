@@ -7,10 +7,42 @@ const Boneco := preload("res://game/world/boneco.gd")
 
 
 func test_shaders_carregam() -> void:
-	for nome in ["ceu", "chao", "parede", "morro", "agua", "folhagem", "palha", "telha"]:
+	for nome in ["ceu", "chao", "parede", "morro", "agua", "folhagem", "palha", "telha", "ceu_foto", "seda"]:
 		var s: Shader = load("res://game/world/shaders/%s.gdshader" % nome)
 		assert_not_null(s, "%s carrega" % nome)
 		assert_true(s.code.length() > 100, "%s tem código" % nome)
+
+
+## D-075: céu de foto em cada hora, com a luz do sol na altura do sol da foto.
+func test_ceu_de_foto_com_sol_alinhado() -> void:
+	var info = JSON.parse_string(FileAccess.get_file_as_string("res://assets/ceus/ceus.json"))
+	for hora in ["manha", "meio_dia", "por_do_sol"]:
+		var raiz := Node3D.new()
+		Ambiente.criar(raiz, hora, "bairro")
+		var amb: WorldEnvironment = raiz.get_node("Ambiente")
+		var mat := amb.environment.sky.sky_material as ShaderMaterial
+		assert_not_null(mat, "céu de %s é shader" % hora)
+		assert_true(mat.shader.resource_path.ends_with("ceu_foto.gdshader"), "céu de %s é foto" % hora)
+		assert_not_null(mat.get_shader_parameter("foto"), "a foto de %s carregou" % hora)
+		var sol: DirectionalLight3D = raiz.get_node("Sol")
+		var elev := float(info[hora]["sol_elevacao"])
+		print("      [céu] %s: %s, sol a %.0f° (luz a %.0f°)" % [hora, info[hora]["nome"], elev, -sol.rotation_degrees.x])
+		assert_true(absf(-sol.rotation_degrees.x - clampf(elev, 4.0, 75.0)) < 0.5, "luz na altura do sol da foto")
+		raiz.free()
+
+
+## D-075: a pipa é de papel de seda (shader) com varetas de bambu.
+func test_pipa_de_papel_de_seda() -> void:
+	var KV = load("res://game/views/kite_view.gd")
+	var Est = load("res://game/views/estilos_pipa.gd")
+	var v: Node3D = KV.new()
+	v.call("construir", KiteDefinition.pipa_rio(), Est.ESTILOS[3])
+	var vela: MeshInstance3D = v.get_node("Vela")
+	var mat := vela.material_override as ShaderMaterial
+	assert_not_null(mat)
+	assert_true(mat.shader.resource_path.ends_with("seda.gdshader"), "vela de papel de seda")
+	assert_not_null(v.get_node_or_null("Varetas"), "varetas com volume")
+	v.free()
 
 
 ## D-067: as fotos CC0 estão no projeto e chegam aos shaders.

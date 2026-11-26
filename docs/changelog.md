@@ -1,5 +1,13 @@
 # Histórico de alterações
 
+## 0.26.0 — 2026-11-26
+
+- Céu de foto real em cada hora do dia, com o sol no lugar certo.
+- Pipa de papel de seda: textura, amassado, luz atravessando contra o sol e
+  varetas de bambu.
+- Serra de verdade ao fundo, com favela de casinhas, caixas d'água, pedra e
+  mata, e névoa de distância com a cor do céu.
+
 ## 0.25.0 — 2026-11-26
 
 - Tenteio com os números medidos no vídeo do Pipa Combate: balanço de 40°,

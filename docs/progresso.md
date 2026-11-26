@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-25 (versão 0.25.0).
+Atualizado em 2026-11-25 (versão 0.26.0).
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
@@ -52,6 +52,7 @@ Atualizado em 2026-11-25 (versão 0.25.0).
 | Fachadas 3D e boneco novo (D-069) | Feito, aguardando teste do Lucas |
 | Tenteio sem travas, bico que fica, puxão segurando (D-070) | Feito; de volta na 0.24.2 (D-072), aprovado pelo Lucas |
 | Tenteio e câmera medidos no vídeo do Pipa Combate (D-074) | Feito, aguardando teste do Lucas |
+| Céu de foto, pipa de seda, serra com favela (D-075) | Feito, aguardando teste do Lucas |
 | Pedidos seguintes do Lucas: gráfico mais realista (menos "quadrado"), andar pelo mapa com joystick, correr, pular, campo de futebol, escadas para as lajes, bambu para pegar avoada alta | Pendente |
 | Próximos (pedidos do Lucas): gráfico, chão, casas, boneco, andar, mapas, mais pipas e modelos, linhas cortantes e escolha de linha, andar e pegar pipa, aparar de novo depois de decepar | Pendente |
 | Próximo no visual: cenário, boneco, animações | Pendente |
