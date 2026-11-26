@@ -3,6 +3,7 @@ shader_type spatial;
 // com mato verde no alto. Visto de longe, por código.
 
 varying vec3 mundo;
+varying vec3 nmundo;
 uniform float topo_verde = 38.0;
 uniform bool so_mata = false;   // D-065: morro só de mata (praia), sem casinhas
 
@@ -23,6 +24,7 @@ float hash(vec2 p) {
 
 void vertex() {
 	mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	nmundo = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
 void fragment() {
@@ -33,6 +35,9 @@ void fragment() {
 		float n = ruido(q) * 0.5 + ruido(q * 2.7) * 0.3 + ruido(q * 7.0) * 0.2;
 		c = mix(vec3(0.07, 0.2, 0.08), vec3(0.24, 0.4, 0.14), n);
 		c *= 0.85 + 0.25 * clamp(mundo.y / 120.0, 0.0, 1.0);
+		// pedra nas encostas íngremes (D-075), como os paredões dos morros do Rio
+		float pedra = smoothstep(0.35, 0.6, 1.0 - nmundo.y + (ruido(mundo.xy * 0.05) - 0.5) * 0.3);
+		c = mix(c, vec3(0.42, 0.4, 0.37) * (0.8 + 0.35 * n), pedra);
 	} else {
 		vec2 cel = vec2(mundo.x / 6.0, mundo.y / 4.5 + floor(mundo.z / 12.0) * 0.37);
 		vec2 i = floor(cel);

@@ -481,64 +481,109 @@ static func _fio(pai: Node3D, a: Vector3, b: Vector3) -> void:
 
 
 ## Morros com casinhas ao fundo (para onde o vento leva as pipas).
+## Serra ao fundo (D-075): terreno de verdade com picos e vales (ruído), em
+## vez de bolas lisas; favela de casinhas 3D grudadas subindo as encostas,
+## mais tijolo que reboco, caixas d'água azuis, alguns telhados, e mata no
+## alto. A névoa da distância deixa tudo azulado, como de verdade.
+const SERRA_X := Vector2(-760.0, 760.0)
+const SERRA_Z := Vector2(-780.0, -360.0)
+
+
+static func _altura_serra(ruido: FastNoiseLite, x: float, z: float) -> float:
+	var frente := clampf((-z - 380.0) / 160.0, 0.0, 1.0)   # começa no pé, perto do bairro
+	frente = frente * frente * (3.0 - 2.0 * frente)
+	var n := ruido.get_noise_2d(x, z) * 0.5 + 0.5
+	var h := (25.0 + 95.0 * n * n) * frente
+	# dois morros mais altos (silhueta do Rio)
+	h += 70.0 * exp(-(pow((x + 60.0) / 140.0, 2.0) + pow((z + 640.0) / 110.0, 2.0)))
+	h += 45.0 * exp(-(pow((x - 330.0) / 110.0, 2.0) + pow((z + 560.0) / 90.0, 2.0)))
+	return h
+
+
 static func _morro(pai: Node3D) -> void:
+	var ruido := FastNoiseLite.new()
+	ruido.seed = 11
+	ruido.frequency = 0.0045
+	ruido.fractal_octaves = 4
+	var nx := 110
+	var nz := 34
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var pts: Array = []
+	for iz in nz + 1:
+		var linha: Array = []
+		for ix in nx + 1:
+			var x := lerpf(SERRA_X.x, SERRA_X.y, float(ix) / nx)
+			var z := lerpf(SERRA_Z.y, SERRA_Z.x, float(iz) / nz)
+			linha.append(Vector3(x, _altura_serra(ruido, x, z) - 1.0, z))
+		pts.append(linha)
+	for iz in nz:
+		for ix in nx:
+			var a: Vector3 = pts[iz][ix]
+			var b: Vector3 = pts[iz][ix + 1]
+			var c: Vector3 = pts[iz + 1][ix]
+			var d: Vector3 = pts[iz + 1][ix + 1]
+			for v in [a, c, b, b, c, d]:
+				st.add_vertex(v)
+	st.generate_normals()
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://game/world/shaders/morro.gdshader")
-	mat.set_shader_parameter("so_mata", true)   # D-068: as casinhas agora são 3D
-	# [x, z, raio, altura]: longe e baixos, uma serra no horizonte
-	for d in [Vector4(-260.0, -520.0, 170.0, 55.0), Vector4(-40.0, -600.0, 230.0, 80.0), Vector4(200.0, -540.0, 190.0, 60.0),
-			Vector4(420.0, -480.0, 160.0, 45.0), Vector4(-460.0, -450.0, 150.0, 40.0)]:
-		var m := MeshInstance3D.new()
-		var malha := SphereMesh.new()
-		malha.radius = d.z
-		malha.height = d.w * 2.0
-		malha.radial_segments = 40
-		malha.rings = 20
-		m.mesh = malha
-		m.material_override = mat
-		m.position = Vector3(d.x, 0.0, d.y)
-		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		pai.add_child(m)
-		_casinhas_no_morro(pai, d)
+	mat.set_shader_parameter("so_mata", true)
+	var m := MeshInstance3D.new()
+	m.name = "Serra"
+	m.mesh = st.commit()
+	m.material_override = mat
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pai.add_child(m)
+	_favela(pai, ruido)
 
 
-## D-068: casinhas de verdade (caixas 3D) subindo o morro, em vez de
-## desenho na encosta. Um MultiMesh por morro: milhares de casas, um só
-## desenho para a placa de vídeo.
-static func _casinhas_no_morro(pai: Node3D, d: Vector4) -> void:
+static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = int(absf(d.x * 13.0 + d.y))
+	rng.seed = 77
+	var mancha := FastNoiseLite.new()   # onde é favela e onde é mata
+	mancha.seed = 5
+	mancha.frequency = 0.012
+	var casas: Array = []
+	for k in 30000:
+		if casas.size() >= 2600:
+			break
+		var x := rng.randf_range(-620.0, 620.0)
+		var z := rng.randf_range(-640.0, -395.0)
+		var h := _altura_serra(ruido, x, z)
+		if h < 2.0 or h > 70.0:
+			continue
+		if mancha.get_noise_2d(x, z) < -0.05:
+			continue   # mancha de mata no meio da favela
+		# encosta muito íngreme não tem casa
+		var dx := _altura_serra(ruido, x + 3.0, z) - h
+		var dz := _altura_serra(ruido, x, z + 3.0) - h
+		if Vector2(dx, dz).length() / 3.0 > 0.9:
+			continue
+		casas.append(Vector3(x, h, z))
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
 	var caixa := BoxMesh.new()
 	caixa.size = Vector3.ONE
 	mm.mesh = caixa
-	var quantas := int(d.z * 2.2)
-	mm.instance_count = quantas
-	var feitas := 0
-	for k in quantas * 3:
-		if feitas >= quantas:
-			break
-		var a := rng.randf() * TAU
-		var r := sqrt(rng.randf()) * 0.92
-		# só na frente do morro (o lado que se vê do bairro) e até 75% da altura
-		var px := d.x + sin(a) * r * d.z
-		var pz := d.y + cos(a) * r * d.z
-		if pz < d.y - d.z * 0.2:
-			continue
-		var y := d.w * sqrt(maxf(0.0, 1.0 - r * r))
-		if y > d.w * 0.78:
-			continue
-		var t := Vector3(rng.randf_range(4.0, 8.0), rng.randf_range(3.0, 3.0 * rng.randi_range(1, 3)), rng.randf_range(4.0, 8.0))
-		var b := Basis(Vector3.UP, rng.randf_range(-0.15, 0.15)).scaled(t)
-		mm.set_instance_transform(feitas, Transform3D(b, Vector3(px, y + t.y * 0.5 - 1.5, pz)))
-		var c: Color = CORES_PAREDE[rng.randi() % CORES_PAREDE.size()]
-		if rng.randf() < 0.35:
-			c = Color(0.66, 0.36, 0.24)   # tijolo sem reboco
-		mm.set_instance_color(feitas, c.darkened(rng.randf() * 0.15))
-		feitas += 1
-	mm.visible_instance_count = feitas
+	mm.instance_count = casas.size()
+	var caixas_dagua: Array = []
+	var tijolos := [Color(0.62, 0.32, 0.2), Color(0.7, 0.38, 0.24), Color(0.55, 0.28, 0.19), Color(0.66, 0.42, 0.3)]
+	for k in casas.size():
+		var p: Vector3 = casas[k]
+		var andares := 1 + int(rng.randf() < 0.55) + int(rng.randf() < 0.25)
+		var t := Vector3(rng.randf_range(3.5, 6.5), andares * 2.9, rng.randf_range(3.5, 6.5))
+		var b := Basis(Vector3.UP, rng.randf_range(-0.12, 0.12)).scaled(t)
+		mm.set_instance_transform(k, Transform3D(b, Vector3(p.x, p.y + t.y * 0.5 - 1.2, p.z)))
+		var c: Color
+		if rng.randf() < 0.55:
+			c = tijolos[rng.randi() % tijolos.size()]
+		else:
+			c = CORES_PAREDE[rng.randi() % CORES_PAREDE.size()]
+		mm.set_instance_color(k, c.darkened(rng.randf() * 0.2))
+		if rng.randf() < 0.4:
+			caixas_dagua.append(Vector3(p.x + rng.randf_range(-1.0, 1.0), p.y + t.y - 1.2, p.z + rng.randf_range(-1.0, 1.0)))
 	var no := MultiMeshInstance3D.new()
 	no.name = "Casinhas"
 	no.multimesh = mm
@@ -548,6 +593,60 @@ static func _casinhas_no_morro(pai: Node3D, d: Vector4) -> void:
 	no.material_override = mat
 	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(no)
+	# caixas d'água azuis nas lajes
+	var mc := MultiMesh.new()
+	mc.transform_format = MultiMesh.TRANSFORM_3D
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.75
+	cil.bottom_radius = 0.65
+	cil.height = 1.0
+	cil.radial_segments = 8
+	cil.rings = 1
+	mc.mesh = cil
+	mc.instance_count = caixas_dagua.size()
+	for k in caixas_dagua.size():
+		mc.set_instance_transform(k, Transform3D(Basis(), (caixas_dagua[k] as Vector3) + Vector3(0.0, 0.5, 0.0)))
+	var nc := MultiMeshInstance3D.new()
+	nc.name = "CaixasDagua"
+	nc.multimesh = mc
+	var azul := StandardMaterial3D.new()
+	azul.albedo_color = Color(0.16, 0.36, 0.72)
+	azul.roughness = 0.6
+	nc.material_override = azul
+	nc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pai.add_child(nc)
+	# árvores espalhadas no meio das casas e na mata
+	_materiais_arvore()
+	var ma := MultiMesh.new()
+	ma.transform_format = MultiMesh.TRANSFORM_3D
+	var bola := SphereMesh.new()
+	bola.radius = 1.0
+	bola.height = 1.7
+	bola.radial_segments = 10
+	bola.rings = 6
+	ma.mesh = bola
+	var arvores: Array = []
+	for k in 6000:
+		if arvores.size() >= 1400:
+			break
+		var x := rng.randf_range(-700.0, 700.0)
+		var z := rng.randf_range(-740.0, -390.0)
+		var h := _altura_serra(ruido, x, z)
+		if h < 1.0:
+			continue
+		var na_mata := mancha.get_noise_2d(x, z) < -0.05 or h > 70.0
+		if not na_mata and rng.randf() > 0.15:
+			continue
+		arvores.append(Transform3D(Basis().scaled(Vector3.ONE * rng.randf_range(3.0, 6.0)), Vector3(x, h + 1.5, z)))
+	ma.instance_count = arvores.size()
+	for k in arvores.size():
+		ma.set_instance_transform(k, arvores[k])
+	var na := MultiMeshInstance3D.new()
+	na.name = "MataDaSerra"
+	na.multimesh = ma
+	na.material_override = _mat_folha[1]
+	na.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pai.add_child(na)
 
 
 ## Orla da praia (D-063): coqueiros no calçadão, quiosques, guarda-sóis

@@ -45,8 +45,8 @@ func test_modelos_3d() -> void:
 	for filho in bairro.get_children():
 		if filho.scene_file_path.contains("plastic_monobloc_chair_01"):
 			cadeiras += 1
-		if filho is MultiMeshInstance3D:
-			casinhas += (filho as MultiMeshInstance3D).multimesh.visible_instance_count
+		if filho is MultiMeshInstance3D and String(filho.name) == "Casinhas":
+			casinhas += (filho as MultiMeshInstance3D).multimesh.instance_count
 	print("      [cenário] %d cadeiras de laje, %d casinhas nos morros" % [cadeiras, casinhas])
 	# D-069: fachadas 3D (janelas, portas, sacadas) numa malha só
 	var fach: MeshInstance3D = bairro.get_node("Fachadas")
@@ -55,7 +55,11 @@ func test_modelos_3d() -> void:
 	assert_true(tri > 5000, "fachadas com janelas e portas 3D")
 	assert_not_null(bairro.get_node_or_null("Vidros"))
 	assert_true(cadeiras >= 8, "cadeiras nas lajes")
-	assert_true(casinhas > 500, "morros cheios de casinhas 3D")
+	assert_true(casinhas > 1500, "serra cheia de casinhas 3D")
+	# D-075: a serra é um terreno de verdade, com caixas d'água e mata
+	assert_not_null(bairro.get_node_or_null("Serra"))
+	assert_not_null(bairro.get_node_or_null("CaixasDagua"))
+	assert_not_null(bairro.get_node_or_null("MataDaSerra"))
 	raiz.free()
 
 

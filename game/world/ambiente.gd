@@ -22,6 +22,38 @@ static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
 	criar(pai, "por_do_sol", "bairro", com_marcos)
 
 
+static var _ceus_info := {}
+
+
+## Material do céu de foto da hora, com o sol e a exposição medidos pelo
+## tools/baixar_ceus.py (assets/ceus/ceus.json). Vazio se não houver foto.
+static func _ceu_foto(hora: String) -> Dictionary:
+	var caminho := "res://assets/ceus/%s.hdr" % hora
+	if not ResourceLoader.exists(caminho):
+		return {}
+	if _ceus_info.is_empty():
+		var arq := FileAccess.open("res://assets/ceus/ceus.json", FileAccess.READ)
+		if arq == null:
+			return {}
+		var dados = JSON.parse_string(arq.get_as_text())
+		if not dados is Dictionary:
+			return {}
+		_ceus_info = dados
+	if not _ceus_info.has(hora):
+		return {}
+	var info: Dictionary = _ceus_info[hora]
+	var m := ShaderMaterial.new()
+	m.shader = load("res://game/world/shaders/ceu_foto.gdshader")
+	m.set_shader_parameter("foto", load(caminho))
+	m.set_shader_parameter("foto_sol_u", float(info["sol_azimute"]) / 360.0)
+	# exposição: o céu (sem o sol) fica com o mesmo brilho do céu de antes
+	m.set_shader_parameter("energia", 0.6 / maxf(float(info["mediana_ceu"]), 0.02))
+	var hz: Array = info["horizonte"]
+	var nevoa := Color(float(hz[0]), float(hz[1]), float(hz[2])) * 0.85
+	m.set_shader_parameter("cor_baixo", nevoa)
+	return {"material": m, "elevacao": clampf(float(info["sol_elevacao"]), 4.0, 75.0), "nevoa": nevoa}
+
+
 ## Céu, sol, névoa e chão para a hora e o mapa ("bairro" ou "praia").
 static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marcos := false) -> void:
 	var h: Dictionary = HORAS.get(hora, HORAS["por_do_sol"])
@@ -35,6 +67,16 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 
 	var ceu := Sky.new()
 	ceu.sky_material = ceu_material
+	# D-075: céu de foto real, quando a foto da hora existir (baixada pelo CI)
+	var foto := _ceu_foto(hora)
+	if not foto.is_empty():
+		ceu.sky_material = foto["material"]
+		h = h.duplicate()
+		# a luz vem do sol da foto (mesma altura), virada para o lado do jogo
+		var rot: Vector3 = h["sol_rot"]
+		h["sol_rot"] = Vector3(-float(foto["elevacao"]), rot.y, rot.z)
+		h["nevoa"] = foto["nevoa"]
+	ceu.radiance_size = Sky.RADIANCE_SIZE_128
 
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY

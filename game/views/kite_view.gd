@@ -19,19 +19,31 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 		for i in def.triangles.size():
 			var tri := i / 3
 			st.set_color(Color(0.90, 0.18, 0.15) if tri < 2 else Color(1.0, 0.82, 0.20))
+			st.set_uv(Vector2(def.triangles[i].x, -def.triangles[i].y))
 			st.add_vertex(def.triangles[i])
 	else:
 		_vela_estampada(st, def, estilo)
 	st.generate_normals()
-	var vela_material := StandardMaterial3D.new()
-	vela_material.vertex_color_use_as_albedo = true
-	vela_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	vela_material.roughness = 0.8
+	st.generate_tangents()
+	# D-075: papel de seda (fibra, amassado, luz atravessando, varetas por dentro)
+	var vela_material := ShaderMaterial.new()
+	vela_material.shader = load("res://game/world/shaders/seda.gdshader")
+	var y_sup := def.corners[2].y
+	var y_inf := def.corners[2].y - 0.15
+	if not estilo.is_empty():
+		var cc := contorno(def, estilo)
+		y_sup = (cc[1] as Vector3).y
+		y_inf = (cc[2] as Vector3).y
+	vela_material.set_shader_parameter("vareta_sup_y", y_sup)
+	vela_material.set_shader_parameter("vareta_inf_y", y_inf)
 	var vela := MeshInstance3D.new()
 	vela.name = "Vela"
 	vela.mesh = st.commit()
 	vela.material_override = vela_material
+	# a pipa não faz sombra em si mesma (senão a luz não atravessa o papel)
+	vela.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(vela)
+	_varetas(def, estilo)
 
 	# Varetas e cabresto.
 	var linhas := ImmediateMesh.new()
@@ -52,8 +64,8 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 		var c := contorno(def, estilo)
 		var sup: Vector3 = c[1]
 		var inf: Vector3 = c[2]
-		for p in [c[0], c[3], Vector3(-sup.x, sup.y, 0.0), sup, Vector3(-inf.x, inf.y, 0.0), inf]:
-			linhas.surface_add_vertex(p)
+		# (as varetas agora são de bambu com volume: _varetas)
+		pass
 		# linha do bico: da ponta da vareta central às pontas da vareta de cima
 		if Estilos.aberto(estilo):
 			linhas.surface_set_color(Color(0.95, 0.95, 0.95))
@@ -70,6 +82,57 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 	estrutura.mesh = linhas
 	add_child(estrutura)
 	_cabresto = linhas
+
+
+## Varetas de bambu de verdade (finas, com volume), atrás do papel (D-075).
+func _varetas(def: KiteDefinition, estilo: Dictionary) -> void:
+	var pares: Array = []
+	if estilo.is_empty():
+		pares = [[def.corners[0], def.corners[1]], [def.corners[2], def.corners[3]]]
+	else:
+		var c := contorno(def, estilo)
+		var sup: Vector3 = c[1]
+		var inf: Vector3 = c[2]
+		pares = [[c[0], c[3]], [Vector3(-sup.x, sup.y, 0.0), sup], [Vector3(-inf.x, inf.y, 0.0), inf]]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_color(Color(0.72, 0.58, 0.36))
+	var r := 0.0028
+	for par in pares:
+		var a: Vector3 = par[0]
+		var b: Vector3 = par[1]
+		# vareta atravessada verga um pouco (como na pipa de verdade)
+		var passos := 6
+		for k in passos:
+			var t0 := float(k) / passos
+			var t1 := float(k + 1) / passos
+			var p0 := a.lerp(b, t0)
+			var p1 := a.lerp(b, t1)
+			if absf(a.y - b.y) < 0.01:
+				p0.y += p0.x * p0.x * 0.25
+				p1.y += p1.x * p1.x * 0.25
+			p0.z = 0.004
+			p1.z = 0.004
+			var d := (p1 - p0).normalized()
+			var lado := d.cross(Vector3.BACK).normalized() * r
+			var cima := Vector3.BACK * r
+			var anel := [lado, cima, -lado, -cima]
+			for q in 4:
+				var u: Vector3 = anel[q]
+				var w: Vector3 = anel[(q + 1) % 4]
+				for v in [p0 + u, p1 + u, p1 + w, p0 + u, p1 + w, p0 + w]:
+					st.add_vertex(v)
+	st.generate_normals()
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 0.6
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var m := MeshInstance3D.new()
+	m.name = "Varetas"
+	m.mesh = st.commit()
+	m.material_override = mat
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(m)
 
 
 func atualizar(kite: KiteBody) -> void:
@@ -131,6 +194,7 @@ func _vela_estampada(st: SurfaceTool, def: KiteDefinition, estilo: Dictionary) -
 				var c := (p00 + p10 + p11 + p01) * 0.25
 				st.set_color(Estilos.cor(estilo, c.x / meia, (top.y - c.y) / comprimento, tb, tc))
 				for p in [p00, p10, p11, p00, p11, p01]:
+					st.set_uv(Vector2(p.x, -p.y))
 					st.add_vertex(p)
 
 
