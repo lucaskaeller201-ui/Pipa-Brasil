@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.26.3 — 2026-11-26
+
+- Com a pipa na mão, arraste o dedo para olhar em volta; a câmera fica atrás
+  do pipeiro.
+
 ## 0.26.2 — 2026-11-26
 
 - Tenteando para o lado, a pipa vai para o lado sem afundar.

@@ -221,3 +221,30 @@ func test_escolher_pipa_e_linha() -> void:
 	assert_eq(modo.you_line, 3)
 	assert_not_null(modo.you())
 	raiz.queue_free()
+
+
+
+## D-077: com a pipa na mão, arrastar o dedo gira a câmera (olhar em volta),
+## e a câmera fica atrás do pipeiro (não olhando para o céu vazio).
+func test_pipa_na_mao_olha_em_volta() -> void:
+	var cena: PackedScene = load("res://scenes/main/main.tscn")
+	var raiz := cena.instantiate()
+	tree.root.add_child(raiz)
+	raiz.call("_jogar")
+	var modo: FreeMode = raiz.get("modo")
+	assert_true(modo.you_on_hand, "começa com a pipa na mão")
+	raiz.call("_posicionar_camera", true)
+	var cam: Camera3D = raiz.get("_camera")
+	var base: Vector3 = modo.players[0]["base"]
+	assert_true(cam.global_position.distance_to(base) < 8.0, "câmera perto do pipeiro")
+	var antes := -cam.global_transform.basis.z
+	raiz.call("_toque", 0, Vector2(600, 400), true)
+	for k in 20:
+		raiz.call("_arrasto", 0, Vector2(600 + 15 * k, 400), Vector2(15, 0))
+	raiz.call("_toque", 0, Vector2(900, 400), false)
+	raiz.call("_posicionar_camera", true)
+	var depois := -cam.global_transform.basis.z
+	var giro := rad_to_deg(Vector2(antes.x, antes.z).angle_to(Vector2(depois.x, depois.z)))
+	print("      [olhar em volta] arrastando 300 px a câmera girou %.0f°" % giro)
+	assert_true(absf(giro) > 40.0, "arrastar gira a câmera")
+	raiz.queue_free()

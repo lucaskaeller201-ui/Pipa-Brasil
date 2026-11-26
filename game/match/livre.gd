@@ -67,7 +67,9 @@ var _ultimo_toque := -99.0      # instante do último toque (s)
 var _ultimo_duplo := false      # o último toque fechou um toque duplo
 var _duplo_t := -99.0           # instante do último toque duplo (s)
 var _puxao_ate := -1.0          # até quando o puxão também recolhe linha pela mão
-var _puxoes := 0                # D-070: quantos puxões (segurar a tela) o jogador deu
+var _puxoes := 0
+var _olhar_yaw := 0.0     ## D-077: graus, para onde a câmera olha com a pipa na mão
+var _olhar_pitch := 18.0  ## graus acima do horizonte                # D-070: quantos puxões (segurar a tela) o jogador deu
 var _dir_volta := 0.0           # sentido em que os toques duplos estão virando
 var _sentido_antes := 1.0       # lado do bico antes do último toque simples
 var _penultimo_toque := -99.0   # instante do toque antes do último (s)
@@ -370,6 +372,23 @@ func _posicionar_camera(imediato: bool) -> void:
 		return
 	var eu := modo.you()
 	var base: Vector3 = modo.players[0]["base"]
+	if modo.you_on_hand:
+		# D-077: pipa na mão — câmera atrás do pipeiro, olhando em volta (o
+		# dedo gira); dá para ver as pipas no céu, as lajes e o morro.
+		_corpos[0].visible = true
+		var yaw := deg_to_rad(_olhar_yaw)
+		var pit := deg_to_rad(_olhar_pitch)
+		var frente := Vector3(-sin(yaw) * cos(pit), sin(pit), -cos(yaw) * cos(pit))
+		var ombro := base + Vector3(0.0, 1.6, 0.0)
+		var plano := Vector3(-sin(yaw), 0.0, -cos(yaw))
+		var olho_m := ombro - plano * 4.0 + Vector3(0.0, 1.2, 0.0) + plano.cross(Vector3.UP) * 0.8
+		var quer := Transform3D(Basis.looking_at(frente, Vector3.UP), olho_m)
+		if imediato:
+			_camera.global_transform = quer
+		else:
+			_camera.global_transform = _camera.global_transform.interpolate_with(quer, 0.35)
+		_camera.fov = lerpf(_camera.fov, 62.0, 0.2)
+		return
 	var olho := base + Pilot.SHOULDER + Vector3(0.0, 0.2, 0.15)
 	if not _primeira_pessoa:
 		olho = base + Pilot.SHOULDER + Vector3(1.5, 1.5, 6.5)
@@ -451,6 +470,12 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 
 func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 	if not _dedos.has(indice):
+		return
+	if modo.you_on_hand and not _no_lobby:
+		# D-077: pipa na mão — arrastar o dedo gira a câmera e olha em volta
+		_olhar_yaw -= relativo.x * 0.25
+		_olhar_pitch = clampf(_olhar_pitch + relativo.y * 0.2, -25.0, 75.0)
+		(_dedos[indice] as Dictionary)["ult"] = posicao
 		return
 	_dy_quadro += relativo.y
 	var d: Dictionary = _dedos[indice]

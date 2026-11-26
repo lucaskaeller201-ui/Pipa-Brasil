@@ -33,6 +33,14 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-077 — Olhar em volta com a pipa na mão (2026-11-26)
+Com a pipa na mão a câmera olhava para o céu vazio (onde a pipa estaria) e
+não dava para girar. Agora, na mão, a câmera fica atrás do ombro do pipeiro
+e arrastar o dedo gira para olhar em volta (para os lados e para cima/baixo):
+dá para ver as pipas no céu, as lajes e o morro antes de colocar no alto.
+Com a pipa no alto, o arrastar continua sendo dar/puxar linha. Andar pelo
+mapa (joystick, correr, pular, escadas) é a próxima etapa.
+
 ### D-076 — Tentear de lado sem afundar nem rodar (2026-11-26)
 O Lucas: tenteando para a direita ou esquerda (para ir até a mão do outro)
 a pipa afunda e roda sozinha. Medido no teste: com a direção a 90°, 4 s de
