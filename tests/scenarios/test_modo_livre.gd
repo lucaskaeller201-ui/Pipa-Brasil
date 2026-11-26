@@ -151,17 +151,21 @@ func test_recolher_a_linha_toda_tira_do_alto() -> void:
 ## pipeiro dando linha e tenteando, até uns 20 m — sem aparecer no alto.
 func test_largada_da_mao_sobe_pela_fisica() -> void:
 	for semente in [3, 7, 11]:
-		var modo := FreeMode.new(1, semente, true)
+		var modo := FreeMode.new(1, semente, false)   # você sem bot: só a subida comanda
 		modo.put_you_on_hand()
 		modo.launch_you(5, 2, true)
 		var eu: Flyer = modo.you()
 		var l0 := eu.line_length()
 		var r := 0
 		var t := 0.0
+		var prox := 0.0
 		while r == 0 and t < 35.0:
 			r = modo.subir(DT)
 			modo.update(DT)
 			t += DT
+			if semente == 3 and t >= prox:
+				prox += 1.0
+				print("        t %.0f s: linha %.1f m, elevação %.0f°, tensão %.1f N, bico %.0f°, haul %.1f, vento na pipa %.1f m/s" % [t, eu.line_length(), eu.elevation_deg(), eu.tension, eu.nose_angle_deg(), eu.input.haul_speed, eu.kite.velocity.length()])
 		var base: Vector3 = modo.players[0]["base"]
 		print("      [largada, semente %d] linha %.1f → %.1f m em %.1f s; altura %.1f m; elevação %.0f° (r=%d)" % [semente, l0, eu.line_length(), t, eu.kite.position.y - base.y, eu.elevation_deg(), r])
 		assert_true(l0 < 5.0, "sai da mão com pouca linha")
