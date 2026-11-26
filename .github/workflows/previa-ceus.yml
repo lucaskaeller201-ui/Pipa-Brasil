@@ -1,0 +1,18 @@
+# Folha de prévias dos céus CC0 (só para escolher; D-075).
+name: Previa ceus
+on:
+  push:
+    branches: [main]
+    paths: [tools/previa_ceus.py]
+permissions:
+  contents: write
+jobs:
+  previa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q pillow && python3 tools/previa_ceus.py
+      - run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git checkout --orphan previas-ceu; git rm -rq --cached .; git add -f previa_ceus.png
+          git commit -qm "prévias dos céus"; git push -qf origin previas-ceu
