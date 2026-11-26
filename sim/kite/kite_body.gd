@@ -57,6 +57,10 @@ var kick_base_shift := 0.0  ## graus que a direção anda neste toque (toque dup
 ## vento faz a pipa girar, como mandando linha (D-058).
 var slack_spin := false
 var _kick_prev := false
+## D-070: o Lucas escolheu que o bico FICA na direção escolhida: o toque
+## simples só balança em volta dela. A volta para cima a cada toque (D-060,
+## D-062) ficou desligada (true religa, para comparar no laboratório).
+var tenteio_volta_cima := false
 var _ultima_volta := 0.0   ## quanto o último toque simples trouxe a direção para cima (rad)
 const TENTEIO_VOLTA_DEG := 20.0
 const TENTEIO_LONGE_DEG := 45.0    ## acima disso o toque desbica para cima (D-062)   ## cada toque simples traz a direção isso para cima (D-060)
@@ -319,7 +323,7 @@ func integrate(h: float) -> void:
 					# cima aos poucos — com o bico para um lado, tenteando ele
 					# volta para cima e passa para o outro lado.
 					var lado := kick_sign
-					if kick_base_shift == 0.0:
+					if kick_base_shift == 0.0 and tenteio_volta_cima:
 						# D-062: com o bico bem de lado ou para baixo (martelão,
 						# afundando), cada toque é um desbico PARA CIMA: a direção
 						# volta metade do caminho e o bico vai para o lado de cima —

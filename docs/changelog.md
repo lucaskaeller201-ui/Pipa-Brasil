@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.24.0 — 2026-11-25
+
+- Tenteio: o toque duplo vale sempre (bico para cima ou de lado, sem pausa)
+  e o bico fica na direção escolhida; tenteio só balança em volta dela.
+- Puxão: segurar o dedo parado 1 s dá um tranco forte na linha.
+
 ## 0.23.0 — 2026-11-25
 
 - Casas com janelas, portas, grades, sacadas, ar-condicionado, beiral e

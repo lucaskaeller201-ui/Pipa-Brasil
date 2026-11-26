@@ -66,6 +66,8 @@ var _ultimo_lado := 1.0         # lado do último tenteio
 var _ultimo_toque := -99.0      # instante do último toque (s)
 var _ultimo_duplo := false      # o último toque fechou um toque duplo
 var _duplo_t := -99.0           # instante do último toque duplo (s)
+var _puxao_ate := -1.0          # até quando o puxão também recolhe linha pela mão
+var _puxoes := 0                # D-070: quantos puxões (segurar a tela) o jogador deu
 var _dir_volta := 0.0           # sentido em que os toques duplos estão virando
 var _sentido_antes := 1.0       # lado do bico antes do último toque simples
 var _penultimo_toque := -99.0   # instante do toque antes do último (s)
@@ -76,6 +78,8 @@ var _sentido := -1.0            # sentido do giro do último tenteio (+1/-1)
 ## faz rodar). Toque DUPLO (dois toques bem juntos): a direção anda 30° para
 ## o lado do toque — de 30 em 30 o bico vai para o lado, para baixo, ou dá a
 ## volta (12 duplos = 360°).
+const PUXAO_LINHA_S := 0.25      ## s em que o puxão recolhe linha no máximo da mão (~1,5 m)
+const PUXAO_SEGURAR_S := 1.0     ## D-070: segurar o dedo parado 1 s = puxão (tranco forte)
 const TOQUE_DUPLO_S := 0.3      ## s entre os dois toques do toque duplo
 const VOLTA_SEGUE_S := 1.5      ## s: outro duplo logo depois continua virando para o mesmo lado (D-052)
 @export var graus_por_toque := 30.0
@@ -277,6 +281,10 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 			v = maxf(v, TOQUE_VELOCIDADE)
 		else:
 			_toque_ate = -1.0
+	if modo.world.time < _puxao_ate:
+		v = Pilot.HAUL_MAX_SPEED   # puxão: o tranco recolhe linha no máximo
+		e.haul_speed = v
+		return
 	e.haul_speed = clampf(v, -DAR_LINHA_MAX, forca_puxada)
 
 
@@ -471,29 +479,38 @@ func _tentear() -> void:
 	_ultimo_toque = agora
 
 
-## Toque duplo de verdade (D-059): dois toques bem juntos DEPOIS de uma pausa
-## (tentear rápido, com os toques no mesmo ritmo, é só tenteio), e só com o
-## bico já para o lado — com o bico para cima o duplo é tenteio e a pipa não
-## roda. Duplos seguidos (a volta) continuam valendo.
+## Toque duplo (D-070, escolha do Lucas): dois toques com menos de 0,3 s
+## entre eles, na tela toda, com o bico em qualquer posição — sem a trava de
+## pausa e sem a de 20° (D-059). O toque seguinte a um duplo começa de novo.
 func _eh_toque_duplo(agora: float) -> bool:
 	if _ultimo_duplo:
 		return false
-	var junto := agora - _ultimo_toque
-	if junto >= TOQUE_DUPLO_S:
-		return false
-	var na_volta := agora - _duplo_t < VOLTA_SEGUE_S
-	if na_volta:
-		return true
-	var antes := _ultimo_toque - _penultimo_toque
-	if antes < maxf(0.35, junto * 2.0):
-		return false   # ritmo de tenteio, não é duplo
-	var eu := modo.you()
-	if eu == null:
-		return false
-	return absf(eu.nose_angle_deg()) >= BICO_DE_LADO_DEG
+	return agora - _ultimo_toque < TOQUE_DUPLO_S
 
+## D-070: puxão — o dedo ficou parado na tela por PUXAO_SEGURAR_S, sem
+## arrastar: a mão dá um tranco forte para trás (o mesmo puxão da física,
+## Pilot.Impulse.PUXAO; a pipa responde conforme o estado em que está).
 func _ver_toque_pendente() -> void:
-	pass
+	var agora := Time.get_ticks_msec() / 1000.0
+	for k in _dedos:
+		var d: Dictionary = _dedos[k]
+		if d.get("puxao", false) or bool(d["puxou"]):
+			continue
+		if (d["ult"] as Vector2).distance_to(d["ini"]) > TOQUE_MAX_PX:
+			continue
+		if agora - float(d["t0"]) >= PUXAO_SEGURAR_S:
+			d["puxao"] = true
+			_puxao()
+
+
+func _puxao() -> void:
+	var eu := modo.you()
+	if eu == null or eu.cut or eu.line == null:
+		return
+	eu.pilot.trigger(Pilot.Impulse.PUXAO, modo.world.time)
+	_puxao_ate = modo.world.time + PUXAO_LINHA_S
+	_puxoes += 1
+	_avisar("PUXÃO!")
 
 
 func _desbicar(lado: float, sentido := 0.0, escala := 1.0, anda := 0.0) -> void:
@@ -673,7 +690,7 @@ func _criar_interface() -> void:
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · TOQUE DUPLO: o bico vira 30° (de 30 em 30)"
+	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~30° para cada lado) · TOQUE DUPLO: o bico vira 30° e fica · SEGURAR parado 1 s: puxão"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
@@ -760,7 +777,7 @@ func _animar_bonecos(delta: float) -> void:
 		if fl == null or fl.cut or fl.line == null:
 			corpo.call("atualizar", base + Vector3(0.3, 1.0, -0.4), base + Vector3(0.0, 10.0, -20.0), 0.0, delta)
 			continue
-		var puxando := 1.0 if fl.input.haul_speed > 0.1 or fl.input.pull > 0.05 else 0.0
+		var puxando := 1.0 if fl.input.haul_speed > 0.1 or fl.input.pull > 0.05 or fl.pilot.is_pulling(modo.world.time) else 0.0
 		corpo.call("atualizar", fl.hand_position, fl.kite.position, puxando, delta)
 
 

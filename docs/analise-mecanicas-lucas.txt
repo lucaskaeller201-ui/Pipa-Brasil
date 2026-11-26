@@ -1,0 +1,347 @@
+DOCUMENTAÇÃO DE ANÁLISE DAS MECÂNICAS DE PIPA — PIPA BRASIL
+
+1. OBJETIVO DESTA ANÁLISE
+
+Quero desenvolver no Pipa Brasil mecânicas de movimentação e combate de pipas inspiradas no funcionamento dos jogos Pipa Combate X e Pipa Combate 4.
+
+O objetivo não é simplesmente reproduzir animações. Quero entender como os comandos do jogador influenciam a movimentação da pipa, como ela responde às mudanças de direção, como a linha reage e como cada manobra interfere na trajetória.
+
+A prioridade desta etapa é estudar exclusivamente:
+
+* Desbico.
+* Tenteio.
+* Puxão.
+* Largada.
+* Arrancão.
+* Corte.
+* Movimentação e mudança de direção da pipa.
+
+Não desviar a análise para gráficos, cenários, sons, menus ou outros sistemas do jogo. O foco agora é entender as mecânicas de movimentação e combate.
+
+2. ANÁLISE DOS VÍDEOS ENVIADOS
+
+Foram enviados vídeos de partidas do Pipa Combate X para observar o comportamento das mecânicas.
+
+Existem duas demonstrações importantes que precisam ser identificadas corretamente.
+
+2.1. TENTEIO
+
+O primeiro vídeo enviado demonstra o tenteio.
+
+O funcionamento observado e explicado por mim é o seguinte:
+
+* O jogador dá um ou dois toques na tela.
+* A quantidade de toques depende do movimento que deseja realizar.
+* Essa mecânica permite fazer a pipa girar para todos os lados.
+* O comando é realizado por toques na tela, e não simplesmente segurando o botão.
+* O movimento da pipa muda conforme os comandos dados pelo jogador.
+
+É importante investigar como o jogo interpreta um toque, dois toques e sequências de toques.
+
+Precisamos entender se a velocidade dos toques, o intervalo entre eles e a sequência utilizada influenciam a direção, a intensidade e a continuidade do giro.
+
+Não assumir que o tenteio é apenas uma sequência de puxar e soltar a linha. No vídeo demonstrado, a característica principal é a utilização de um ou dois toques para movimentar e girar a pipa em diferentes direções.
+
+2.2. PUXÃO
+
+O segundo vídeo enviado demonstra o puxão.
+
+O funcionamento observado e explicado por mim é o seguinte:
+
+* O jogador segura a tela por aproximadamente 1 segundo ou talvez alguns milésimos a mais.
+* O personagem realiza um puxão forte.
+* A pipa responde com um tranco.
+* Existe uma diferença clara entre o comando de toque do tenteio e o comando de pressionar e segurar do puxão.
+
+O puxão precisa ser tratado como uma mecânica independente do tenteio.
+
+É importante investigar o tempo necessário para ativar o puxão, a intensidade da resposta e como a pipa se comporta depois do tranco.
+
+Não confundir esse segundo vídeo com arrancão. O vídeo demonstra o PUXÃO.
+
+3. DIFERENÇA ENTRE TENTEIO E PUXÃO
+
+Essas duas mecânicas não podem ser tratadas como se fossem a mesma coisa.
+
+TENTEIO:
+
+* Comando realizado por toques na tela.
+* Pode envolver um ou dois toques.
+* Permite movimentar e girar a pipa para diferentes direções.
+* A quantidade e a sequência de toques precisam ser investigadas.
+
+PUXÃO:
+
+* Comando realizado pressionando e segurando a tela.
+* A duração da pressão parece influenciar a ativação.
+* O personagem realiza um puxão forte.
+* A pipa responde com um tranco.
+
+As duas mecânicas precisam funcionar separadamente, mas também devem poder ser combinadas durante uma partida.
+
+Por exemplo: o jogador pode realizar um tenteio e, em seguida, executar um puxão. A resposta do puxão deve considerar a situação atual da pipa, em vez de simplesmente executar uma animação independente da movimentação.
+
+4. OUTRAS MANOBRAS QUE PRECISAM SER INVESTIGADAS
+
+Além do tenteio e do puxão, precisamos estudar:
+
+4.1. DESBICO
+
+O desbico precisa ser analisado para entender como o jogador provoca uma mudança de orientação ou trajetória da pipa.
+
+Investigar:
+
+* Qual comando ativa o desbico.
+* Como a pipa muda de direção.
+* Se existe uma rotação rápida.
+* Se a pipa muda a inclinação do corpo.
+* Como a linha acompanha esse movimento.
+* Se o movimento continua depois que o jogador deixa de tocar na tela.
+
+Não considerar uma definição definitiva antes de observar a mecânica em funcionamento.
+
+4.2. LARGADA
+
+A largada precisa ser investigada separadamente.
+
+É necessário entender como o jogador libera linha e como essa ação interfere no movimento da pipa.
+
+Investigar:
+
+* Como o comando é realizado.
+* Se existe uma liberação rápida de linha.
+* Como a tensão muda.
+* Como a pipa reage depois da liberação.
+* Se existe atraso entre o comando e a resposta.
+* Como a largada interfere na trajetória e na velocidade.
+
+4.3. ARRANCÃO
+
+O arrancão ainda precisa ser diferenciado com segurança do puxão.
+
+Não assumir que arrancão e puxão são a mesma mecânica.
+
+Investigar:
+
+* Qual comando ativa o arrancão.
+* Como ele se diferencia do puxão.
+* Se existe uma diferença na duração ou intensidade do movimento.
+* Como o personagem movimenta a mão.
+* Como a linha reage.
+* Como a pipa responde.
+* Se o efeito acontece de maneira instantânea ou progressiva.
+
+Ainda não existe uma demonstração confirmada do arrancão nesta análise.
+
+4.4. CORTE
+
+O corte também precisa ser investigado.
+
+O objetivo é entender como as manobras, a tensão da linha, a movimentação da pipa e o contato entre as linhas influenciam o resultado de um combate.
+
+Não quero que o corte seja determinado apenas por uma animação ou por um botão que decide automaticamente o vencedor.
+
+O resultado deve depender da física e das condições do confronto.
+
+5. MOVIMENTAÇÃO E MUDANÇA DE DIREÇÃO DA PIPA
+
+Esta é uma das partes mais importantes do projeto.
+
+Quero que a pipa tenha uma movimentação natural, responsiva e convincente.
+
+Ela não deve parecer um objeto que simplesmente acompanha o dedo do jogador.
+
+A movimentação precisa considerar:
+
+* Direção atual da pipa.
+* Orientação e inclinação.
+* Velocidade.
+* Inércia.
+* Trajetória anterior.
+* Força aplicada pela linha.
+* Tensão da linha.
+* Resposta aos comandos do jogador.
+* Tempo necessário para mudar de direção.
+* Continuidade do movimento depois que o comando termina.
+
+Quando o jogador realiza um comando, a pipa deve responder de acordo com sua condição naquele momento.
+
+Uma mudança de direção não deve parecer uma troca instantânea de posição. É necessário investigar como ocorre a transição entre uma direção e outra.
+
+Também precisamos observar se a pipa continua girando ou seguindo determinada trajetória depois que o jogador para de tocar na tela.
+
+A movimentação deve transmitir sensação de controle, mas também de inércia e continuidade física.
+
+6. FÍSICA DA PIPA E DA LINHA
+
+A pipa e a linha precisam funcionar como partes de um mesmo sistema físico.
+
+Não quero que a linha seja apenas um desenho que acompanha a pipa.
+
+A linha deve apresentar comportamentos como:
+
+* Curvatura.
+* Barriga.
+* Tensão.
+* Vibração.
+* Atraso na resposta.
+* Oscilações.
+* Mudanças de tensão.
+* Reação aos puxões.
+* Reação às largadas.
+* Interação com os movimentos da pipa.
+* Possibilidade de colisão e emaranhamento com outras linhas.
+
+A pipa também precisa considerar características físicas como:
+
+* Massa.
+* Área da vela.
+* Centro de massa.
+* Centro de pressão.
+* Arrasto.
+* Sustentação.
+* Inércia.
+* Rigidez da estrutura.
+* Cabresto.
+* Estabilidade.
+
+Essas características devem contribuir para que diferentes comandos produzam respostas coerentes.
+
+Uma possibilidade de implementação é utilizar um sistema de física próprio para a pipa e um sistema de simulação de linha baseado em partículas e restrições, como Verlet Integration.
+
+Essa é uma proposta técnica para investigação e implementação, não uma afirmação sobre como os jogos analisados foram programados.
+
+7. TESTES CONTROLADOS PARA ENTENDER AS MECÂNICAS
+
+Precisamos realizar testes para identificar o comportamento real de cada comando.
+
+Sempre que possível, utilizar a mesma pipa e o mesmo cenário para evitar que diferenças de equipamento ou ambiente confundam os resultados.
+
+TESTE DO TENTEIO
+
+Realizar os seguintes testes:
+
+1. Dar apenas um toque na tela.
+2. Dar dois toques rápidos.
+3. Dar dois toques com um intervalo maior.
+4. Dar vários toques consecutivos.
+
+Observar:
+
+* Direção do movimento.
+* Sentido do giro.
+* Velocidade da mudança de direção.
+* Intensidade da resposta.
+* Se a pipa continua girando depois que os toques terminam.
+* Se a sequência de toques altera o resultado.
+
+TESTE DO PUXÃO
+
+Testar diferentes durações de pressão na tela.
+
+Sugestões de duração para os testes:
+
+* 0,1 segundo.
+* 0,2 segundo.
+* 0,4 segundo.
+* 0,6 segundo.
+* 1 segundo.
+
+Esses valores são apenas referências para experimentação. Não são tempos confirmados de ativação do jogo.
+
+Observar:
+
+* Quando o puxão é ativado.
+* Se existe um tempo mínimo de pressão.
+* Como o personagem executa o movimento.
+* Como a linha reage.
+* Qual é a intensidade do tranco.
+* Como a pipa se movimenta depois do puxão.
+* Quanto tempo leva para recuperar a trajetória.
+
+8. COMO TRANSFORMAR AS OBSERVAÇÕES EM MECÂNICAS NO PIPA BRASIL
+
+A implementação precisa separar a entrada do jogador, a física da linha e a resposta da pipa.
+
+Uma estrutura inicial de investigação seria:
+
+TENTEIO
+
+* Detectar os toques na tela.
+* Identificar a quantidade de toques.
+* Identificar os intervalos entre os toques.
+* Interpretar a sequência de comandos.
+* Aplicar a mudança de orientação e trajetória correspondente.
+* Preservar a continuidade e a inércia da pipa.
+
+PUXÃO
+
+* Detectar quando o jogador começa a pressionar a tela.
+* Medir a duração da pressão.
+* Identificar o momento de ativação.
+* Aplicar uma força ou impulso na linha.
+* Transmitir a reação física para a pipa.
+* Calcular o tranco e a trajetória resultante.
+
+OUTRAS MANOBRAS
+
+* Criar sistemas separados para desbico, largada, arrancão e corte.
+* Investigar o funcionamento de cada uma antes de definir os comandos.
+* Permitir combinações de manobras.
+* Evitar que uma manobra anule artificialmente a física das outras.
+
+Essa estrutura é uma proposta para o Pipa Brasil. Não representa o código interno dos jogos de referência.
+
+9. REGRAS IMPORTANTES PARA A IMPLEMENTAÇÃO
+
+1. Não inventar o funcionamento de uma mecânica que ainda não foi demonstrada.
+2. Não confundir puxão com arrancão.
+3. Não confundir tenteio com puxar e soltar a linha.
+4. Não transformar todas as manobras em animações independentes.
+5. Não fazer a pipa mudar de direção instantaneamente sem considerar sua movimentação anterior.
+6. Não fazer a linha parecer um desenho rígido.
+7. Não aplicar forças sem considerar a orientação, velocidade e trajetória atuais da pipa.
+8. Não considerar uma mecânica concluída apenas porque existe uma animação visual.
+9. Criar testes para verificar se os comandos produzem os resultados esperados.
+10. Manter a movimentação responsiva, mas com comportamento físico convincente.
+
+10. COMO O CLAUDE CODE DEVE TRABALHAR
+
+Antes de implementar qualquer alteração:
+
+1. Analisar a arquitetura atual do Pipa Brasil.
+2. Identificar como a movimentação da pipa funciona atualmente.
+3. Identificar como os comandos da tela são recebidos.
+4. Verificar como a linha está sendo simulada.
+5. Identificar limitações e possíveis conflitos no código existente.
+6. Apresentar uma proposta de implementação.
+7. Explicar quais arquivos e sistemas serão alterados.
+8. Aguardar a aprovação antes de realizar mudanças importantes.
+
+Depois da implementação:
+
+* Criar testes específicos para cada mecânica.
+* Verificar se os comandos funcionam individualmente.
+* Verificar se as combinações funcionam.
+* Verificar se não existem conflitos entre os comandos.
+* Testar a resposta da pipa em diferentes velocidades e orientações.
+* Verificar se a linha acompanha corretamente os movimentos.
+* Corrigir problemas identificados antes de considerar a mecânica concluída.
+
+Não afirmar que uma mecânica está pronta sem testes.
+
+11. OBJETIVO FINAL
+
+Quero que o Pipa Brasil tenha uma movimentação de pipa convincente e um sistema de combate baseado em física.
+
+O jogador precisa sentir que está controlando uma pipa de verdade, com resposta aos comandos, inércia, mudanças de direção, tensão da linha e movimentos naturais.
+
+O tenteio deve permitir controlar os giros e as mudanças de direção por meio dos toques.
+
+O puxão deve provocar uma ação forte, com a reação da linha e o tranco da pipa.
+
+O desbico, a largada, o arrancão e o corte precisam ser estudados e implementados como mecânicas próprias, sem confundir seus comportamentos.
+
+O resultado do combate deve depender da movimentação, da física e da interação entre as pipas e suas linhas.
+
+IMPORTANTE: a prioridade não é fazer algo que apenas pareça com os jogos de referência. A prioridade é entender as mecânicas observadas, reproduzir suas características de maneira convincente e desenvolver um sistema próprio, consistente e bem testado para o Pipa Brasil.

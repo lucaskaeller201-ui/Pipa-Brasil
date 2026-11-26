@@ -33,6 +33,23 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-070 — Tenteio sem travas, bico que fica e puxão segurando (2026-11-25)
+O Lucas mandou o documento de análise das mecânicas (Pipa Combate X/4) e
+disse que ainda não conseguia pôr o bico onde queria. Diagnóstico: o duplo
+era recusado com o bico para cima ou sem pausa antes (D-059), e cada toque
+simples puxava a direção 20° de volta para cima (D-060, D-062). Ele aprovou:
+- Duplo = dois toques com menos de 0,3 s, na tela toda, com o bico em
+  qualquer posição (sem as travas de pausa e de 20°). O lado continua sendo
+  o de antes (duplos seguidos giram para o mesmo lado).
+- O bico FICA na direção escolhida: o toque simples só balança ±30° em volta
+  dela. Para voltar para cima, duplos para o outro lado. (A volta automática
+  ficou desligada em KiteBody.tenteio_volta_cima.)
+- Puxão (do documento: segurar a tela ~1 s): dedo parado 1 s dispara o
+  puxão da física (mão recua rápido, Pilot.Impulse.PUXAO) e recolhe ~1,5 m de
+  linha no máximo da mão em 0,25 s — um tranco que a pipa sente conforme o
+  estado em que está. Um por dedo. É separado do tenteio e combina com ele.
+- Arrancão: ainda sem demonstração, não foi inventado (regra do documento).
+
 ### D-069 — Fachadas 3D e boneco com corpo torneado (2026-11-25)
 Casas: as janelas e portas deixaram de ser desenho na parede (o shader só
 desenha de longe, nas casinhas do morro). Agora são peças 3D: vidro que

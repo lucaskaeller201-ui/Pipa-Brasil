@@ -112,9 +112,9 @@ func test_deslizar_para_baixo_puxa() -> void:
 	raiz.queue_free()
 
 
-## D-059: tentear rápido (toques no mesmo ritmo) não vira toque duplo; o duplo
-## precisa de pausa antes e do bico já para o lado.
-func test_toque_duplo_so_depois_de_pausa_e_com_bico_de_lado() -> void:
+## D-070: duplo = dois toques com menos de 0,3 s, com o bico em qualquer
+## posição (sem as travas de pausa e de 20°); segurar parado 1 s = puxão.
+func test_toque_duplo_livre_e_puxao_segurando() -> void:
 	var cena: PackedScene = load("res://scenes/main/main.tscn")
 	var raiz := cena.instantiate()
 	tree.root.add_child(raiz)
@@ -122,18 +122,39 @@ func test_toque_duplo_so_depois_de_pausa_e_com_bico_de_lado() -> void:
 	raiz.call("_colocar_no_alto")
 	raiz.call("avancar", 3.0)
 	var t := 100.0
-	# ritmo de tenteio: toques a cada 0,2 s
 	raiz.set("_duplo_t", -99.0)
 	raiz.set("_ultimo_duplo", false)
 	raiz.set("_penultimo_toque", t - 0.4)
 	raiz.set("_ultimo_toque", t - 0.2)
-	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "tenteio rápido não é duplo")
-	# par depois de pausa, mas com o bico para cima (a pipa acabou de subir)
-	raiz.set("_penultimo_toque", t - 1.5)
-	raiz.set("_ultimo_toque", t - 0.12)
 	var modo: FreeMode = raiz.get("modo")
-	var bico := absf(modo.you().nose_angle_deg())
-	assert_eq(bool(raiz.call("_eh_toque_duplo", t)), bico >= 20.0, "duplo só com o bico de lado (bico %.0f°)" % bico)
+	print("      [duplo] bico em %.0f°" % modo.you().nose_angle_deg())
+	assert_true(bool(raiz.call("_eh_toque_duplo", t)), "dois toques juntos = duplo, mesmo com o bico para cima e no ritmo")
+	raiz.set("_ultimo_toque", t - 0.45)
+	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "toques separados = tenteio")
+	raiz.set("_ultimo_toque", t - 0.1)
+	raiz.set("_ultimo_duplo", true)
+	assert_false(bool(raiz.call("_eh_toque_duplo", t)), "o toque depois de um duplo começa de novo")
+	# puxão: segurar o dedo parado
+	var eu: Flyer = modo.you()
+	raiz.call("_toque", 0, Vector2(900, 400), true)
+	var dedos: Dictionary = raiz.get("_dedos")
+	dedos[0]["t0"] = float(dedos[0]["t0"]) - 0.5
+	raiz.call("_ver_toque_pendente")
+	assert_eq(int(raiz.get("_puxoes")), 0, "meio segundo ainda não é puxão")
+	var linha0 := eu.line_length()
+	var tensao0 := eu.tension
+	dedos[0]["t0"] = float(dedos[0]["t0"]) - 0.6
+	raiz.call("_ver_toque_pendente")
+	raiz.call("_ver_toque_pendente")
+	assert_eq(int(raiz.get("_puxoes")), 1, "1 s parado = um puxão (só um por dedo)")
+	var maior := tensao0
+	for k in 40:
+		raiz.call("_physics_process", 1.0 / 120.0)
+		maior = maxf(maior, eu.tension)
+	print("      [puxão] tensão %.1f → pico %.1f N; recolheu %.2f m" % [tensao0, maior, linha0 - eu.line_length()])
+	assert_true(maior > tensao0 * 1.3, "o puxão dá um tranco na linha")
+	assert_true(linha0 - eu.line_length() > 0.8, "e recolhe linha")
+	raiz.call("_toque", 0, Vector2(900, 400), false)
 	raiz.queue_free()
 
 
