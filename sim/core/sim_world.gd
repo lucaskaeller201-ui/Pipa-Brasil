@@ -135,18 +135,36 @@ func step(dt: float) -> void:
 		time += h
 
 
+## D-082: medição de onde vai o tempo da física (liga só em teste).
+var medir := false
+var perfil := {}
+
+
+func _marca(nome: String, t0: int) -> int:
+	var t := Time.get_ticks_usec()
+	perfil[nome] = int(perfil.get(nome, 0)) + (t - t0)
+	return t
+
+
 func _substep(h: float) -> void:
 	var t := time
+	var m := Time.get_ticks_usec() if medir else 0
 	for f in flyers:
 		(f as Flyer).begin_substep(wind, t, h)
 	for c in loose_chains:
 		(c as ParticleChain).compute_forces(wind, t)
 		(c as ParticleChain).integrate(h)
+	if medir:
+		m = _marca("forças e integração", m)
 	for f in flyers:
 		(f as Flyer).solve_internal(h)
 	for c in loose_chains:
 		(c as ParticleChain).solve_segments(h)
+	if medir:
+		m = _marca("restrições (linha, pipa)", m)
 	combat.solve(flyers, loose_chains, h)
+	if medir:
+		m = _marca("contato entre linhas", m)
 	for f in flyers:
 		(f as Flyer).solve_ground()
 	for c in loose_chains:
@@ -156,12 +174,16 @@ func _substep(h: float) -> void:
 			(f as Flyer).solve_obstacles(obstacles)
 		for c in loose_chains:
 			(c as ParticleChain).solve_obstacles(obstacles)
+	if medir:
+		m = _marca("chão e obstáculos", m)
 	for f in flyers:
 		(f as Flyer).end_substep(h)
 	for c in loose_chains:
 		(c as ParticleChain).update_velocities(h)
 	combat.check_breaks(flyers, loose_chains)
 	combat.check_snags(flyers)
+	if medir:
+		m = _marca("fim (velocidades, enrosco)", m)
 
 
 # ---------------- medidas (primeiro pipeiro) ----------------

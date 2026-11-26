@@ -15,10 +15,18 @@ func test_custo_do_passo_da_fisica() -> void:
 	for k in roundi(8.0 / DT):
 		modo.update(DT)
 	var partes := {"total": 0, "sem obstáculos": 0}
+	modo.world.medir = true
 	var t0 := Time.get_ticks_usec()
 	for k in 600:
 		modo.update(DT)
 	partes["total"] = Time.get_ticks_usec() - t0
+	modo.world.medir = false
+	var fisica := 0
+	for k in modo.world.perfil:
+		fisica += int(modo.world.perfil[k])
+	for k in modo.world.perfil:
+		print("      [desempenho] %s: %.2f ms por passo" % [k, float(modo.world.perfil[k]) / 600.0 / 1000.0])
+	print("      [desempenho] fora da física (bots, modo): %.2f ms por passo" % [float(partes["total"] - fisica) / 600.0 / 1000.0])
 	var obs = modo.world.obstacles
 	modo.world.obstacles = null
 	t0 = Time.get_ticks_usec()
