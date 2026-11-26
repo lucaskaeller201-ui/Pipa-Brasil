@@ -131,8 +131,15 @@ func remove_flyer(f: Flyer) -> void:
 func step(dt: float) -> void:
 	var h := dt / substeps
 	for i in substeps:
+		_ultimo_subpasso = i == substeps - 1
 		_substep(h)
 		time += h
+
+
+## D-082: os obstáculos (casas, postes, árvores) são resolvidos no último
+## subpasso de cada passo: num passo (8 ms) quase nada entra neles, e era 1/3
+## do tempo da física.
+var _ultimo_subpasso := true
 
 
 ## D-082: medição de onde vai o tempo da física (liga só em teste).
@@ -169,7 +176,7 @@ func _substep(h: float) -> void:
 		(f as Flyer).solve_ground()
 	for c in loose_chains:
 		(c as ParticleChain).solve_ground()
-	if obstacles != null and not obstacles.vazio():
+	if obstacles != null and _ultimo_subpasso and not obstacles.vazio():
 		for f in flyers:
 			(f as Flyer).solve_obstacles(obstacles)
 		for c in loose_chains:

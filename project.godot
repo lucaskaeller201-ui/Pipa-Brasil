@@ -23,7 +23,7 @@ window/handheld/orientation=4
 [physics]
 
 common/physics_ticks_per_second=120
-common/max_physics_steps_per_frame=8
+common/max_physics_steps_per_frame=3
 
 [rendering]
 

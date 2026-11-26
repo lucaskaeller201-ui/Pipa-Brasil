@@ -208,8 +208,19 @@ func current_length() -> float:
 
 
 ## Gravidade + arrasto do vento, distribuídos nas partículas.
+## D-082: o vento em cada pedaço é lido uma vez por passo (não em cada
+## subpasso): ele quase não muda em 8 ms e era 1/3 do tempo da física.
+var _vento: PackedVector3Array = PackedVector3Array()
+var _vento_t := -INF
+const VENTO_VALE := 1.0 / 120.0 - 1e-6
+
+
 func compute_forces(wind: WindField, t: float) -> void:
 	var n := pos.size()
+	var novo_vento := t - _vento_t >= VENTO_VALE or _vento.size() != n - 1
+	if novo_vento:
+		_vento.resize(maxi(n - 1, 0))
+		_vento_t = t
 	for i in n:
 		_forces[i] = GRAVITY / inv_mass[i] if inv_mass[i] > 0.0 else Vector3.ZERO
 	for i in n - 1:
@@ -220,8 +231,9 @@ func compute_forces(wind: WindField, t: float) -> void:
 		if seg_len < 1e-6:
 			continue
 		var e := seg / seg_len
-		var mid := (a + b) * 0.5
-		var vrel := wind.sample(mid, t) - (vel[i] + vel[i + 1]) * 0.5
+		if novo_vento:
+			_vento[i] = wind.sample((a + b) * 0.5, t)
+		var vrel := _vento[i] - (vel[i] + vel[i + 1]) * 0.5
 		var fd: Vector3
 		if kind == Kind.LINE:
 			var vn := vrel - e * vrel.dot(e)

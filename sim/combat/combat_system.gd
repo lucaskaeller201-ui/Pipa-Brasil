@@ -74,6 +74,12 @@ var max_contact_force := 0.0
 
 
 ## Reúne as cadeias de todos os pipeiros (e pedaços soltos) e resolve contatos.
+var _pares_ref: Array = []
+var _pares_t := -1.0
+const PARES_VALE := 1.0 / 120.0 - 1e-6
+const PARES_FOLGA := 0.35   ## m: quanto um pedaço pode andar num passo
+
+
 func solve(flyers: Array, loose: Array, h: float) -> void:
 	if not enabled:
 		return
@@ -96,7 +102,26 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	if _chains.size() < 2:
 		contacts_last_step = 0
 		return
-	_pairs = LineContact.find_pairs(_chains, _groups, CONTACT_RADIUS * 2.0)
+	# D-082: procura os pares de pedaços perto uma vez por passo (com folga),
+	# não em cada subpasso; nos subpassos só resolve os pares já achados.
+	var mapa := {}
+	for ci in _chains.size():
+		mapa[_chains[ci]] = ci
+	if _clock - _pares_t >= PARES_VALE or _pares_ref.is_empty() and _pares_t < 0.0:
+		_pares_t = _clock
+		var achados := LineContact.find_pairs(_chains, _groups, CONTACT_RADIUS * 2.0 + PARES_FOLGA)
+		_pares_ref.clear()
+		for p in achados:
+			_pares_ref.append([_chains[p[0]], p[1], _chains[p[2]], p[3]])
+	_pairs = []
+	for r in _pares_ref:
+		var ia = mapa.get(r[0])
+		var ib = mapa.get(r[2])
+		if ia == null or ib == null:
+			continue
+		if int(r[1]) >= (r[0] as ParticleChain).pos.size() - 1 or int(r[3]) >= (r[2] as ParticleChain).pos.size() - 1:
+			continue
+		_pairs.append([ia, r[1], ib, r[3]])
 	var lacadas := {}
 	for e in engagements:
 		var fa: Flyer = e["a"]
