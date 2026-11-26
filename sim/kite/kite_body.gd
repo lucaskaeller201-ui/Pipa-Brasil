@@ -63,10 +63,12 @@ var _kick_prev := false
 var tenteio_volta_cima := false
 ## D-076: tenteando com a direção para o lado, a pipa vai para o lado SEM
 ## afundar: o pipeiro mira o bico um pouco acima conforme ela cai (como quem
-## tenteia de verdade), até 55°. É só onde o bico mira; quem move a pipa
+## tenteia de verdade), até 80°: segura a altura em que começou a ir de lado. É só onde o bico mira; quem move a pipa
 ## continua sendo o vento e a linha.
 var segura_altura := true
 var _comp_alt := 0.0
+var _segurando_alt := false
+var _alt_alvo := 0.0
 var _ultima_volta := 0.0   ## quanto o último toque simples trouxe a direção para cima (rad)
 const TENTEIO_VOLTA_DEG := 20.0
 const TENTEIO_LONGE_DEG := 45.0    ## acima disso o toque desbica para cima (D-062)   ## cada toque simples traz a direção isso para cima (D-060)
@@ -370,10 +372,15 @@ func integrate(h: float) -> void:
 		var alvo_bico := _hold_ang
 		var de_lado := absf(_tenteio_base) > deg_to_rad(25.0) and absf(_tenteio_base) < deg_to_rad(115.0)
 		if segura and segura_altura and de_lado:
-			var cai := -velocity.y   # m/s para baixo
-			var quer := clampf(cai * deg_to_rad(22.0), 0.0, deg_to_rad(55.0))
+			if not _segurando_alt:
+				_segurando_alt = true
+				_alt_alvo = position.y   # a altura em que ele começou a ir de lado
+			# quanto caiu e quão rápido está caindo → quanto mirar para cima
+			var quer := (_alt_alvo - position.y) * deg_to_rad(7.0) - velocity.y * deg_to_rad(14.0)
+			quer = clampf(quer, 0.0, deg_to_rad(80.0))
 			_comp_alt = lerpf(_comp_alt, quer, 1.0 - exp(-6.0 * h))
 		else:
+			_segurando_alt = false
 			_comp_alt = lerpf(_comp_alt, 0.0, 1.0 - exp(-4.0 * h))
 		alvo_bico = wrapf(_hold_ang - signf(_tenteio_base) * _comp_alt, -PI, PI)
 		if segura:
