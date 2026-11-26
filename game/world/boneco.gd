@@ -151,7 +151,7 @@ func _alcancar(braco: Node3D, ponto: Vector3) -> void:
 	# longe demais: o corpo inclina para a frente (dando linha, o pipeiro
 	# estica o braço e se debruça), em vez de a linha "sair" da mão
 	var falta := d - (BRACO + ANTEBRACO - 0.01)
-	_inclinar = clampf(_inclinar + (0.6 if falta > 0.0 else -0.3) * clampf(absf(falta) * 4.0, 0.05, 1.0) * 0.1, 0.0, 0.45)
+	_inclinar = clampf(_inclinar + (0.6 if falta > 0.0 else -0.3) * clampf(absf(falta) * 4.0, 0.05, 1.0) * 0.1, 0.0, 0.6)
 	var dd := clampf(d, 0.12, BRACO + ANTEBRACO - 0.002)
 	var cos_ombro := clampf((BRACO * BRACO + dd * dd - ANTEBRACO * ANTEBRACO) / (2.0 * BRACO * dd), -1.0, 1.0)
 	var cos_cot := clampf((BRACO * BRACO + ANTEBRACO * ANTEBRACO - dd * dd) / (2.0 * BRACO * ANTEBRACO), -1.0, 1.0)
