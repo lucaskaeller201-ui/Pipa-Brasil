@@ -63,7 +63,7 @@ var _kick_prev := false
 var tenteio_volta_cima := false
 ## D-076: tenteando com a direção para o lado, a pipa vai para o lado SEM
 ## afundar: o pipeiro mira o bico um pouco acima conforme ela cai (como quem
-## tenteia de verdade), até 35°. É só onde o bico mira; quem move a pipa
+## tenteia de verdade), até 55°. É só onde o bico mira; quem move a pipa
 ## continua sendo o vento e a linha.
 var segura_altura := true
 var _comp_alt := 0.0
@@ -371,8 +371,8 @@ func integrate(h: float) -> void:
 		var de_lado := absf(_tenteio_base) > deg_to_rad(25.0) and absf(_tenteio_base) < deg_to_rad(115.0)
 		if segura and segura_altura and de_lado:
 			var cai := -velocity.y   # m/s para baixo
-			var quer := clampf(cai * deg_to_rad(9.0), 0.0, deg_to_rad(35.0))
-			_comp_alt = lerpf(_comp_alt, quer, 1.0 - exp(-3.0 * h))
+			var quer := clampf(cai * deg_to_rad(22.0), 0.0, deg_to_rad(55.0))
+			_comp_alt = lerpf(_comp_alt, quer, 1.0 - exp(-6.0 * h))
 		else:
 			_comp_alt = lerpf(_comp_alt, 0.0, 1.0 - exp(-4.0 * h))
 		alvo_bico = wrapf(_hold_ang - signf(_tenteio_base) * _comp_alt, -PI, PI)
