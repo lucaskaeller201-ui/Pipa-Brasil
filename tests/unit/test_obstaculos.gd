@@ -93,9 +93,8 @@ func test_linha_escorrega_no_telhado_de_duas_aguas() -> void:
 	var no_meio := 0.0
 	for p in c.pos:
 		var ct := obs.contato(p)
-		if not ct.is_empty():
+		if not ct.is_empty() and float(ct[1]) > 0.01:   # apoiado na água conta como fora
 			dentro += 1
-			print("        dentro: %s fundo %.3f normal %s" % [p, float(ct[1]), ct[0]])
 		if absf(p.x) < 0.3:
 			no_meio = maxf(no_meio, p.y)
 	print("      [linha no telhado] %d pontos dentro; na cumeeira a %.2f m (cumeeira em 5 m)" % [dentro, no_meio])
