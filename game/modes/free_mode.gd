@@ -306,11 +306,11 @@ func subir(dt: float) -> int:
 			e.kick_scale = 0.3
 			e.kick_base_shift = minf(30.0, absf(bico))
 			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
-	elif elev < 30.0:
+	elif elev < 35.0:
 		e.haul_speed = 1.2      # baixa: puxadinha, ela sobe
 	else:
 		e.haul_speed = -2.0     # bico para cima e alta: manda linha
-	if (f.line_length() >= SUBIDA_LINHA and elev >= 35.0) or _sub_t > 30.0:
+	if (f.line_length() >= SUBIDA_LINHA and elev >= 28.0) or _sub_t > 30.0:
 		e.haul_speed = 0.0
 		e.kick_spin = 0.0
 		subindo = false

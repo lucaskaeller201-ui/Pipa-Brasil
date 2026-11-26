@@ -54,8 +54,8 @@ jobs:
       - name: Importar o projeto
         run: |
           timeout 300 godot --headless --path . --import 2>&1 | tee import.log || true
-          # o importador às vezes cai no meio ("double free"); uma 2ª passada termina o que faltou
-          timeout 300 godot --headless --path . --import 2>&1 | tail -3 || true
+          # o importador às vezes cai no meio ("double free"); repete até 3 vezes
+          for n in 1 2 3; do timeout 300 godot --headless --path . --import 2>&1 | tail -2 || true; done
           test -d .godot || (echo "A importação não criou a pasta .godot" && exit 1)
 
       - name: Rodar os testes
@@ -165,8 +165,8 @@ jobs:
       - name: Importar o projeto
         run: |
           timeout 300 godot --headless --path . --import 2>&1 | tee import.log || true
-          # o importador às vezes cai no meio ("double free"); uma 2ª passada termina o que faltou
-          timeout 300 godot --headless --path . --import 2>&1 | tail -3 || true
+          # o importador às vezes cai no meio ("double free"); repete até 3 vezes
+          for n in 1 2 3; do timeout 300 godot --headless --path . --import 2>&1 | tail -2 || true; done
           test -d .godot
 
       - name: Exportar Android
@@ -278,8 +278,7 @@ jobs:
 
       - name: Importar o projeto
         run: |
-          timeout 300 godot --headless --path . --import 2>&1 | tail -5 || true
-          timeout 300 godot --headless --path . --import 2>&1 | tail -3 || true
+          for n in 1 2 3 4; do timeout 300 godot --headless --path . --import 2>&1 | tail -2 || true; done
 
       - name: Gravar quadros da partida e do laboratório
         run: |
