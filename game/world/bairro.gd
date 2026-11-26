@@ -37,6 +37,10 @@ static var _ruas: Array = RUAS
 
 static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
 	_mats.clear()
+	_det = SurfaceTool.new()
+	_det.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_vid = SurfaceTool.new()
+	_vid.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_mat_folha.clear()
 	_mat_telha = null
 	var praia := mapa == "praia"
@@ -91,6 +95,7 @@ static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> vo
 		_morros_verdes(raiz)
 	else:
 		_morro(raiz)
+	_fechar_detalhes(raiz)
 
 
 static func _perto_de_laje(x: float, z: float, lajes: int) -> bool:
@@ -118,6 +123,7 @@ static func _material_parede(cor: Color, tijolo: bool) -> ShaderMaterial:
 	m.set_shader_parameter("cor", cor)
 	m.set_shader_parameter("tijolo", 1.0 if tijolo else 0.0)
 	m.set_shader_parameter("semente", float(_mats.size()) * 1.7)
+	m.set_shader_parameter("janelas", 0.0)   # D-069: janelas 3D (fachada)
 	Texturas.aplicar(m, ["reboco", "tijolo", "concreto"])
 	_mats[chave] = m
 	return m
@@ -128,7 +134,10 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 	corpo.material_override = _material_parede(cor, tijolo)
 	# D-068: porta de enrolar (comércio) e plantas na frente de algumas casas
 	var frente := 1.0 if rng.randf() < 0.5 else -1.0
-	if rng.randf() < 0.3:
+	var comercio := rng.randf() < 0.3
+	var com_telhado := tamanho.y < 7.0 and rng.randf() < 0.45
+	_fachada(base, tamanho, tijolo, frente, comercio, not com_telhado, rng)
+	if comercio:
 		Modelos.por_variante(pai, "rollershutter_door", "rollershutter_door" if rng.randf() < 0.6 else "rollershutter_door_graffiti",
 			base + Vector3(rng.randf_range(-0.25, 0.25) * tamanho.x, 0.0, frente * tamanho.z * 0.5 - frente * 0.05),
 			0.0 if frente > 0.0 else PI, Vector3(1.6, 1.15, 1.0))
@@ -141,7 +150,7 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 			base + Vector3(-tamanho.x * 0.5 + 0.8, 0.0, frente * (tamanho.z * 0.5 + 0.8)), rng.randf() * TAU, Vector3.ONE * 1.6)
 	var topo := base + Vector3(0.0, tamanho.y, 0.0)
 	# D-065: parte das casas com telhado de telha de barro (menos "caixote")
-	if tamanho.y < 7.0 and rng.randf() < 0.45:
+	if com_telhado:
 		_telhado(pai, topo, tamanho, rng)
 		return
 	# mureta da laje em algumas casas
@@ -191,6 +200,7 @@ static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumb
 	var h := ALTURA_LAJE
 	var corpo := _caixa(pai, base + Vector3(0.0, h * 0.5 - 0.1, 0.0), Vector3(8.0, h - 0.2, 8.0), cor_parede, 0.9)
 	corpo.material_override = _material_parede(cor_parede, false)
+	_fachada(base, Vector3(8.0, h - 0.2, 8.0), false, -1.0, false, false, rng)
 	# Piso de cerâmica avermelhada, pouco rugosa (brilho do sol baixo).
 	# Piso de cerâmica com verniz leve: brilha com o sol, sem ofuscar (D-063).
 	var piso := _caixa(pai, base + Vector3(0.0, h - 0.05, 0.0), Vector3(8.2, 0.1, 8.2), Color(0.62, 0.27, 0.18), 0.32)
@@ -534,6 +544,7 @@ static func _casinhas_no_morro(pai: Node3D, d: Vector4) -> void:
 	no.multimesh = mm
 	var mat := _material_parede(Color.WHITE, false).duplicate() as ShaderMaterial
 	mat.set_shader_parameter("por_instancia", 1.0)
+	mat.set_shader_parameter("janelas", 1.0)   # de longe, janelas desenhadas
 	no.material_override = mat
 	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(no)
@@ -612,3 +623,163 @@ static func _morros_verdes(pai: Node3D) -> void:
 		m.position = Vector3(d.x, 0.0, d.y)
 		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		pai.add_child(m)
+
+
+# ---------------------------------------------------------------------------
+# D-069: fachadas 3D. Janelas com vidro, caixilho, peitoril e grade; portas;
+# sacadas com guarda-corpo; ar-condicionado; beiral da laje; pilares e vigas
+# nas casas de tijolo. Tudo vai para DUAS malhas só (detalhes e vidros), para
+# o celular desenhar rápido.
+
+static var _det: SurfaceTool
+static var _vid: SurfaceTool
+
+const COR_CAIXILHO := [Color(0.88, 0.88, 0.86), Color(0.72, 0.74, 0.76), Color(0.4, 0.26, 0.16), Color(0.15, 0.15, 0.16)]
+const COR_CONCRETO := Color(0.6, 0.59, 0.56)
+const COR_GRADE := Color(0.12, 0.12, 0.13)
+
+
+static func _st_caixa(st: SurfaceTool, c: Vector3, t: Vector3, cor: Color) -> void:
+	if st == null:
+		return
+	var h := t * 0.5
+	var faces := [
+		[Vector3.RIGHT, Vector3(h.x, -h.y, -h.z), Vector3(h.x, h.y, -h.z), Vector3(h.x, h.y, h.z), Vector3(h.x, -h.y, h.z)],
+		[Vector3.LEFT, Vector3(-h.x, -h.y, h.z), Vector3(-h.x, h.y, h.z), Vector3(-h.x, h.y, -h.z), Vector3(-h.x, -h.y, -h.z)],
+		[Vector3.UP, Vector3(-h.x, h.y, -h.z), Vector3(-h.x, h.y, h.z), Vector3(h.x, h.y, h.z), Vector3(h.x, h.y, -h.z)],
+		[Vector3.DOWN, Vector3(-h.x, -h.y, h.z), Vector3(-h.x, -h.y, -h.z), Vector3(h.x, -h.y, -h.z), Vector3(h.x, -h.y, h.z)],
+		[Vector3.BACK, Vector3(h.x, -h.y, h.z), Vector3(h.x, h.y, h.z), Vector3(-h.x, h.y, h.z), Vector3(-h.x, -h.y, h.z)],
+		[Vector3.FORWARD, Vector3(-h.x, -h.y, -h.z), Vector3(-h.x, h.y, -h.z), Vector3(h.x, h.y, -h.z), Vector3(h.x, -h.y, -h.z)],
+	]
+	st.set_color(cor)
+	for f in faces:
+		st.set_normal(f[0])
+		for i in [1, 2, 3, 1, 3, 4]:
+			st.add_vertex(c + (f[i] as Vector3))
+
+
+## Caixa presa numa parede: u = ao longo da parede, y = altura, d = para fora.
+## tu, ty, td = tamanho nessas direções.
+static func _na_parede(st: SurfaceTool, parede: Dictionary, u: float, y: float, d: float, tu: float, ty: float, td: float, cor: Color) -> void:
+	var n: Vector3 = parede["n"]
+	var eixo: Vector3 = parede["u"]
+	var c: Vector3 = (parede["c"] as Vector3) + eixo * u + Vector3(0.0, y, 0.0) + n * d
+	var t := Vector3(absf(eixo.x) * tu + absf(n.x) * td, ty, absf(eixo.z) * tu + absf(n.z) * td)
+	_st_caixa(st, c, t, cor)
+
+
+static func _fachada(base: Vector3, tamanho: Vector3, tijolo: bool, frente: float, comercio: bool, laje: bool, rng: RandomNumberGenerator) -> void:
+	var paredes := [
+		{"n": Vector3(0, 0, frente), "u": Vector3.RIGHT, "c": base + Vector3(0, 0, frente * tamanho.z * 0.5), "l": tamanho.x, "frente": true},
+		{"n": Vector3(0, 0, -frente), "u": Vector3.RIGHT, "c": base + Vector3(0, 0, -frente * tamanho.z * 0.5), "l": tamanho.x, "frente": false},
+		{"n": Vector3.RIGHT, "u": Vector3.BACK, "c": base + Vector3(tamanho.x * 0.5, 0, 0), "l": tamanho.z, "frente": false},
+		{"n": Vector3.LEFT, "u": Vector3.BACK, "c": base + Vector3(-tamanho.x * 0.5, 0, 0), "l": tamanho.z, "frente": false},
+	]
+	var andares := maxi(1, int(round(tamanho.y / 3.0)))
+	var caixilho: Color = COR_CAIXILHO[rng.randi() % COR_CAIXILHO.size()]
+	var com_grade := rng.randf() < 0.45
+	for p in paredes:
+		var e_frente: bool = p["frente"]
+		var l: float = p["l"]
+		var modulos := maxi(1, int(l / 2.7))
+		var porta_mod := rng.randi() % modulos
+		for f in andares:
+			var y0 := f * 3.0
+			for i in modulos:
+				var u := -l * 0.5 + (i + 0.5) * l / modulos
+				if e_frente and f == 0 and i == porta_mod:
+					if not comercio:
+						_porta(p, u, y0, caixilho, rng)
+					continue
+				if rng.randf() > (0.85 if e_frente else 0.55):
+					continue
+				_janela(p, u, y0, caixilho, com_grade and f == 0, rng)
+				if f > 0 and rng.randf() < 0.12:
+					_na_parede(_det, p, u + rng.randf_range(-0.3, 0.3), y0 + 0.55, 0.16, 0.75, 0.45, 0.3, Color(0.9, 0.89, 0.85))   # ar-condicionado
+			# sacada na frente de alguns andares de cima
+			if e_frente and f > 0 and rng.randf() < 0.3:
+				_sacada(p, rng.randf_range(-0.2, 0.2) * l, y0, l * rng.randf_range(0.4, 0.65), Color(0.15, 0.15, 0.16) if rng.randf() < 0.6 else caixilho)
+		# faixa entre andares (reboco) ou vigas (tijolo)
+		for f in range(1, andares + 1):
+			var yv := f * 3.0 - 0.1
+			if yv > tamanho.y + 0.01:
+				break
+			if tijolo:
+				_na_parede(_det, p, 0.0, yv - 0.05, 0.02, l + 0.04, 0.22, 0.06, COR_CONCRETO)
+			elif f < andares:
+				_na_parede(_det, p, 0.0, yv, 0.02, l, 0.08, 0.04, Color(0.82, 0.8, 0.76))
+	if tijolo:
+		for sx in [-0.5, 0.5]:
+			for sz in [-0.5, 0.5]:
+				_st_caixa(_det, base + Vector3(sx * tamanho.x, tamanho.y * 0.5, sz * tamanho.z), Vector3(0.26, tamanho.y, 0.26), COR_CONCRETO)
+	if laje:
+		# beiral: a borda da laje sobrando um pouco para fora
+		_st_caixa(_det, base + Vector3(0.0, tamanho.y - 0.08, 0.0), Vector3(tamanho.x + 0.3, 0.16, tamanho.z + 0.3), COR_CONCRETO)
+
+
+static func _janela(p: Dictionary, u: float, y0: float, caixilho: Color, grade: bool, rng: RandomNumberGenerator) -> void:
+	var w := rng.randf_range(1.0, 1.4)
+	var h := 1.15
+	var yc := y0 + 1.0 + h * 0.5
+	_na_parede(_vid, p, u, yc, 0.015, w, h, 0.03, Color.WHITE)          # vidro
+	var e := 0.06
+	_na_parede(_det, p, u, yc + h * 0.5, 0.04, w + e * 2.0, e, 0.07, caixilho)   # caixilho
+	_na_parede(_det, p, u, yc - h * 0.5, 0.04, w + e * 2.0, e, 0.07, caixilho)
+	_na_parede(_det, p, u - w * 0.5, yc, 0.04, e, h, 0.07, caixilho)
+	_na_parede(_det, p, u + w * 0.5, yc, 0.04, e, h, 0.07, caixilho)
+	_na_parede(_det, p, u, yc, 0.035, 0.035, h, 0.05, caixilho)          # folha do meio
+	_na_parede(_det, p, u, y0 + 0.97, 0.08, w + 0.24, 0.05, 0.16, COR_CONCRETO)   # peitoril
+	if grade:
+		var barras := int(w / 0.12)
+		for k in barras + 1:
+			_na_parede(_det, p, u - w * 0.5 + k * w / barras, yc, 0.11, 0.018, h, 0.018, COR_GRADE)
+		for yy in [yc - h * 0.45, yc + h * 0.45]:
+			_na_parede(_det, p, u, yy, 0.11, w, 0.025, 0.025, COR_GRADE)
+
+
+static func _porta(p: Dictionary, u: float, y0: float, caixilho: Color, rng: RandomNumberGenerator) -> void:
+	var madeira := Color(0.36, 0.22, 0.12) if rng.randf() < 0.5 else Color(0.2, 0.24, 0.28)
+	_na_parede(_det, p, u, y0 + 1.05, 0.025, 0.92, 2.1, 0.05, madeira)
+	_na_parede(_det, p, u, y0 + 2.14, 0.05, 1.08, 0.08, 0.08, caixilho)
+	_na_parede(_det, p, u - 0.5, y0 + 1.05, 0.05, 0.08, 2.1, 0.08, caixilho)
+	_na_parede(_det, p, u + 0.5, y0 + 1.05, 0.05, 0.08, 2.1, 0.08, caixilho)
+	_na_parede(_det, p, u + 0.32, y0 + 1.0, 0.07, 0.05, 0.05, 0.05, Color(0.75, 0.7, 0.5))   # maçaneta
+	_na_parede(_det, p, u, y0 + 0.06, 0.25, 1.2, 0.12, 0.5, COR_CONCRETO)     # degrau
+
+
+static func _sacada(p: Dictionary, u: float, y0: float, largura: float, cor: Color) -> void:
+	_na_parede(_det, p, u, y0 + 0.06, 0.55, largura, 0.12, 1.1, COR_CONCRETO)
+	_na_parede(_det, p, u, y0 + 1.05, 1.06, largura, 0.05, 0.05, cor)     # corrimão
+	var postes := int(largura / 0.14)
+	for k in postes + 1:
+		_na_parede(_det, p, u - largura * 0.5 + k * largura / postes, y0 + 0.6, 1.06, 0.025, 0.9, 0.025, cor)
+	for lado in [-0.5, 0.5]:
+		_na_parede(_det, p, u + lado * largura, y0 + 1.05, 0.55, 0.05, 0.05, 1.05, cor)
+		for k in 7:
+			_na_parede(_det, p, u + lado * largura, y0 + 0.6, 0.08 + k * 0.15, 0.025, 0.9, 0.025, cor)
+
+
+static func _fechar_detalhes(raiz: Node3D) -> void:
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 0.7
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var m := MeshInstance3D.new()
+	m.name = "Fachadas"
+	m.mesh = _det.commit()
+	m.material_override = mat
+	raiz.add_child(m)
+	var vidro := StandardMaterial3D.new()
+	vidro.albedo_color = Color(0.1, 0.13, 0.17)
+	vidro.metallic = 0.7
+	vidro.roughness = 0.06
+	vidro.metallic_specular = 0.9
+	vidro.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var v := MeshInstance3D.new()
+	v.name = "Vidros"
+	v.mesh = _vid.commit()
+	v.material_override = vidro
+	v.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	raiz.add_child(v)
+	_det = null
+	_vid = null

@@ -5,7 +5,8 @@ shader_type spatial;
 uniform vec3 cor : source_color = vec3(0.9, 0.8, 0.6);
 uniform float tijolo = 0.0;      // 1 = tijolo aparente
 uniform float semente = 0.0;
-uniform float por_instancia = 0.0;   // D-068: cor vem de cada casinha (MultiMesh)
+uniform float por_instancia = 0.0;
+uniform float janelas = 1.0;   // D-069: 0 = janelas e portas são peças 3D   // D-068: cor vem de cada casinha (MultiMesh)
 varying vec3 cor_inst;
 
 varying vec3 mundo;
@@ -79,7 +80,7 @@ void fragment() {
 		vec2 f = fract(cel);
 		float andar = floor(cel.y);
 		float tem = step(0.35, hash(floor(cel) + vec2(3.0, 7.0)));
-		if (andar >= 0.0 && tem > 0.5 && f.x > 0.3 && f.x < 0.7 && f.y > 0.35 && f.y < 0.75) {
+		if (janelas > 0.5 && andar >= 0.0 && tem > 0.5 && f.x > 0.3 && f.x < 0.7 && f.y > 0.35 && f.y < 0.75) {
 			bool moldura = f.x < 0.33 || f.x > 0.67 || f.y < 0.38 || f.y > 0.72;
 			float acesa = step(0.85, hash(floor(cel) + vec2(11.0, 5.0)));
 			// vidro reflete o céu (mais na beirada, como de verdade)
@@ -90,7 +91,7 @@ void fragment() {
 			rug = moldura ? 0.6 : 0.08;
 		}
 		// porta (térreo)
-		if (andar < 0.5 && andar >= 0.0 && f.x > 0.08 && f.x < 0.24 && f.y < 0.7 && hash(floor(cel) + vec2(1.0, 9.0)) > 0.6) {
+		if (janelas > 0.5 && andar < 0.5 && andar >= 0.0 && f.x > 0.08 && f.x < 0.24 && f.y < 0.7 && hash(floor(cel) + vec2(1.0, 9.0)) > 0.6) {
 			c = vec3(0.35, 0.22, 0.12);
 		}
 	}

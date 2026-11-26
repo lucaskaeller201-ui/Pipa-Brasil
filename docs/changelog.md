@@ -1,5 +1,12 @@
 # Histórico de alterações
 
+## 0.23.0 — 2026-11-25
+
+- Casas com janelas, portas, grades, sacadas, ar-condicionado, beiral e
+  pilares em 3D.
+- Boneco novo: corpo com formas de gente, cotovelo que dobra, rosto, boné,
+  camiseta, bermuda e chinelo.
+
 ## 0.22.0 — 2026-11-25
 
 - Modelos 3D reais (CC0): cadeiras de plástico, engradados, bombona e vasos

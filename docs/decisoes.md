@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-069 — Fachadas 3D e boneco com corpo torneado (2026-11-25)
+Casas: as janelas e portas deixaram de ser desenho na parede (o shader só
+desenha de longe, nas casinhas do morro). Agora são peças 3D: vidro que
+reflete, caixilho (branco, alumínio, madeira ou preto), folha do meio,
+peitoril, grade no térreo, porta com batente, maçaneta e degrau, sacadas com
+guarda-corpo, ar-condicionado, beiral da laje, faixa entre andares e, nas
+casas de tijolo, pilares e vigas de concreto aparentes. Tudo junto em duas
+malhas (detalhes e vidros), para o celular desenhar em duas chamadas.
+Boneco: corpo "torneado" por seções (ombro, cintura, quadril, coxa, joelho,
+panturrilha), braço com cotovelo que dobra (IK de dois ossos: a mão chega na
+linha), rosto com nariz, orelhas, olhos com íris, sobrancelhas e boca; boné
+com aba curva ou cabelo; camiseta com manga e gola, bermuda com cós,
+chinelo de dedo; luz de contorno para dar volume. Continua só visual.
+
 ### D-068 — Modelos 3D CC0 do Poly Haven e morro com casinhas 3D (2026-11-25)
 Modelos fotográficos leves (poucos milhares de triângulos) baixados pelo
 GitHub Actions (tools/baixar_modelos.py; créditos em

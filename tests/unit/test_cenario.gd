@@ -48,6 +48,12 @@ func test_modelos_3d() -> void:
 		if filho is MultiMeshInstance3D:
 			casinhas += (filho as MultiMeshInstance3D).multimesh.visible_instance_count
 	print("      [cenário] %d cadeiras de laje, %d casinhas nos morros" % [cadeiras, casinhas])
+	# D-069: fachadas 3D (janelas, portas, sacadas) numa malha só
+	var fach: MeshInstance3D = bairro.get_node("Fachadas")
+	var tri := (fach.mesh as ArrayMesh).surface_get_array_len(0) / 3
+	print("      [cenário] fachadas 3D: %d triângulos" % tri)
+	assert_true(tri > 5000, "fachadas com janelas e portas 3D")
+	assert_not_null(bairro.get_node_or_null("Vidros"))
 	assert_true(cadeiras >= 8, "cadeiras nas lajes")
 	assert_true(casinhas > 500, "morros cheios de casinhas 3D")
 	raiz.free()
@@ -75,12 +81,23 @@ func test_bairro_monta_com_casas_arvores_e_morro() -> void:
 
 func test_boneco_monta_e_aponta_o_braco_para_a_mao() -> void:
 	var raiz := Node3D.new()
+	tree.root.add_child(raiz)
 	var b: Node3D = Boneco.new()
 	raiz.add_child(b)
 	b.call("construir", Color(0.5, 0.35, 0.25), Color.RED, Color.BLUE, true)
-	b.call("atualizar", Vector3(0.4, 1.4, -0.5), Vector3(0.0, 20.0, -30.0), 1.0, 0.1)
+	# D-069: a mão (com cotovelo dobrado) chega no ponto da linha
+	var mao := Vector3(0.35, 1.25, -0.3)
+	for k in 30:
+		b.call("atualizar", mao, Vector3(0.0, 20.0, -30.0), 0.0, 0.1)
 	assert_true(b.get_child_count() > 0)
-	raiz.free()
+	var braco: Node3D = b.get("_braco_linha")
+	var cot: Node3D = braco.get_node("Cotovelo")
+	var ponta := cot.global_transform * Vector3(0.0, -b.ANTEBRACO, 0.0)
+	print("      [boneco] mão a %.3f m do ponto da linha" % ponta.distance_to(mao))
+	assert_true(ponta.distance_to(mao) < 0.03, "a mão alcança a linha")
+	var cotovelo_y := cot.global_position.y
+	assert_true(cotovelo_y < maxf(braco.global_position.y, mao.y), "cotovelo para baixo")
+	raiz.queue_free()
 
 
 
