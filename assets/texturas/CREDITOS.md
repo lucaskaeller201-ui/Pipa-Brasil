@@ -14,3 +14,5 @@ Fotos de materiais do Poly Haven (https://polyhaven.com), licença CC0
 | tijolo | [red_brick_03](https://polyhaven.com/a/red_brick_03) | Rob Tuytel |
 | telha | [roof_tiles_14](https://polyhaven.com/a/roof_tiles_14) | Rob Tuytel |
 | casca | [bark_willow](https://polyhaven.com/a/bark_willow) | Dario Barresi, Dimitrios Savva |
+| piso | [floor_tiles_06](https://polyhaven.com/a/floor_tiles_06) | Rob Tuytel |
+| tecido | [cotton_jersey](https://polyhaven.com/a/cotton_jersey) | colormass, Rico Cilliers |
