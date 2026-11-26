@@ -114,9 +114,9 @@ func test_linha_enrosca_no_fio() -> void:
 		obs.add_fio(Vector3(-10.0 + k * 2.0, 6.0, 0.0), Vector3(-8.0 + k * 2.0, 6.0, 0.0))
 	w.obstacles = obs
 	# linha atravessada (ao longo de z), com as pontas abaixo do fio: cai nele
-	var c := w.add_fixed_line(Vector3(0.0, 7.0, -4.0), Vector3(0.0, 7.0, 4.0), 30)
-	c.inv_mass[0] = c.inv_mass[1]   # uma ponta solta, como uma linha caindo
-	c.scale_rest(1.1)
+	# frouxa: sem o fio ela desceria uns 2 m no meio; com o fio, para nele
+	var c := w.add_fixed_line(Vector3(0.0, 6.6, -4.0), Vector3(0.0, 6.6, 4.0), 30)
+	c.scale_rest(1.3)
 	for k in roundi(3.0 / DT):
 		w.step(DT)
 	var meio := 99.0
