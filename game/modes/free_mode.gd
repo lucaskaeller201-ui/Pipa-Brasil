@@ -36,7 +36,7 @@ var _rng := RandomNumberGenerator.new()
 ## Velocidade do giro mandando linha da SUA pipa (graus/s), ajustável na tela.
 var your_spin_rate := 900.0
 ## Giro por toque do SEU tenteio (graus), ajustável na tela.
-var your_kick_deg := 30.0
+var your_kick_deg := 40.0   ## balanço do tenteio para cada lado (D-074)
 ## Acontecimentos para a tela (tremor, câmera lenta, avisos): {"type", ...}
 var screen_events: Array = []
 ## Sua pipa está na mão, na laje: a tela mostra a escolha de pipa e linha e o

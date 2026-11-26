@@ -67,9 +67,11 @@ extends Resource
 ## Tenteio (D-041): cada toque gira o bico este tanto (graus); 10 toques no
 ## mesmo sentido = uma volta. O bico chega lá suave (ganho spin_kick_damp por
 ## s, no máximo spin_kick_max_deg °/s) e para exato.
-@export var spin_kick_rate_deg := 30.0
-@export var spin_kick_damp := 14.0
-@export var spin_kick_max_deg := 420.0
+## D-074: medido no vídeo do Pipa Combate (30 quadros/s): cada balanço vai
+## uns 40° para cada lado, gira uns 550°/s e para seco (sem passar do ponto).
+@export var spin_kick_rate_deg := 40.0
+@export var spin_kick_damp := 20.0
+@export var spin_kick_max_deg := 550.0
 ## Retorno elástico (D-035): solta (sem comando), o vento traz o bico de volta
 ## para cima com esta "mola" (1/s); 0 = desligado.
 @export var spin_return := 0.0

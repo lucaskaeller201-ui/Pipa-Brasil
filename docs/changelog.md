@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.25.0 — 2026-11-26
+
+- Tenteio com os números medidos no vídeo do Pipa Combate: balanço de 40°,
+  bico rápido que para seco, toque duplo de 45°.
+- Câmera segue a pipa no meio da tela, com a pipa maior.
+
 ## 0.24.3 — 2026-11-25
 
 - "Um toque e dois rápidos" agora é reconhecido como toque duplo.

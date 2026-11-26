@@ -484,3 +484,29 @@ func test_duplos_para_o_outro_lado_trazem_o_bico_de_volta() -> void:
 	print("      [volta com duplos] foi a %.0f°, voltou a %.0f°" % [ida, f.nose_angle_deg()])
 	assert_true(absf(ida) > 90.0, "4 duplos levam o bico longe (%.0f°)" % ida)
 	assert_true(absf(f.nose_angle_deg()) < 40.0, "4 duplos de volta trazem para cima (%.0f°)" % f.nose_angle_deg())
+
+
+## D-074: medido no vídeo do Pipa Combate — cada balanço do tenteio vai uns
+## 40°, chega em uns 0,15 s e para seco (sem passar muito do ponto).
+func test_balanco_do_tenteio_como_no_video() -> void:
+	var w := _voo()
+	var f: Flyer = w.flyers[0]
+	var b0 := f.nose_angle_deg()
+	f.input.kick_spin = 1.0
+	f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+	var serie: Array[float] = []
+	for i in roundi(0.5 / DT):
+		w.step(DT)
+		serie.append(absf(_dif(f.nose_angle_deg(), b0)))
+	f.input.kick_spin = 0.0
+	var final := serie[serie.size() - 1]
+	var maior := 0.0
+	var t90 := -1.0
+	for i in serie.size():
+		maior = maxf(maior, serie[i])
+		if t90 < 0.0 and serie[i] >= 0.9 * final:
+			t90 = (i + 1) * DT
+	print("      [balanço] foi %.0f° (pico %.0f°) e chegou a 90%% em %.2f s" % [final, maior, t90])
+	assert_true(final > 32.0 and final < 50.0, "balança uns 40° (%.0f°)" % final)
+	assert_true(t90 > 0.0 and t90 < 0.22, "rápido: chega em ~0,15 s (%.2f s)" % t90)
+	assert_true(maior - final < 10.0, "para seco, sem passar muito (%.0f° a mais)" % (maior - final))

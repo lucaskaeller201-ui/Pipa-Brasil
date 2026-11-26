@@ -33,6 +33,22 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-074 — Tenteio e câmera medidos no vídeo do Pipa Combate (2026-11-26)
+O Lucas mandou um vídeo de tela do Pipa Combate. Analisado quadro a quadro
+(30 por segundo, pela letra "B" e pela armação do bico):
+- o bico balança em volta de uma direção que fica (para a esquerda de 13 a
+  16 s, para baixo de 8 a 11 s), uma ida e volta a cada ~0,6 s; a pipa anda
+  para onde a direção aponta (confirma D-070);
+- cada balanço gira 60–90° em ~0,15 s (~550°/s), para seco e segura;
+- balanço de 30–45° para cada lado;
+- para mudar a direção, degraus com volta, andando ~45° por ciclo (cima →
+  baixo em ~2 s);
+- a câmera segue a pipa o tempo todo, perto do meio da tela.
+Com aprovação do Lucas: balanço 40° (spin_kick_rate_deg), giro até 550°/s
+com ganho 20 (para seco), toque duplo de 45°, câmera com a pipa maior e
+mais no meio, seguindo mais firme. Os toques em si não aparecem no vídeo.
+Ajustes ganhou dois controles separados: balanço e giro do duplo.
+
 ### D-073 — "Um toque e dois rápidos", linha que não solta da mão, linha lisa (2026-11-25)
 - Duplo: o Lucas faz "um toque... e dois rápidos" e o jogo não pegava
   quando o par passava de 0,3 s. Agora o par vale até 0,4 s desde que seja

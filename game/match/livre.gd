@@ -83,7 +83,8 @@ const PUXAO_SEGURAR_S := 1.0     ## D-070: segurar o dedo parado 1 s = puxão (t
 const TOQUE_DUPLO_S := 0.4      ## s: o mais separado que os dois toques do duplo podem estar (D-073)
 const RITMO_DUPLO := 1.6        ## o intervalo antes do par tem que ser 1,6× maior que o do par      ## s entre os dois toques do toque duplo
 const VOLTA_SEGUE_S := 1.5      ## s: outro duplo logo depois continua virando para o mesmo lado (D-052)
-@export var graus_por_toque := 30.0
+@export var graus_por_toque := 45.0   ## quanto cada toque duplo vira a direção (D-074: medido no vídeo)
+@export var balanco_tenteio := 40.0   ## quanto o bico balança para cada lado no tenteio (D-074)
 
 # interface
 var _placar: Label
@@ -379,7 +380,8 @@ func _posicionar_camera(imediato: bool) -> void:
 	# Zoom (1ª pessoa): a pipa ocupa uns 10% da altura da tela (dá para ver o modelo). Na 3ª pessoa,
 	# visão aberta para ver as lajes e as outras pipas.
 	var envergadura := 0.6
-	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.07, 12.0, 55.0)
+	# D-074: como no Pipa Combate, a pipa aparece maior e no meio da tela
+	var fov := clampf(rad_to_deg(envergadura / maxf(dist, 1.0)) / 0.1, 12.0, 55.0)
 	if not _primeira_pessoa:
 		fov = 50.0
 	var guinada := atan2(-alvo.x, -alvo.z)
@@ -387,13 +389,14 @@ func _posicionar_camera(imediato: bool) -> void:
 	# A pipa fica um pouco acima do meio (acima dos textos de baixo). A câmera
 	# também olha para baixo do horizonte: afundando a pipa, ela continua na
 	# tela (D-059).
-	var inclinacao := clampf(elevacao - fov * 0.12, -45.0, 75.0)
+	var inclinacao := clampf(elevacao - fov * 0.06, -45.0, 75.0)
 	var desejada := Transform3D(Basis.from_euler(Vector3(deg_to_rad(inclinacao), guinada, 0.0)), olho)
 	if imediato:
 		_camera.global_transform = desejada
 		_camera.fov = fov
 	else:
-		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.2)
+		# segue a pipa o tempo todo, com um atraso pequeno e suave (D-074)
+		_camera.global_transform = _camera.global_transform.interpolate_with(desejada, 0.3)
 		_camera.fov = lerpf(_camera.fov, fov, 0.08)
 	# Tremor (corte): deslocamento pequeno da imagem, que some rápido.
 	_camera.h_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
@@ -736,7 +739,8 @@ func _criar_interface() -> void:
 	_painel_ajustes.add_child(caixa)
 	_ajuste(caixa, "Giro máximo mandando linha (°/s)", 60.0, 900.0, 20.0, velocidade_giro_mandando_linha, "giro")
 	_ajuste(caixa, "Força da puxada (m/s)", 2.0, 10.0, 0.5, forca_puxada, "puxada")
-	_ajuste(caixa, "Giro por toque no tenteio (°)", 15.0, 90.0, 3.0, graus_por_toque, "toque")
+	_ajuste(caixa, "Balanço do tenteio, para cada lado (°)", 15.0, 90.0, 5.0, balanco_tenteio, "balanco")
+	_ajuste(caixa, "Giro do toque duplo (°)", 15.0, 90.0, 5.0, graus_por_toque, "toque")
 
 	_criar_painel_mao(raiz)
 	_criar_lobby(raiz)
@@ -820,6 +824,8 @@ func _ao_ajustar(v: float, qual: String, rotulo: Label, nome: String) -> void:
 	rotulo.text = "%s: %s" % [nome, str(v)]
 	if qual == "toque":
 		graus_por_toque = v
+	elif qual == "balanco":
+		balanco_tenteio = v
 		modo.your_kick_deg = v
 		if modo.you() != null:
 			modo.you().kite.definition.spin_kick_rate_deg = v
