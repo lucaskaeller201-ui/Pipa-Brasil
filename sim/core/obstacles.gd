@@ -161,4 +161,10 @@ func resolver(p: Vector3, anterior: Vector3) -> Vector3:
 	var s: Vector3 = p + n * float(c[1])
 	var d := s - anterior
 	var tangente := d - n * d.dot(n)
-	return s - tangente * (1.0 - float(c[2]))
+	var r := s - tangente * (1.0 - float(c[2]))
+	# o atrito pode ter levado o ponto para dentro de novo (passando a
+	# cumeeira, uma quina): então só empurra para fora, sem atrito
+	var c2 := contato(r)
+	if not c2.is_empty():
+		r += (c2[0] as Vector3) * float(c2[1])
+	return r
