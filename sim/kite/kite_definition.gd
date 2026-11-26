@@ -69,7 +69,8 @@ extends Resource
 ## s, no máximo spin_kick_max_deg °/s) e para exato.
 ## D-074: medido no vídeo do Pipa Combate (30 quadros/s): cada balanço vai
 ## uns 40° para cada lado, gira uns 550°/s e para seco (sem passar do ponto).
-@export var spin_kick_rate_deg := 40.0
+## (O alvo de 30° já dá ~40° de balanço de verdade, com a puxadinha do toque.)
+@export var spin_kick_rate_deg := 30.0
 @export var spin_kick_damp := 20.0
 @export var spin_kick_max_deg := 550.0
 ## Retorno elástico (D-035): solta (sem comando), o vento traz o bico de volta

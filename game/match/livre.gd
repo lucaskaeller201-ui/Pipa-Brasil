@@ -84,7 +84,7 @@ const TOQUE_DUPLO_S := 0.4      ## s: o mais separado que os dois toques do dupl
 const RITMO_DUPLO := 1.6        ## o intervalo antes do par tem que ser 1,6× maior que o do par      ## s entre os dois toques do toque duplo
 const VOLTA_SEGUE_S := 1.5      ## s: outro duplo logo depois continua virando para o mesmo lado (D-052)
 @export var graus_por_toque := 45.0   ## quanto cada toque duplo vira a direção (D-074: medido no vídeo)
-@export var balanco_tenteio := 40.0   ## quanto o bico balança para cada lado no tenteio (D-074)
+@export var balanco_tenteio := 30.0   ## quanto o bico balança para cada lado no tenteio (D-074)
 
 # interface
 var _placar: Label

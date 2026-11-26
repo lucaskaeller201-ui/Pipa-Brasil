@@ -44,7 +44,9 @@ O Lucas mandou um vídeo de tela do Pipa Combate. Analisado quadro a quadro
 - para mudar a direção, degraus com volta, andando ~45° por ciclo (cima →
   baixo em ~2 s);
 - a câmera segue a pipa o tempo todo, perto do meio da tela.
-Com aprovação do Lucas: balanço 40° (spin_kick_rate_deg), giro até 550°/s
+Com aprovação do Lucas: balanço de ~40° de verdade (o alvo de 30° em
+spin_kick_rate_deg já dava 42° medido no teste; com 40 dava 52°, então ficou
+30), giro até 550°/s
 com ganho 20 (para seco), toque duplo de 45°, câmera com a pipa maior e
 mais no meio, seguindo mais firme. Os toques em si não aparecem no vídeo.
 Ajustes ganhou dois controles separados: balanço e giro do duplo.
