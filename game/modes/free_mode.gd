@@ -295,26 +295,21 @@ func subir(dt: float) -> int:
 	_sub_toque -= dt
 	_sub_dar -= dt
 	e.kick_base_shift = 0.0
-	if absf(bico) > 20.0:
-		# bico de lado: desbica para cima (como o pipeiro faz), sem dar linha
-		# — dar linha faz a pipa girar (D-055) e ela não sobe de lado
-		e.haul_speed = 0.6
-		_sub_dar = 0.0
+	if absf(bico) > 35.0:
+		# bico de lado: segura a linha e desbica para cima (como o pipeiro
+		# faz); dar linha agora faria a pipa girar mais (D-055)
+		e.haul_speed = 0.0
 		if _sub_toque <= 0.0:
 			_sub_toque = 0.35
 			e.kick_side = signf(bico)
 			e.kick_spin = signf(bico)
-			e.kick_scale = 0.5
+			e.kick_scale = 0.3
 			e.kick_base_shift = minf(30.0, absf(bico))
 			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, world.time)
 	elif elev < 30.0:
 		e.haul_speed = 1.2      # baixa: puxadinha, ela sobe
-		_sub_dar = 0.0
 	else:
-		# bico para cima e subindo bem: dá linha em embaladas curtas
-		if _sub_dar <= -0.3:
-			_sub_dar = 0.45
-		e.haul_speed = -2.5 if _sub_dar > 0.0 else 0.0
+		e.haul_speed = -2.0     # bico para cima e alta: manda linha
 	if (f.line_length() >= SUBIDA_LINHA and elev >= 35.0) or _sub_t > 30.0:
 		e.haul_speed = 0.0
 		e.kick_spin = 0.0
