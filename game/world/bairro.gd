@@ -169,8 +169,10 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 		var mc := cor.darkened(0.08)
 		for lado in [Vector3(0.0, 0.0, tamanho.z * 0.5), Vector3(0.0, 0.0, -tamanho.z * 0.5)]:
 			_caixa(pai, topo + Vector3(0.0, 0.4, 0.0) + lado, Vector3(tamanho.x, 0.8, 0.12), mc, 0.9)
+			obstaculos.add_caixa(topo + Vector3(0.0, 0.4, 0.0) + lado, Vector3(tamanho.x + 0.2, 0.8, 0.4), 0.5)
 		for lado in [Vector3(tamanho.x * 0.5, 0.0, 0.0), Vector3(-tamanho.x * 0.5, 0.0, 0.0)]:
 			_caixa(pai, topo + Vector3(0.0, 0.4, 0.0) + lado, Vector3(0.12, 0.8, tamanho.z), mc, 0.9)
+			obstaculos.add_caixa(topo + Vector3(0.0, 0.4, 0.0) + lado, Vector3(0.4, 0.8, tamanho.z + 0.2), 0.5)
 	# ferragem saindo da laje (casa "em obra"), comum no bairro
 	if tijolo and rng.randf() < 0.5:
 		for k in 4:
@@ -202,9 +204,8 @@ static func _telhado(pai: Node3D, topo: Vector3, tamanho: Vector3, rng: RandomNu
 	m.mesh = prisma
 	m.material_override = _mat_telha
 	m.position = topo + Vector3(0.0, prisma.size.y * 0.5, 0.0)
-	# telhado: a metade de baixo do prisma vira caixa (a linha apoia nele)
-	var tam_c := Vector3(comp + 0.6, prisma.size.y * 0.55, vao + 0.6) if ao_longo_x else Vector3(vao + 0.6, prisma.size.y * 0.55, comp + 0.6)
-	obstaculos.add_caixa(topo + Vector3(0.0, prisma.size.y * 0.27, 0.0), tam_c, 0.5)
+	# telhado de duas águas de verdade: a linha escorrega pelas águas
+	obstaculos.add_telhado(topo, vao + 0.6, prisma.size.y, comp + 0.6, ao_longo_x, 0.5)
 	if ao_longo_x:
 		m.rotation.y = PI * 0.5
 	pai.add_child(m)
@@ -225,8 +226,11 @@ static func _laje(pai: Node3D, base: Vector3, cor_parede: Color, rng: RandomNumb
 	for lado in [Vector3(0, 0, 4.0), Vector3(0, 0, -4.0)]:
 		var alta := 0.25 if (sua and lado.z < 0.0) else 0.9
 		_caixa(pai, base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.2, alta, 0.15), cor_parede.darkened(0.1), 0.9)
+		# (obstáculo mais grosso que o muro: a linha não "pula" entre dois pontos)
+		obstaculos.add_caixa(base + Vector3(0.0, h + alta * 0.5, 0.0) + lado, Vector3(8.4, alta, 0.4), 0.5)
 	for lado in [Vector3(4.0, 0, 0), Vector3(-4.0, 0, 0)]:
 		_caixa(pai, base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.15, 0.9, 8.2), cor_parede.darkened(0.1), 0.9)
+		obstaculos.add_caixa(base + Vector3(0.0, h + 0.45, 0.0) + lado, Vector3(0.4, 0.9, 8.4), 0.5)
 	_caixa_dagua(pai, base + Vector3(-2.8, h, 2.8))
 	# D-068: coisas de laje — cadeira de plástico, engradado, bombona, vasos
 	Modelos.por(pai, "plastic_monobloc_chair_01", base + Vector3(2.6, h, 2.6), PI + rng.randf_range(-0.5, 0.5))

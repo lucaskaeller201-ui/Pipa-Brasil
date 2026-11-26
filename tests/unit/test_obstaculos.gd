@@ -74,3 +74,28 @@ func test_bairro_registra_obstaculos() -> void:
 	assert_true(obs.bolas.size() > 10, "copas de árvore")
 	assert_true(obs.hastes.size() > 20, "postes e troncos")
 	raiz.free()
+
+
+
+## D-079: a linha apoia nas águas do telhado (não atravessa a parte de cima).
+func test_linha_escorrega_no_telhado_de_duas_aguas() -> void:
+	var w := SimWorld.new()
+	w.wind = WindField.new(0.0, 0.0, 1)
+	var obs := Obstacles.new()
+	# telhado com cumeeira ao longo de z, de 3 m a 5 m de altura
+	obs.add_telhado(Vector3(0.0, 3.0, 0.0), 6.0, 2.0, 8.0, false)
+	w.obstacles = obs
+	var c := w.add_fixed_line(Vector3(-5.0, 6.0, 0.0), Vector3(5.0, 6.0, 0.0), 40)
+	c.scale_rest(1.25)
+	for k in roundi(4.0 / DT):
+		w.step(DT)
+	var dentro := 0
+	var no_meio := 0.0
+	for p in c.pos:
+		if not obs.contato(p).is_empty():
+			dentro += 1
+		if absf(p.x) < 0.3:
+			no_meio = maxf(no_meio, p.y)
+	print("      [linha no telhado] %d pontos dentro; na cumeeira a %.2f m (cumeeira em 5 m)" % [dentro, no_meio])
+	assert_eq(dentro, 0, "nenhum ponto dentro do telhado")
+	assert_true(no_meio > 4.85, "a linha passa por cima da cumeeira")

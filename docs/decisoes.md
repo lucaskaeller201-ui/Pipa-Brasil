@@ -45,6 +45,11 @@ apareciam no alto; 20 m de subida era muito.
   8 m e a altura máxima dos obstáculos deixam rápido (quase toda a linha
   está no alto). Bairro monta os obstáculos junto com o cenário e a cena
   passa para SimWorld.obstacles; sem cenário (testes de voo), campo aberto.
+- 0.28.1: o Lucas viu a linha ainda atravessando telhados e muros das lajes.
+  O telhado era só uma caixa na metade de baixo; agora é um telhado de duas
+  águas de verdade (a linha escorrega pelas águas e passa por cima da
+  cumeeira). Os muros das lajes (e das casas com laje) entraram, com 40 cm
+  de espessura para a linha não pular entre dois pontos dela.
 - Os fios dos postes ainda não pegam a linha (fio fino precisa de colisão
   de segmento com segmento; fica para a próxima).
 - Casas na frente das lajes (para onde as pipas vão): só de 1 andar.

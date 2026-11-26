@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.28.1 — 2026-11-26
+
+- Telhados de duas águas e muros das lajes também seguram a linha e a pipa.
+
 ## 0.28.0 — 2026-11-26
 
 - A linha e a pipa não atravessam mais casas, telhados, caixas d'água, postes
