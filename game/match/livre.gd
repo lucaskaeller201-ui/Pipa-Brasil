@@ -483,7 +483,7 @@ func _process(delta: float) -> void:
 	_banner.visible = agora_real < _banner_ate
 	if eu != null:
 		_giro_carretilha += eu.input.haul_speed * delta * 3.0
-	_painel_mao.visible = modo.you_on_hand and not _no_lobby and not _selecao.visible
+	_painel_mao.visible = modo.you_on_hand and not _no_lobby and not _selecao.visible and _lanc_fase == 0
 	if modo.you_on_hand:
 		_atualizar_painel_mao()
 	tq = Time.get_ticks_usec()

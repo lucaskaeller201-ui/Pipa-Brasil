@@ -33,6 +33,36 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-089 — Primeira pessoa com as duas mãos (versão de teste) (2026-11-27)
+Pedido do Lucas (plano de evolução visual + imagens de referência): visão
+pelos olhos do pipeiro com duas mãos humanas manipulando a linha, sem
+carretilha na tela; amarrar no cabresto e colocar no alto também pelos olhos.
+Feito em etapas: esta é a das mãos, para ele avaliar antes das outras (menu
+novo, placar compacto, botões, vento, mensagens).
+- Modelos: "Hand Models for the Godot XR Tools" (DigitalN8m4r3), CC0 — com
+  unhas, esqueleto, pele realista, relevo e oclusão, e poses dos dedos
+  (aberta, pinça, punho, segurar). Em game/assets/maos, com CREDITOS.md.
+- As mãos ficam presas à câmera, com campo de visão próprio (58°): a câmera
+  dá zoom na pipa e as mãos não deformam (escala no espaço da câmera, no shader).
+- A animação segue a física, não a substitui: a mão da frente acompanha o
+  braço do pipeiro da física (Pilot.arm_offset — recua ao puxar, avança ao
+  afrouxar), os dedos apertam com a tensão; puxando = braçada, uma mão depois
+  da outra, dedos fechados; mandando = dedos abertos, a linha corre, a outra mão
+  alimenta; desbicando/tenteando = estalo rápido do pulso para o lado do
+  toque (Flyer.tenteio_age); puxão = tranco das duas mãos.
+- A sua linha sai da mão: o começo dela (perto dos olhos) é trocado pelo ponto
+  da tela onde a mão está; daí em diante, os pontos da linha da física. Entre as
+  mãos e até o chão, um pedaço só visual (a sobra da linha).
+- Largada pelos olhos: olha para baixo amarrando no cabresto (a mão dá as
+  voltas, a outra segura a vareta), anda até a beira com o balanço do passo,
+  ergue e solta (as mãos abrem). Depois sobe pela física, como antes.
+- 1ª pessoa é o padrão; o botão Câmera troca para a 3ª (a de antes, com o
+  boneco e a carretilha). Carretilha só aparece na 3ª.
+- Testes: tests/unit/test_maos.gd (modelos e poses carregam; parado quase não
+  mexe; puxando > 8 cm de braçada; mandando a mão vai para a frente; desbico
+  mexe de uma vez; a mão segue o braço da física). Capturas "maos" e
+  "largada" no ramo capturas. A física não mudou (regressão 0,0000 m).
+
 ### D-088 — A barriga vinha da largada da mão; o jogo andava em câmera lenta (2026-11-27)
 Vídeo do Lucas (0.30.5, iPhone): linha com barriga, "braçada mais lenta" e
 fps baixo quase sempre. O canto da tela mostrou "passos/quadro 2,0 · passo

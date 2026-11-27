@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.31.0 — 2026-11-27
+
+- Primeira pessoa com duas mãos humanas (versão de teste): puxando, mandando e desbicando, cada um com seu movimento.
+- Amarrar no cabresto, ir até a beira e colocar no alto pelos olhos do pipeiro.
+- Sem carretilha na primeira pessoa (o botão Câmera volta para a visão de antes).
+
 ## 0.30.6 — 2026-11-27
 
 - Linha sem barriga depois de subir da mão (tinha o dobro de pontos).

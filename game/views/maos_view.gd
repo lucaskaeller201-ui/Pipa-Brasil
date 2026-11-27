@@ -181,13 +181,13 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 		var tens := clampf(float(estado.get("tensao", 0.0)) / 12.0, 0.0, 1.0)
 		var haul: float = estado.get("haul", 0.0)
 		var forca := clampf(absf(haul) / 4.0, 0.0, 1.0)
-		var d := Vector3(0.17, -0.17 + respira + arm * 0.08, -0.5 - arm * 0.3)
-		var e := Vector3(-0.16, -0.2 + respira * 0.7, -0.44)
+		var d := Vector3(0.14, -0.17 + respira + arm * 0.08, -0.5 - arm * 0.3)
+		var e := Vector3(-0.13, -0.2 + respira * 0.7, -0.45)
 		var rd := Vector3(22.0 + tens * 6.0, 9.0, -14.0)
 		var re := Vector3(8.0, -12.0, 18.0)
 		var pd := {"pinch_tight": 1.0 - tens * 0.6, "grip": tens * 0.6}
 		var pe := {"hold": 1.0}
-		folga_linha = lerpf(0.05, 0.015, tens)
+		folga_linha = lerpf(0.03, 0.01, tens)
 		if haul > 0.2 or bool(estado.get("puxao", false)):
 			# PUXANDO: braçada, uma mão depois da outra
 			var ritmo := 0.9 + 1.5 * forca
@@ -220,7 +220,7 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 			re += Vector3(15.0 * vai, 0.0, 0.0)
 			pd = {"pinch_large": 0.7 + 0.3 * forca, "pinch_tight": 0.3 - 0.3 * forca}
 			pe = {"pinch_large": vai, "hold": 1.0 - vai}
-			folga_linha = 0.04 + 0.06 * forca
+			folga_linha = 0.03 + 0.03 * forca
 		var desde: float = estado.get("desbico", 99.0)
 		if desde < 0.24:
 			# DESBICANDO / TENTEANDO: estalo rápido do pulso para o lado do toque
