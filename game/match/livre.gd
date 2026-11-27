@@ -25,6 +25,8 @@ const LinesView := preload("res://game/views/lines_view.gd")
 const MaosView := preload("res://game/views/maos_view.gd")
 const Visual := preload("res://game/ui/visual.gd")
 const BotaoRedondo := preload("res://game/ui/botao_redondo.gd")
+const BotaoCapsula := preload("res://game/ui/botao_capsula.gd")
+const Logo := preload("res://game/ui/logo.gd")
 
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
@@ -534,11 +536,17 @@ func _atualizar_vistas() -> void:
 func _posicionar_camera(imediato: bool) -> void:
 	if _no_lobby:
 		# Página inicial: a câmera passeia devagar em volta das lajes.
-		var t := Time.get_ticks_msec() / 1000.0 * 0.06
-		var centro := Vector3(6.0, 8.0, -6.0)
-		var olho2 := centro + Vector3(sin(t) * 46.0, 16.0 + sin(t * 0.7) * 4.0, cos(t) * 46.0)
-		_camera.global_transform = Transform3D(Basis.looking_at(centro + Vector3(0.0, 10.0, -20.0) - olho2, Vector3.UP), olho2)
-		_camera.fov = 55.0
+		# D-095: atrás do pipeiro, na laje, olhando o morro (e o Cristo), com
+		# um balanço lento — como na imagem de referência
+		var t := Time.get_ticks_msec() / 1000.0
+		var base_l: Vector3 = modo.players[0]["base"]
+		_corpos[0].visible = true
+		var olho2 := base_l + Vector3(1.6 + sin(t * 0.13) * 0.5, 2.1 + sin(t * 0.21) * 0.15, 3.9)
+		var alvo_l := base_l + Vector3(-3.0 + sin(t * 0.09) * 2.0, 9.0, -60.0)
+		_camera.global_transform = Transform3D(Basis.looking_at(alvo_l - olho2, Vector3.UP), olho2)
+		_camera.fov = 60.0
+		_camera.h_offset = 0.0
+		_camera.v_offset = 0.0
 		return
 	var eu := modo.you()
 	var base: Vector3 = modo.players[0]["base"]
@@ -1381,20 +1389,19 @@ func _desenhar_hud(c: Control, tela: Vector2) -> void:
 	var eu := modo.you()
 	var agora := Time.get_ticks_msec() / 1000.0
 	# placar compacto: cortes salvos | sequência (tocar abre o completo)
-	var r := Rect2(Vector2(m, 16.0), Vector2(330.0, 58.0))
+	var cortes := str(int(_estatisticas["cortes"]))
+	var seq := str(int(modo.players[0]["streak"]))
+	var xs := m + 70.0 + maxf(Visual.largura(cortes, 26, 780), 52.0) + 16.0
+	var r := Rect2(Vector2(m, 16.0), Vector2(xs - m + 62.0 + maxf(Visual.largura(seq, 26, 780), Visual.largura("sequência", 14)) + 22.0, 58.0))
+	_botao_placar.size.x = r.size.x
 	Visual.pilula(c, r)
 	Visual.icone(c, "trofeu", r.position + Vector2(34.0, 30.0), 19.0)
-	var cortes := str(int(_estatisticas["cortes"]))
 	Visual.texto(c, r.position + Vector2(62.0, 31.0), cortes, 26, Visual.BRANCO, 780)
 	Visual.texto(c, r.position + Vector2(62.0, 49.0), "cortes", 14, Color(0.85, 0.9, 1.0))
-	var xs := r.position.x + 70.0 + maxf(Visual.largura(cortes, 26, 780), 52.0) + 16.0
 	c.draw_line(Vector2(xs, r.position.y + 12.0), Vector2(xs, r.end.y - 12.0), Color(1, 1, 1, 0.35), 2.0)
 	Visual.icone(c, "coroa", Vector2(xs + 34.0, r.position.y + 29.0), 18.0)
-	var seq := str(int(modo.players[0]["streak"]))
 	Visual.texto(c, Vector2(xs + 62.0, r.position.y + 31.0), seq, 26, Visual.BRANCO, 780)
 	Visual.texto(c, Vector2(xs + 62.0, r.position.y + 49.0), "sequência", 14, Color(0.85, 0.9, 1.0))
-	_botao_placar.size.x = xs + 160.0 - m
-	r.size.x = _botao_placar.size.x
 	# vento: pílula embaixo dos botões, com a direção vista da câmera
 	var ref := eu.kite.position if eu != null else _camera.global_position + Vector3(0.0, 15.0, 0.0)
 	var vento := modo.world.wind.sample(ref, modo.world.time)
@@ -1841,90 +1848,88 @@ func _colocar_no_alto() -> void:
 # ---------------- página inicial (D-063) ----------------
 
 func _criar_lobby(raiz: Control) -> void:
+	# D-095: página inicial no estilo das imagens do Lucas — cenário 3D na tela
+	# toda, logo, JOGAR verde grande, seletores em cápsula, recorde com troféu
+	# e botões redondos no canto.
 	_lobby = Control.new()
 	_lobby.name = "PaginaInicial"
 	_lobby.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_lobby.mouse_filter = Control.MOUSE_FILTER_STOP
 	_lobby.add_to_group("botao_livre")
 	raiz.add_child(_lobby)
-	# faixa escura atrás do título e dos botões, deixando a cidade aparecer
-	var fundo := ColorRect.new()
-	fundo.color = Color(0.02, 0.03, 0.08, 0.45)
-	fundo.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	fundo.offset_right = 520.0
-	fundo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_lobby.add_child(fundo)
-	# pipinha voando ao lado do título (desenhada)
-	_titulo_pipa = Control.new()
-	_titulo_pipa.position = Vector2(395.0, 40.0)
-	_titulo_pipa.custom_minimum_size = Vector2(110.0, 170.0)
-	_titulo_pipa.size = Vector2(110.0, 170.0)
-	_titulo_pipa.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_titulo_pipa.draw.connect(_desenhar_pipinha)
-	_lobby.add_child(_titulo_pipa)
-	var titulo := Label.new()
-	titulo.text = "PIPA\nBRASIL"
-	titulo.add_theme_font_size_override("font_size", 78)
-	titulo.add_theme_color_override("font_color", Color(1.0, 0.86, 0.2))
-	titulo.add_theme_color_override("font_outline_color", Color(0.55, 0.12, 0.05))
-	titulo.add_theme_constant_override("outline_size", 14)
-	titulo.add_theme_constant_override("line_spacing", -18)
-	titulo.position = Vector2(48.0, 34.0)
-	titulo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_lobby.add_child(titulo)
-	var sub := Label.new()
-	sub.text = "solta · tenteia · apara · fatia"
-	sub.add_theme_font_size_override("font_size", 22)
-	sub.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.9))
-	sub.position = Vector2(52.0, 232.0)
-	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_lobby.add_child(sub)
-	var caixa := VBoxContainer.new()
-	caixa.position = Vector2(48.0, 290.0)
-	caixa.custom_minimum_size = Vector2(400.0, 0.0)
-	caixa.add_theme_constant_override("separation", 12)
-	_lobby.add_child(caixa)
-	var jogar := _botao(caixa, "JOGAR")
+	# sombra suave à esquerda, só para o texto ler bem (sem faixa escura)
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.0, 0.03, 0.1, 0.42))
+	grad.set_color(1, Color(0.0, 0.03, 0.1, 0.0))
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill_from = Vector2(0.0, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	var sombra := TextureRect.new()
+	sombra.texture = tex
+	sombra.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	sombra.offset_right = 760.0
+	sombra.stretch_mode = TextureRect.STRETCH_SCALE
+	sombra.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lobby.add_child(sombra)
+	var logo: Control = Logo.new()
+	logo.position = Vector2(34.0, 14.0)
+	_lobby.add_child(logo)
+	_titulo_pipa = logo
+	var jogar: Button = BotaoCapsula.new("jogar")
 	jogar.name = "Jogar"
-	jogar.add_theme_font_size_override("font_size", 40)
-	jogar.custom_minimum_size = Vector2(400.0, 84.0)
-	var verde := StyleBoxFlat.new()
-	verde.bg_color = Color(0.1, 0.62, 0.28)
-	verde.set_corner_radius_all(22)
-	verde.border_color = Color(1.0, 0.86, 0.2)
-	verde.set_border_width_all(4)
-	jogar.add_theme_stylebox_override("normal", verde)
-	jogar.add_theme_stylebox_override("hover", verde)
-	jogar.add_theme_stylebox_override("pressed", verde)
+	jogar.position = Vector2(56.0, 300.0)
+	jogar.size = jogar.custom_minimum_size
 	jogar.pressed.connect(_jogar)
-	_botao_mapa = _botao(caixa, "")
-	_botao_mapa.add_theme_font_size_override("font_size", 24)
-	_botao_mapa.custom_minimum_size = Vector2(400.0, 56.0)
+	_lobby.add_child(jogar)
+	var linha := HBoxContainer.new()
+	linha.position = Vector2(46.0, 398.0)
+	linha.add_theme_constant_override("separation", 10)
+	_lobby.add_child(linha)
+	_botao_mapa = BotaoCapsula.new("seletor", "mapa", "Mapa")
 	_botao_mapa.pressed.connect(_trocar_mapa)
-	_botao_hora = _botao(caixa, "")
-	_botao_hora.add_theme_font_size_override("font_size", 24)
-	_botao_hora.custom_minimum_size = Vector2(400.0, 56.0)
+	linha.add_child(_botao_mapa)
+	_botao_hora = BotaoCapsula.new("seletor", "sol", "Hora")
 	_botao_hora.pressed.connect(_trocar_hora)
-	_botao_graficos = _botao(caixa, "")
-	_botao_graficos.add_theme_font_size_override("font_size", 24)
-	_botao_graficos.custom_minimum_size = Vector2(400.0, 56.0)
+	linha.add_child(_botao_hora)
+	_botao_graficos = BotaoCapsula.new("seletor", "graficos", "Gráficos")
 	_botao_graficos.pressed.connect(_trocar_graficos)
-	var lab := _botao(caixa, "Laboratório de voo")
-	lab.add_theme_font_size_override("font_size", 18)
+	linha.add_child(_botao_graficos)
+	var recorde: Button = BotaoCapsula.new("recorde", "trofeu", "Meu recorde", "%d cortes" % int(_estatisticas["cortes"]))
+	recorde.name = "Recorde"
+	recorde.position = Vector2(56.0, 480.0)
+	recorde.size = recorde.custom_minimum_size
+	recorde.pressed.connect(func() -> void:
+		_avisar("%d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]]))
+	_lobby.add_child(recorde)
+	# botões redondos no canto: ajustes, câmera (1ª/3ª pessoa) e laboratório
+	var canto := HBoxContainer.new()
+	canto.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	canto.offset_left = -260.0
+	canto.offset_right = -20.0
+	canto.offset_top = 14.0
+	canto.alignment = BoxContainer.ALIGNMENT_END
+	canto.add_theme_constant_override("separation", 14)
+	_lobby.add_child(canto)
+	var aj: Button = BotaoRedondo.new("engrenagem")
+	aj.pressed.connect(func() -> void: _painel_ajustes.visible = not _painel_ajustes.visible)
+	canto.add_child(aj)
+	var cam: Button = BotaoRedondo.new("camera")
+	cam.pressed.connect(func() -> void:
+		_primeira_pessoa = not _primeira_pessoa
+		_avisar("Câmera: " + ("pelos olhos (mãos)" if _primeira_pessoa else "atrás do boneco")))
+	canto.add_child(cam)
+	var lab: Button = BotaoRedondo.new("lab")
 	lab.pressed.connect(_ir_laboratorio)
-	var total := Label.new()
-	total.add_theme_font_size_override("font_size", 16)
-	total.add_theme_color_override("font_color", Color(1.0, 0.95, 0.75))
-	total.text = "Seu recorde: %d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]]
-	caixa.add_child(total)
+	canto.add_child(lab)
 	_atualizar_lobby()
 	_lobby.visible = _no_lobby
 
 
 func _atualizar_lobby() -> void:
-	_botao_mapa.text = "Mapa: %s  ›" % String(Bairro.NOMES_MAPAS[_mapa])
-	_botao_hora.text = "Hora: %s  ›" % String(Ambiente.HORAS[_hora]["nome"])
-	_botao_graficos.text = "Gráficos: %s  ›" % String(NOMES_GRAFICOS[_graficos])
+	_botao_mapa.set("valor", String(Bairro.NOMES_MAPAS[_mapa]))
+	_botao_hora.set("valor", String(Ambiente.HORAS[_hora]["nome"]))
+	_botao_graficos.set("valor", String(NOMES_GRAFICOS[_graficos]).get_slice(" ", 0))
 
 
 func _trocar_mapa() -> void:

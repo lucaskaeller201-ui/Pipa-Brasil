@@ -573,6 +573,72 @@ static func _morro(pai: Node3D) -> void:
 	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(m)
 	_favela(pai, ruido)
+	_cristo(pai, ruido)
+
+
+## D-095: estátua de braços abertos no pico mais alto da serra, virada para o
+## bairro (como o Cristo no Corcovado). Peças simples, pedra clara; vista de
+## longe, é a silhueta que conta.
+static func _cristo(pai: Node3D, ruido: FastNoiseLite) -> void:
+	var melhor := Vector3(-60.0, 0.0, -640.0)
+	for ix in range(-6, 7):
+		for iz in range(-6, 7):
+			var x := -60.0 + ix * 15.0
+			var z := -640.0 + iz * 15.0
+			var h := _altura_serra(ruido, x, z)
+			if h > melhor.y:
+				melhor = Vector3(x, h, z)
+	var raiz := Node3D.new()
+	raiz.name = "Cristo"
+	raiz.position = melhor + Vector3(0.0, -3.0, 0.0)
+	pai.add_child(raiz)
+	var pedra := StandardMaterial3D.new()
+	pedra.albedo_color = Color(0.88, 0.88, 0.85)
+	pedra.roughness = 0.85
+	var s := 1.5   # um pouco maior que o de verdade, para aparecer de longe
+	var pecas := [
+		# [malha, posição, rotação z]
+		[_malha_caixa(Vector3(9.0, 11.0, 9.0) * s), Vector3(0.0, 5.5 * s, 0.0), 0.0],          # pedestal
+		[_malha_caixa(Vector3(10.5, 1.2, 10.5) * s), Vector3(0.0, 11.2 * s, 0.0), 0.0],         # beirada do pedestal
+		[_malha_cilindro(2.0 * s, 3.1 * s, 20.0 * s), Vector3(0.0, 21.8 * s, 0.0), 0.0],        # manto
+		[_malha_cilindro(2.6 * s, 2.1 * s, 4.0 * s), Vector3(0.0, 33.0 * s, 0.0), 0.0],         # peito e ombros
+		[_malha_caixa(Vector3(27.0, 2.0, 2.2) * s), Vector3(0.0, 33.6 * s, 0.0), 0.0],          # braços abertos
+		[_malha_caixa(Vector3(2.0, 2.6, 1.6) * s), Vector3(13.6 * s, 33.1 * s, 0.0), -0.25],    # mão direita
+		[_malha_caixa(Vector3(2.0, 2.6, 1.6) * s), Vector3(-13.6 * s, 33.1 * s, 0.0), 0.25],    # mão esquerda
+		[_malha_cilindro(0.9 * s, 1.1 * s, 1.4 * s), Vector3(0.0, 35.6 * s, 0.0), 0.0],         # pescoço
+	]
+	for p in pecas:
+		var mi := MeshInstance3D.new()
+		mi.mesh = p[0]
+		mi.material_override = pedra
+		mi.position = p[1]
+		mi.rotation.z = p[2]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		raiz.add_child(mi)
+	var cabeca := MeshInstance3D.new()
+	var esfera := SphereMesh.new()
+	esfera.radius = 1.7 * s
+	esfera.height = 3.8 * s
+	cabeca.mesh = esfera
+	cabeca.material_override = pedra
+	cabeca.position = Vector3(0.0, 38.0 * s, 0.0)
+	cabeca.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	raiz.add_child(cabeca)
+
+
+static func _malha_caixa(t: Vector3) -> BoxMesh:
+	var b := BoxMesh.new()
+	b.size = t
+	return b
+
+
+static func _malha_cilindro(cima: float, baixo: float, altura: float) -> CylinderMesh:
+	var c := CylinderMesh.new()
+	c.top_radius = cima
+	c.bottom_radius = baixo
+	c.height = altura
+	c.radial_segments = 14
+	return c
 
 
 static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
