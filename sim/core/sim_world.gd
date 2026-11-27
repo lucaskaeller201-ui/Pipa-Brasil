@@ -95,11 +95,6 @@ func add_flyer(definition: KiteDefinition, ground_position: Vector3, line_length
 	f.line = ParticleChain.new(ParticleChain.Kind.LINE, f.hand_position, bridle, segments,
 		LINE_MASS_PER_METER * line_length, 1.0 / LINE_STIFFNESS, LINE_DIAMETER, LINE_DRAG_COEFFICIENT)
 	f.line.inv_mass[0] = 0.0  # presa na mão
-	# D-088: linha curta (largada da mão, 5 m) nasce com segmentos curtos para
-	# ter o mínimo de pontos, mas a que a carretilha solta depois tem o tamanho
-	# normal. Antes saía com 0,6 m e a linha no alto tinha o dobro de pontos:
-	# mais barriga, "V" perto do cabresto e física mais pesada.
-	f.line.rest_length = maxf(f.line.rest_length, TARGET_SEGMENT_LENGTH)
 	if pre_tension > 0.0:
 		f.line.scale_rest(1.0 - pre_tension / LINE_STIFFNESS)
 
