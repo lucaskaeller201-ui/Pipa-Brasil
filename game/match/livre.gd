@@ -670,9 +670,15 @@ func _linha_da_mao(pos: PackedVector3Array) -> PackedVector3Array:
 	var inicio: Vector3 = _maos.call("ponto_linha_no_mundo", _camera, 1.5)
 	var out := PackedVector3Array([inicio])
 	var olho := _camera.global_position
+	var y_mao := _camera.unproject_position(inicio).y
 	var achou := false
 	for i in range(1, pos.size()):
-		if not achou and pos[i].distance_to(olho) < 4.0 and i < pos.size() - 2:
+		# D-090: pula o começo da linha da física, que fica perto dos olhos e,
+		# com a linha frouxa, abaixo da mão (saía da mão para baixo da tela e
+		# voltava pelo meio). Junta onde a linha já aparece acima da mão.
+		var perto := pos[i].distance_to(olho) < 4.0
+		var abaixo := pos[i].distance_to(olho) < 25.0 and (_camera.is_position_behind(pos[i]) or _camera.unproject_position(pos[i]).y > y_mao)
+		if not achou and (perto or abaixo) and i < pos.size() - 2:
 			continue
 		achou = true
 		out.append(pos[i])
