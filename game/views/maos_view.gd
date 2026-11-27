@@ -23,8 +23,7 @@ var _material_braco: ShaderMaterial
 var _linha_mat: ShaderMaterial
 var _linha_malha := ImmediateMesh.new()
 var _linha_no: MeshInstance3D
-var _proj := Projection.IDENTITY
-var _usar_proj := false
+var _escala := 1.0       ## tan(fov da câmera / 2) / tan(fov das mãos / 2)
 var _t := 0.0
 var _fase_bracada := 0.0
 var _fase_alimenta := 0.0
@@ -44,6 +43,7 @@ func preparar(tom := 0.45) -> void:
 	_material.set_shader_parameter("relevo", load("res://game/assets/maos/hands_normal.png"))
 	_material.set_shader_parameter("orm", load("res://game/assets/maos/hands_occlusionRoughnessMetallic.png"))
 	_material.set_shader_parameter("tom", tom)
+	_material.set_shader_parameter("tinta", Color(0.93, 0.86, 0.8))
 	_material_braco = _material.duplicate() as ShaderMaterial
 	_material_braco.set_shader_parameter("braco", true)
 	_material_braco.set_shader_parameter("cor_braco", Color(0.86, 0.6, 0.48).lerp(Color(0.4, 0.26, 0.19), tom))
@@ -166,16 +166,11 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 		return
 	_t += delta
 	var modo: String = estado.get("modo", "voo")
-	var tamanho := cam.get_viewport().get_visible_rect().size
-	var aspecto := tamanho.x / maxf(tamanho.y, 1.0)
-	_usar_proj = modo == "voo"
-	if _usar_proj:
-		_proj = Projection.create_perspective(FOV_MAOS, aspecto, 0.02, 100.0)
-	else:
-		_proj = Projection.create_perspective(cam.fov, aspecto, cam.near, cam.far)
+	_escala = 1.0
+	if modo == "voo":
+		_escala = tan(deg_to_rad(cam.fov) * 0.5) / tan(deg_to_rad(FOV_MAOS) * 0.5)
 	for mat in [_material, _material_braco, _linha_mat]:
-		mat.set_shader_parameter("proj_mao", _proj)
-		mat.set_shader_parameter("usar_proj", _usar_proj)
+		mat.set_shader_parameter("escala_vm", _escala)
 	var alvo := {}
 	var poses := {}
 	var flick := 0.0
@@ -301,14 +296,10 @@ func ponto_mao(lado := "d") -> Vector3:
 ## frente: daí a linha da física segue até a pipa.
 func ponto_linha_no_mundo(cam: Camera3D, profundidade := 1.5) -> Vector3:
 	var p := ponto_mao("d")
-	if not _usar_proj:
-		return cam.global_transform * p
-	var c := _proj * Vector4(p.x, p.y, p.z, 1.0)
-	if absf(c.w) < 1e-5:
-		return cam.global_transform * p
-	var tam := cam.get_viewport().get_visible_rect().size
-	var tela := Vector2((c.x / c.w * 0.5 + 0.5) * tam.x, (0.5 - c.y / c.w * 0.5) * tam.y)
-	return cam.project_position(tela, profundidade)
+	var q := Vector3(p.x * _escala, p.y * _escala, p.z)
+	if q.z > -0.01:
+		return cam.global_transform * q
+	return cam.global_transform * (q * (profundidade / -q.z))
 
 
 func _desenhar_linha() -> void:

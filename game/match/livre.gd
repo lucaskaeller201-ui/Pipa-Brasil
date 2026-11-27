@@ -53,6 +53,7 @@ var _primeira_pessoa := true
 var _camera: Camera3D
 var _maos: Node3D               # D-089: as duas mãos em primeira pessoa
 var _vitrine_maos := false
+var _largada_arg := false
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
 var _estilo_de := {}            # Flyer -> estilo (desenho e fitinhas)
@@ -145,6 +146,8 @@ func _ready() -> void:
 			_inicio_arg = true
 		elif arg == "--escolha":
 			_escolha_arg = true
+		elif arg == "--largada":
+			_largada_arg = true    # D-089: captura da largada pelos olhos
 		elif arg == "--vitrine-maos":
 			_vitrine_maos = true   # D-089: captura das mãos em cada movimento
 	_conferir_versao_nova()
@@ -171,7 +174,7 @@ func _ready() -> void:
 		_mapa = _mapa_arg
 	if Ambiente.HORAS.has(_hora_arg):
 		_hora = _hora_arg
-	_no_lobby = not _automatico or _inicio_arg
+	_no_lobby = (not _automatico or _inicio_arg) and not _largada_arg
 	_aplicar_graficos()
 	_montar_cenario()
 	for i in modo.players.size():
@@ -428,6 +431,8 @@ func _process(delta: float) -> void:
 		_passos = 0
 		_quadros = 0
 	_quadros += 1
+	if _largada_arg and _lanc_fase == 0 and modo.you_on_hand and modo.world.time > 1.0:
+		_colocar_no_alto_animado()   # captura: coloca no alto sozinho
 	var tq := Time.get_ticks_usec()
 	_ver_toque_pendente()
 	_animar_bonecos(delta)
