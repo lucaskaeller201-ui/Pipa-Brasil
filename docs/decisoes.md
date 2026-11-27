@@ -33,6 +33,21 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-087 — Desbico, largada, subida e corte medidos contra a referência (2026-11-27)
+O Lucas sentiu na 0.30.4 o desbico e a largada "soltando muita linha", a
+física estranha, e o corte demorando mais. Medido contra a física de
+referência (120 × 4, como era até a 0.29), com roteiros iguais:
+- tests/scenarios/test_fisica_do_jogo.gd: toques (bico até 41° nas três),
+  largada puxa-e-manda (6,0 m de linha nas três), elevação e altura iguais;
+  subida da mão: mesma linha.
+- tests/scenarios/test_tempo_de_corte.gd (laço): referência 4,8 s
+  descarregando / 3,4 s na largada; 0.30.3 8,4 s / 4,8 s — ele tinha razão,
+  cortava bem mais devagar; 0.30.4 (a de agora) 5,2 s / 3,1 s. O teste exige
+  o jogo a ±15% da referência.
+- Testei rodar só a sua pipa na física de referência (micro-subpassos de
+  1/480 s, bots a 1/120 s): desbico e largada iguais, mas o laço entre ritmos
+  diferentes cortava 40–70% mais devagar. Desfeito; fica 60 × 3 + 4 (D-086).
+
 ### D-086 — Linha firme medida contra a referência; física do jogo 60 × 3 + 4 (2026-11-27)
 O Lucas viu que a barriga e os "V" continuavam (0.30.3) e que o jogo "mexeu
 na física". Medido (tests/unit/test_barriga.gd, 7 pipas, 30 s) contra a física

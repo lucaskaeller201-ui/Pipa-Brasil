@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.30.5 — 2026-11-27
+
+- Testes novos comparando desbico, largada, subida e tempo de corte com a física de antes da 0.30.
+
 ## 0.30.4 — 2026-11-27
 
 - Linhas sem barriga nem "V": física do jogo medida contra a de referência.

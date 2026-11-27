@@ -298,8 +298,6 @@ var largada_da_mao := false
 var rabiola_bots := 0
 ## D-085: passadas extras nas linhas (o jogo usa 2, com 2 subpassos)
 var passadas_extras := 0
-## D-087: micro-subpassos da sua pipa (o jogo usa 4: 60 × 2 × 4 = 1/480 s)
-var micro_voce := 1
 
 var subindo: bool:
 	get:
@@ -471,10 +469,6 @@ func _lancar(i: int, comprimento := LINHA_INICIAL, elevacao := 45.0, tensao := 3
 		def.tail_segments = rabiola_bots
 	var f := world.add_flyer(def, p["base"], comprimento, elevacao, 0.0, true, tensao)
 	f.extra_sweeps = passadas_extras
-	if i == 0 and micro_voce > 1:
-		# D-087: a SUA pipa roda na física de referência (subpasso de 1/480 s)
-		f.extra_sweeps = 0
-		f.micro = micro_voce
 	if i == 0:
 		apply_line(f, you_line, you_style)
 	f.tag = i

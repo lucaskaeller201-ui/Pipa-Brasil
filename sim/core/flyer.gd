@@ -149,11 +149,6 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 ## ficava com barriga e "V" perto do cabresto — medido em tests/unit/
 ## test_barriga.gd contra a referência de 1/480 s. Com 0 é a física de sempre.
 var extra_sweeps := 0
-## D-087: micro-subpassos desta pipa dentro de cada subpasso do mundo. Com
-## micro = 4 e o mundo a 1/120 s, a pipa (e a linha e a rabiola dela) anda a
-## 1/480 s — a física de referência —, enquanto as outras andam a 1/120 s.
-## O contato com outras linhas e os obstáculos entram no último micro.
-var micro := 1
 
 
 func solve_internal(h: float) -> void:

@@ -10,16 +10,15 @@ func test_custo_do_passo_da_fisica() -> void:
 	var B = load("res://game/world/bairro.gd")
 	var raiz := Node3D.new()
 	var modo := FreeMode.new(6, 7, true)
-	modo.world.substeps = 2   # como no jogo (D-087)
+	modo.world.substeps = 3   # como no jogo (D-086)
 	modo.world.leve = true
-	for i in modo.players.size():
-		var fl: Flyer = modo.players[i]["flyer"]
-		if fl != null:
-			fl.extra_sweeps = 0 if i == 0 else 8
-			fl.micro = 4 if i == 0 else 1
+	modo.passadas_extras = 4
+	for p in modo.players:
+		if p["flyer"] != null:
+			(p["flyer"] as Flyer).extra_sweeps = 4
 	B.criar(raiz, modo.players.size(), 7)
 	modo.world.obstacles = B.obstaculos
-	var DT := 1.0 / 60.0   # como no jogo (60 passos × 2 subpassos; a sua × 4)
+	var DT := 1.0 / 60.0   # como no jogo (60 passos × 3 subpassos)
 	for k in roundi(8.0 / DT):
 		modo.update(DT)
 	var partes := {"total": 0, "sem obstáculos": 0}
