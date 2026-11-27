@@ -45,10 +45,10 @@ func _linha(nome: String, cfg: Array) -> Array:
 
 func test_tempo_de_corte_igual_a_referencia() -> void:
 	for k in [0.0, 0.5, 1.0, 1.5, 2.0]:
-		CombatSystem.forca_pela_tensao = k
+		KiteCombatSystem.forca_pela_tensao = k
 		print("      [corte] --- k = %.1f" % k)
 		_linha("referência 120 × 4 (até 0.29)", [1.0 / 120.0, 4, false, 1, 0, 1, 0])
 		_linha("0.30.4 (60 × 3 + 4 leve)", [1.0 / 60.0, 3, true, 1, 4, 1, 4])
 		_linha("jogo: você parada, bot corre", [1.0 / 60.0, 2, true, 4, 0, 1, 8])
 		_linha("jogo: você corre, bot parado", [1.0 / 60.0, 2, true, 1, 8, 4, 0])
-	CombatSystem.forca_pela_tensao = 0.0
+	KiteCombatSystem.forca_pela_tensao = 0.0
