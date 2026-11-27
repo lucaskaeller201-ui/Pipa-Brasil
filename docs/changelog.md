@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.30.1 — 2026-11-26
+
+- Mais leve no celular (sombras mais simples, bonecos e rabiolas dos bots
+  mais leves). Medidor na tela: fps, física, lógica e desenhos.
+
 ## 0.30.0 — 2026-11-26
 
 - Jogo bem mais leve: a física gasta ~10× menos processador e o 3D do celular

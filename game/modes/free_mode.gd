@@ -294,6 +294,8 @@ var subir_motivo := ""
 ## true: os bots também começam com a pipa na mão e sobem pela física (o jogo
 ## liga; os testes de combate deixam desligado para começar já no alto).
 var largada_da_mao := false
+## D-083: pontos da rabiola dos bots no jogo (0 = o da pipa; o jogo usa 12)
+var rabiola_bots := 0
 
 var subindo: bool:
 	get:
@@ -461,6 +463,8 @@ func _lancar(i: int, comprimento := LINHA_INICIAL, elevacao := 45.0, tensao := 3
 		def = kite_for(you_style)
 		def.spin_give_rate_deg = your_spin_rate * def.spin_give_rate_deg / KiteDefinition.pipa_rio().spin_give_rate_deg
 		def.spin_kick_rate_deg = your_kick_deg
+	if i > 0 and rabiola_bots > 0:
+		def.tail_segments = rabiola_bots
 	var f := world.add_flyer(def, p["base"], comprimento, elevacao, 0.0, true, tensao)
 	if i == 0:
 		apply_line(f, you_line, you_style)

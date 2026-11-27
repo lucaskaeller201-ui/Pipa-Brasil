@@ -22,6 +22,11 @@ static func criar_por_do_sol(pai: Node3D, com_marcos := true) -> void:
 	criar(pai, "por_do_sol", "bairro", com_marcos)
 
 
+## D-083: quantas faixas de sombra o sol usa (4 no computador, menos no
+## celular — a cena escolhe pela qualidade dos gráficos).
+static var sombra_faixas := 4
+
+
 static var _ceus_info := {}
 
 
@@ -111,8 +116,8 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	sol.light_color = h["sol_cor"]
 	sol.light_energy = float(h["sol_forca"])
 	sol.shadow_enabled = true
-	sol.directional_shadow_max_distance = 120.0
-	sol.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sol.directional_shadow_max_distance = 120.0 if sombra_faixas >= 4 else 70.0
+	sol.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if sombra_faixas >= 4 else (DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if sombra_faixas == 2 else DirectionalLight3D.SHADOW_ORTHOGONAL)
 	sol.shadow_blur = 1.5   # D-066: sombra com borda macia, não serrilhada
 	sol.rotation_degrees = h["sol_rot"]
 	pai.add_child(sol)

@@ -146,6 +146,7 @@ func _ready() -> void:
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
 	# segundo de processador por segundo de jogo e o celular travava
 	modo.world.substeps = 2   # (com 60 passos por segundo: subpasso de 1/120 s)
+	modo.rabiola_bots = 12    # D-083: rabiola dos bots com metade dos pontos (são vistos de longe)
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()
@@ -162,6 +163,11 @@ func _ready() -> void:
 		var corpo: Node3D = Boneco.new()
 		add_child(corpo)
 		corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
+		if i > 0:
+			# D-083: os bonecos dos bots não fazem sombra (cada um tem ~45 peças
+			# e cada faixa de sombra desenharia todas de novo)
+			for m in corpo.find_children("*", "MeshInstance3D", true, false):
+				(m as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# D-073: no lugar do pipeiro da física (antes ficava 25 cm atrás e o
 		# braço não alcançava a mão: parecia que a linha soltava da mão)
 		corpo.position = modo.players[i]["base"] as Vector3
@@ -207,6 +213,9 @@ func _aplicar_graficos() -> void:
 	# é desenhado numa resolução menor e ampliado — quase não se nota e pesa
 	# bem menos para a placa de vídeo.
 	var celular := OS.has_feature("web_ios") or OS.has_feature("web_android") or OS.has_feature("mobile")
+	# D-083: sombra do sol mais simples no celular (2 faixas, até 70 m; no
+	# Leve, 1 faixa): cada faixa desenha a cena inteira de novo
+	Ambiente.sombra_faixas = 4 if not celular else (2 if _graficos != "leve" else 1)
 	if celular:
 		match _graficos:
 			"ultra":
@@ -258,6 +267,7 @@ func _aplicar_graficos() -> void:
 func _trocar_graficos() -> void:
 	_graficos = String(GRAFICOS[(GRAFICOS.find(_graficos) + 1) % GRAFICOS.size()])
 	_aplicar_graficos()
+	_montar_cenario()   # a sombra do sol muda com a qualidade (D-083)
 	_salvar_preferencias()
 	_atualizar_lobby()
 
@@ -339,7 +349,11 @@ func _process(delta: float) -> void:
 	_fps_t += delta
 	if _versao != null and _fps_t > 0.5:
 		_fps_t = 0.0
-		_versao.text = "PIPA BRASIL %s · build %s · %d fps" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT, Engine.get_frames_per_second()]
+		# D-083: e onde vai o tempo de cada quadro, para achar o que trava
+		var fis := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+		var logica := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+		var des := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+		_versao.text = "PIPA BRASIL %s · build %s · %d fps · física %.1f ms · lógica %.1f ms · %d desenhos" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT, Engine.get_frames_per_second(), fis, logica, des]
 	_ver_toque_pendente()
 	_animar_bonecos(delta)
 	if _no_lobby and _titulo_pipa != null:

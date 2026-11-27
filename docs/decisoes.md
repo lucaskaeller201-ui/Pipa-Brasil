@@ -33,6 +33,19 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-083 — Mais leve no celular e medidor do quadro na tela (2026-11-26)
+O Lucas: ainda com pouquíssimo fps, pediu 120. O Safari do iPhone desenha no
+máximo 60 quadros por segundo (o navegador limita; o jogo não consegue passar
+disso), então a meta é 60 estável. Sem medir no aparelho, cortei o que mais
+pesa e coloquei o medidor na tela para o Lucas mandar os números:
+- Ao lado da versão: fps, ms da física e da lógica por quadro e quantos
+  desenhos (draw calls) por quadro — mostra se o gargalo é o processador ou
+  a placa de vídeo.
+- Sombra do sol no celular: 2 faixas até 70 m (Leve: 1 faixa), em vez de 4
+  faixas até 120 m; cada faixa desenha a cena toda de novo.
+- Bonecos dos bots sem sombra (~45 peças cada).
+- Rabiola dos bots com 12 pontos (eram 24): menos física e menos desenho.
+
 ### D-082 — Jogo mais leve: física 60 Hz × 2 subpassos, gráficos do celular (2026-11-26)
 O Lucas sentiu o jogo travando num iPhone 17. Medido no CI (tests/unit/
 test_desempenho.gd): um passo de física custava 8–9,5 ms — com 120 passos
