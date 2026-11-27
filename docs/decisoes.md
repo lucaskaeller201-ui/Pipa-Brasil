@@ -33,6 +33,32 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-086 — Linha firme medida contra a referência; física do jogo 60 × 3 + 4 (2026-11-27)
+O Lucas viu que a barriga e os "V" continuavam (0.30.3) e que o jogo "mexeu
+na física". Medido (tests/unit/test_barriga.gd, 7 pipas, 30 s) contra a física
+de referência dos testes (120 Hz × 4, subpasso de 1/480 s):
+- referência: barriga 4,0% do comprimento, dobra perto do cabresto 3,5° (pior 19°);
+- 0.30.3 (60 × 2 + 2 passadas): barriga 7,2%, dobra 8,1° (pior 82°) — ele tinha razão;
+- jogo agora (60 × 3 + 4 passadas completas + modo leve): 4,6%, 3,9° (pior 21°),
+  elevação das pipas igual. Custo ~35% maior que 0.30.3, bem menor que a referência.
+O teste agora exige o jogo perto da referência (barriga +1,5 pt, dobra +1,5°,
+pior dobra < 35°).
+- As passadas extras agora são completas (linha, alcance, cabresto, rabiola);
+  a tensão soma as correções de todas.
+- Modo leve (SimWorld.leve, só no jogo): vento nas linhas e lista de pares de
+  contato feitos no 1º subpasso de cada passo e reaproveitados (folga 0,5 m;
+  o contato em si continua exato). Testes de física sem ele.
+- Linhas, rabiolas e fitinhas desenhadas numa ArrayMesh única, enviada uma vez
+  por quadro (antes: um comando por vértice, milhares por quadro).
+- No máximo 2 passos de física por quadro (era 3): um quadro lento não vira
+  uma bola de neve.
+- O canto da tela ganhou uma 2ª linha com o detalhe do tempo (passos por
+  quadro, cada fase da física, linhas, bonecos, câmera, textos), para o
+  próximo print mostrar o que ainda pesa.
+- 120 fps: o Safari do iPhone desenha a página a no máximo 60 por padrão, e
+  a física roda a 60 passos — sem interpolar, 120 quadros mostrariam cada
+  posição duas vezes. Fica para depois de o jogo segurar 60 firme.
+
 ### D-085 — O que pesava pelos números do iPhone; linha firme de novo (2026-11-26)
 Prints do Lucas (iPhone 17, Safari): 36 fps com física 5,4 ms, lógica 4,9 ms
 e 122 desenhos (olhando a serra de perto); 50 fps com lógica 11,5 ms e 710

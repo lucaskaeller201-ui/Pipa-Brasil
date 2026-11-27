@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.30.4 — 2026-11-27
+
+- Linhas sem barriga nem "V": física do jogo medida contra a de referência.
+- Linhas e rabiolas desenhadas de uma vez (mais leve).
+- Detalhe do tempo de cada parte no canto da tela.
+
 ## 0.30.3 — 2026-11-26
 
 - Serra ao fundo bem mais leve para desenhar (casinhas e mata).

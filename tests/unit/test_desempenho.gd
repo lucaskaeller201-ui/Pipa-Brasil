@@ -18,6 +18,7 @@ func test_custo_do_passo_da_fisica() -> void:
 			(p["flyer"] as Flyer).extra_sweeps = 4
 	B.criar(raiz, modo.players.size(), 7)
 	modo.world.obstacles = B.obstaculos
+	var DT := 1.0 / 60.0   # D-086: como no jogo (60 passos × 3 subpassos)
 	for k in roundi(8.0 / DT):
 		modo.update(DT)
 	var partes := {"total": 0, "sem obstáculos": 0}
@@ -46,8 +47,8 @@ func test_custo_do_passo_da_fisica() -> void:
 	for f in modo.world.flyers:
 		for c in (f as Flyer).chains():
 			particulas += (c as ParticleChain).pos.size()
-	print("      [desempenho] um passo de física (1/120 s): %.2f ms (sem obstáculos %.2f ms); %d pipas, %d pontos de linha/rabiola" % [por_passo, sem, modo.world.flyers.size(), particulas])
-	print("      [desempenho] por segundo de jogo: %.0f ms de física (no celular, uns %.0f–%.0f ms)" % [por_passo * 120.0, por_passo * 240.0, por_passo * 360.0])
+	print("      [desempenho] um passo de física (1/60 s): %.2f ms (sem obstáculos %.2f ms); %d pipas, %d pontos de linha/rabiola" % [por_passo, sem, modo.world.flyers.size(), particulas])
+	print("      [desempenho] por segundo de jogo: %.0f ms de física (no celular, uns %.0f–%.0f ms)" % [por_passo * 60.0, por_passo * 120.0, por_passo * 180.0])
 	assert_true(por_passo < 20.0, "passo de física razoável")
 	raiz.free()
 
