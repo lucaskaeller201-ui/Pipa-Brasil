@@ -1092,9 +1092,6 @@ func _criar_interface() -> void:
 	_banner.offset_bottom = -40.0
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
-	# D-094: estes rótulos guardam o texto; o desenho é feito pela interface nova
-	for l in [_info, _aviso, _banner, _dica]:
-		l.modulate.a = 0.0
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
 	_dica.text = "Deslize ↑ manda linha · ↓ puxa · toque: tenteio · 2 toques: vira · segure 1 s: puxão"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -1102,6 +1099,9 @@ func _criar_interface() -> void:
 	_dica.offset_right = 420.0
 	_dica.offset_top = -90.0
 	_dica.offset_bottom = -54.0
+	# D-094: estes rótulos guardam o texto; o desenho é feito pela interface nova
+	for l in [_info, _aviso, _banner, _dica]:
+		l.modulate.a = 0.0
 
 	# D-094: botões redondos com ícone — câmera, ajustes, pausa (o Lab fica na pausa)
 	var cantos := HBoxContainer.new()
