@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-093 — Braçada lisa; a linha não pula de mão (2026-11-27)
+O Lucas sentiu a puxada mais lenta e a pipa dando trancos "como se
+teletransportasse" depois da braçada nova (D-092).
+- A física da puxada não mudou (sim/ sem mudança desde a D-088). Medido em
+  tests/scenarios/test_puxada_lisa.gd, como no jogo: a 3 m/s entram 3,00 m/s,
+  a 6 m/s entram 6,00 m/s; aceleração da pipa igual com segmentos de 1,25 m
+  e de 0,6 m (máx 22 e 42 m/s², média 2 e 4).
+- O tranco era do desenho: a linha passava de uma mão para a outra de uma vez
+  a cada meia braçada (salto na tela), e a mão que puxa tinha um tranco no
+  começo. Agora a linha sai da mão que está mais à frente e passa para a outra
+  aos poucos quando as mãos se cruzam; a mão que puxa desce em velocidade
+  constante; o ritmo vem da linha que entra (~0,6 m por meia braçada, até 3,8
+  braçadas de cada mão por segundo); a mão que volta passa mais perto.
+
 ### D-092 — Braçada de verdade, uma mão depois da outra (2026-11-27)
 O Lucas: "uma mão vai na frente e a outra atrás, e depois a de trás vai para a
 frente… no ritmo da puxada, rápido". Antes as duas mãos balançavam juntas.

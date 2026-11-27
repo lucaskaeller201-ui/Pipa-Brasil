@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.31.4 — 2026-11-27
+
+- Braçada lisa, no ritmo da linha que entra; a linha não pula mais de uma mão para a outra.
+
 ## 0.31.3 — 2026-11-27
 
 - Braçada de verdade: uma mão puxa enquanto a outra vai pegar a linha na frente, no ritmo da puxada.
