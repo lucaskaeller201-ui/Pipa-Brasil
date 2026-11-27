@@ -147,6 +147,7 @@ func _ready() -> void:
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
 	# segundo de processador por segundo de jogo e o celular travava
 	modo.world.substeps = 2   # (com 60 passos por segundo: subpasso de 1/120 s)
+	modo.world.medir = true   # D-086: detalhe do tempo no canto da tela
 	modo.rabiola_bots = 12    # D-083: rabiola dos bots com metade dos pontos (são vistos de longe)
 	modo.passadas_extras = 2  # D-085: linha firme como com 4 subpassos (sem barriga nem "V")
 	for p in modo.players:
@@ -311,7 +312,10 @@ func _physics_process(delta: float) -> void:
 		_largada_passo(delta)   # a largada comanda; os dedos esperam
 	elif not _automatico and eu != null and not eu.cut:
 		_ler_comandos(eu, delta)
+	var t0 := Time.get_ticks_usec()
 	modo.update(delta)
+	_medir_tempo("passo", t0)
+	_passos += 1
 	for msg in modo.take_messages():
 		_avisar(msg)
 
@@ -347,6 +351,16 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 
 var _versao: Label
 var _fps_t := 0.0
+## D-086: onde vai o tempo, por pedaço (µs somados desde o último relatório)
+var _tempos := {}
+var _passos := 0
+var _quadros := 0
+
+
+func _medir_tempo(nome: String, t0: int) -> int:
+	var t := Time.get_ticks_usec()
+	_tempos[nome] = int(_tempos.get(nome, 0)) + (t - t0)
+	return t
 
 
 ## D-084: o app da tela de início (PWA) guarda o jogo no celular e às vezes
@@ -386,8 +400,24 @@ func _process(delta: float) -> void:
 		var logica := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 		var des := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 		_versao.text = "PIPA BRASIL %s · build %s · %d fps · física %.1f ms · lógica %.1f ms · %d desenhos" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT, Engine.get_frames_per_second(), fis, logica, des]
+		# D-086: segunda linha com o detalhe (para o Lucas mandar no print)
+		var q := maxf(_quadros, 1.0)
+		var ps := maxf(_passos, 1.0)
+		var det := "passos/quadro %.1f · passo %.1f ms" % [_passos / q, int(_tempos.get("passo", 0)) / ps / 1000.0]
+		for k in modo.world.perfil:
+			det += " · %s %.1f" % [String(k).get_slice(" ", 0), int(modo.world.perfil[k]) / ps / 1000.0]
+		for k in ["linhas", "bonecos", "vistas", "câmera", "textos"]:
+			det += " · %s %.1f" % [k, int(_tempos.get(k, 0)) / q / 1000.0]
+		_versao.text += "\n" + det
+		_tempos.clear()
+		modo.world.perfil.clear()
+		_passos = 0
+		_quadros = 0
+	_quadros += 1
+	var tq := Time.get_ticks_usec()
 	_ver_toque_pendente()
 	_animar_bonecos(delta)
+	tq = _medir_tempo("bonecos", tq)
 	if _no_lobby and _titulo_pipa != null:
 		_titulo_pipa.queue_redraw()
 	# Velocidade da mão a partir do deslizar deste quadro.
@@ -396,8 +426,11 @@ func _process(delta: float) -> void:
 	_velocidade_mao = alvo if not _dedos.is_empty() else 0.0
 	_dy_quadro = 0.0
 
+	tq = Time.get_ticks_usec()
 	_atualizar_vistas()
+	tq = _medir_tempo("vistas", tq)
 	_posicionar_camera(false)
+	tq = _medir_tempo("câmera", tq)
 	_linhas.set("camera_position", _camera.global_position)
 	_linhas.set("min_width_per_meter", 2.0 * 2.0 * tan(deg_to_rad(_camera.fov * 0.5)) / altura)
 	_linhas.call("limpar")
@@ -415,6 +448,7 @@ func _process(delta: float) -> void:
 			var estilo: Dictionary = _estilo_de.get(fl, Estilos.ESTILOS[0])
 			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9, 0.8), 0.0008, 0.5, 2 if fl.tag == 0 else 1)
 			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
+	tq = _medir_tempo("linhas", tq)
 	var eu := modo.you()
 	_tratar_acontecimentos()
 	var agora_real := Time.get_ticks_msec() / 1000.0
@@ -426,8 +460,10 @@ func _process(delta: float) -> void:
 	_painel_mao.visible = modo.you_on_hand and not _no_lobby and not _selecao.visible
 	if modo.you_on_hand:
 		_atualizar_painel_mao()
+	tq = Time.get_ticks_usec()
 	_atualizar_textos(eu)
 	_sobreposicao.queue_redraw()
+	_medir_tempo("textos", tq)
 
 
 func _atualizar_vistas() -> void:
