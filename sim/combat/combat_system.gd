@@ -53,6 +53,10 @@ var engagements: Array = []
 var contact_points: PackedVector3Array = PackedVector3Array()
 
 var _pairs: Array = []
+## D-086: reaproveitar a lista de pares do subpasso anterior (SimWorld leve)
+var reusar_pares := false
+const FOLGA_LEVE := 0.5   ## m: folga da lista quando ela vale por um passo inteiro
+var _assinatura := PackedInt64Array()
 var _tangle := {}              ## [avoada, pipeiro, pedaço] -> embolo em formação
 var _clock := 0.0
 var _cut_want := {}            ## avoada -> [cadeia, segmento, quem] (neste subpasso)
@@ -74,6 +78,9 @@ var max_contact_force := 0.0
 
 
 ## Reúne as cadeias de todos os pipeiros (e pedaços soltos) e resolve contatos.
+var _leve_proximo := false   ## o SimWorld está no modo leve
+
+
 func solve(flyers: Array, loose: Array, h: float) -> void:
 	if not enabled:
 		return
@@ -96,7 +103,15 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	if _chains.size() < 2:
 		contacts_last_step = 0
 		return
-	_pairs = LineContact.find_pairs(_chains, _groups, CONTACT_RADIUS * 2.0)
+	var assinatura := PackedInt64Array()
+	for c in _chains:
+		assinatura.append((c as ParticleChain).get_instance_id())
+		assinatura.append((c as ParticleChain).pos.size())
+	if not (reusar_pares and assinatura == _assinatura):
+		# no 1º subpasso do modo leve a lista sai com folga para valer o passo todo
+		var folga := FOLGA_LEVE if _leve_proximo else 0.0
+		_pairs = LineContact.find_pairs(_chains, _groups, CONTACT_RADIUS * 2.0 + folga)
+	_assinatura = assinatura
 	var lacadas := {}
 	for e in engagements:
 		var fa: Flyer = e["a"]

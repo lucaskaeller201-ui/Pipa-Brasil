@@ -132,8 +132,21 @@ func step(dt: float) -> void:
 	var h := dt / substeps
 	for i in substeps:
 		_ultimo_subpasso = i == substeps - 1
+		ParticleChain.reusar_vento = leve and i > 0
+		combat.reusar_pares = leve and i > 0
+		combat._leve_proximo = leve
 		_substep(h)
 		time += h
+	ParticleChain.reusar_vento = false
+	combat.reusar_pares = false
+
+
+## D-086: modo leve do jogo — o vento nas linhas e a lista de pares de
+## segmentos que podem se tocar são calculados no 1º subpasso de cada passo e
+## reaproveitados nos outros (1/60 s: o vento quase não muda; a lista é feita
+## com folga de 0,5 m e o contato em si continua exato). Os testes de física
+## rodam sem isso (trajetória de referência intacta).
+var leve := false
 
 
 ## D-082: os obstáculos (casas, postes, árvores) são resolvidos no último

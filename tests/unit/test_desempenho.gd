@@ -11,6 +11,7 @@ func test_custo_do_passo_da_fisica() -> void:
 	var raiz := Node3D.new()
 	var modo := FreeMode.new(6, 7, true)
 	modo.world.substeps = 2   # como no jogo (D-082)
+	modo.world.leve = true    # D-086
 	B.criar(raiz, modo.players.size(), 7)
 	modo.world.obstacles = B.obstaculos
 	for k in roundi(8.0 / DT):

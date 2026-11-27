@@ -208,8 +208,16 @@ func current_length() -> float:
 
 
 ## Gravidade + arrasto do vento, distribuídos nas partículas.
+## D-086: reaproveitar o vento do subpasso anterior (ligado pelo SimWorld leve)
+static var reusar_vento := false
+var _vento := PackedVector3Array()
+
+
 func compute_forces(wind: WindField, t: float) -> void:
 	var n := pos.size()
+	var reusa := reusar_vento and _vento.size() == n - 1
+	if not reusa:
+		_vento.resize(n - 1)
 	for i in n:
 		_forces[i] = GRAVITY / inv_mass[i] if inv_mass[i] > 0.0 else Vector3.ZERO
 	for i in n - 1:
@@ -221,7 +229,9 @@ func compute_forces(wind: WindField, t: float) -> void:
 			continue
 		var e := seg / seg_len
 		var mid := (a + b) * 0.5
-		var vrel := wind.sample(mid, t) - (vel[i] + vel[i + 1]) * 0.5
+		if not reusa:
+			_vento[i] = wind.sample(mid, t)
+		var vrel := _vento[i] - (vel[i] + vel[i + 1]) * 0.5
 		var fd: Vector3
 		if kind == Kind.LINE:
 			var vn := vrel - e * vrel.dot(e)

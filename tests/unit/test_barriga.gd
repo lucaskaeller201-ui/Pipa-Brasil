@@ -5,9 +5,10 @@ extends "res://tests/test_case.gd"
 ## Imprime uma tabela; o critério numérico fica em test_linha_firme_no_jogo.
 
 
-func _medir(passo: float, sub: int, extras: int, segundos := 30.0) -> Dictionary:
+func _medir(passo: float, sub: int, extras: int, leve := false, segundos := 30.0) -> Dictionary:
 	var modo := FreeMode.new(6, 7, true)
 	modo.world.substeps = sub
+	modo.world.leve = leve
 	modo.passadas_extras = extras
 	for p in modo.players:
 		if p["flyer"] != null:
@@ -66,11 +67,10 @@ func _linha(nome: String, r: Dictionary) -> void:
 func test_linha_firme_no_jogo() -> void:
 	var ref := _medir(1.0 / 120.0, 4, 0)
 	_linha("120 Hz × 4 (referência)", ref)
-	var jogo := _medir(1.0 / 60.0, 2, 2)
-	_linha("60 Hz × 2 + 2", jogo)
-	_linha("60 Hz × 2 + 4", _medir(1.0 / 60.0, 2, 4))
+	_linha("60 Hz × 2 + 2", _medir(1.0 / 60.0, 2, 2))
 	_linha("60 Hz × 2 + 8", _medir(1.0 / 60.0, 2, 8))
-	_linha("60 Hz × 3 + 2", _medir(1.0 / 60.0, 3, 2))
-	_linha("60 Hz × 3 + 4", _medir(1.0 / 60.0, 3, 4))
-	_linha("60 Hz × 4 + 2", _medir(1.0 / 60.0, 4, 2))
+	_linha("60 Hz × 2 + 8 leve", _medir(1.0 / 60.0, 2, 8, true))
+	_linha("60 Hz × 3 + 4 leve", _medir(1.0 / 60.0, 3, 4, true))
+	_linha("60 Hz × 4 + 2 leve", _medir(1.0 / 60.0, 4, 2, true))
+	_linha("60 Hz × 4 + 4 leve", _medir(1.0 / 60.0, 4, 4, true))
 	assert_true(ref["barriga"] < 30.0, "referência com barriga razoável")
