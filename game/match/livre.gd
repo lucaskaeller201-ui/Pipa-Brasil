@@ -22,6 +22,7 @@ const BERMUDAS := [Color(0.15, 0.25, 0.55), Color(0.2, 0.2, 0.22), Color(0.5, 0.
 const KiteView := preload("res://game/views/kite_view.gd")
 const Estilos := preload("res://game/views/estilos_pipa.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
+const MaosView := preload("res://game/views/maos_view.gd")
 
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
@@ -50,6 +51,8 @@ var _semente := 1
 var _automatico := false
 var _primeira_pessoa := true
 var _camera: Camera3D
+var _maos: Node3D               # D-089: as duas mãos em primeira pessoa
+var _vitrine_maos := false
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
 var _estilo_de := {}            # Flyer -> estilo (desenho e fitinhas)
@@ -142,6 +145,8 @@ func _ready() -> void:
 			_inicio_arg = true
 		elif arg == "--escolha":
 			_escolha_arg = true
+		elif arg == "--vitrine-maos":
+			_vitrine_maos = true   # D-089: captura das mãos em cada movimento
 	_conferir_versao_nova()
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
@@ -191,6 +196,11 @@ func _ready() -> void:
 	_camera.far = 2000.0
 	_camera.current = true
 	add_child(_camera)
+	# D-089: mãos em primeira pessoa, presas à câmera
+	_maos = MaosView.new()
+	_maos.name = "Maos"
+	_camera.add_child(_maos)
+	_maos.call("preparar", 0.45)
 	if not _automatico:
 		modo.put_you_on_hand()
 	_criar_interface()
@@ -434,6 +444,7 @@ func _process(delta: float) -> void:
 	_atualizar_vistas()
 	tq = _medir_tempo("vistas", tq)
 	_posicionar_camera(false)
+	_atualizar_maos(modo.you(), delta)
 	tq = _medir_tempo("câmera", tq)
 	_linhas.set("camera_position", _camera.global_position)
 	_linhas.set("min_width_per_meter", 2.0 * 2.0 * tan(deg_to_rad(_camera.fov * 0.5)) / altura)
@@ -444,7 +455,7 @@ func _process(delta: float) -> void:
 		if fl.tag == 0:
 			cor = Estilos.LINHAS[modo.you_line]["cor"]   # a linha que você escolheu
 		if fl.line != null:
-			_linhas.call("desenhar_cadeia", fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012, 1.0, 4 if fl.tag == 0 else 2)
+			_linhas.call("desenhar_cadeia", _linha_da_mao(fl.line.pos) if fl.tag == 0 else fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012, 1.0, 4 if fl.tag == 0 else 2)
 		if fl.trailing_line != null:
 			_linhas.call("desenhar_cadeia", fl.trailing_line.pos, cor, 0.0012)
 		if fl.tail != null:
@@ -452,6 +463,10 @@ func _process(delta: float) -> void:
 			var estilo: Dictionary = _estilo_de.get(fl, Estilos.ESTILOS[0])
 			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9, 0.8), 0.0008, 0.5, 2 if fl.tag == 0 else 1)
 			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
+	if _primeira_pessoa and _maos != null and _maos.visible and _pipa_mao != null:
+		# D-089: na largada, a linha vai da mão até o cabresto da pipa na mão
+		var cabresto := _pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point
+		_linhas.call("desenhar_cadeia", PackedVector3Array([_camera.global_transform * (_maos.call("ponto_mao", "d") as Vector3), cabresto]), Estilos.LINHAS[modo.you_line]["cor"], 0.0012, 1.0, 1)
 	tq = _medir_tempo("linhas", tq)
 	var eu := modo.you()
 	_tratar_acontecimentos()
@@ -503,6 +518,20 @@ func _posicionar_camera(imediato: bool) -> void:
 		return
 	var eu := modo.you()
 	var base: Vector3 = modo.players[0]["base"]
+	if (modo.you_on_hand or (_lanc_fase >= 1 and _lanc_fase <= 3)) and _primeira_pessoa:
+		# D-089: primeira pessoa com a pipa na mão — pelos olhos do pipeiro.
+		# Escolhendo: o dedo olha em volta. Na largada: olha a pipa nas mãos
+		# (amarrando), anda até a beira (com o balanço do passo) e ergue.
+		_corpos[0].visible = false
+		var olhos_q := _olhos_largada()
+		if imediato:
+			_camera.global_transform = olhos_q
+		else:
+			_camera.global_transform = _camera.global_transform.interpolate_with(olhos_q, 0.3)
+		_camera.fov = lerpf(_camera.fov, 66.0, 0.2)
+		_camera.h_offset = 0.0
+		_camera.v_offset = 0.0
+		return
 	if modo.you_on_hand:
 		# D-077: pipa na mão — câmera atrás do pipeiro, olhando em volta (o
 		# dedo gira); dá para ver as pipas no céu, as lajes e o morro.
@@ -552,6 +581,95 @@ func _posicionar_camera(imediato: bool) -> void:
 	_camera.h_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
 	_camera.v_offset = randf_range(-1.0, 1.0) * _tremor * 0.02
 	_tremor = maxf(0.0, _tremor - 0.06)
+
+
+## D-089: os olhos do pipeiro com a pipa na mão (e na largada).
+func _olhos_largada() -> Transform3D:
+	var base: Vector3 = modo.players[0]["base"]
+	if _lanc_fase >= 1 and _lanc_fase <= 3:
+		var pose := _pose_largada()
+		var olho: Vector3 = (pose["corpo"] as Vector3) + Vector3(0.0, 1.62, 0.0)
+		var pipa: Vector3 = pose["pipa"]
+		var mira := pipa
+		match _lanc_fase:
+			2:
+				# andando: balança com o passo e olha para a frente, a pipa embaixo
+				olho.y += 0.025 * sin(_lanc_t * TAU * 1.8)
+				olho.x += 0.012 * sin(_lanc_t * PI * 1.8)
+				mira = pipa + Vector3(0.0, 0.25, -3.0)
+			3:
+				mira = pipa + Vector3(0.0, 1.2, -3.0)
+		return Transform3D(Basis.looking_at(mira - olho, Vector3.UP), olho)
+	var yaw := deg_to_rad(_olhar_yaw)
+	var pit := deg_to_rad(_olhar_pitch)
+	var frente := Vector3(-sin(yaw) * cos(pit), sin(pit), -cos(yaw) * cos(pit))
+	var olho2 := base + Vector3(0.0, 1.62, 0.0)
+	return Transform3D(Basis.looking_at(frente, Vector3.UP), olho2)
+
+
+## D-089: atualiza as mãos com o que a física está fazendo (ou com a fase da largada).
+func _atualizar_maos(eu: Flyer, delta: float) -> void:
+	if _maos == null:
+		return
+	var mostrar := _primeira_pessoa and not _no_lobby and (modo.you_on_hand or _lanc_fase > 0 or (eu != null and not eu.cut))
+	_maos.visible = mostrar
+	if not mostrar:
+		return
+	var estado := {"modo": "voo"}
+	if _vitrine_maos:
+		# captura: parado, puxando, mandando, desbicando, amarrando, erguendo
+		var t := modo.world.time
+		estado = {"modo": "voo", "tensao": 6.0, "lado": 1.0}
+		if t < 4.0:
+			pass
+		elif t < 8.0:
+			estado["haul"] = 3.0
+		elif t < 12.0:
+			estado["haul"] = -3.0
+		elif t < 16.0:
+			estado["desbico"] = fmod(t - 12.0, 0.6)
+			estado["lado"] = 1.0 if fmod(t, 1.2) < 0.6 else -1.0
+		elif t < 19.0:
+			estado = {"modo": "amarrar", "fase": (t - 16.0) / 3.0, "pipa": Vector3(0.0, -0.45, -0.55)}
+		else:
+			estado = {"modo": "erguer", "fase": (t - 19.0) / 3.0, "pipa": Vector3(0.0, -0.1 + (t - 19.0) * 0.12, -0.55)}
+		_maos.call("atualizar", _camera, estado, delta)
+		return
+	if _lanc_fase >= 1 and _lanc_fase <= 3:
+		var pose := _pose_largada()
+		var duracao: float = [1.0, LARGADA_AMARRAR, LARGADA_ANDAR, LARGADA_ERGUER][_lanc_fase]
+		estado = {"modo": ["", "amarrar", "andar", "erguer"][_lanc_fase],
+			"fase": clampf(_lanc_t / duracao, 0.0, 1.0),
+			"pipa": _camera.global_transform.affine_inverse() * (pose["pipa"] as Vector3)}
+	elif modo.you_on_hand or eu == null:
+		estado = {"modo": "mao"}
+	else:
+		estado["arm"] = eu.pilot.arm_offset
+		estado["tensao"] = eu.tension
+		estado["haul"] = eu.input.haul_speed
+		estado["desbico"] = eu.tenteio_age
+		estado["lado"] = _ultimo_lado
+		estado["puxao"] = eu.pilot.is_pulling(modo.world.time)
+		_maos.set("cor_linha", Estilos.LINHAS[modo.you_line]["cor"])
+	_maos.call("atualizar", _camera, estado, delta)
+
+
+## D-089: na 1ª pessoa, a sua linha sai da mão da frente (o começo dela, perto
+## dos olhos, é trocado pelo ponto da tela onde a mão está; daí em diante é a
+## linha da física, ponto por ponto).
+func _linha_da_mao(pos: PackedVector3Array) -> PackedVector3Array:
+	if _maos == null or not _maos.visible or not _primeira_pessoa or pos.size() < 3:
+		return pos
+	var inicio: Vector3 = _maos.call("ponto_linha_no_mundo", _camera, 1.5)
+	var out := PackedVector3Array([inicio])
+	var olho := _camera.global_position
+	var achou := false
+	for i in range(1, pos.size()):
+		if not achou and pos[i].distance_to(olho) < 4.0 and i < pos.size() - 2:
+			continue
+		achou = true
+		out.append(pos[i])
+	return out
 
 
 # ---------------- gestos ----------------
@@ -788,7 +906,15 @@ func _desenhar_sobreposicao() -> void:
 	var c := _sobreposicao
 	var tela := c.get_viewport_rect().size
 	var fonte := ThemeDB.fallback_font
-	# Carretilha no canto de baixo à esquerda (gira com a linha).
+	# Carretilha no canto de baixo à esquerda (gira com a linha) — só na 3ª
+	# pessoa; na 1ª, as mãos mostram a linha (D-089).
+	if not _primeira_pessoa:
+		_desenhar_carretilha(c, tela)
+	_desenhar_relo_e_vento(c, tela)
+	_desenhar_resto_sobreposicao(c, tela, fonte)
+
+
+func _desenhar_carretilha(c: Control, tela: Vector2) -> void:
 	var centro := Vector2(110.0, tela.y - 110.0)
 	c.draw_circle(centro, 86.0, Color(0.42, 0.25, 0.12, 0.92))
 	c.draw_circle(centro, 70.0, Color(0.93, 0.92, 0.88, 0.95))
@@ -799,7 +925,8 @@ func _desenhar_sobreposicao() -> void:
 	var cabo := centro + Vector2.from_angle(_giro_carretilha) * 58.0
 	c.draw_circle(cabo, 11.0, Color(0.25, 0.15, 0.08))
 
-	_desenhar_relo_e_vento(c, tela)
+
+func _desenhar_resto_sobreposicao(c: Control, tela: Vector2, fonte: Font) -> void:
 	# Faísca nos pontos em que as linhas estão laçadas.
 	for p in modo.world.combat.contact_points:
 		if _camera.is_position_behind(p):

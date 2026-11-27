@@ -287,18 +287,22 @@ jobs:
         run: |
           mkdir -p capturas
           # Modo livre (cena principal), celular deitado: um bot pilota a sua pipa.
-          for vista in primeira terceira praia inicio escolha; do
+          for vista in primeira maos terceira praia inicio escolha; do
             mkdir -p "quadros_$vista"
             extra=""
             if [ "$vista" = terceira ]; then extra="--terceira"; fi
             if [ "$vista" = praia ]; then extra="--terceira --mapa=praia --hora=meio_dia"; fi
             if [ "$vista" = inicio ]; then extra="--inicio --hora=manha"; fi
             if [ "$vista" = escolha ]; then extra="--escolha"; fi
+            if [ "$vista" = maos ]; then extra="--vitrine-maos"; fi
             timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
               --rendering-method gl_compatibility --resolution 1280x720 \
               --fixed-fps 15 --quit-after 330 --write-movie "quadros_$vista/q.png" \
               -- --auto $extra 2>&1 | tail -5 || true
-            for n in 00000030 00000150 00000329; do
+            quadros="00000030 00000150 00000329"
+            # mãos (D-089): parado, puxando, mandando, desbicando, amarrando, erguendo
+            if [ "$vista" = maos ]; then quadros="00000045 00000090 00000105 00000150 00000165 00000182 00000190 00000260 00000320"; fi
+            for n in $quadros; do
               if [ -f "quadros_$vista/q$n.png" ]; then cp "quadros_$vista/q$n.png" "capturas/livre_${vista}_quadro${n}.png"; fi
             done
           done
