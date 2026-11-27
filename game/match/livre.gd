@@ -150,6 +150,8 @@ func _ready() -> void:
 			_largada_arg = true    # D-089: captura da largada pelos olhos
 		elif arg == "--vitrine-maos":
 			_vitrine_maos = true   # D-089: captura das mãos em cada movimento
+	if _largada_arg:
+		_automatico = false   # a captura passa --auto; a largada é sua, pelos olhos
 	_conferir_versao_nova()
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um

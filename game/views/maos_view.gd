@@ -43,10 +43,10 @@ func preparar(tom := 0.45) -> void:
 	_material.set_shader_parameter("relevo", load("res://game/assets/maos/hands_normal.png"))
 	_material.set_shader_parameter("orm", load("res://game/assets/maos/hands_occlusionRoughnessMetallic.png"))
 	_material.set_shader_parameter("tom", tom)
-	_material.set_shader_parameter("tinta", Color(0.93, 0.86, 0.8))
+	_material.set_shader_parameter("tinta", Color(0.8, 0.7, 0.62))
 	_material_braco = _material.duplicate() as ShaderMaterial
 	_material_braco.set_shader_parameter("braco", true)
-	_material_braco.set_shader_parameter("cor_braco", Color(0.86, 0.6, 0.48).lerp(Color(0.4, 0.26, 0.19), tom))
+	_material_braco.set_shader_parameter("cor_braco", Color(0.7, 0.5, 0.4).lerp(Color(0.36, 0.24, 0.18), tom))
 	for lado in ["d", "e"]:
 		var cena: PackedScene = MODELO_D if lado == "d" else MODELO_E
 		var raiz := Node3D.new()
@@ -181,8 +181,8 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 		var tens := clampf(float(estado.get("tensao", 0.0)) / 12.0, 0.0, 1.0)
 		var haul: float = estado.get("haul", 0.0)
 		var forca := clampf(absf(haul) / 4.0, 0.0, 1.0)
-		var d := Vector3(0.15, -0.155 + respira + arm * 0.08, -0.41 - arm * 0.3)
-		var e := Vector3(-0.15, -0.235 + respira * 0.7, -0.34)
+		var d := Vector3(0.17, -0.17 + respira + arm * 0.08, -0.5 - arm * 0.3)
+		var e := Vector3(-0.16, -0.2 + respira * 0.7, -0.44)
 		var rd := Vector3(22.0 + tens * 6.0, 9.0, -14.0)
 		var re := Vector3(8.0, -12.0, 18.0)
 		var pd := {"pinch_tight": 1.0 - tens * 0.6, "grip": tens * 0.6}
