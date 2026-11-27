@@ -144,34 +144,33 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 
 
 ## Restrições internas: segmentos, alcance, cabresto, rabiola.
-## D-085: passadas extras nas linhas antes da passada normal. Com menos
-## subpassos (o jogo usa 2) a linha esticava mais: barriga e "V" perto do
-## cabresto. Passadas a mais só nas linhas são baratas.
+## D-086: `extra_sweeps` passadas completas a mais (linha, alcance, cabresto e
+## rabiola) em cada subpasso. Com subpassos maiores (o jogo usa menos) a linha
+## ficava com barriga e "V" perto do cabresto — medido em tests/unit/
+## test_barriga.gd contra a referência de 1/480 s. Com 0 é a física de sempre.
 var extra_sweeps := 0
 
 
 func solve_internal(h: float) -> void:
 	var d := kite.definition
-	for k in extra_sweeps:
+	var soma := 0.0
+	for k in extra_sweeps + 1:
 		if line != null:
 			line.pos[0] = hand_position
 			line.solve_segments(h)
+			line.solve_max_reach()
+			if not cut:
+				_attach(line, line.size() - 1, d.tow_point)
+				soma += absf(_attach_dl)
+		if cut and trailing_line != null:
+			trailing_line.solve_segments(h)
+			_attach(trailing_line, trailing_line.size() - 1, d.tow_point)
+			soma += absf(_attach_dl)
 		if tail != null:
+			_attach(tail, 0, d.tail_attach)
 			tail.solve_segments(h)
-	if line != null:
-		line.pos[0] = hand_position
-		line.solve_segments(h)
-		line.solve_max_reach()
-		if not cut:
-			_attach(line, line.size() - 1, d.tow_point)
-			tension = absf(_attach_dl) / (h * h)
-	if cut and trailing_line != null:
-		trailing_line.solve_segments(h)
-		_attach(trailing_line, trailing_line.size() - 1, d.tow_point)
-		tension = absf(_attach_dl) / (h * h)
-	if tail != null:
-		_attach(tail, 0, d.tail_attach)
-		tail.solve_segments(h)
+	if line != null and not cut or cut and trailing_line != null:
+		tension = soma / (h * h)
 
 
 func solve_ground() -> void:
