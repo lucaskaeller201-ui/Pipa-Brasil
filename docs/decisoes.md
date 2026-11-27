@@ -33,6 +33,21 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-088 — A barriga vinha da largada da mão; o jogo andava em câmera lenta (2026-11-27)
+Vídeo do Lucas (0.30.5, iPhone): linha com barriga, "braçada mais lenta" e
+fps baixo quase sempre. O canto da tela mostrou "passos/quadro 2,0 · passo
+6,5 ms" (restrições 2,7, contato 1,6, forças 1,4 ms).
+- Barriga: desde a largada da mão (D-078/D-079) a linha nascia com 5 m em 8
+  segmentos de 0,6 m, e a carretilha soltava o resto com esse tamanho: a 40 m
+  eram ~68 pontos em vez de 32. O dobro de pontos dá mais barriga e "V" (o
+  solucionador converge pior) e o dobro de física. Os testes de barriga criavam
+  as pipas já no alto e não pegavam isso. Agora a linha solta sai em segmentos
+  de 1,25 m (40 m → 37 pontos). Testes: test_linha_da_mao e a medição "bots
+  subindo da mão" em test_barriga.
+- Câmera lenta: com 2 passos por quadro no máximo (D-086), a 20 fps o jogo
+  andava a 40 passos por segundo — 2/3 da velocidade: a braçada parecia lenta.
+  Volta para 3. Com metade dos pontos, a física pesa bem menos.
+
 ### D-087 — Desbico, largada, subida e corte medidos contra a referência (2026-11-27)
 O Lucas sentiu na 0.30.4 o desbico e a largada "soltando muita linha", a
 física estranha, e o corte demorando mais. Medido contra a física de

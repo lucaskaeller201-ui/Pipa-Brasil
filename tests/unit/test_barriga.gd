@@ -5,14 +5,17 @@ extends "res://tests/test_case.gd"
 ## Imprime uma tabela; o critério numérico fica em test_linha_firme_no_jogo.
 
 
-func _medir(passo: float, sub: int, extras: int, leve := false, segundos := 30.0) -> Dictionary:
-	var modo := FreeMode.new(6, 7, true)
+func _medir(passo: float, sub: int, extras: int, leve := false, segundos := 30.0, da_mao := false) -> Dictionary:
+	var modo := FreeMode.new(6, 7, not da_mao)
 	modo.world.substeps = sub
 	modo.world.leve = leve
 	modo.passadas_extras = extras
 	for p in modo.players:
 		if p["flyer"] != null:
 			(p["flyer"] as Flyer).extra_sweeps = extras
+	if da_mao:
+		modo.bots_para_a_mao()   # como no jogo: cada bot sobe da mão (D-088)
+	var inicio := 12.0 if not da_mao else segundos - 15.0
 	var barriga := 0.0
 	var v_max := 0.0
 	var v_med := 0.0
@@ -24,7 +27,7 @@ func _medir(passo: float, sub: int, extras: int, leve := false, segundos := 30.0
 		var t0 := Time.get_ticks_usec()
 		modo.update(passo)
 		custo += Time.get_ticks_usec() - t0
-		if k * passo < 12.0 or k % 6 != 0:
+		if k * passo < inicio or k % 6 != 0:
 			continue
 		for f in modo.world.flyers:
 			var fl: Flyer = f
@@ -70,6 +73,9 @@ func test_linha_firme_no_jogo() -> void:
 	_linha("60 Hz × 2 + 2 (0.30.3)", _medir(1.0 / 60.0, 2, 2))
 	var jogo := _medir(1.0 / 60.0, 3, 4, true)
 	_linha("60 Hz × 3 + 4 leve (jogo)", jogo)
+	var mao := _medir(1.0 / 60.0, 3, 4, true, 60.0, true)
+	_linha("jogo, bots subindo da mão", mao)
+	assert_true(mao["barriga"] < ref["barriga"] + 1.5, "bots que subiram da mão: barriga perto da referência")
 	assert_true(ref["barriga"] < 30.0, "referência com barriga razoável")
 	assert_true(jogo["barriga"] < ref["barriga"] + 1.5, "barriga do jogo perto da referência")
 	assert_true(jogo["v"] < ref["v"] + 1.5, "dobra perto do cabresto perto da referência")

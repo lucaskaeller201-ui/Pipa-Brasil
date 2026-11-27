@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.30.6 — 2026-11-27
+
+- Linha sem barriga depois de subir da mão (tinha o dobro de pontos).
+- Física mais leve; o jogo não fica mais em câmera lenta quando o fps cai.
+
 ## 0.30.5 — 2026-11-27
 
 - Testes novos comparando desbico, largada, subida e tempo de corte com a física de antes da 0.30.
