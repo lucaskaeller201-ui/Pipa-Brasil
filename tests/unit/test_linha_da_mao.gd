@@ -41,12 +41,15 @@ func test_linha_solta_da_mao_igual_a_do_alto() -> void:
 		r = modo.subir(DT)
 		modo.update(DT)
 		t += DT
+	print("      [linha da mão] subiu: r=%d, %.1f s, linha %.1f m, %d pontos" % [r, t, f.line_length(), f.line.size()])
 	# depois dá linha até uns 40 m
 	t = 0.0
 	while f.line_length() < 40.0 and t < 40.0 and modo.world.is_finite_state():
 		f.input.haul_speed = -2.0
 		modo.update(DT)
 		t += DT
+		if fmod(t, 2.0) < DT:
+			print("        t %.0f: linha %.1f m, %d pontos, rest0 %.2f, rest_length %.2f" % [t, f.line_length(), f.line.size(), f.line.rest[0], f.line.rest_length])
 	f.input.haul_speed = 0.0
 	for i in roundi(6.0 / DT):
 		modo.update(DT)
