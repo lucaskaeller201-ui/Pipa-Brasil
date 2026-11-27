@@ -146,13 +146,17 @@ func _ready() -> void:
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
 	# segundo de processador por segundo de jogo e o celular travava
-	modo.world.substeps = 2   # (com 60 passos por segundo: subpasso de 1/120 s)
+	# D-086: 60 passos × 3 subpassos (1/180 s) + 4 passadas extras na linha e
+	# vento/pares por passo: linha como na física de referência (sem barriga
+	# nem "V") e mais barato que a de 0.30.3 (medido em test_barriga.gd)
+	modo.world.substeps = 3
+	modo.world.leve = true
 	modo.world.medir = true   # D-086: detalhe do tempo no canto da tela
 	modo.rabiola_bots = 12    # D-083: rabiola dos bots com metade dos pontos (são vistos de longe)
-	modo.passadas_extras = 2  # D-085: linha firme como com 4 subpassos (sem barriga nem "V")
+	modo.passadas_extras = 4  # D-086: linha firme como na referência (sem barriga nem "V")
 	for p in modo.players:
 		if p["flyer"] != null:
-			(p["flyer"] as Flyer).extra_sweeps = 2
+			(p["flyer"] as Flyer).extra_sweeps = 4
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()

@@ -10,8 +10,12 @@ func test_custo_do_passo_da_fisica() -> void:
 	var B = load("res://game/world/bairro.gd")
 	var raiz := Node3D.new()
 	var modo := FreeMode.new(6, 7, true)
-	modo.world.substeps = 2   # como no jogo (D-082)
-	modo.world.leve = true    # D-086
+	modo.world.substeps = 3   # como no jogo (D-086)
+	modo.world.leve = true
+	modo.passadas_extras = 4
+	for p in modo.players:
+		if p["flyer"] != null:
+			(p["flyer"] as Flyer).extra_sweeps = 4
 	B.criar(raiz, modo.players.size(), 7)
 	modo.world.obstacles = B.obstaculos
 	for k in roundi(8.0 / DT):

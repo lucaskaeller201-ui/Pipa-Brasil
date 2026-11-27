@@ -1,9 +1,17 @@
 extends MeshInstance3D
-## Desenha cadeias de pontos (linha, rabiola) e setas de força com ImmediateMesh.
+## Desenha cadeias de pontos (linha, rabiola) e setas de força.
+## D-086: tudo vai para listas de vértices e sobe de uma vez numa ArrayMesh no
+## fim do quadro (uma superfície só) — chamar vértice por vértice era lento
+## no celular.
 ## As cadeias são desenhadas como fitas viradas para a câmera, com uma largura
 ## mínima na tela: uma linha de 0,6 mm a 50 m continua visível (D-017).
 
-var _im := ImmediateMesh.new()
+var _am := ArrayMesh.new()
+var _tv := PackedVector3Array()   ## triângulos
+var _tc := PackedColorArray()
+var _lv := PackedVector3Array()   ## segmentos (setas)
+var _lc := PackedColorArray()
+var _marcado := false
 var _material := StandardMaterial3D.new()
 
 ## Posição da câmera e largura mínima (m de largura por m de distância).
@@ -13,7 +21,7 @@ var min_width_per_meter := 0.002
 
 
 func _init() -> void:
-	mesh = _im
+	mesh = _am
 	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_material.vertex_color_use_as_albedo = true
 	_material.no_depth_test = false
@@ -22,7 +30,42 @@ func _init() -> void:
 
 
 func limpar() -> void:
-	_im.clear_surfaces()
+	_tv.clear()
+	_tc.clear()
+	_lv.clear()
+	_lc.clear()
+	_marcar()
+
+
+func _marcar() -> void:
+	if not _marcado:
+		_marcado = true
+		_enviar.call_deferred()
+
+
+## Sobe as listas para a malha (uma vez por quadro).
+func _enviar() -> void:
+	_marcado = false
+	_am.clear_surfaces()
+	for par in [[_tv, _tc, Mesh.PRIMITIVE_TRIANGLES], [_lv, _lc, Mesh.PRIMITIVE_LINES]]:
+		var v: PackedVector3Array = par[0]
+		if v.is_empty():
+			continue
+		var arr := []
+		arr.resize(Mesh.ARRAY_MAX)
+		arr[Mesh.ARRAY_VERTEX] = v
+		arr[Mesh.ARRAY_COLOR] = par[1]
+		_am.add_surface_from_arrays(par[2], arr)
+		_am.surface_set_material(_am.get_surface_count() - 1, _material)
+
+
+func _tri(a: Vector3, b: Vector3, c: Vector3, cor: Color) -> void:
+	_tv.append(a)
+	_tv.append(b)
+	_tv.append(c)
+	_tc.append(cor)
+	_tc.append(cor)
+	_tc.append(cor)
 
 
 ## Desenha a cadeia como fita. `largura` é a largura real (m); a fita nunca fica
@@ -34,8 +77,7 @@ func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, 
 	# contínua nas emendas — sem os "V" nos nós. Só desenho: os pontos são os
 	# da simulação, nada é mexido nela.
 	var p := suavizar(pontos, suave) if suave > 1 else pontos   # D-085: menos pontos nas linhas dos bots
-	_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
-	_im.surface_set_color(cor)
+	_marcar()
 	var lados := PackedVector3Array()
 	lados.resize(p.size())
 	for i in p.size():
@@ -48,13 +90,8 @@ func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, 
 			continue
 		var la := lados[i]
 		var lb := lados[i + 1]
-		_im.surface_add_vertex(a - la)
-		_im.surface_add_vertex(a + la)
-		_im.surface_add_vertex(b + lb)
-		_im.surface_add_vertex(a - la)
-		_im.surface_add_vertex(b + lb)
-		_im.surface_add_vertex(b - lb)
-	_im.surface_end()
+		_tri(a - la, a + la, b + lb, cor)
+		_tri(a - la, b + lb, b - lb, cor)
 
 
 ## Pontos intermediários numa curva Catmull-Rom (passa por todos os pontos).
@@ -91,7 +128,7 @@ func _lado(p: Vector3, dir: Vector3, largura: float, minimo := 1.0) -> Vector3:
 func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -> void:
 	if pontos.size() < 2 or cores.is_empty():
 		return
-	_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
+	_marcar()
 	var k := 0
 	for i in range(1, pontos.size()):
 		var a := pontos[i - 1]
@@ -118,20 +155,19 @@ func desenhar_fitinhas(pontos: PackedVector3Array, cores: Array, tempo: float) -
 			var ang := sin(tempo * 11.0 + k * 1.9) * 0.6
 			var eixo := lado * cos(ang) + dir * sin(ang)
 			var w := dir * (largura * 0.5)
-			_im.surface_set_color(cores[k % cores.size()])
+			var cf: Color = cores[k % cores.size()]
 			var p1 := p - eixo * comprimento
 			var p2 := p + eixo * comprimento
-			for q in [p1 - w, p1 + w, p2 + w, p1 - w, p2 + w, p2 - w]:
-				_im.surface_add_vertex(q)
+			_tri(p1 - w, p1 + w, p2 + w, cf)
+			_tri(p1 - w, p2 + w, p2 - w, cf)
 			k += 1
-	_im.surface_end()
 
 
 ## Desenha várias setas (origem, vetor) numa única superfície.
 func desenhar_setas(setas: Array, cores: Array) -> void:
 	if setas.is_empty():
 		return
-	_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
+	_marcar()
 	for i in setas.size():
 		var origem: Vector3 = setas[i][0]
 		var vetor: Vector3 = setas[i][1]
@@ -145,7 +181,7 @@ func desenhar_setas(setas: Array, cores: Array) -> void:
 			lado = dir.cross(Vector3.RIGHT)
 		lado = lado.normalized() * minf(0.15, tamanho * 0.25)
 		var recuo := dir * minf(0.3, tamanho * 0.3)
-		_im.surface_set_color(cores[i])
+		var cs: Color = cores[i]
 		for p in [origem, fim, fim, fim - recuo + lado, fim, fim - recuo - lado]:
-			_im.surface_add_vertex(p)
-	_im.surface_end()
+			_lv.append(p)
+			_lc.append(cs)

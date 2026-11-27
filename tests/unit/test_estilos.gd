@@ -40,7 +40,8 @@ func test_rabiola_tem_fitinhas() -> void:
 	for i in 11:
 		pontos.append(Vector3(0.0, -0.2 * i, 0.0))
 	l.call("desenhar_fitinhas", pontos, [Color.RED, Color.WHITE], 1.0)
-	var im: ImmediateMesh = l.mesh
+	l.call("_enviar")   # D-086: a malha sobe no fim do quadro
+	var im: ArrayMesh = l.mesh
 	assert_eq(im.get_surface_count(), 1)
 	var vertices: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 	assert_eq(vertices.size(), 10 * 2 * 6, "duas fitinhas por pedaço da rabiola")
@@ -56,7 +57,8 @@ func test_rabiola_de_longe_nao_engrossa() -> void:
 	for i in 11:
 		pontos.append(Vector3(0.0, -0.2 * i, 0.0))
 	l.call("desenhar_fitinhas", pontos, [Color.RED, Color.WHITE], 1.0)
-	var im: ImmediateMesh = l.mesh
+	l.call("_enviar")
+	var im: ArrayMesh = l.mesh
 	var n := 0
 	if im.get_surface_count() > 0:
 		var vertices: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
