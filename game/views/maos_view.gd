@@ -213,8 +213,9 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 			_fase_bracada += delta * ritmo
 			_rapido = true
 			var amp := 0.6 + 0.4 * forca
-			var ponta := {"d": Vector3(0.03, -0.07, -0.6), "e": Vector3(-0.03, -0.08, -0.6)}
-			var corpo := {"d": Vector3(0.07, -0.3, -0.33), "e": Vector3(-0.07, -0.31, -0.33)}
+			# as duas mãos ficam na tela: pega lá em cima, puxa até embaixo
+			var ponta := {"d": Vector3(0.025, 0.0, -0.56), "e": Vector3(-0.025, -0.005, -0.56)}
+			var corpo := {"d": Vector3(0.08, -0.19, -0.38), "e": Vector3(-0.08, -0.195, -0.38)}
 			var res := {}
 			for lado in ["d", "e"]:
 				var s := fmod(_fase_bracada + (0.0 if lado == "d" else 0.5), 1.0)
@@ -235,7 +236,7 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 					# aberta, voltando por fora da outra mão
 					var k := smoothstep(0.0, 1.0, (s - 0.5) / 0.5)
 					var arco := sin(k * PI)
-					pos = c.lerp(f, k) + Vector3(0.09 * sinal, 0.05, 0.0) * arco
+					pos = c.lerp(f, k) + Vector3(0.1 * sinal, 0.03, 0.04) * arco
 					pitch = lerpf(-12.0, 28.0, k)
 					pose = {"pinch_large": 0.7, "default_pose": 0.3}
 				res[lado] = [pos, pitch, pose]

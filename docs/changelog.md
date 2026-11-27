@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.31.3 — 2026-11-27
+
+- Braçada de verdade: uma mão puxa enquanto a outra vai pegar a linha na frente, no ritmo da puxada.
+
 ## 0.31.2 — 2026-11-27
 
 - Largada: a pipa fica de frente para você, com o cabresto aparecendo e a linha dando nó nele.

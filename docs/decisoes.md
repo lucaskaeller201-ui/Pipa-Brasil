@@ -33,6 +33,18 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-092 — Braçada de verdade, uma mão depois da outra (2026-11-27)
+O Lucas: "uma mão vai na frente e a outra atrás, e depois a de trás vai para a
+frente… no ritmo da puxada, rápido". Antes as duas mãos balançavam juntas.
+- Cada mão: metade do ciclo fechada, puxando da frente (lá em cima) até
+  perto do corpo (embaixo da tela), com o tranco no começo; outra metade
+  aberta, voltando por fora da outra mão para pegar a linha lá na frente. As
+  duas em oposição: sempre tem uma puxando.
+- Ritmo pela velocidade da puxada (1,6 a 3,4 braçadas de cada mão por
+  segundo; puxão 3,6), e as mãos seguem sem o atraso de suavização.
+- A linha da pipa sai da mão que está puxando (troca a cada meia braçada).
+- Teste: em 2 s puxando, a mão que segura troca ≥ 6 vezes (deu 12).
+
 ### D-091 — Largada: pipa de frente, cabresto e nó; varetas atrás com envergadura (2026-11-27)
 Prints do Lucas (0.31.1): a pipa ficava de costas para o pipeiro na largada
 (vendo as varetas), o cabresto não aparecia, nem a linha dando nó; faltava a
