@@ -1,5 +1,9 @@
 # Histórico de alterações
 
+## 0.32.1 — 2026-11-27
+
+- Olhar em volta com a pipa na mão: arrastar para cima olha para cima.
+
 ## 0.32.0 — 2026-11-27
 
 - Página inicial nova: logo, JOGAR verde, seletores em cápsula, recorde com troféu, a laje com o pipeiro e o morro.

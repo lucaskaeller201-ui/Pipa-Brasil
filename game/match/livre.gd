@@ -798,7 +798,8 @@ func _arrasto(indice: int, posicao: Vector2, relativo: Vector2) -> void:
 	if modo.you_on_hand and not _no_lobby:
 		# D-077: pipa na mão — arrastar o dedo gira a câmera e olha em volta
 		_olhar_yaw -= relativo.x * 0.25
-		_olhar_pitch = clampf(_olhar_pitch + relativo.y * 0.2, -25.0, 75.0)
+		# D-096: arrastar para cima olha para cima (era invertido)
+		_olhar_pitch = clampf(_olhar_pitch - relativo.y * 0.2, -25.0, 75.0)
 		(_dedos[indice] as Dictionary)["ult"] = posicao
 		return
 	_dy_quadro += relativo.y

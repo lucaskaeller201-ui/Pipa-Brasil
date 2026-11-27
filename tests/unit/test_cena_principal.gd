@@ -247,6 +247,13 @@ func test_pipa_na_mao_olha_em_volta() -> void:
 	var giro := rad_to_deg(Vector2(antes.x, antes.z).angle_to(Vector2(depois.x, depois.z)))
 	print("      [olhar em volta] arrastando 300 px a câmera girou %.0f°" % giro)
 	assert_true(absf(giro) > 40.0, "arrastar gira a câmera")
+	# D-096: arrastar para cima olha para cima
+	var pitch0: float = raiz.get("_olhar_pitch")
+	raiz.call("_toque", 0, Vector2(600, 500), true)
+	for k in 10:
+		raiz.call("_arrasto", 0, Vector2(600, 500 - 15 * k), Vector2(0, -15))
+	raiz.call("_toque", 0, Vector2(600, 350), false)
+	assert_true(float(raiz.get("_olhar_pitch")) > pitch0 + 10.0, "arrastar para cima olha para cima")
 	raiz.queue_free()
 
 

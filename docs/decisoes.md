@@ -33,6 +33,11 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-096 — Olhar em volta: arrastar para cima olha para cima (2026-11-27)
+O Lucas achou invertido (com a pipa na mão, arrastando para cima a vista
+descia). Agora o dedo para cima levanta a vista; o lado continua igual.
+Teste em test_cena_principal.
+
 ### D-095 — Página inicial nova e o Cristo na serra (2026-11-27)
 Pedido: deixar o menu como as imagens de referência do Lucas, "até o cenário
 com o Cristo", e o que não der, buscar de fora.
