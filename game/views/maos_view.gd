@@ -69,7 +69,7 @@ func preparar(tom := 0.45) -> void:
 		# acha que ele está (no iPhone ele sumia).
 		var braco := MeshInstance3D.new()
 		var cap := CapsuleMesh.new()
-		cap.radius = 0.031
+		cap.radius = 0.034
 		cap.height = 0.62
 		cap.radial_segments = 20
 		cap.rings = 6
@@ -77,9 +77,13 @@ func preparar(tom := 0.45) -> void:
 		braco.material_override = _material_braco
 		braco.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		braco.extra_cull_margin = 4.0
-		# a cápsula (eixo Y) vai do pulso para trás (+Z da mão), um pouco para baixo
-		var giro := Basis(Vector3.RIGHT, deg_to_rad(90.0 + 10.0))
-		braco.transform = Transform3D(giro * Basis.from_scale(Vector3(1.0, 1.0, 0.85)), Vector3(0.0, -0.004, 0.0) + giro * Vector3(0.0, 0.31 - 0.035, 0.0))
+		# a cápsula (eixo Y) vai do pulso para trás (+Z da mão), um pouco para baixo.
+		# D-091: na medida da abertura do pulso do modelo (medida nos vértices:
+		# centro x ∓3,8 mm, y −2,4 mm; meia largura 24 mm de lado, 32 mm de
+		# polegar a mindinho) — antes ficava torto e aparecia o corte.
+		var giro := Basis(Vector3.RIGHT, deg_to_rad(90.0 + 6.0))
+		var centro := Vector3(-0.0038 if lado == "d" else 0.0038, -0.0024, 0.0)
+		braco.transform = Transform3D(giro * Basis.from_scale(Vector3(0.78, 1.0, 1.0)), centro + giro * Vector3(0.0, 0.31 - 0.03, 0.0))
 		raiz.add_child(braco)
 		var poses := {}
 		var suf := "R" if lado == "d" else "L"
@@ -242,11 +246,16 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 		var fase: float = estado.get("fase", 0.0)
 		match modo:
 			"amarrar":
-				# a mão de trás segura a vareta; a da frente dá as voltas no cabresto
+				# D-091: a pipa de frente para os olhos; a mão esquerda segura a
+				# vareta do meio embaixo, a direita dá as voltas da linha no cabresto
 				var w := _t * TAU * 1.8
-				alvo["e"] = Transform3D(_rot(55.0, -15.0, 25.0), pipa + Vector3(-0.07, -0.16, 0.07))
-				alvo["d"] = Transform3D(_rot(40.0 + sin(w) * 20.0, 20.0, -30.0 + cos(w) * 25.0),
-					pipa + Vector3(0.05 + 0.025 * cos(w), 0.0 + 0.025 * sin(w), 0.09))
+				var tp: Transform3D = estado.get("pipa_t", Transform3D(Basis.IDENTITY, pipa))
+				var cab: Vector3 = estado.get("cabresto", pipa)
+				var embaixo := tp * Vector3(0.0, -0.2, 0.035)
+				alvo["e"] = Transform3D(tp.basis * _rot(-10.0, 0.0, 80.0), embaixo)
+				var volta := tp.basis * Vector3(cos(w), sin(w), 0.0) * 0.022
+				alvo["d"] = Transform3D(tp.basis * _rot(-35.0 + sin(w) * 15.0, 25.0, -70.0 + cos(w) * 20.0),
+					cab + tp.basis * Vector3(0.035, -0.045, 0.03) + volta)
 				var aperta := 0.5 + 0.5 * sin(w)
 				poses["d"] = {"pinch_tight": aperta, "pinch_large": 1.0 - aperta}
 				poses["e"] = {"grip": 1.0}

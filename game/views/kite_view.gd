@@ -77,11 +77,40 @@ func construir(def: KiteDefinition, estilo := {}) -> void:
 	for p in [top, def.tow_point, def.tow_point, meio_espinha]:
 		linhas.surface_add_vertex(p)
 	linhas.surface_end()
+	# D-091: o cabresto com volume (barbante), para aparecer de perto
+	var cab := SurfaceTool.new()
+	cab.begin(Mesh.PRIMITIVE_TRIANGLES)
+	cab.set_color(Color(0.96, 0.94, 0.88))
+	_tubo(cab, top + Vector3(0.0, -0.02, 0.0), def.tow_point, 0.0011)
+	_tubo(cab, meio_espinha, def.tow_point, 0.0011)
+	cab.generate_normals()
+	var cab_mat := StandardMaterial3D.new()
+	cab_mat.vertex_color_use_as_albedo = true
+	cab_mat.roughness = 0.9
+	var cab_no := MeshInstance3D.new()
+	cab_no.name = "Cabresto"
+	cab_no.mesh = cab.commit()
+	cab_no.material_override = cab_mat
+	cab_no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(cab_no)
 	var estrutura := MeshInstance3D.new()
 	estrutura.name = "Estrutura"
 	estrutura.mesh = linhas
 	add_child(estrutura)
 	_cabresto = linhas
+
+
+## Tubo fino de a até b (barbante do cabresto).
+static func _tubo(st: SurfaceTool, a: Vector3, b: Vector3, r: float) -> void:
+	var d := (b - a).normalized()
+	var u := d.cross(Vector3.UP if absf(d.y) < 0.9 else Vector3.RIGHT).normalized() * r
+	var v := d.cross(u).normalized() * r
+	var anel := [u, v, -u, -v]
+	for q in 4:
+		var p: Vector3 = anel[q]
+		var w: Vector3 = anel[(q + 1) % 4]
+		for x in [a + p, b + p, b + w, a + p, b + w, a + w]:
+			st.add_vertex(x)
 
 
 ## Varetas de bambu de verdade (finas, com volume), atrás do papel (D-075).
@@ -108,11 +137,14 @@ func _varetas(def: KiteDefinition, estilo: Dictionary) -> void:
 			var t1 := float(k + 1) / passos
 			var p0 := a.lerp(b, t0)
 			var p1 := a.lerp(b, t1)
+			# D-091: as varetas ficam atrás do papel (o cabresto sai pela frente,
+			# virada para o pipeiro), e a vareta atravessada enverga para trás
+			# (a envergadura): as pontas vão para trás do meio
+			p0.z = -0.004
+			p1.z = -0.004
 			if absf(a.y - b.y) < 0.01:
-				p0.y += p0.x * p0.x * 0.25
-				p1.y += p1.x * p1.x * 0.25
-			p0.z = 0.004
-			p1.z = 0.004
+				p0.z -= p0.x * p0.x * 0.45
+				p1.z -= p1.x * p1.x * 0.45
 			var d := (p1 - p0).normalized()
 			var lado := d.cross(Vector3.BACK).normalized() * r
 			var cima := Vector3.BACK * r

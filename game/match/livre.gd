@@ -472,8 +472,17 @@ func _process(delta: float) -> void:
 			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
 	if _primeira_pessoa and _maos != null and _maos.visible and _pipa_mao != null:
 		# D-089: na largada, a linha vai da mão até o cabresto da pipa na mão
-		var cabresto := _pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point
-		_linhas.call("desenhar_cadeia", PackedVector3Array([_camera.global_transform * (_maos.call("ponto_mao", "d") as Vector3), cabresto]), Estilos.LINHAS[modo.you_line]["cor"], 0.0012, 1.0, 1)
+		var tp := _pipa_mao.global_transform
+		var cabresto := tp * modo.kite_for(modo.you_style).tow_point
+		var pts := PackedVector3Array([_camera.global_transform * (_maos.call("ponto_mao", "d") as Vector3)])
+		# D-091: o nó no cabresto — as voltas da linha vão aparecendo enquanto amarra
+		var voltas := 3.0 if _lanc_fase != 1 else clampf(_lanc_t / LARGADA_AMARRAR, 0.0, 1.0) * 3.0
+		var n := int(voltas * 10.0)
+		for k in n:
+			var a := float(k) / 10.0 * TAU
+			pts.append(cabresto + tp.basis * Vector3(cos(a) * 0.009, sin(a) * 0.009, -0.004 + 0.003 * float(k) / 10.0))
+		pts.append(cabresto)
+		_linhas.call("desenhar_cadeia", pts, Estilos.LINHAS[modo.you_line]["cor"], 0.0012, 1.0, 1)
 	tq = _medir_tempo("linhas", tq)
 	var eu := modo.you()
 	_tratar_acontecimentos()
@@ -645,9 +654,13 @@ func _atualizar_maos(eu: Flyer, delta: float) -> void:
 	if _lanc_fase >= 1 and _lanc_fase <= 3:
 		var pose := _pose_largada()
 		var duracao: float = [1.0, LARGADA_AMARRAR, LARGADA_ANDAR, LARGADA_ERGUER][_lanc_fase]
+		var inv := _camera.global_transform.affine_inverse()
 		estado = {"modo": ["", "amarrar", "andar", "erguer"][_lanc_fase],
 			"fase": clampf(_lanc_t / duracao, 0.0, 1.0),
-			"pipa": _camera.global_transform.affine_inverse() * (pose["pipa"] as Vector3)}
+			"pipa": inv * (pose["pipa"] as Vector3)}
+		if _pipa_mao != null:
+			estado["pipa_t"] = inv * _pipa_mao.global_transform
+			estado["cabresto"] = inv * (_pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point)
 	elif modo.you_on_hand or eu == null:
 		estado = {"modo": "mao"}
 	else:
@@ -1139,9 +1152,18 @@ func _animar_bonecos(delta: float) -> void:
 			if _pipa_mao != null:
 				_pipa_mao.global_position = pose["pipa"]
 				_pipa_mao.global_rotation = Vector3(0.0, corpo.rotation.y, 0.0)
+				# D-091: a frente da pipa (papel e cabresto) fica virada para o
+				# pipeiro; amarrando, deitada para os olhos verem o cabresto;
+				# andando, meio inclinada; erguendo, vai ficando em pé
+				var deita := -0.8
+				if _lanc_fase == 2:
+					deita = lerpf(-0.8, -0.35, smoothstep(0.0, 1.0, _lanc_t / LARGADA_ANDAR))
+				elif _lanc_fase == 3:
+					deita = lerpf(-0.35, 0.1, _lanc_t / LARGADA_ERGUER)
+				_pipa_mao.rotate_object_local(Vector3.RIGHT, deita)
 				# amarrando: a pipa balança um pouco na mão
 				if _lanc_fase == 1:
-					_pipa_mao.rotate_object_local(Vector3.FORWARD, sin(_lanc_t * 9.0) * 0.08)
+					_pipa_mao.rotate_object_local(Vector3.FORWARD, sin(_lanc_t * 9.0) * 0.05)
 			continue
 		if i == 0:
 			corpo.position = base
