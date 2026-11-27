@@ -33,6 +33,15 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-084 — O jogo se atualiza sozinho no app da tela de início (2026-11-26)
+Depois do app da web (D-081), o Lucas continuou na 0.29.1: o service worker
+guarda o jogo e só troca de versão quando o app é fechado de verdade. Agora
+o CI grava versao.txt junto do jogo, e ao abrir no navegador o jogo busca
+esse arquivo sem cache; se a versão do site for outra, apaga os arquivos
+guardados e o service worker e recarrega (no máximo uma vez por sessão).
+Vale a partir desta versão — para chegar nela, uma última vez é preciso
+fechar o app/aba e abrir de novo.
+
 ### D-083 — Mais leve no celular e medidor do quadro na tela (2026-11-26)
 O Lucas: ainda com pouquíssimo fps, pediu 120. O Safari do iPhone desenha no
 máximo 60 quadros por segundo (o navegador limita; o jogo não consegue passar

@@ -187,6 +187,9 @@ jobs:
           mkdir -p build/web
           timeout 600 godot --headless --path . --export-release "Web" build/web/index.html 2>&1 | tee web.log
           test -s build/web/index.html
+          # D-084: o jogo compara com este arquivo para saber se há versão nova
+          grep -oP 'config/version="\K[^"]+' project.godot > build/web/versao.txt
+          cat build/web/versao.txt
           (cd build/web && zip -q -r ../pipa-brasil-web.zip .)
 
       - name: Preparar a página para jogar no navegador (iPhone)

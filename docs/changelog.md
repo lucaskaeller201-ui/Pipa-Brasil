@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.30.2 — 2026-11-26
+
+- O jogo percebe sozinho quando há versão nova e se atualiza (no app da tela
+  de início também).
+
 ## 0.30.1 — 2026-11-26
 
 - Mais leve no celular (sombras mais simples, bonecos e rabiolas dos bots

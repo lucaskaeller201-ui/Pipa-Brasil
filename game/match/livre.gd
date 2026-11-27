@@ -142,6 +142,7 @@ func _ready() -> void:
 			_inicio_arg = true
 		elif arg == "--escolha":
 			_escolha_arg = true
+	_conferir_versao_nova()
 	modo = FreeMode.new(BOTS, _semente, _automatico)
 	# D-082: no jogo, 2 subpassos por passo (era 4): a física custava quase um
 	# segundo de processador por segundo de jogo e o celular travava
@@ -342,6 +343,33 @@ func _ler_comandos(eu: Flyer, delta: float) -> void:
 
 var _versao: Label
 var _fps_t := 0.0
+
+
+## D-084: o app da tela de início (PWA) guarda o jogo no celular e às vezes
+## abre a versão velha. No navegador, o jogo pergunta ao site qual é a versão
+## atual (versao.txt, sem cache); se for outra, apaga o que está guardado e
+## recarrega sozinho (uma vez por sessão, para não ficar em laço).
+func _conferir_versao_nova() -> void:
+	if not OS.has_feature("web"):
+		return
+	var minha := String(ProjectSettings.get_setting("application/config/version", ""))
+	var js := """
+(function(minha){
+  try {
+    if (sessionStorage.getItem('pipa_atualizou') === minha) return;
+    fetch('versao.txt?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.ok ? r.text() : ''; }).then(function(t){
+      t = (t || '').trim();
+      if (!t || t === minha) return;
+      sessionStorage.setItem('pipa_atualizou', minha);
+      var limpar = [];
+      if (window.caches) limpar.push(caches.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return caches.delete(k); })); }));
+      if (navigator.serviceWorker) limpar.push(navigator.serviceWorker.getRegistrations().then(function(rs){ return Promise.all(rs.map(function(r){ return r.unregister(); })); }));
+      Promise.all(limpar).then(function(){ location.reload(); });
+    }).catch(function(){});
+  } catch (e) {}
+})(%s);
+""" % JSON.stringify(minha)
+	JavaScriptBridge.eval(js, true)
 
 
 func _process(delta: float) -> void:
