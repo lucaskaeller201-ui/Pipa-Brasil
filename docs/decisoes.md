@@ -33,6 +33,22 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-085 — O que pesava pelos números do iPhone; linha firme de novo (2026-11-26)
+Prints do Lucas (iPhone 17, Safari): 36 fps com física 5,4 ms, lógica 4,9 ms
+e 122 desenhos (olhando a serra de perto); 50 fps com lógica 11,5 ms e 710
+desenhos. Com só ~10 ms de processador e 36 fps, o gargalo era a placa de
+vídeo — a serra enchendo a tela: 2.600 casinhas com o shader de parede
+(três fotos e ruído por ponto) e 1.400 copas com a folhagem furada.
+- Casinhas da serra com um shader próprio leve (cor da casa, janelas numa
+  grade, laje), sem fotos; copas da mata sólidas, cor calculada nos vértices.
+- Lógica: o placar era reescrito a cada quadro (refazer as letras é caro);
+  agora 4 vezes por segundo e só se mudou. Linhas dos bots com menos pontos
+  na curva (2 em vez de 4) e rabiolas dos bots sem curva extra.
+- Barriga e "V" perto do cabresto nas linhas dos bots (visto pelo Lucas):
+  com 2 subpassos (D-082) a linha recebia metade das passadas e esticava.
+  Agora cada linha (e rabiola) ganha 2 passadas extras por subpasso
+  (Flyer.extra_sweeps) — barato, e a linha volta a ficar firme.
+
 ### D-084 — O jogo se atualiza sozinho no app da tela de início (2026-11-26)
 Depois do app da web (D-081), o Lucas continuou na 0.29.1: o service worker
 guarda o jogo e só troca de versão quando o app é fechado de verdade. Agora

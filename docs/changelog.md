@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.30.3 — 2026-11-26
+
+- Serra ao fundo bem mais leve para desenhar (casinhas e mata).
+- Placar e linhas dos bots mais leves.
+- Linhas sem barriga nem "V" perto do cabresto.
+
 ## 0.30.2 — 2026-11-26
 
 - O jogo percebe sozinho quando há versão nova e se atualiza (no app da tela

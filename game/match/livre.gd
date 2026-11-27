@@ -148,6 +148,10 @@ func _ready() -> void:
 	# segundo de processador por segundo de jogo e o celular travava
 	modo.world.substeps = 2   # (com 60 passos por segundo: subpasso de 1/120 s)
 	modo.rabiola_bots = 12    # D-083: rabiola dos bots com metade dos pontos (são vistos de longe)
+	modo.passadas_extras = 2  # D-085: linha firme como com 4 subpassos (sem barriga nem "V")
+	for p in modo.players:
+		if p["flyer"] != null:
+			(p["flyer"] as Flyer).extra_sweeps = 2
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()
@@ -403,13 +407,13 @@ func _process(delta: float) -> void:
 		if fl.tag == 0:
 			cor = Estilos.LINHAS[modo.you_line]["cor"]   # a linha que você escolheu
 		if fl.line != null:
-			_linhas.call("desenhar_cadeia", fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012)
+			_linhas.call("desenhar_cadeia", fl.line.pos, cor.lerp(Color(1.0, 0.1, 0.05), clampf(fl.line.max_wear() / fl.line.strength, 0.0, 1.0)), 0.0012, 1.0, 4 if fl.tag == 0 else 2)
 		if fl.trailing_line != null:
 			_linhas.call("desenhar_cadeia", fl.trailing_line.pos, cor, 0.0012)
 		if fl.tail != null:
 			# Rabiola: o barbante fininho e as fitinhas coloridas (D-043).
 			var estilo: Dictionary = _estilo_de.get(fl, Estilos.ESTILOS[0])
-			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9, 0.8), 0.0008, 0.5)
+			_linhas.call("desenhar_cadeia", fl.tail.pos, Color(0.9, 0.9, 0.9, 0.8), 0.0008, 0.5, 2 if fl.tag == 0 else 1)
 			_linhas.call("desenhar_fitinhas", fl.tail.pos, estilo["fitas"], Time.get_ticks_msec() / 1000.0)
 	var eu := modo.you()
 	_tratar_acontecimentos()
@@ -697,7 +701,23 @@ func _sobre_botao(posicao: Vector2) -> bool:
 
 # ---------------- interface ----------------
 
+var _textos_t := 0.0
+
+
 func _atualizar_textos(eu: Flyer) -> void:
+	# D-085: trocar o texto de um rótulo refaz o desenho das letras (caro no
+	# celular): o placar é refeito 4 vezes por segundo, e só se mudou
+	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate and not _no_lobby
+	_dica.visible = modo.world.time - _inicio_jogo < 15.0 and not _no_lobby
+	# na página inicial, só a cidade e os botões (D-063)
+	_placar.visible = not _no_lobby
+	_info.visible = not _no_lobby
+	_sobreposicao.visible = not _no_lobby
+	_cantos.visible = not _no_lobby
+	var agora := Time.get_ticks_msec() / 1000.0
+	if agora - _textos_t < 0.25 and not _automatico:
+		return
+	_textos_t = agora
 	var linhas: Array[String] = []
 	for p in modo.ranking():
 		linhas.append("%s — %d %s · %d %s · estoque %d" % [p["name"], p["cuts"], "corte" if int(p["cuts"]) == 1 else "cortes", p["catches"], "aparada" if int(p["catches"]) == 1 else "aparadas", p["stock"]])
@@ -705,7 +725,9 @@ func _atualizar_textos(eu: Flyer) -> void:
 	if seq >= 2:
 		linhas.append("Sequência: %d cortes · x%d%s" % [seq, _multiplicador(seq), "  · REI DA LAJE" if seq >= 3 else ""])
 	linhas.append("Total salvo: %d cortes · %d aparadas · melhor sequência %d" % [_estatisticas["cortes"], _estatisticas["aparadas"], _estatisticas["melhor_sequencia"]])
-	_placar.text = "\n".join(linhas)
+	var novo := "\n".join(linhas)
+	if _placar.text != novo:
+		_placar.text = novo
 	var p0: Dictionary = modo.players[0]
 	if eu == null:
 		_info.text = "Pipa na mão · estoque %d" % int(p0["stock"])
@@ -714,13 +736,6 @@ func _atualizar_textos(eu: Flyer) -> void:
 	else:
 		var extra := "   ENROSCOU: puxe a linha toda para trazer!" if eu.holding > 0 else ""
 		_info.text = "Linha %d m · altura %d m%s" % [roundi(eu.line_length()), roundi(eu.kite.position.y - (p0["base"] as Vector3).y), extra]
-	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate and not _no_lobby
-	_dica.visible = modo.world.time - _inicio_jogo < 15.0 and not _no_lobby
-	# na página inicial, só a cidade e os botões (D-063)
-	_placar.visible = not _no_lobby
-	_info.visible = not _no_lobby
-	_sobreposicao.visible = not _no_lobby
-	_cantos.visible = not _no_lobby
 
 
 func _avisar(texto: String) -> void:

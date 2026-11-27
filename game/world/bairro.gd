@@ -624,9 +624,9 @@ static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
 	var no := MultiMeshInstance3D.new()
 	no.name = "Casinhas"
 	no.multimesh = mm
-	var mat := _material_parede(Color.WHITE, false).duplicate() as ShaderMaterial
-	mat.set_shader_parameter("por_instancia", 1.0)
-	mat.set_shader_parameter("janelas", 1.0)   # de longe, janelas desenhadas
+	# D-085: material leve (sem fotos): de longe não se vê a textura e pesava
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://game/world/shaders/casinha_longe.gdshader")
 	no.material_override = mat
 	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(no)
@@ -681,7 +681,9 @@ static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
 	var na := MultiMeshInstance3D.new()
 	na.name = "MataDaSerra"
 	na.multimesh = ma
-	na.material_override = _mat_folha[1]
+	var copa := ShaderMaterial.new()
+	copa.shader = load("res://game/world/shaders/copa_longe.gdshader")   # D-085: sólida e leve
+	na.material_override = copa
 	na.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(na)
 

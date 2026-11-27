@@ -144,8 +144,20 @@ func begin_substep(wind: WindField, t: float, h: float) -> void:
 
 
 ## Restrições internas: segmentos, alcance, cabresto, rabiola.
+## D-085: passadas extras nas linhas antes da passada normal. Com menos
+## subpassos (o jogo usa 2) a linha esticava mais: barriga e "V" perto do
+## cabresto. Passadas a mais só nas linhas são baratas.
+var extra_sweeps := 0
+
+
 func solve_internal(h: float) -> void:
 	var d := kite.definition
+	for k in extra_sweeps:
+		if line != null:
+			line.pos[0] = hand_position
+			line.solve_segments(h)
+		if tail != null:
+			tail.solve_segments(h)
 	if line != null:
 		line.pos[0] = hand_position
 		line.solve_segments(h)

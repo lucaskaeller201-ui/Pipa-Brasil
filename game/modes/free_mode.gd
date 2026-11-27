@@ -296,6 +296,8 @@ var subir_motivo := ""
 var largada_da_mao := false
 ## D-083: pontos da rabiola dos bots no jogo (0 = o da pipa; o jogo usa 12)
 var rabiola_bots := 0
+## D-085: passadas extras nas linhas (o jogo usa 2, com 2 subpassos)
+var passadas_extras := 0
 
 var subindo: bool:
 	get:
@@ -466,6 +468,7 @@ func _lancar(i: int, comprimento := LINHA_INICIAL, elevacao := 45.0, tensao := 3
 	if i > 0 and rabiola_bots > 0:
 		def.tail_segments = rabiola_bots
 	var f := world.add_flyer(def, p["base"], comprimento, elevacao, 0.0, true, tensao)
+	f.extra_sweeps = passadas_extras
 	if i == 0:
 		apply_line(f, you_line, you_style)
 	f.tag = i

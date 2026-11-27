@@ -27,13 +27,13 @@ func limpar() -> void:
 
 ## Desenha a cadeia como fita. `largura` é a largura real (m); a fita nunca fica
 ## mais fina que `min_width_per_meter` × distância até a câmera.
-func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, minimo := 1.0) -> void:
+func desenhar_cadeia(pontos: PackedVector3Array, cor: Color, largura := 0.0006, minimo := 1.0, suave := 4) -> void:
 	if pontos.size() < 2:
 		return
 	# D-073: curva suave passando pelos pontos da física (Catmull-Rom) e fita
 	# contínua nas emendas — sem os "V" nos nós. Só desenho: os pontos são os
 	# da simulação, nada é mexido nela.
-	var p := suavizar(pontos)
+	var p := suavizar(pontos, suave) if suave > 1 else pontos   # D-085: menos pontos nas linhas dos bots
 	_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
 	_im.surface_set_color(cor)
 	var lados := PackedVector3Array()
