@@ -1156,9 +1156,9 @@ func _animar_bonecos(delta: float) -> void:
 				# D-091: a frente da pipa (papel e cabresto) fica virada para o
 				# pipeiro; amarrando, deitada para os olhos verem o cabresto;
 				# andando, meio inclinada; erguendo, vai ficando em pé
-				var deita := -0.8
+				var deita := -0.55
 				if _lanc_fase == 2:
-					deita = lerpf(-0.8, -0.35, smoothstep(0.0, 1.0, _lanc_t / LARGADA_ANDAR))
+					deita = lerpf(-0.55, -0.35, smoothstep(0.0, 1.0, _lanc_t / LARGADA_ANDAR))
 				elif _lanc_fase == 3:
 					deita = lerpf(-0.35, 0.1, _lanc_t / LARGADA_ERGUER)
 				_pipa_mao.rotate_object_local(Vector3.RIGHT, deita)

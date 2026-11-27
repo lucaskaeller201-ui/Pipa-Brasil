@@ -33,6 +33,23 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-091 — Largada: pipa de frente, cabresto e nó; varetas atrás com envergadura (2026-11-27)
+Prints do Lucas (0.31.1): a pipa ficava de costas para o pipeiro na largada
+(vendo as varetas), o cabresto não aparecia, nem a linha dando nó; faltava a
+envergadura; e entre a mão e o pulso o braço ficava fora do lugar.
+- Varetas atrás do papel (o cabresto sai pela frente, virada para o pipeiro),
+  e a vareta atravessada enverga para trás (pontas atrás do meio). Só visual.
+- Cabresto com volume (barbante), do alto da vareta e do meio dela até o ponto
+  da linha da física (tow_point).
+- Na largada, a frente da pipa fica para o pipeiro: amarrando, deitada para os
+  olhos verem o cabresto; andando, meio inclinada; erguendo, fica em pé.
+- O nó: enquanto amarra, as voltas da linha vão aparecendo em volta do ponto do
+  cabresto (até 3 voltas); a mão direita dá as voltas ali, a esquerda segura a
+  vareta embaixo; mãos no referencial do corpo (braço vindo de baixo).
+- Braço: medido nos vértices do modelo da mão (abertura do pulso: centro
+  x ∓3,8 mm, y −2,4 mm; 24 × 32 mm de meia largura); a cápsula agora tem essa
+  medida e esse centro.
+
 ### D-090 — Braços que sumiam no iPhone; linha saindo da mão para cima (2026-11-27)
 Print do Lucas (0.31.0): só as mãos, com o corte do pulso aparecendo.
 - O antebraço era recortado pela câmera: com o campo de visão próprio das

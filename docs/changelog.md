@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.31.2 — 2026-11-27
+
+- Largada: a pipa fica de frente para você, com o cabresto aparecendo e a linha dando nó nele.
+- Varetas atrás do papel, com a envergadura.
+- Braço encaixado no pulso.
+
 ## 0.31.1 — 2026-11-27
 
 - Braços aparecendo junto com as mãos (no iPhone sumiam).
