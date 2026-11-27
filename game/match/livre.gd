@@ -660,6 +660,7 @@ func _atualizar_maos(eu: Flyer, delta: float) -> void:
 			"pipa": inv * (pose["pipa"] as Vector3)}
 		if _pipa_mao != null:
 			estado["pipa_t"] = inv * _pipa_mao.global_transform
+			estado["corpo"] = inv.basis * Basis(Vector3.UP, _corpos[0].rotation.y)
 			estado["cabresto"] = inv * (_pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point)
 	elif modo.you_on_hand or eu == null:
 		estado = {"modo": "mao"}

@@ -251,11 +251,14 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 				var w := _t * TAU * 1.8
 				var tp: Transform3D = estado.get("pipa_t", Transform3D(Basis.IDENTITY, pipa))
 				var cab: Vector3 = estado.get("cabresto", pipa)
+				# orientação das mãos no referencial do corpo (dedos para a frente,
+				# braço vindo de baixo), não no da câmera, que olha para baixo
+				var corpo: Basis = estado.get("corpo", Basis.IDENTITY)
 				var embaixo := tp * Vector3(0.0, -0.2, 0.035)
-				alvo["e"] = Transform3D(tp.basis * _rot(-10.0, 0.0, 80.0), embaixo)
+				alvo["e"] = Transform3D(corpo * _rot(-25.0, -20.0, 60.0), embaixo + corpo * Vector3(-0.02, 0.0, 0.03))
 				var volta := tp.basis * Vector3(cos(w), sin(w), 0.0) * 0.022
-				alvo["d"] = Transform3D(tp.basis * _rot(-35.0 + sin(w) * 15.0, 25.0, -70.0 + cos(w) * 20.0),
-					cab + tp.basis * Vector3(0.035, -0.045, 0.03) + volta)
+				alvo["d"] = Transform3D(corpo * _rot(-30.0 + sin(w) * 15.0, 25.0, -45.0 + cos(w) * 20.0),
+					cab + corpo * Vector3(0.03, -0.02, 0.06) + volta)
 				var aperta := 0.5 + 0.5 * sin(w)
 				poses["d"] = {"pinch_tight": aperta, "pinch_large": 1.0 - aperta}
 				poses["e"] = {"grip": 1.0}
