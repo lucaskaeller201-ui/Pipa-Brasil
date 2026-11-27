@@ -23,6 +23,8 @@ const KiteView := preload("res://game/views/kite_view.gd")
 const Estilos := preload("res://game/views/estilos_pipa.gd")
 const LinesView := preload("res://game/views/lines_view.gd")
 const MaosView := preload("res://game/views/maos_view.gd")
+const Visual := preload("res://game/ui/visual.gd")
+const BotaoRedondo := preload("res://game/ui/botao_redondo.gd")
 
 ## Ajustes finos (também na tela, no botão "Ajustes"):
 ## velocidade do giro mandando linha (graus/s) e força da puxada (m/s de linha
@@ -53,6 +55,11 @@ var _primeira_pessoa := true
 var _camera: Camera3D
 var _maos: Node3D               # D-089: as duas mãos em primeira pessoa
 var _vitrine_maos := false
+var _placar_painel: PanelContainer   # D-094: placar completo (abre tocando no placar compacto)
+var _botao_placar: Button
+var _painel_pausa: PanelContainer
+var _botao_alto: Button
+var _banner_ini := 0.0
 var _largada_arg := false
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
@@ -150,6 +157,7 @@ func _ready() -> void:
 			_largada_arg = true    # D-089: captura da largada pelos olhos
 		elif arg == "--vitrine-maos":
 			_vitrine_maos = true   # D-089: captura das mãos em cada movimento
+	ThemeDB.fallback_font = Visual.fonte(600)   # D-094: Baloo 2 em toda a interface
 	if _largada_arg:
 		_automatico = false   # a captura passa --auto; a largada é sua, pelos olhos
 	_conferir_versao_nova()
@@ -895,7 +903,9 @@ func _atualizar_textos(eu: Flyer) -> void:
 	_aviso.visible = Time.get_ticks_msec() / 1000.0 < _aviso_ate and not _no_lobby
 	_dica.visible = modo.world.time - _inicio_jogo < 15.0 and not _no_lobby
 	# na página inicial, só a cidade e os botões (D-063)
-	_placar.visible = not _no_lobby
+	_botao_placar.visible = not _no_lobby
+	if _no_lobby:
+		_placar_painel.visible = false
 	_info.visible = not _no_lobby
 	_sobreposicao.visible = not _no_lobby
 	_cantos.visible = not _no_lobby
@@ -939,6 +949,7 @@ func _desenhar_sobreposicao() -> void:
 		_desenhar_carretilha(c, tela)
 	_desenhar_relo_e_vento(c, tela)
 	_desenhar_resto_sobreposicao(c, tela, fonte)
+	_desenhar_hud(c, tela)
 
 
 func _desenhar_carretilha(c: Control, tela: Vector2) -> void:
@@ -986,8 +997,12 @@ func _desenhar_resto_sobreposicao(c: Control, tela: Vector2, fonte: Font) -> voi
 		var s := _camera.unproject_position(p)
 		var dentro := na_frente and Rect2(Vector2(30, 30), tela - Vector2(60, 60)).has_point(s)
 		if dentro:
-			c.draw_string_outline(fonte, s + Vector2(-40.0, -22.0), nome, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 6, Color(0, 0, 0, 0.8))
-			c.draw_string(fonte, s + Vector2(-40.0, -22.0), nome, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, cor)
+			# D-094: nome numa pílula pequena com a cor do pipeiro (não cobre o céu)
+			var w := Visual.largura(nome, 14, 700)
+			var r := Rect2(s + Vector2(-w * 0.5 - 16.0, -44.0), Vector2(w + 30.0, 24.0))
+			Visual.pilula(c, r, Color(0.04, 0.08, 0.18, 0.62), Color(cor.r, cor.g, cor.b, 0.7))
+			c.draw_circle(r.position + Vector2(12.0, 12.0), 4.5, cor)
+			Visual.texto(c, r.position + Vector2(21.0, 17.5), nome, 14, Visual.BRANCO, 700)
 		else:
 			# Seta na borda da tela apontando para onde está a pipa.
 			var meio := tela * 0.5
@@ -999,8 +1014,7 @@ func _desenhar_resto_sobreposicao(c: Control, tela: Vector2, fonte: Font) -> voi
 			var ponta := meio + dir * escala
 			var lado := dir.orthogonal() * 12.0
 			c.draw_colored_polygon(PackedVector2Array([ponta + dir * 18.0, ponta + lado, ponta - lado]), cor)
-			c.draw_string_outline(fonte, ponta - dir * 30.0 + Vector2(-40.0, 6.0), nome, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 6, Color(0, 0, 0, 0.8))
-			c.draw_string(fonte, ponta - dir * 30.0 + Vector2(-40.0, 6.0), nome, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, cor)
+			Visual.texto(c, ponta - dir * 30.0 + Vector2(-30.0, 6.0), nome, 14, cor, 700, 5)
 
 
 ## Seta curta saindo da sua pipa na direção do bico: ajuda a desbicar.
@@ -1037,8 +1051,27 @@ func _criar_interface() -> void:
 	_sobreposicao.draw.connect(_desenhar_sobreposicao)
 	raiz.add_child(_sobreposicao)
 
-	_placar = _rotulo(raiz, 16, Color(1.0, 0.95, 0.7), HORIZONTAL_ALIGNMENT_LEFT)
-	_placar.position = Vector2(16.0, 28.0)
+	# D-094: placar completo num painel que abre tocando no placar compacto
+	_placar_painel = PanelContainer.new()
+	_placar_painel.name = "PlacarCompleto"
+	_placar_painel.add_theme_stylebox_override("panel", Visual.caixa(18))
+	_placar_painel.position = Vector2(20.0, 84.0)
+	_placar_painel.visible = false
+	_placar_painel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	raiz.add_child(_placar_painel)
+	_placar = _rotulo(_placar_painel, 17, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT)
+	_placar.add_theme_constant_override("outline_size", 0)
+	_botao_placar = Button.new()
+	_botao_placar.name = "Placar"
+	_botao_placar.flat = true
+	_botao_placar.focus_mode = Control.FOCUS_NONE
+	for s in ["normal", "hover", "pressed", "focus", "hover_pressed"]:
+		_botao_placar.add_theme_stylebox_override(s, StyleBoxEmpty.new())
+	_botao_placar.position = Vector2(20.0, 16.0)
+	_botao_placar.size = Vector2(330.0, 58.0)
+	_botao_placar.add_to_group("botao_livre")
+	_botao_placar.pressed.connect(func() -> void: _placar_painel.visible = not _placar_painel.visible)
+	raiz.add_child(_botao_placar)
 	_info = _rotulo(raiz, 20, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 	_info.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_info.offset_left = -360.0
@@ -1059,35 +1092,49 @@ func _criar_interface() -> void:
 	_banner.offset_bottom = -40.0
 	_banner.add_theme_constant_override("outline_size", 12)
 	_banner.visible = false
+	# D-094: estes rótulos guardam o texto; o desenho é feito pela interface nova
+	for l in [_info, _aviso, _banner, _dica]:
+		l.modulate.a = 0.0
 	_dica = _rotulo(raiz, 20, Color(0.9, 0.95, 1.0), HORIZONTAL_ALIGNMENT_CENTER)
-	_dica.text = "Deslize para CIMA: manda linha (a pipa gira) · para BAIXO: puxa · TOQUES: tenteio (o bico balança ~40° para cada lado) · TOQUE DUPLO: o bico vira 45° e fica · SEGURAR parado 1 s: puxão"
+	_dica.text = "Deslize ↑ manda linha · ↓ puxa · toque: tenteio · 2 toques: vira · segure 1 s: puxão"
 	_dica.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_dica.offset_left = -420.0
 	_dica.offset_right = 420.0
 	_dica.offset_top = -90.0
 	_dica.offset_bottom = -54.0
 
+	# D-094: botões redondos com ícone — câmera, ajustes, pausa (o Lab fica na pausa)
 	var cantos := HBoxContainer.new()
 	cantos.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	cantos.offset_left = -360.0
-	cantos.offset_right = -12.0
-	cantos.offset_top = 12.0
+	cantos.offset_left = -260.0
+	cantos.offset_right = -20.0
+	cantos.offset_top = 14.0
 	cantos.alignment = BoxContainer.ALIGNMENT_END
+	cantos.add_theme_constant_override("separation", 14)
 	raiz.add_child(cantos)
 	_cantos = cantos
-	var cam := _botao(cantos, "Câmera")
+	var cam: Button = BotaoRedondo.new("camera")
+	cam.name = "Camera"
+	cantos.add_child(cam)
 	cam.pressed.connect(func() -> void: _primeira_pessoa = not _primeira_pessoa)
-	var ajustes := _botao(cantos, "Ajustes")
+	var ajustes: Button = BotaoRedondo.new("engrenagem")
+	ajustes.name = "Ajustes"
+	cantos.add_child(ajustes)
 	ajustes.pressed.connect(func() -> void: _painel_ajustes.visible = not _painel_ajustes.visible)
-	var lab := _botao(cantos, "Lab")
-	lab.pressed.connect(_ao_abrir_laboratorio)
+	var pausa: Button = BotaoRedondo.new("pausa")
+	pausa.name = "Pausa"
+	cantos.add_child(pausa)
+	pausa.pressed.connect(_pausar)
+	camada.process_mode = Node.PROCESS_MODE_ALWAYS
+	_criar_pausa(raiz)
 
 	_painel_ajustes = PanelContainer.new()
 	_painel_ajustes.name = "Ajustes"
 	_painel_ajustes.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_painel_ajustes.offset_left = -430.0
 	_painel_ajustes.offset_right = -12.0
-	_painel_ajustes.offset_top = 70.0
+	_painel_ajustes.offset_top = 150.0
+	_painel_ajustes.add_theme_stylebox_override("panel", Visual.caixa(18))
 	_painel_ajustes.visible = false
 	_painel_ajustes.add_to_group("botao_livre")
 	raiz.add_child(_painel_ajustes)
@@ -1104,8 +1151,11 @@ func _criar_interface() -> void:
 	var versao := Label.new()
 	_versao = versao
 	versao.text = "PIPA BRASIL %s · build %s" % [ProjectSettings.get_setting("application/config/version", "?"), BuildInfo.COMMIT]
-	versao.add_theme_font_size_override("font_size", 12)
-	versao.position = Vector2(16.0, 6.0)
+	versao.add_theme_font_size_override("font_size", 11)
+	versao.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	versao.offset_left = 12.0
+	versao.offset_top = -34.0
+	versao.modulate.a = 0.7
 	versao.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	raiz.add_child(versao)
 
@@ -1275,7 +1325,8 @@ func _camera_lenta(segundos: float) -> void:
 
 func _mostrar_banner(texto: String) -> void:
 	_banner.text = texto
-	_banner_ate = Time.get_ticks_msec() / 1000.0 + 2.0
+	_banner_ini = Time.get_ticks_msec() / 1000.0
+	_banner_ate = _banner_ini + 1.7
 
 
 func _carregar_estatisticas() -> void:
@@ -1308,8 +1359,8 @@ func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
 		var ele := clampf(float(r["them"]) / forca, 0.0, 1.0)
 		var largura := 420.0
 		var x0 := (tela.x - largura) * 0.5
-		var y0 := 170.0
-		c.draw_rect(Rect2(x0 - 4, y0 - 4, largura + 8, 30), Color(0, 0, 0, 0.55))
+		var y0 := 150.0
+		Visual.pilula(c, Rect2(x0 - 10, y0 - 8, largura + 20, 38))
 		# metade esquerda: quanto a SUA linha já gastou; direita: a dele
 		c.draw_rect(Rect2(x0, y0, largura * 0.5 * eu, 22), Color(0.95, 0.2, 0.15))
 		c.draw_rect(Rect2(x0 + largura * 0.5, y0, largura * 0.5 * ele, 22), Color(0.2, 0.85, 0.3))
@@ -1319,20 +1370,169 @@ func _desenhar_relo_e_vento(c: Control, tela: Vector2) -> void:
 		var cor := Color(0.4, 1.0, 0.5) if ele >= eu else Color(1.0, 0.45, 0.35)
 		c.draw_string_outline(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, 6, Color(0, 0, 0, 0.85))
 		c.draw_string(fonte, Vector2(x0, y0 + 50), aviso, HORIZONTAL_ALIGNMENT_CENTER, largura, 18, cor)
-	# Vento: seta no canto (direção vista da sua câmera) e força.
-	var ref := modo.you().kite.position if modo.you() != null else _camera.global_position + Vector3(0.0, 15.0, 0.0)
+
+
+# ---------------- interface nova (D-094) ----------------
+
+## Pílulas e mensagens desenhadas: placar compacto, vento, linha e altura,
+## aviso, dica e as mensagens de combate (LARGADA!, CORTE!…).
+func _desenhar_hud(c: Control, tela: Vector2) -> void:
+	var m := 20.0
+	var eu := modo.you()
+	var agora := Time.get_ticks_msec() / 1000.0
+	# placar compacto: cortes salvos | sequência (tocar abre o completo)
+	var r := Rect2(Vector2(m, 16.0), Vector2(330.0, 58.0))
+	Visual.pilula(c, r)
+	Visual.icone(c, "trofeu", r.position + Vector2(34.0, 30.0), 19.0)
+	var cortes := str(int(_estatisticas["cortes"]))
+	Visual.texto(c, r.position + Vector2(62.0, 31.0), cortes, 26, Visual.BRANCO, 780)
+	Visual.texto(c, r.position + Vector2(62.0, 49.0), "cortes", 14, Color(0.85, 0.9, 1.0))
+	var xs := r.position.x + 70.0 + maxf(Visual.largura(cortes, 26, 780), 52.0) + 16.0
+	c.draw_line(Vector2(xs, r.position.y + 12.0), Vector2(xs, r.end.y - 12.0), Color(1, 1, 1, 0.35), 2.0)
+	Visual.icone(c, "coroa", Vector2(xs + 34.0, r.position.y + 29.0), 18.0)
+	var seq := str(int(modo.players[0]["streak"]))
+	Visual.texto(c, Vector2(xs + 62.0, r.position.y + 31.0), seq, 26, Visual.BRANCO, 780)
+	Visual.texto(c, Vector2(xs + 62.0, r.position.y + 49.0), "sequência", 14, Color(0.85, 0.9, 1.0))
+	_botao_placar.size.x = xs + 160.0 - m
+	r.size.x = _botao_placar.size.x
+	# vento: pílula embaixo dos botões, com a direção vista da câmera
+	var ref := eu.kite.position if eu != null else _camera.global_position + Vector3(0.0, 15.0, 0.0)
 	var vento := modo.world.wind.sample(ref, modo.world.time)
 	var na_tela := _camera.global_transform.basis.inverse() * vento
 	var dir := Vector2(na_tela.x, -na_tela.y - na_tela.z * 0.3)
-	if dir.length() > 0.01:
-		dir = dir.normalized()
-	var centro := Vector2(tela.x - 70.0, 120.0)
-	c.draw_circle(centro, 34.0, Color(0, 0, 0, 0.4))
-	c.draw_line(centro - dir * 22.0, centro + dir * 22.0, Color(0.85, 0.95, 1.0), 4.0)
-	c.draw_colored_polygon(PackedVector2Array([centro + dir * 30.0, centro + dir * 16.0 + dir.orthogonal() * 9.0, centro + dir * 16.0 - dir.orthogonal() * 9.0]), Color(0.85, 0.95, 1.0))
-	var txt := "vento %d m/s" % roundi(vento.length())
-	c.draw_string_outline(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, 5, Color(0, 0, 0, 0.8))
-	c.draw_string(fonte, centro + Vector2(-46.0, 54.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+	dir = dir.normalized() if dir.length() > 0.01 else Vector2.DOWN
+	var rv := Rect2(Vector2(tela.x - m - 168.0, 90.0), Vector2(168.0, 52.0))
+	Visual.pilula(c, rv)
+	Visual.icone(c, "vento", rv.position + Vector2(30.0, 26.0), 15.0, Color(0.5, 0.85, 1.0))
+	var pc := rv.position + Vector2(68.0, 26.0)
+	c.draw_line(pc - dir * 10.0, pc + dir * 8.0, Visual.BRANCO, 3.0, true)
+	c.draw_colored_polygon(PackedVector2Array([pc + dir * 14.0, pc + dir * 5.0 + dir.orthogonal() * 6.0, pc + dir * 5.0 - dir.orthogonal() * 6.0]), Visual.BRANCO)
+	var vtxt := str(roundi(vento.length()))
+	Visual.texto(c, rv.position + Vector2(90.0, 35.0), vtxt, 26, Visual.BRANCO, 780)
+	Visual.texto(c, rv.position + Vector2(92.0 + Visual.largura(vtxt, 26, 780), 35.0), "m/s", 15, Color(0.85, 0.9, 1.0))
+	# linha e altura (ou pipa na mão / cortada), embaixo no meio
+	var partes: Array = []   # [texto, cor, tamanho, ícone]
+	var p0: Dictionary = modo.players[0]
+	if eu == null:
+		partes = [["", Visual.BRANCO, 0, "pipa"], ["Pipa na mão · estoque ", Visual.BRANCO, 19, ""], [str(int(p0["stock"])), Visual.AMARELO, 21, ""]]
+	elif eu.cut:
+		partes = [["Sua linha foi cortada…", Color(1.0, 0.6, 0.5), 19, ""]]
+	else:
+		partes = [["", Visual.BRANCO, 0, "carretel"], ["Linha: ", Visual.BRANCO, 19, ""], ["%d m" % roundi(eu.line_length()), Visual.AMARELO, 21, ""],
+			["   |   ", Color(1, 1, 1, 0.4), 19, ""], ["", Visual.BRANCO, 0, "altura"], ["Altura: ", Visual.BRANCO, 19, ""],
+			["%d m" % roundi(eu.kite.position.y - (p0["base"] as Vector3).y), Visual.AMARELO, 21, ""]]
+		if eu.holding > 0:
+			partes.append(["   ENROSCOU: puxe tudo!", Visual.AMARELO, 17, ""])
+	var larg := 36.0
+	for pt in partes:
+		larg += 30.0 if String(pt[3]) != "" else Visual.largura(String(pt[0]), int(pt[2]), 700)
+	var rb := Rect2(Vector2((tela.x - larg) * 0.5, tela.y - 70.0), Vector2(larg, 50.0))
+	if not _no_lobby:
+		Visual.pilula(c, rb)
+		var x := rb.position.x + 18.0
+		for pt in partes:
+			if String(pt[3]) != "":
+				Visual.icone(c, String(pt[3]), Vector2(x + 13.0, rb.position.y + 25.0), 12.0, Visual.BRANCO)
+				x += 30.0
+			else:
+				Visual.texto(c, Vector2(x, rb.position.y + 33.0), String(pt[0]), int(pt[2]), pt[1], 700)
+				x += Visual.largura(String(pt[0]), int(pt[2]), 700)
+	# dica dos gestos (só no começo)
+	if _dica.visible and _dica.text != "":
+		var wd := Visual.largura(_dica.text, 16) + 40.0
+		var rd := Rect2(Vector2((tela.x - wd) * 0.5, tela.y - 120.0), Vector2(wd, 38.0))
+		Visual.pilula(c, rd, Color(0.04, 0.08, 0.18, 0.7))
+		Visual.texto(c, rd.position + Vector2(20.0, 25.0), _dica.text, 16, Color(0.9, 0.95, 1.0))
+	# aviso curto (toast) no alto, no meio
+	if _aviso.visible and _aviso.text != "":
+		var wa := Visual.largura(_aviso.text, 20, 700) + 48.0
+		var ra := Rect2(Vector2((tela.x - wa) * 0.5, 90.0), Vector2(wa, 44.0))
+		Visual.pilula(c, ra, Visual.AZUL, Visual.AMARELO)
+		Visual.texto(c, ra.position + Vector2(24.0, 29.0), _aviso.text, 20, Visual.BRANCO, 700)
+	# mensagem de combate: faixa de pincel, letra grossa amarela, entra e some
+	if agora < _banner_ate and _banner.text != "":
+		var t := agora - _banner_ini
+		var esc := 1.0
+		if t < 0.12:
+			esc = lerpf(0.5, 1.12, t / 0.12)
+		elif t < 0.25:
+			esc = lerpf(1.12, 1.0, (t - 0.12) / 0.13)
+		var alfa := clampf((_banner_ate - agora) / 0.3, 0.0, 1.0)
+		var tam := 64
+		var fonte_t := Visual.fonte_titulo()
+		var wt := fonte_t.get_string_size(_banner.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tam).x
+		var centro := Vector2(tela.x * 0.5, tela.y * 0.3)
+		c.draw_set_transform(centro, -0.06, Vector2(esc, esc))
+		Visual.pincel(c, Vector2.ZERO, Vector2(wt + 60.0, 92.0), Color(0.06, 0.07, 0.1, 0.88 * alfa), hash(_banner.text) % 97)
+		var pos := Vector2(-wt * 0.5, tam * 0.36)
+		c.draw_string_outline(fonte_t, pos + Vector2(3, 4), _banner.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tam, 12, Color(0.35, 0.12, 0.0, 0.8 * alfa))
+		c.draw_string_outline(fonte_t, pos, _banner.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tam, 8, Color(0.5, 0.2, 0.0, alfa))
+		c.draw_string(fonte_t, pos, _banner.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tam, Color(1.0, 0.82, 0.12, alfa))
+		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## Pausa (D-094): para o jogo; dá para continuar ou abrir o laboratório de voo.
+func _criar_pausa(raiz: Control) -> void:
+	_painel_pausa = PanelContainer.new()
+	_painel_pausa.name = "Pausa"
+	_painel_pausa.set_anchors_preset(Control.PRESET_CENTER)
+	_painel_pausa.offset_left = -190.0
+	_painel_pausa.offset_right = 190.0
+	_painel_pausa.offset_top = -130.0
+	_painel_pausa.offset_bottom = 130.0
+	_painel_pausa.add_theme_stylebox_override("panel", Visual.caixa(26, Visual.AZUL))
+	_painel_pausa.visible = false
+	_painel_pausa.add_to_group("botao_livre")
+	raiz.add_child(_painel_pausa)
+	var caixa := VBoxContainer.new()
+	caixa.add_theme_constant_override("separation", 14)
+	caixa.alignment = BoxContainer.ALIGNMENT_CENTER
+	_painel_pausa.add_child(caixa)
+	var t := Label.new()
+	t.text = "PAUSA"
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	t.add_theme_font_override("font", Visual.fonte_titulo())
+	t.add_theme_font_size_override("font_size", 40)
+	t.add_theme_color_override("font_color", Visual.AMARELO)
+	caixa.add_child(t)
+	var cont := _botao_capsula(caixa, "Continuar", Visual.VERDE)
+	cont.pressed.connect(_pausar)
+	var lab := _botao_capsula(caixa, "Laboratório de voo", Visual.AZUL_CLARO)
+	lab.pressed.connect(func() -> void:
+		get_tree().paused = false
+		_ao_abrir_laboratorio())
+
+
+func _botao_capsula(pai: Control, texto: String, cor: Color) -> Button:
+	var b := Button.new()
+	b.text = texto
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(300.0, 58.0)
+	b.add_theme_font_override("font", Visual.fonte(780))
+	b.add_theme_font_size_override("font_size", 22)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = cor
+	sb.set_corner_radius_all(29)
+	sb.anti_aliasing = true
+	sb.shadow_color = Color(0, 0, 0, 0.3)
+	sb.shadow_size = 4
+	sb.shadow_offset = Vector2(0, 3)
+	var ap := sb.duplicate() as StyleBoxFlat
+	ap.bg_color = cor.darkened(0.2)
+	ap.shadow_size = 1
+	b.add_theme_stylebox_override("normal", sb)
+	b.add_theme_stylebox_override("hover", sb)
+	b.add_theme_stylebox_override("pressed", ap)
+	b.add_theme_stylebox_override("hover_pressed", ap)
+	b.add_to_group("botao_livre")
+	pai.add_child(b)
+	return b
+
+
+func _pausar() -> void:
+	var pausado := not get_tree().paused
+	get_tree().paused = pausado
+	_painel_pausa.visible = pausado
 
 
 func _mostrar_aviso_curto(texto: String) -> void:
@@ -1344,28 +1544,27 @@ func _mostrar_aviso_curto(texto: String) -> void:
 func _criar_painel_mao(raiz: Control) -> void:
 	# Pipa na mão (D-064): o estoque e o botão COLOCAR NO ALTO, que abre a
 	# escolha da pipa e depois da linha (como no Pipa Combate).
+	# D-094: o COLOCAR NO ALTO é um botão redondo no canto de baixo à direita,
+	# com aro amarelo iluminado (o estoque aparece na pílula de baixo)
 	_painel_mao = PanelContainer.new()
 	_painel_mao.name = "PipaNaMao"
-	_painel_mao.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_painel_mao.offset_left = -260.0
-	_painel_mao.offset_right = 260.0
+	_painel_mao.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_painel_mao.offset_left = -190.0
+	_painel_mao.offset_right = -24.0
 	_painel_mao.offset_top = -190.0
-	_painel_mao.offset_bottom = -70.0
-	var fundo := StyleBoxFlat.new()
-	fundo.bg_color = Color(0.05, 0.05, 0.12, 0.75)
-	fundo.set_corner_radius_all(18)
-	fundo.set_content_margin_all(12)
-	_painel_mao.add_theme_stylebox_override("panel", fundo)
+	_painel_mao.offset_bottom = -24.0
+	_painel_mao.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	_painel_mao.add_to_group("botao_livre")
 	raiz.add_child(_painel_mao)
 	var caixa := VBoxContainer.new()
 	caixa.add_theme_constant_override("separation", 8)
 	_painel_mao.add_child(caixa)
 	_rotulo_mao = _rotulo(caixa, 18, Color(1.0, 0.9, 0.5), HORIZONTAL_ALIGNMENT_CENTER)
-	var subir := _botao(caixa, "COLOCAR NO ALTO")
+	_rotulo_mao.visible = false
+	var subir: Button = BotaoRedondo.new("pipa", "alto", "Colocar\nno Alto")
 	subir.name = "ColocarNoAlto"
-	subir.add_theme_font_size_override("font_size", 30)
-	subir.custom_minimum_size = Vector2(480.0, 64.0)
+	caixa.add_child(subir)
+	_botao_alto = subir
 	subir.pressed.connect(_abrir_pipas)
 	_painel_mao.visible = modo.you_on_hand
 	_criar_selecao(raiz)
