@@ -31,6 +31,8 @@ var _atual := {}         ## "d"/"e" -> Transform3D suavizado
 var _pesos := {}         ## "d"/"e" -> {pose: peso} suavizado
 var cor_linha := Color(0.95, 0.95, 0.95)
 var folga_linha := 0.03  ## m de barriga da linha entre as mãos
+var _mao_frente := "d"   ## a mão que segura a linha que vai para a pipa
+var _rapido := false     ## braçada: segue a mão sem atraso
 var pronto := false
 
 
@@ -184,6 +186,8 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 	var alvo := {}
 	var poses := {}
 	var flick := 0.0
+	_mao_frente = "d"
+	_rapido = false
 	var lado_toque: float = estado.get("lado", 1.0)
 	var respira := sin(_t * 1.7) * 0.004
 	if modo == "voo":
@@ -199,25 +203,48 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 		var pe := {"hold": 1.0}
 		folga_linha = lerpf(0.03, 0.01, tens)
 		if haul > 0.2 or bool(estado.get("puxao", false)):
-			# PUXANDO: braçada, uma mão depois da outra
-			var ritmo := 0.9 + 1.5 * forca
+			# PUXANDO (D-092): braçada de verdade, no ritmo da puxada — uma mão
+			# fechada puxa da frente até perto do corpo enquanto a outra, aberta,
+			# passa por fora e vai pegar a linha lá na frente; depois trocam.
+			var ritmo := lerpf(1.6, 3.4, forca)   # braçadas de cada mão por segundo
 			if bool(estado.get("puxao", false)):
-				ritmo = 2.6
+				ritmo = 3.6
 				forca = 1.0
 			_fase_bracada += delta * ritmo
-			var s := fmod(_fase_bracada, 1.0)
-			var puxa_d := smoothstep(0.0, 0.5, s) if s < 0.5 else 1.0 - smoothstep(0.5, 1.0, s)
-			var s2 := fmod(_fase_bracada + 0.5, 1.0)
-			var puxa_e := smoothstep(0.0, 0.5, s2) if s2 < 0.5 else 1.0 - smoothstep(0.5, 1.0, s2)
-			var a := 0.4 + 0.6 * forca
-			d += Vector3(0.0, -0.07 * puxa_d * a, 0.17 * puxa_d * a)
-			e += Vector3(0.02, 0.06 * (1.0 - puxa_e) * a - 0.05 * puxa_e * a, -0.1 * (1.0 - puxa_e) * a + 0.08 * puxa_e * a)
-			rd += Vector3(-25.0 * puxa_d * a, 0.0, -8.0 * puxa_d)
-			re += Vector3(-18.0 * puxa_e * a, 0.0, 6.0 * puxa_e)
-			var fecha_d := 1.0 if s < 0.5 else 0.25
-			var fecha_e := 1.0 if s2 < 0.5 else 0.25
-			pd = {"grip": fecha_d, "pinch_large": 1.0 - fecha_d}
-			pe = {"grip": fecha_e, "pinch_large": 1.0 - fecha_e}
+			_rapido = true
+			var amp := 0.6 + 0.4 * forca
+			var ponta := {"d": Vector3(0.03, -0.07, -0.6), "e": Vector3(-0.03, -0.08, -0.6)}
+			var corpo := {"d": Vector3(0.07, -0.3, -0.33), "e": Vector3(-0.07, -0.31, -0.33)}
+			var res := {}
+			for lado in ["d", "e"]:
+				var s := fmod(_fase_bracada + (0.0 if lado == "d" else 0.5), 1.0)
+				var sinal := 1.0 if lado == "d" else -1.0
+				var f: Vector3 = ponta[lado]
+				var c: Vector3 = f.lerp(corpo[lado], amp)
+				var pos: Vector3
+				var pitch: float
+				var pose: Dictionary
+				if s < 0.5:
+					# fechada, puxando (rápido no começo, como o tranco do braço)
+					var k := pow(s / 0.5, 0.8)
+					pos = f.lerp(c, k)
+					pitch = lerpf(28.0, -12.0, k)
+					pose = {"grip": 1.0}
+					_mao_frente = lado
+				else:
+					# aberta, voltando por fora da outra mão
+					var k := smoothstep(0.0, 1.0, (s - 0.5) / 0.5)
+					var arco := sin(k * PI)
+					pos = c.lerp(f, k) + Vector3(0.09 * sinal, 0.05, 0.0) * arco
+					pitch = lerpf(-12.0, 28.0, k)
+					pose = {"pinch_large": 0.7, "default_pose": 0.3}
+				res[lado] = [pos, pitch, pose]
+			d = res["d"][0]
+			e = res["e"][0]
+			rd = Vector3(res["d"][1], 9.0, -14.0)
+			re = Vector3(res["e"][1], -12.0, 18.0)
+			pd = res["d"][2]
+			pe = res["e"][2]
 			folga_linha = 0.012
 		elif haul < -0.2:
 			# MANDANDO: dedos abertos, a linha corre; a outra mão alimenta
@@ -275,8 +302,8 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 				alvo["e"] = Transform3D(_rot(10.0, -10.0, 10.0), Vector3(-0.17, -0.23 + respira, -0.38))
 				poses["d"] = {"hold": 1.0}
 				poses["e"] = {"hold": 1.0}
-	var k_pos := 1.0 - exp(-16.0 * delta)
-	var k_ded := 1.0 - exp(-14.0 * delta)
+	var k_pos := 1.0 - exp(-(45.0 if _rapido else 16.0) * delta)
+	var k_ded := 1.0 - exp(-(40.0 if _rapido else 14.0) * delta)
 	for lado in ["d", "e"]:
 		_atual[lado] = (_atual[lado] as Transform3D).interpolate_with(alvo[lado], k_pos)
 		var t: Transform3D = _atual[lado]
@@ -313,7 +340,7 @@ func ponto_mao(lado := "d") -> Vector3:
 ## Ponto do mundo que aparece na tela exatamente onde a linha sai da mão da
 ## frente: daí a linha da física segue até a pipa.
 func ponto_linha_no_mundo(cam: Camera3D, profundidade := 1.5) -> Vector3:
-	var p := ponto_mao("d")
+	var p := ponto_mao(_mao_frente)
 	var q := Vector3(p.x * _escala, p.y * _escala, p.z)
 	if q.z > -0.01:
 		return cam.global_transform * q
@@ -322,8 +349,9 @@ func ponto_linha_no_mundo(cam: Camera3D, profundidade := 1.5) -> Vector3:
 
 func _desenhar_linha() -> void:
 	_linha_malha.clear_surfaces()
-	var d := ponto_mao("d")
-	var e := ponto_mao("e")
+	# da mão que segura a linha da pipa até a outra
+	var d := ponto_mao(_mao_frente)
+	var e := ponto_mao("e" if _mao_frente == "d" else "d")
 	var pts: Array[Vector3] = []
 	# da mão da frente até a de trás, com barriga
 	for i in 9:

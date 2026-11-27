@@ -66,6 +66,17 @@ func test_cada_comando_tem_movimento_proprio() -> void:
 	assert_true(_alcance(puxando.slice(30)) > 0.08, "puxando, a braçada leva a mão para trás e para a frente")
 	assert_true(p_mandando.z < p_parado.z - 0.02, "mandando, a mão vai para a frente (deixa a linha correr)")
 	assert_true(_alcance(desb) > 0.02, "o desbico mexe a mão de uma vez")
+	# D-092: na braçada as mãos se revezam (a que segura a linha da pipa troca)
+	var trocas := 0
+	var antes := ""
+	for i in 120:
+		maos.call("atualizar", cam, {"modo": "voo", "tensao": 5.0, "haul": 3.0}, 1.0 / 60.0)
+		var agora: String = maos.get("_mao_frente")
+		if antes != "" and agora != antes:
+			trocas += 1
+		antes = agora
+	print("      [mãos] braçada: %d trocas de mão em 2 s" % trocas)
+	assert_true(trocas >= 6, "uma mão depois da outra, no ritmo da puxada")
 	# a mão da frente acompanha o braço da física (Pilot.arm_offset)
 	var recuada := _rodar(cam, maos, {"modo": "voo", "arm": -0.4}, 1.0)
 	var avancada := _rodar(cam, maos, {"modo": "voo", "arm": 0.4}, 1.0)
