@@ -30,18 +30,29 @@ func _media_barriga(w: SimWorld, f: Flyer, s: float) -> float:
 
 
 func test_linha_solta_da_mao_igual_a_do_alto() -> void:
-	var w := SimWorld.create_flight(WindField.new(5.0, 0.0, 3), KiteDefinition.pipa_rio(), 5.0, 40.0, 0.0, 4, true, 0.0)
-	var f: Flyer = w.flyers[0]
-	f.input.haul_speed = -2.0
+	# a sua pipa sai da mão (5 m) e sobe pela física, como no jogo
+	var modo := FreeMode.new(1, 3, false)
+	modo.put_you_on_hand()
+	modo.launch_you(5, 2, true)
+	var f: Flyer = modo.you()
+	var r := 0
 	var t := 0.0
-	while f.line_length() < 40.0 and t < 60.0:
-		w.step(DT)
+	while r == 0 and t < 35.0:
+		r = modo.subir(DT)
+		modo.update(DT)
+		t += DT
+	# depois dá linha até uns 40 m
+	t = 0.0
+	while f.line_length() < 40.0 and t < 40.0 and modo.world.is_finite_state():
+		f.input.haul_speed = -2.0
+		modo.update(DT)
 		t += DT
 	f.input.haul_speed = 0.0
 	for i in roundi(6.0 / DT):
-		w.step(DT)
-	var b_mao := _media_barriga(w, f, 8.0)
-	var w2 := SimWorld.create_flight(WindField.new(5.0, 0.0, 3), KiteDefinition.pipa_rio(), f.line_length(), f.elevation_deg(), 0.0, 4, true, 0.0)
+		modo.update(DT)
+	assert_true(modo.world.is_finite_state(), "estado finito")
+	var b_mao := _media_barriga(modo.world, f, 8.0)
+	var w2 := SimWorld.create_flight(modo.world.wind, f.kite.definition, f.line_length(), f.elevation_deg(), 0.0, 4, true, 3.0)
 	var f2: Flyer = w2.flyers[0]
 	for i in roundi(6.0 / DT):
 		w2.step(DT)
