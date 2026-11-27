@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.31.1 — 2026-11-27
+
+- Braços aparecendo junto com as mãos (no iPhone sumiam).
+- A linha sai da mão direto para a pipa.
+
 ## 0.31.0 — 2026-11-27
 
 - Primeira pessoa com duas mãos humanas (versão de teste): puxando, mandando e desbicando, cada um com seu movimento.

@@ -33,6 +33,17 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-090 — Braços que sumiam no iPhone; linha saindo da mão para cima (2026-11-27)
+Print do Lucas (0.31.0): só as mãos, com o corte do pulso aparecendo.
+- O antebraço era recortado pela câmera: com o campo de visão próprio das
+  mãos (D-089), a câmera achava que ele estava fora da tela. Agora tem margem
+  de recorte grande (mãos, braços e linha). O braço virou uma cápsula comprida
+  que começa por dentro do pulso (esconde o corte do modelo) e vai até fora da
+  tela, um pouco para baixo.
+- A linha da física perto dos olhos, frouxa, fica abaixo da mão: a linha saía
+  da mão para baixo da tela e voltava pelo meio. Agora junta no primeiro ponto
+  da linha que aparece acima da mão.
+
 ### D-089 — Primeira pessoa com as duas mãos (versão de teste) (2026-11-27)
 Pedido do Lucas (plano de evolução visual + imagens de referência): visão
 pelos olhos do pipeiro com duas mãos humanas manipulando a linha, sem
