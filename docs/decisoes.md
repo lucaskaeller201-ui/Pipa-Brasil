@@ -47,6 +47,9 @@ fps baixo quase sempre. O canto da tela mostrou "passos/quadro 2,0 · passo
 - Câmera lenta: com 2 passos por quadro no máximo (D-086), a 20 fps o jogo
   andava a 40 passos por segundo — 2/3 da velocidade: a braçada parecia lenta.
   Volta para 3. Com metade dos pontos, a física pesa bem menos.
+- "V" perto do cabresto: os 8 segmentos curtinhos da linha de 5 m ficavam na
+  ponta da pipa (a carretilha solta linha do lado da mão). Linha nova tem no
+  mínimo 4 segmentos (era 8): 5 m → 4 de 1,25 m.
 
 ### D-087 — Desbico, largada, subida e corte medidos contra a referência (2026-11-27)
 O Lucas sentiu na 0.30.4 o desbico e a largada "soltando muita linha", a

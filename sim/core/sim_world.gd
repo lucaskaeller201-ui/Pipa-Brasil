@@ -91,7 +91,9 @@ func add_flyer(definition: KiteDefinition, ground_position: Vector3, line_length
 	var rot := Quaternion(Vector3.UP, -az) * Quaternion(Vector3.RIGHT, -e)
 	f.kite.reset_pose(bridle - rot * definition.tow_point, rot)
 
-	var segments := clampi(ceili(line_length / TARGET_SEGMENT_LENGTH), 8, 80)
+	# D-088: linha curta (5 m da mão) com segmentos de tamanho normal — os
+	# curtinhos ficavam perto do cabresto e faziam o "V" lá em cima
+	var segments := clampi(ceili(line_length / TARGET_SEGMENT_LENGTH), 4, 80)
 	f.line = ParticleChain.new(ParticleChain.Kind.LINE, f.hand_position, bridle, segments,
 		LINE_MASS_PER_METER * line_length, 1.0 / LINE_STIFFNESS, LINE_DIAMETER, LINE_DRAG_COEFFICIENT)
 	f.line.inv_mass[0] = 0.0  # presa na mão
