@@ -32,6 +32,7 @@ var _pesos := {}         ## "d"/"e" -> {pose: peso} suavizado
 var cor_linha := Color(0.95, 0.95, 0.95)
 var folga_linha := 0.03  ## m de barriga da linha entre as mãos
 var _mao_frente := "d"   ## a mão que segura a linha que vai para a pipa
+var _bracada := false    ## puxando: a linha sai da mão que está mais à frente (sem salto)
 var _rapido := false     ## braçada: segue a mão sem atraso
 var pronto := false
 
@@ -188,6 +189,7 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 	var flick := 0.0
 	_mao_frente = "d"
 	_rapido = false
+	_bracada = false
 	var lado_toque: float = estado.get("lado", 1.0)
 	var respira := sin(_t * 1.7) * 0.004
 	if modo == "voo":
@@ -206,12 +208,15 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 			# PUXANDO (D-092): braçada de verdade, no ritmo da puxada — uma mão
 			# fechada puxa da frente até perto do corpo enquanto a outra, aberta,
 			# passa por fora e vai pegar a linha lá na frente; depois trocam.
-			var ritmo := lerpf(1.6, 3.4, forca)   # braçadas de cada mão por segundo
+			# D-093: no ritmo da linha que entra — cada meia braçada recolhe
+			# ~0,6 m; a mão que puxa desce liso, na velocidade da linha
+			var ritmo := clampf(maxf(haul, 0.0) / 1.2, 1.2, 3.8)   # braçadas de cada mão por segundo
 			if bool(estado.get("puxao", false)):
-				ritmo = 3.6
+				ritmo = 3.8
 				forca = 1.0
 			_fase_bracada += delta * ritmo
 			_rapido = true
+			_bracada = true
 			var amp := 0.6 + 0.4 * forca
 			# as duas mãos ficam na tela: pega lá em cima, puxa até embaixo
 			var ponta := {"d": Vector3(0.025, 0.0, -0.56), "e": Vector3(-0.025, -0.005, -0.56)}
@@ -226,22 +231,22 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 				var pitch: float
 				var pose: Dictionary
 				if s < 0.5:
-					# fechada, puxando (rápido no começo, como o tranco do braço)
-					var k := pow(s / 0.5, 0.8)
+					# fechada, puxando liso (velocidade constante, sem tranco)
+					var k := s / 0.5
 					pos = f.lerp(c, k)
 					pitch = lerpf(28.0, -12.0, k)
 					pose = {"grip": 1.0}
-					_mao_frente = lado
 				else:
 					# aberta, voltando por fora da outra mão
 					var k := smoothstep(0.0, 1.0, (s - 0.5) / 0.5)
 					var arco := sin(k * PI)
-					pos = c.lerp(f, k) + Vector3(0.1 * sinal, 0.03, 0.04) * arco
+					pos = c.lerp(f, k) + Vector3(0.05 * sinal, 0.02, 0.03) * arco
 					pitch = lerpf(-12.0, 28.0, k)
 					pose = {"pinch_large": 0.7, "default_pose": 0.3}
 				res[lado] = [pos, pitch, pose]
 			d = res["d"][0]
 			e = res["e"][0]
+			_mao_frente = "d" if d.z < e.z else "e"
 			rd = Vector3(res["d"][1], 9.0, -14.0)
 			re = Vector3(res["e"][1], -12.0, 18.0)
 			pd = res["d"][2]
@@ -340,8 +345,20 @@ func ponto_mao(lado := "d") -> Vector3:
 
 ## Ponto do mundo que aparece na tela exatamente onde a linha sai da mão da
 ## frente: daí a linha da física segue até a pipa.
+## Por onde a linha da pipa sai das mãos. Na braçada, da mão que está mais à
+## frente, passando de uma para a outra aos poucos quando elas se cruzam (antes
+## pulava de mão: a linha parecia dar trancos).
+func ponto_saida() -> Vector3:
+	var pd := ponto_mao("d")
+	if not _bracada:
+		return pd
+	var pe := ponto_mao("e")
+	var w := smoothstep(-0.05, 0.05, pd.z - pe.z)   # 0 = direita na frente, 1 = esquerda
+	return pd.lerp(pe, w)
+
+
 func ponto_linha_no_mundo(cam: Camera3D, profundidade := 1.5) -> Vector3:
-	var p := ponto_mao(_mao_frente)
+	var p := ponto_saida()
 	var q := Vector3(p.x * _escala, p.y * _escala, p.z)
 	if q.z > -0.01:
 		return cam.global_transform * q
@@ -350,9 +367,11 @@ func ponto_linha_no_mundo(cam: Camera3D, profundidade := 1.5) -> Vector3:
 
 func _desenhar_linha() -> void:
 	_linha_malha.clear_surfaces()
-	# da mão que segura a linha da pipa até a outra
-	var d := ponto_mao(_mao_frente)
-	var e := ponto_mao("e" if _mao_frente == "d" else "d")
+	# da saída (mão da frente) até a outra mão
+	var d := ponto_saida()
+	var e := ponto_mao("e")
+	if _bracada and ponto_mao("e").z < ponto_mao("d").z:
+		e = ponto_mao("d")
 	var pts: Array[Vector3] = []
 	# da mão da frente até a de trás, com barriga
 	for i in 9:
