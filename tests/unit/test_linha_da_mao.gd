@@ -51,10 +51,14 @@ func test_linha_solta_da_mao_igual_a_do_alto() -> void:
 		if fmod(t, 2.0) < DT:
 			print("        t %.0f: linha %.1f m, %d pontos, rest0 %.2f, rest_length %.2f" % [t, f.line_length(), f.line.size(), f.line.rest[0], f.line.rest_length])
 	f.input.haul_speed = 0.0
+	print("      [linha da mão] parou de dar linha")
 	for i in roundi(6.0 / DT):
 		modo.update(DT)
+		if i % 120 == 0:
+			print("        assentando %d: linha %.1f m, %d pontos, finito %s" % [i, f.line_length(), f.line.size(), modo.world.is_finite_state()])
 	assert_true(modo.world.is_finite_state(), "estado finito")
 	var b_mao := _media_barriga(modo.world, f, 8.0)
+	print("      [linha da mão] barriga medida %.1f%%; criando a do alto (%.1f m, %.0f°)" % [b_mao, f.line_length(), f.elevation_deg()])
 	var w2 := SimWorld.create_flight(modo.world.wind, f.kite.definition, f.line_length(), f.elevation_deg(), 0.0, 4, true, 3.0)
 	var f2: Flyer = w2.flyers[0]
 	for i in roundi(6.0 / DT):
