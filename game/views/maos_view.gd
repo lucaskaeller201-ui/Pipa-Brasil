@@ -61,19 +61,25 @@ func preparar(tom := 0.45) -> void:
 			var mi := n as MeshInstance3D
 			mi.material_override = _material
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mi.extra_cull_margin = 1.0
-		# antebraço (a camiseta é de manga curta)
+			mi.extra_cull_margin = 4.0
+		# antebraço (a camiseta é de manga curta). D-090: cápsula comprida, que
+		# começa por dentro do pulso (esconde o corte do modelo da mão) e vai
+		# até fora da tela; margem de recorte grande, porque o campo de visão
+		# das mãos põe o braço na tela num lugar diferente de onde a câmera
+		# acha que ele está (no iPhone ele sumia).
 		var braco := MeshInstance3D.new()
-		var cil := CylinderMesh.new()
-		cil.top_radius = 0.026
-		cil.bottom_radius = 0.037
-		cil.height = 0.34
-		cil.radial_segments = 16
-		braco.mesh = cil
+		var cap := CapsuleMesh.new()
+		cap.radius = 0.031
+		cap.height = 0.62
+		cap.radial_segments = 20
+		cap.rings = 6
+		braco.mesh = cap
 		braco.material_override = _material_braco
 		braco.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		# o cilindro (eixo Y) vai do pulso para trás (+Z da mão)
-		braco.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90.0)), Vector3(0.0, -0.004, 0.027 + 0.17))
+		braco.extra_cull_margin = 4.0
+		# a cápsula (eixo Y) vai do pulso para trás (+Z da mão), um pouco para baixo
+		var giro := Basis(Vector3.RIGHT, deg_to_rad(90.0 + 10.0))
+		braco.transform = Transform3D(giro * Basis.from_scale(Vector3(1.0, 1.0, 0.85)), Vector3(0.0, -0.004, 0.0) + giro * Vector3(0.0, 0.31 - 0.035, 0.0))
 		raiz.add_child(braco)
 		var poses := {}
 		var suf := "R" if lado == "d" else "L"
@@ -93,7 +99,7 @@ func preparar(tom := 0.45) -> void:
 	_linha_no.mesh = _linha_malha
 	_linha_no.material_override = _linha_mat
 	_linha_no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_linha_no.extra_cull_margin = 2.0
+	_linha_no.extra_cull_margin = 4.0
 	add_child(_linha_no)
 	pronto = true
 
