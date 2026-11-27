@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.32.0 — 2026-11-27
+
+- Página inicial nova: logo, JOGAR verde, seletores em cápsula, recorde com troféu, a laje com o pipeiro e o morro.
+- Estátua de braços abertos no alto da serra.
+- Interface da partida nova: placar compacto (toque para ver tudo), botões redondos, vento e linha/altura em pílulas, COLOCAR NO ALTO redondo, LARGADA!/CORTE! com pincel, pausa.
+
 ## 0.31.4 — 2026-11-27
 
 - Braçada lisa, no ritmo da linha que entra; a linha não pula mais de uma mão para a outra.

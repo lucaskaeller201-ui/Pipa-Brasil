@@ -14,7 +14,8 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 c = cor;
+	// D-095: cores mais vivas, como nas imagens de referência
+	vec3 c = mix(vec3(dot(cor, vec3(0.3, 0.55, 0.15))), cor, 1.35);
 	if (nm.y > 0.5) {
 		c = vec3(0.55, 0.54, 0.52);
 	} else {

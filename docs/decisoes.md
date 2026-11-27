@@ -33,6 +33,40 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-095 — Página inicial nova e o Cristo na serra (2026-11-27)
+Pedido: deixar o menu como as imagens de referência do Lucas, "até o cenário
+com o Cristo", e o que não der, buscar de fora.
+- Logo desenhado: PIPA branca e BRASIL amarela (Luckiest Guy), contorno e
+  sombra escuros, pinceladas verde e amarela, a pipa colorida com a linha,
+  "Solta · Tenteia · Apára · Briga". JOGAR verde grande (afunda ao tocar),
+  seletores Mapa/Hora/Gráficos em cápsula com ícone e ›, "Meu recorde" com
+  troféu, botões redondos (ajustes, câmera, laboratório). Sombra suave à
+  esquerda no lugar da faixa escura.
+- Câmera do menu: atrás do pipeiro, na laje, olhando o morro, com balanço lento.
+- Estátua de braços abertos no pico mais alto da serra, virada para o bairro
+  (peças simples, pedra clara, 1,5× o tamanho real para aparecer de longe).
+  Aviso dado ao Lucas: a imagem do Cristo Redentor tem direitos cobrados pela
+  Arquidiocese do Rio em uso comercial — para jogo gratuito, sem anúncio, ok;
+  se um dia vender, rever (trocar por estátua genérica).
+- Casinhas da serra com cores mais vivas.
+
+### D-094 — Interface da partida nova (2026-11-27)
+Pelas imagens de referência e o plano de evolução visual do Lucas.
+- Padrão visual em game/ui/visual.gd: azul profundo nas pílulas e botões,
+  verde nas ações, amarelo nos destaques e números, branco nos textos,
+  grafite nos painéis; ícones desenhados (nítidos em qualquer tela).
+- Fontes gratuitas: Baloo 2 (OFL) nos textos, Luckiest Guy (Apache 2.0) nas
+  mensagens e no logo — game/assets/fontes, com licenças e créditos.
+- Placar compacto (cortes salvos | sequência); tocando, abre o placar completo
+  (nenhuma estatística foi tirada). Botões redondos: câmera, ajustes, pausa (o
+  laboratório foi para dentro da pausa). Vento numa pílula com a direção real
+  vista da câmera. Linha e altura numa pílula embaixo (ou "pipa na mão ·
+  estoque"). COLOCAR NO ALTO redondo com aro amarelo iluminado. Mensagens de
+  combate com faixa de pincel, entram crescendo e somem sozinhas (1,7 s).
+  Nomes dos rivais em pílulas pequenas com a cor de cada um. Aviso curto
+  numa pílula no alto; dica dos gestos curta, só no começo.
+- Pausa de verdade (a árvore para; a interface continua).
+
 ### D-093 — Braçada lisa; a linha não pula de mão (2026-11-27)
 O Lucas sentiu a puxada mais lenta e a pipa dando trancos "como se
 teletransportasse" depois da braçada nova (D-092).

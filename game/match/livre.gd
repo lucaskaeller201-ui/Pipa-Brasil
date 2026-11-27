@@ -917,6 +917,7 @@ func _atualizar_textos(eu: Flyer) -> void:
 	_info.visible = not _no_lobby
 	_sobreposicao.visible = not _no_lobby
 	_cantos.visible = not _no_lobby
+	_versao.visible = not _no_lobby
 	var agora := Time.get_ticks_msec() / 1000.0
 	if agora - _textos_t < 0.25 and not _automatico:
 		return
