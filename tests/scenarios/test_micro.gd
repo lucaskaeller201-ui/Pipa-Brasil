@@ -1,0 +1,66 @@
+extends "res://tests/test_case.gd"
+## D-087: a sua pipa no jogo anda em micro-subpassos (mundo 60 × 2, pipa × 4
+## = 1/480 s). Ela tem que responder como a física de referência (120 × 4):
+## mesmos toques (desbico), mesma largada (puxa e manda linha), mesma linha.
+
+
+func _roteiro(passo: float, sub: int, micro: int, extras := 0, leve := false) -> Dictionary:
+	var w := SimWorld.create_flight(WindField.new(5.0, 0.0, 3), KiteDefinition.pipa_rio(), 30.0, 45.0, 0.0, sub, true, 3.0)
+	w.leve = leve
+	var f: Flyer = w.flyers[0]
+	f.micro = micro
+	f.extra_sweeps = extras
+	var t := 0.0
+	var elev := 0.0
+	var n := 0
+	var giro := 0.0
+	var tensao_max := 0.0
+	var linha0 := 0.0
+	var proximo_toque := 12.0
+	var lado := 1.0
+	while t < 26.0:
+		if t >= 12.0 and linha0 == 0.0:
+			linha0 = f.line_length()
+		# 12–18 s: um toque por segundo, alternando o lado (tenteio)
+		if t >= proximo_toque and t < 18.0:
+			f.input.kick_side = lado
+			f.input.kick_spin = 0.0
+			f.input.kick_scale = 1.0
+			f.input.kick_base_shift = 0.0
+			f.pilot.trigger(Pilot.Impulse.DESBICAR_LADO, w.time)
+			lado = -lado
+			proximo_toque += 1.0
+		# 19–21 s: manda linha; 21,5–21,9 puxa forte; 21,9–23,5 manda (largada)
+		f.input.haul_speed = 0.0
+		if t >= 19.0 and t < 21.0 or t >= 21.9 and t < 23.5:
+			f.input.haul_speed = -2.0
+		elif t >= 21.5 and t < 21.9:
+			f.input.haul_speed = 3.0
+		var a := f.nose_angle_deg()
+		w.step(passo)
+		t += passo
+		if t > 12.0 and t < 18.0:
+			giro = maxf(giro, absf(f.nose_angle_deg()))
+		if t > 12.0:
+			elev += f.elevation_deg()
+			n += 1
+			tensao_max = maxf(tensao_max, f.tension)
+	return {"elev": elev / n, "giro": giro, "linha": f.line_length() - linha0, "tensao": tensao_max,
+		"altura": f.kite.position.y}
+
+
+func _p(nome: String, r: Dictionary) -> void:
+	print("      [micro] %-24s elevação %4.1f° · bico até %3.0f° nos toques · linha dada %5.1f m · tensão máx %5.1f N · altura final %5.1f m" % [
+		nome, r["elev"], r["giro"], r["linha"], r["tensao"], r["altura"]])
+
+
+func test_sua_pipa_responde_como_a_referencia() -> void:
+	var ref := _roteiro(1.0 / 120.0, 4, 1)
+	_p("referência 120 × 4", ref)
+	_p("0.30.4 (60 × 3 + 4)", _roteiro(1.0 / 60.0, 3, 1, 4, true))
+	var novo := _roteiro(1.0 / 60.0, 2, 4, 0, true)
+	_p("jogo: 60 × 2, pipa × 4", novo)
+	assert_true(absf(novo["elev"] - ref["elev"]) < 3.0, "mesma elevação")
+	assert_true(absf(novo["giro"] - ref["giro"]) < 0.2 * ref["giro"] + 3.0, "mesmo giro do bico nos toques")
+	assert_true(absf(novo["linha"] - ref["linha"]) < 0.1 * absf(ref["linha"]) + 1.0, "mesma linha dada na largada")
+	assert_true(absf(novo["altura"] - ref["altura"]) < 3.0, "termina na mesma altura")

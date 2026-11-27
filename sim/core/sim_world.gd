@@ -170,14 +170,24 @@ func _substep(h: float) -> void:
 	var t := time
 	var m := Time.get_ticks_usec() if medir else 0
 	for f in flyers:
-		(f as Flyer).begin_substep(wind, t, h)
+		var fl: Flyer = f
+		if fl.micro > 1:
+			var hm := h / fl.micro
+			for k in fl.micro - 1:
+				fl.begin_substep(wind, t + k * hm, hm)
+				fl.solve_internal(hm)
+				fl.solve_ground()
+				fl.end_substep(hm)
+			fl.begin_substep(wind, t + (fl.micro - 1) * hm, hm)
+		else:
+			fl.begin_substep(wind, t, h)
 	for c in loose_chains:
 		(c as ParticleChain).compute_forces(wind, t)
 		(c as ParticleChain).integrate(h)
 	if medir:
 		m = _marca("forças e integração", m)
 	for f in flyers:
-		(f as Flyer).solve_internal(h)
+		(f as Flyer).solve_internal(h / (f as Flyer).micro)
 	for c in loose_chains:
 		(c as ParticleChain).solve_segments(h)
 	if medir:
@@ -197,7 +207,7 @@ func _substep(h: float) -> void:
 	if medir:
 		m = _marca("chão e obstáculos", m)
 	for f in flyers:
-		(f as Flyer).end_substep(h)
+		(f as Flyer).end_substep(h / (f as Flyer).micro)
 	for c in loose_chains:
 		(c as ParticleChain).update_velocities(h)
 	combat.check_breaks(flyers, loose_chains)

@@ -149,14 +149,17 @@ func _ready() -> void:
 	# D-086: 60 passos × 3 subpassos (1/180 s) + 4 passadas extras na linha e
 	# vento/pares por passo: linha como na física de referência (sem barriga
 	# nem "V") e mais barato que a de 0.30.3 (medido em test_barriga.gd)
-	modo.world.substeps = 3
+	modo.world.substeps = 2
 	modo.world.leve = true
+	modo.micro_voce = 4       # D-087: a sua pipa na física de referência (1/480 s)
 	modo.world.medir = true   # D-086: detalhe do tempo no canto da tela
 	modo.rabiola_bots = 12    # D-083: rabiola dos bots com metade dos pontos (são vistos de longe)
-	modo.passadas_extras = 4  # D-086: linha firme como na referência (sem barriga nem "V")
-	for p in modo.players:
-		if p["flyer"] != null:
-			(p["flyer"] as Flyer).extra_sweeps = 4
+	modo.passadas_extras = 8  # D-087: linha dos bots firme como na referência
+	for i in modo.players.size():
+		var fl: Flyer = modo.players[i]["flyer"]
+		if fl != null:
+			fl.extra_sweeps = 0 if i == 0 else 8
+			fl.micro = 4 if i == 0 else 1
 	if not _automatico:
 		modo.bots_para_a_mao()   # D-079: os bots também colocam a pipa no alto
 	_carregar_estatisticas()
