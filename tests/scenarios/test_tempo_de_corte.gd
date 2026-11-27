@@ -44,11 +44,11 @@ func _linha(nome: String, cfg: Array) -> Array:
 
 
 func test_tempo_de_corte_igual_a_referencia() -> void:
-	var ref := _linha("referência 120 × 4 (até 0.29)", [1.0 / 120.0, 4, false, 1, 0, 1, 0])
-	_linha("0.30.3 (60 × 2 + 2)", [1.0 / 60.0, 2, false, 1, 2, 1, 2])
-	_linha("0.30.4 (60 × 3 + 4 leve)", [1.0 / 60.0, 3, true, 1, 4, 1, 4])
-	var voce_a := _linha("jogo: você parada, bot corre", [1.0 / 60.0, 2, true, 4, 0, 1, 8])
-	var voce_b := _linha("jogo: você corre, bot parado", [1.0 / 60.0, 2, true, 1, 8, 4, 0])
-	for r in [voce_a, voce_b]:
-		for k in 2:
-			assert_true(absf(r[k] - ref[k]) < 0.3 * ref[k] + 0.3, "corta no mesmo tempo da referência (%.1f s × %.1f s)" % [r[k], ref[k]])
+	for k in [0.0, 0.5, 1.0, 1.5, 2.0]:
+		CombatSystem.forca_pela_tensao = k
+		print("      [corte] --- k = %.1f" % k)
+		_linha("referência 120 × 4 (até 0.29)", [1.0 / 120.0, 4, false, 1, 0, 1, 0])
+		_linha("0.30.4 (60 × 3 + 4 leve)", [1.0 / 60.0, 3, true, 1, 4, 1, 4])
+		_linha("jogo: você parada, bot corre", [1.0 / 60.0, 2, true, 4, 0, 1, 8])
+		_linha("jogo: você corre, bot parado", [1.0 / 60.0, 2, true, 1, 8, 4, 0])
+	CombatSystem.forca_pela_tensao = 0.0

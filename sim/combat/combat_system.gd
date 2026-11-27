@@ -55,6 +55,8 @@ var contact_points: PackedVector3Array = PackedVector3Array()
 var _pairs: Array = []
 ## D-086: reaproveitar a lista de pares do subpasso anterior (SimWorld leve)
 var reusar_pares := false
+## D-087: se > 0, o desgaste no laço usa k × (soma das tensões) como força
+static var forca_pela_tensao := 0.0
 const FOLGA_LEVE := 0.5   ## m: folga da lista quando ela vale por um passo inteiro
 var _assinatura := PackedInt64Array()
 var _tangle := {}              ## [avoada, pipeiro, pedaço] -> embolo em formação
@@ -533,6 +535,9 @@ func _solve_engagements(h: float, wear_k: float) -> void:
 		var f := LineContact.hold_pair(a, bi, b, bj, CONTACT_RADIUS, h, 0.0) + float(e.get("f", 0.0))
 		# A força no ponto de encontro não passa muito da tensão das linhas.
 		f = minf(f, 2.0 * (fa.tension + fb.tension) + 1.0)
+		if forca_pela_tensao > 0.0:
+			# D-087 (experimento): força no laço pelas tensões das linhas
+			f = forca_pela_tensao * (fa.tension + fb.tension)
 		if wear_k > 0.0:
 			# Relo (D-027): a linha que corre (quem está dando ou puxando linha)
 			# gasta a outra; um pouco para as duas sempre.
