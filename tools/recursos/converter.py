@@ -199,19 +199,6 @@ def coqueiros():
 			o.location.x += k * 8.0
 			o.name = os.path.splitext(os.path.basename(f))[0] + "_" + o.name
 	f = objs[0] if objs else cand[0]
-	if False:
-	if f.lower().endswith(".fbx"):
-		bpy.ops.import_scene.fbx(filepath=f)
-	elif f.lower().endswith(".obj"):
-		bpy.ops.wm.obj_import(filepath=f)
-	elif f.lower().endswith(".dae"):
-		bpy.ops.wm.collada_import(filepath=f)
-	else:
-		with bpy.data.libraries.load(f) as (src, dst):
-			dst.objects = src.objects
-		for o in dst.objects:
-			if o is not None:
-				bpy.context.scene.collection.objects.link(o)
 	for img in bpy.data.images:
 		base = os.path.basename(img.filepath.replace("\\", "/"))
 		achado = glob.glob(os.path.join(T, "coqueiros", "**", base), recursive=True)

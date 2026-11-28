@@ -65,7 +65,7 @@ jobs:
           fi
       - name: Prévias no ramo "previas"
         run: |
-          cd previas
+          mkdir -p previas && cd previas
           git init -q -b previas
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
