@@ -104,6 +104,12 @@ static func criar(pai: Node3D, hora := "por_do_sol", mapa := "bairro", com_marco
 	env.fog_light_color = h["nevoa"]
 	env.fog_density = float(h["nevoa_d"])
 	env.fog_sky_affect = 0.0
+	# D-102: correção de cor (como num filme): um pouco mais de contraste e de
+	# cor, para o cenário não ficar "lavado". Barato (uma conta por pixel).
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.07
+	env.adjustment_saturation = 1.1
+	env.adjustment_brightness = 1.0
 
 	var mundo := WorldEnvironment.new()
 	mundo.name = "Ambiente"

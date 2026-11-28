@@ -97,6 +97,14 @@ void fragment() {
 	}
 	// sombra de contato no pé da parede e na quina com a laje
 	c *= mix(0.62, 1.0, smoothstep(0.0, 1.4, mundo.y));
+	// D-102: sombra de contato no pé da parede (oclusão falsa) e a faixa de
+	// umidade/barro que sobe do chão nas casas do bairro
+	if (n.y < 0.5) {
+		float pe = smoothstep(0.0, 0.9, mundo.y);
+		float umidade = (1.0 - smoothstep(0.15, 0.55 + 0.25 * hash(vec2(floor(dot(mundo.xz, vec2(0.7, 1.3)) * 0.8), 7.0)), mundo.y)) * 0.18;
+		c *= mix(0.62, 1.0, pe) * (1.0 - umidade);
+		c = mix(c, c * vec3(0.92, 0.85, 0.75), umidade * 2.0);
+	}
 	ALBEDO = c;
 	ROUGHNESS = rug;
 	if (texturas > 0.5) {
