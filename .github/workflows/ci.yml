@@ -287,7 +287,7 @@ jobs:
         run: |
           mkdir -p capturas
           # Modo livre (cena principal), celular deitado: um bot pilota a sua pipa.
-          for vista in primeira maos largada terceira praia inicio escolha; do
+          for vista in terceira inicio praia; do
             mkdir -p "quadros_$vista"
             extra=""
             if [ "$vista" = terceira ]; then extra="--terceira"; fi
@@ -317,6 +317,16 @@ jobs:
             res://scenes/lab/lab.tscn -- --camera=1 --rival --auto 2>&1 | tail -5 || true
           if [ -f quadros_lab/q00000119.png ]; then cp quadros_lab/q00000119.png capturas/laboratorio_quadro00000119.png; fi
           ls -la capturas
+
+      - name: Capturas de antes no ramo capturas-antes
+        run: |
+          cd capturas
+          git init -q -b capturas-antes
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Capturas antes da evolução gráfica"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" capturas-antes
 
       - name: Guardar as capturas
         uses: actions/upload-artifact@v4
