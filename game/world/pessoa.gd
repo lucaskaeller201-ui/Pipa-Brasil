@@ -143,7 +143,7 @@ func _por_bone(cor: Color) -> void:
 	presa.add_child(_bone_no)
 	var copa := MeshInstance3D.new()
 	var esf := SphereMesh.new()   # copa achatada; a metade de baixo fica no cabelo
-	esf.radius = 0.112
+	esf.radius = 0.116
 	esf.height = 0.15
 	esf.radial_segments = 20
 	esf.rings = 10
@@ -165,7 +165,7 @@ func _por_bone(cor: Color) -> void:
 	# copa no espaço do esqueleto: topo da cabeça
 	var base := Basis(Quaternion(Vector3.UP, cima))
 	base = Basis(_de_para(base * Vector3.BACK, frente)) * base
-	var t_esq := Transform3D(base, g.origin + cima * 0.115 * u + frente * 0.005 * u)
+	var t_esq := Transform3D(base, g.origin + cima * 0.145 * u + frente * 0.005 * u)
 	_bone_no.transform = g.affine_inverse() * t_esq
 	copa.rotation.x = -0.08
 

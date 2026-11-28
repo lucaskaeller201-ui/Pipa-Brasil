@@ -30,7 +30,9 @@ void vertex() {
 void fragment() {
 	vec4 c = texture(atlas, uv_atlas);
 	// a foto saiu escura (sol de lado no Blender): clareia e puxa para o verde
-	vec3 cor = c.rgb * tom * brilho * mix(1.08, 0.8, altura);
+	// o fundo transparente da foto é preto: nas versões pequenas (mipmaps) a
+	// borda escurece; dividir pela opacidade devolve a cor certa
+	vec3 cor = (c.rgb / max(c.a, 0.05)) * tom * brilho * mix(1.08, 0.8, altura);
 	float cinza = dot(cor, vec3(0.3, 0.59, 0.11));
 	ALBEDO = mix(vec3(cinza), cor, 1.35) * vec3(0.95, 1.05, 0.88);
 	ALPHA = c.a;
