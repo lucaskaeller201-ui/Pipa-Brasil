@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - tools/pesquisar_recursos.py
+      - tools/detalhar_recursos.py
 
 permissions:
   contents: write
@@ -19,7 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Pesquisar
-        run: python3 tools/pesquisar_recursos.py
+        run: |
+          python3 tools/pesquisar_recursos.py
+          python3 tools/detalhar_recursos.py
       - name: Publicar no ramo "pesquisa"
         run: |
           cd pesquisa
