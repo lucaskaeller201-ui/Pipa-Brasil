@@ -339,6 +339,23 @@ func test_aparada_pela_linha_tambem_embola_pela_rabiola() -> void:
 	if outro == b.tail:
 		w.step(DT)
 		assert_true(b.caught_by_tail, "presa pela rabiola: vem rodando")
+	# D-107: trazida até a mão, é UMA aparada (não uma por embolo)
+	w.combat.take_events()
+	a.input.haul_speed = 3.0
+	var aparadas := 0
+	for i in roundi(20.0 / DT):
+		w.step(DT)
+		aparadas += _eventos_do_tipo(w.combat.take_events(), "aparada").size()
+		if b.captured:
+			for k in 30:
+				w.step(DT)
+				aparadas += _eventos_do_tipo(w.combat.take_events(), "aparada").size()
+			break
+	a.input.clear()
+	print("      [uma aparada] chegou: %s; avisos de aparada: %d; aparadas de A: %d" % [b.captured, aparadas, a.catches])
+	assert_true(b.captured, "chegou na mão")
+	assert_eq(aparadas, 1, "um aviso só")
+	assert_eq(a.catches, 1, "conta uma pipa só")
 	assert_true(w.is_finite_state())
 
 

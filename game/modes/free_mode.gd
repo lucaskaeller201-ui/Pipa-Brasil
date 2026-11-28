@@ -397,17 +397,20 @@ func _para_a_mao() -> void:
 func _recolher() -> void:
 	var eu := you()
 	var trouxe := 0
+	var vistas := {}
 	for l in world.combat.links.duplicate():
 		if l["catcher"] != eu:
 			continue
 		var av: Flyer = l["avoada"]
-		if not bool(l["captured"]):
+		if vistas.has(av):
+			continue   # D-107: a mesma pipa embolada por dois lados conta uma vez
+		vistas[av] = true
+		if not av.captured:
 			players[0]["catches"] = int(players[0]["catches"]) + 1
 			players[0]["stock"] = int(players[0]["stock"]) + 1
 			screen_events.append({"type": "aparada", "quem": 0})
+			guardar.append([av, av.caught_by_tail and l["chain"] == av.tail, false])
 		trouxe += 1
-		if not bool(l["captured"]):   # (as já aparadas foram para a fila no evento "aparada")
-			guardar.append([av, l["chain"] == av.tail, false])
 		av.captured = true
 		if not _agendada(av):
 			_remocoes.append([av, world.time])

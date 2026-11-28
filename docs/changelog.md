@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.33.4 — 2026-11-28
+
+- A pipa aparada também tem a animação: o pipeiro pega, tira a linha ou a rabiola e põe no canto da laje.
+- Corrigido: uma aparada mostrava o aviso várias vezes (e contava a mais no estoque).
+
 ## 0.33.3 — 2026-11-28
 
 - Animação de guardar: o pipeiro pega a pipa (aparada ou a sua), tira a linha ou a rabiola e põe no canto da laje, onde elas ficam empilhadas.

@@ -429,11 +429,16 @@ func check_snags(flyers: Array) -> void:
 		if cchain == ct.line and float(l["m"]) >= cchain.rest_total() - 0.3:
 			na_mao = true
 		if na_mao:
-			l["captured"] = true
+			# D-107: uma aparada é UMA pipa, mesmo embolada pela linha e pela
+			# rabiola (dois embolos): conta e avisa uma vez só
+			var ja := av.captured
+			for l2 in links:
+				if l2["avoada"] == av:
+					l2["captured"] = true
 			av.captured = true
-			ct.holding = maxi(0, ct.holding - 1)
-			ct.catches += 1
-			events.append({"type": "aparada", "flyer": av.id, "catcher": ct.id})
+			if not ja:
+				ct.catches += 1
+				events.append({"type": "aparada", "flyer": av.id, "catcher": ct.id})
 	# Enroscos ainda não trazidos, contados de novo (o aviso não fica preso).
 	for f in flyers:
 		(f as Flyer).holding = 0

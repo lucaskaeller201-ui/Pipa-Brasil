@@ -354,6 +354,9 @@ func _physics_process(delta: float) -> void:
 	var eu := modo.you()
 	if _lanc_fase > 0:
 		_largada_passo(delta)   # a largada comanda; os dedos esperam
+	elif _guardar_ativo() and eu != null and not eu.cut and not _automatico:
+		eu.input.clear()   # D-107: guardando a aparada, segura a linha parada
+		_puxada = Vector3.ZERO
 	elif not _automatico and eu != null and not eu.cut:
 		_ler_comandos(eu, delta)
 	var t0 := Time.get_ticks_usec()
@@ -659,7 +662,9 @@ func _guardar_passo(delta: float) -> void:
 		_guardando["t"] = 0.0
 		_guardando["fase"] = 1
 		# com a sua pipa na mão, o pipeiro usa as duas mãos (animação inteira)
-		_guardando["na_mao"] = modo.you_on_hand
+		# D-107: sempre com as mãos — com a sua pipa no alto, ele para, segura
+		# a linha parada e guarda a aparada (os comandos esperam)
+		_guardando["na_mao"] = true
 		var quem := "a sua pipa" if bool(_guardando["sua"]) else "a aparada"
 		_avisar("Pegando %s…" % quem)
 	var g := _guardando
@@ -734,7 +739,7 @@ func _posicionar_camera(imediato: bool) -> void:
 		return
 	var eu := modo.you()
 	var base: Vector3 = modo.players[0]["base"]
-	if (modo.you_on_hand or (_lanc_fase >= 1 and _lanc_fase <= 3)) and _primeira_pessoa:
+	if (modo.you_on_hand or (_lanc_fase >= 1 and _lanc_fase <= 3) or _guardar_ativo()) and _primeira_pessoa:
 		# D-089: primeira pessoa com a pipa na mão — pelos olhos do pipeiro.
 		# Escolhendo: o dedo olha em volta. Na largada: olha a pipa nas mãos
 		# (amarrando), anda até a beira (com o balanço do passo) e ergue.
@@ -869,7 +874,7 @@ func _atualizar_maos(eu: Flyer, delta: float) -> void:
 			estado["pipa_t"] = inv * _pipa_mao.global_transform
 			estado["corpo"] = inv.basis * Basis(Vector3.UP, _corpos[0].rotation.y)
 			estado["cabresto"] = inv * (_pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point)
-	elif _guardar_ativo() and bool(_guardando["na_mao"]) and modo.you_on_hand:
+	elif _guardar_ativo() and bool(_guardando["na_mao"]):
 		# D-106: pega a pipa, desfaz o nó e põe no canto
 		var inv2 := _camera.global_transform.affine_inverse()
 		var gv2: Node3D = _guardando["v"]
@@ -959,6 +964,8 @@ func _toque(indice: int, posicao: Vector2, apertou: bool) -> void:
 	if apertou:
 		if _sobre_botao(posicao):
 			return
+		if _guardar_ativo():
+			return   # D-107: guardando a pipa, os dedos esperam (uns 3 s)
 		_dedos[indice] = {"ini": posicao, "t0": agora, "ult": posicao, "puxou": false}
 		return
 	if not _dedos.has(indice):

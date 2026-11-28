@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-28 (versão 0.33.3: guardar a pipa no canto da laje; braçada para na hora — D-106).
+Atualizado em 2026-11-28 (versão 0.33.4: aparada guardada com as mãos; um aviso por aparada — D-107).
 
 ## Evolução gráfica (0.33.0, D-098 a D-103)
 

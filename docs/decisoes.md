@@ -33,6 +33,20 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-107 — A aparada também é guardada com as mãos; uma aparada, um aviso (2026-11-28)
+O Lucas (0.33.3): a animação só aparecia ao tirar a sua pipa do alto; a
+aparada ainda sumia. E aparou uma pipa e o aviso "APAROU" saiu 3 vezes.
+- A aparada chegava com a sua pipa no alto e ia sozinha para o canto, fora da
+  tela (as mãos ficavam na linha). Agora é a mesma animação inteira: o
+  pipeiro para, segura a linha parada (os comandos e toques esperam ~3 s),
+  olha a aparada nas mãos, tira a linha ou a rabiola e põe no canto. Depois
+  os olhos voltam para a sua pipa.
+- Aviso triplicado: a avoada embolada pela linha e pela rabiola tem dois
+  embolos, e cada um que chegava na mão contava uma aparada (aviso, placar
+  e estoque a mais). Agora a pipa chega uma vez: todos os embolos dela
+  ficam "trazidos" juntos, um aviso, +1 no placar e no estoque. O mesmo no
+  recolher. Teste em test_manda_busca (embolada pelos dois lados = 1 aparada).
+
 ### D-106 — Guardar a pipa no canto da laje; braçada para na hora (2026-11-28)
 O Lucas: a pipa chegava perto da laje e sumia para o estoque; queria ver o
 pipeiro pegar a pipa, tirar a linha ou a rabiola (conforme o aparo) e pôr no
