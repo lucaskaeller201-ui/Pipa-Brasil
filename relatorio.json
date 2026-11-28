@@ -1,0 +1,280 @@
+[
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_01",
+  "triangulos": 7440,
+  "altura": 1.824,
+  "mb": 0.83,
+  "materiais": [
+   "m002_body",
+   "m002_head",
+   "m002_opacity"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_17",
+  "triangulos": 7084,
+  "altura": 1.812,
+  "mb": 0.44,
+  "materiais": [
+   "m022_body",
+   "m022_head"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_04",
+  "triangulos": 8684,
+  "altura": 1.869,
+  "mb": 0.86,
+  "materiais": [
+   "m006_body",
+   "m006_head",
+   "m006_opacity"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_16",
+  "triangulos": 7064,
+  "altura": 1.809,
+  "mb": 0.49,
+  "materiais": [
+   "m019_body",
+   "m019_head"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_09",
+  "triangulos": 7426,
+  "altura": 1.822,
+  "mb": 0.75,
+  "materiais": [
+   "m017_body",
+   "m017_head",
+   "m017_opacity"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_11",
+  "triangulos": 6740,
+  "altura": 1.803,
+  "mb": 0.4,
+  "materiais": [
+   "m001_body",
+   "m001_head"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "personagem",
+  "nome": "Male_Adult_20",
+  "triangulos": 7120,
+  "altura": 1.805,
+  "mb": 0.49,
+  "materiais": [
+   "m027_body",
+   "m027_head"
+  ],
+  "ossos_exemplo": [
+   "Bip01 Spine",
+   "Bip01 Spine1",
+   "Bip01 Spine2",
+   "Bip01 Head",
+   "Bip01 L Clavicle",
+   "Bip01 L UpperArm",
+   "Bip01 L Forearm",
+   "Bip01 L Hand",
+   "Bip01 R Clavicle",
+   "Bip01 R UpperArm",
+   "Bip01 R Forearm",
+   "Bip01 R Hand",
+   "Bip01 L Foot",
+   "Bip01 L Toe0",
+   "Bip01 R Foot",
+   "Bip01 R Toe0"
+  ]
+ },
+ {
+  "tipo": "arvore",
+  "nome": "island_tree_01",
+  "triangulos_original": 1599403,
+  "altura": 5.03,
+  "largura": 4.82,
+  "mb": 1.72
+ },
+ {
+  "tipo": "arvore",
+  "nome": "tree_small_02",
+  "triangulos_original": 2062487,
+  "altura": 4.56,
+  "largura": 4.29,
+  "mb": 1.42
+ },
+ {
+  "tipo": "arvore",
+  "nome": "jacaranda_tree",
+  "triangulos_original": 3863832,
+  "altura": 19.47,
+  "largura": 24.42,
+  "mb": 1.42
+ },
+ {
+  "tipo": "coqueiros_arquivos",
+  "arquivos": [
+   "coqueiros/palm_bend.obj",
+   "coqueiros/palm_bend.FBX",
+   "coqueiros/palm_dual.obj",
+   "coqueiros/palm_dual_bend.obj",
+   "coqueiros/palm_dual.FBX",
+   "coqueiros/palm_trio.obj",
+   "coqueiros/palm_straight.obj",
+   "coqueiros/palm_trio.FBX",
+   "coqueiros/palm_straight.FBX",
+   "coqueiros/palm_dual_bend.FBX"
+  ]
+ },
+ {
+  "tipo": "coqueiros_lidos",
+  "arquivos": [
+   "palm_bend.obj",
+   "palm_dual.obj",
+   "palm_dual_bend.obj",
+   "palm_straight.obj",
+   "palm_trio.obj"
+  ]
+ },
+ {
+  "tipo": "coqueiros_textura",
+  "difusa": [
+   "/home/runner/work/Pipa-Brasil/Pipa-Brasil/trabalho/coqueiros/diffuse.tga"
+  ],
+  "materiais": [
+   "palma"
+  ]
+ },
+ {
+  "tipo": "coqueiros",
+  "fonte": "coqueiros/palm_bend.obj",
+  "triangulos": 8460,
+  "altura": 8.64,
+  "objetos": [
+   "palm_bend_palm_bend",
+   "palm_dual_palm_dual",
+   "palm_dual_bend_palm_dual_bend",
+   "palm_straight_palm_straight",
+   "palm_trio_palm_trio"
+  ],
+  "mb": 2.43
+ }
+]
