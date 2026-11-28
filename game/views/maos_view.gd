@@ -210,9 +210,10 @@ func atualizar(cam: Camera3D, estado: Dictionary, delta: float) -> void:
 			# passa por fora e vai pegar a linha lá na frente; depois trocam.
 			# D-093: no ritmo da linha que entra — cada meia braçada recolhe
 			# ~0,6 m; a mão que puxa desce liso, na velocidade da linha
-			var ritmo := clampf(maxf(haul, 0.0) / 1.2, 1.2, 3.8)   # braçadas de cada mão por segundo
+			# D-104: mais rápido (cada meia braçada ~0,45 m de linha)
+			var ritmo := clampf(maxf(haul, 0.0) / 0.9, 1.6, 4.6)   # braçadas de cada mão por segundo
 			if bool(estado.get("puxao", false)):
-				ritmo = 3.8
+				ritmo = 4.6
 				forca = 1.0
 			_fase_bracada += delta * ritmo
 			_rapido = true

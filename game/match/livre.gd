@@ -75,6 +75,7 @@ var _corpos: Array = []         # boneco de cada participante
 var _dedos := {}                # índice -> {"ini": Vector2, "t0": float, "ult": Vector2}
 var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo)
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
+var _puxada := Vector2.ZERO     # D-104: (média do dedo, puxada alisada) em m/s
 var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
@@ -199,7 +200,8 @@ func _ready() -> void:
 		var corpo: Node3D = Pessoa.new() if Pessoa.disponivel() and not _boneco_antigo else Boneco.new()
 		add_child(corpo)
 		if corpo.has_method("construir_pessoa"):
-			corpo.call("construir_pessoa", i, i % 3 != 2, CORES[(i + 2) % CORES.size()].darkened(0.2))
+			# D-104: sem o boné feito por código (não encaixava na cabeça)
+			corpo.call("construir_pessoa", i, false, CORES[(i + 2) % CORES.size()].darkened(0.2))
 		else:
 			corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
 		if i > 0:
@@ -359,6 +361,24 @@ func _physics_process(delta: float) -> void:
 		_avisar(msg)
 
 
+const PUXADA_MEDIA := 0.08      ## s: janela da média do dedo (os toques chegam aos pulos)
+const PUXADA_QUEDA := 8.0       ## m/s²: quanto a puxada perde por segundo entre braçadas
+
+
+## D-104: puxada alisada. estado = (média do dedo, puxada). A média junta os
+## toques que chegam fora do ritmo dos quadros; entre uma braçada e outra
+## (dedo voltando) a puxada cai devagar, no embalo — na vida real a outra mão
+## está puxando nessa hora. Mandar linha corta na hora.
+static func suavizar_puxada(estado: Vector2, dedo: float, delta: float) -> Vector2:
+	if dedo < -0.3:
+		return Vector2.ZERO
+	var media := lerpf(estado.x, maxf(dedo, 0.0), 1.0 - exp(-delta / PUXADA_MEDIA))
+	var puxada := media if media >= estado.y else maxf(media, estado.y - PUXADA_QUEDA * delta)
+	if puxada < 0.05:
+		puxada = 0.0
+	return Vector2(media, puxada)
+
+
 func _ler_comandos(eu: Flyer, delta: float) -> void:
 	var e := eu.input
 	var v := _velocidade_mao   # + = puxando (para baixo); - = mandando linha (para cima)
@@ -473,7 +493,12 @@ func _process(delta: float) -> void:
 	# Velocidade da mão a partir do deslizar deste quadro.
 	var altura := maxf(1.0, get_viewport().get_visible_rect().size.y)
 	var alvo := (_dy_quadro / altura) * LINHA_POR_TELA / maxf(delta, 1e-3)
-	_velocidade_mao = alvo if not _dedos.is_empty() else 0.0
+	alvo = alvo if not _dedos.is_empty() else 0.0
+	# D-104: puxada lisa — o dedo chega aos pulos (toques do iPhone fora do
+	# ritmo dos quadros, e o dedo sobe entre uma braçada e outra); a mão
+	# segue puxando no embalo, sem trancos na pipa.
+	_puxada = suavizar_puxada(_puxada, alvo, delta)
+	_velocidade_mao = alvo if alvo < -0.3 else _puxada.y
 	_dy_quadro = 0.0
 
 	tq = Time.get_ticks_usec()

@@ -1,5 +1,11 @@
 # Histórico de alterações
 
+## 0.33.1 — 2026-11-28
+
+- Braçada lisa: a pipa vem rápida e sem trancos; as mãos acompanham mais rápidas.
+- Mandar linha não deixa mais linha frouxa sobrando (menos barriga).
+- Tirado o boné que não encaixava na cabeça.
+
 ## 0.33.0 — 2026-11-27
 
 - Pipeiros de verdade: 7 personagens Microsoft Rocketbox (MIT) com roupas e cabelos diferentes, bonés variados; o braço segue a mão da física, a outra mão abraça a linha, a cabeça acompanha a pipa.

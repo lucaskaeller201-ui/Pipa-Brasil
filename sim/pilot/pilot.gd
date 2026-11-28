@@ -22,6 +22,8 @@ const SPOOL_FRICTION := 0.3      ## N
 const SPOOL_INERTIA := 0.05      ## kg equivalentes da carretilha
 const MIN_LINE := 5.0            ## m
 const MAX_LINE := 300.0          ## m
+const GIVE_MIN_TENSION := 0.1    ## N: abaixo disso a linha não corre entre os dedos (D-104)
+const GIVE_FULL_SPAN := 0.5       ## N: acima de 0,6 N corre no ritmo do dedo
 const HAUL_MAX_SPEED := 6.0      ## m/s: o mais rápido que a mão puxa ou dá linha
 const DESBICO_TIME := 0.08        ## s: duração do toque de desbicar (folga curta)
 
@@ -105,7 +107,13 @@ func update(h: float, t: float, input: PilotInput, dir_to_kite: Vector3, tension
 	if input.haul_speed != 0.0:
 		# Linha pela mão: puxar (abraçar) ou dar linha no ritmo do gesto.
 		spool_speed = 0.0
-		delta = -clampf(input.haul_speed, -HAUL_MAX_SPEED, HAUL_MAX_SPEED) * h
+		var v := clampf(input.haul_speed, -HAUL_MAX_SPEED, HAUL_MAX_SPEED)
+		if v < 0.0:
+			# D-104: dar linha = abrir os dedos; a linha só corre se a pipa puxar.
+			# Sem pressão ela não sai sozinha (antes saía no ritmo do dedo e
+			# sobrava linha frouxa: a barriga).
+			v *= clampf((tension - GIVE_MIN_TENSION) / GIVE_FULL_SPAN, 0.0, 1.0)
+		delta = -v * h
 	elif input.free_spool:
 		spool_speed = maxf(0.0, spool_speed + (tension - SPOOL_FRICTION) / SPOOL_INERTIA * h)
 		delta = spool_speed * h

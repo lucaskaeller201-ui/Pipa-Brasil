@@ -33,6 +33,27 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-104 — Puxada lisa, mãos mais rápidas, linha sem sobra, sem boné (2026-11-28)
+Vídeo do Lucas (0.33.0, iPhone, 50–59 fps): a pipa dava trancos na braçada,
+os braços eram lentos, o boné não encaixava e a linha tinha barriga demais.
+- Trancos: a puxada ia para a física quadro a quadro, do jeito que o dedo
+  chegava (toques do iPhone fora do ritmo dos quadros, um quadro com o dobro e
+  outro parado, e zero quando o dedo volta para a próxima braçada). Agora a
+  velocidade do dedo passa por uma média de 0,08 s e, entre braçadas, cai só
+  8 m/s² (na vida real a outra mão puxa nessa hora). Parou de puxar: acaba em
+  menos de 1 s; mandar linha corta na hora. Teste test_puxada_suave
+  (toques aos pulos: puxada entre 3,9 e 5,8 m/s, sem queda a zero).
+- Mãos: o ritmo vinha dessa puxada aos pulos (caía abaixo de 0,2 e a mão saía
+  da braçada). Com a puxada lisa ela não sai mais, e ficou mais rápida:
+  1,6 a 4,6 braçadas de cada mão por segundo (era 1,2 a 3,8).
+- Barriga: dar linha soltava no ritmo do dedo mesmo com a linha frouxa, e a
+  linha que a pipa não pedia ficava sobrando. Agora a linha só corre entre os
+  dedos com pressão: nada abaixo de 0,1 N, ritmo inteiro a partir de 0,6 N
+  (com a pipa voando são 3 a 5 N, então mandar linha continua igual). Puxar
+  não mudou; a pipa continua girando com o "manda".
+- Boné: o boné feito por código foi tirado (não encaixava nos cabelos de cada
+  personagem). Volta quando houver um modelo de boné de verdade.
+
 ### D-103 — Medir o custo de desenho (2026-11-27)
 Nas capturas do CI (`--auto`) o jogo imprime chamadas de desenho, triângulos,
 objetos e memória de vídeo nos quadros 100, 200 e 300. O FPS do CI não vale
