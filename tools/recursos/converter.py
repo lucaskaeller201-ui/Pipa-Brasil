@@ -196,7 +196,9 @@ def coqueiros():
 	for k, f in enumerate(objs):
 		bpy.ops.wm.obj_import(filepath=f, forward_axis="NEGATIVE_Z", up_axis="Y")
 		for o in bpy.context.selected_objects:
-			o.location.x += k * 8.0
+			# o pacote vem em centímetros (2,16 m de altura = 216): ~8,5 m no jogo
+			o.scale = (0.04, 0.04, 0.04)
+			o.location = (o.location.x * 0.04 + k * 9.0, o.location.y * 0.04, o.location.z * 0.04)
 			o.name = os.path.splitext(os.path.basename(f))[0] + "_" + o.name
 	f = objs[0] if objs else cand[0]
 	for img in bpy.data.images:
@@ -212,7 +214,9 @@ def coqueiros():
 		mat.use_nodes = True
 		nt = mat.node_tree
 		bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
-		if bsdf is not None and not bsdf.inputs["Base Color"].is_linked and dif:
+		if bsdf is not None and dif:
+			for l in list(bsdf.inputs["Base Color"].links) + list(bsdf.inputs["Alpha"].links):
+				nt.links.remove(l)
 			img = bpy.data.images.load(dif[0])
 			if img.size[0] > 1024:
 				img.scale(1024, 1024)
