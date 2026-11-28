@@ -16,7 +16,7 @@ UA = {"User-Agent": "pipa-brasil-ci (pesquisa de modelos CC0)"}
 os.makedirs(os.path.join(SAIDA, "miniaturas"), exist_ok=True)
 
 BUSCAS = {
-	"maos": ["realistic hand rigged", "first person arms rigged", "hands fps"],
+	"maos": ["hand rigged", "first person arms", "fps hands", "realistic hands"],
 	"personagens": ["realistic man rigged", "young man casual rigged", "brazilian boy", "character male t-shirt shorts rigged"],
 	"casas": ["favela", "brazilian house", "slum house", "low poly house realistic", "rooftop water tank"],
 	"vegetacao": ["palm tree", "tropical tree", "banana tree", "tree low poly realistic", "bush"],
@@ -48,7 +48,7 @@ for grupo, termos in BUSCAS.items():
 	vistos = set()
 	n = 0
 	for termo in termos:
-		q = urllib.parse.urlencode({"type": "models", "q": termo, "license": "cc0", "downloadable": "true", "sort_by": "-likeCount", "count": 12})
+		q = urllib.parse.urlencode({"type": "models", "q": termo, "downloadable": "true", "count": 24})
 		try:
 			res = json.loads(pegar("https://api.sketchfab.com/v3/search?" + q))
 		except Exception as e:
@@ -56,6 +56,10 @@ for grupo, termos in BUSCAS.items():
 			continue
 		for m in res.get("results", []):
 			if m["uid"] in vistos:
+				continue
+			lic0 = (m.get("license") or {}).get("label", "")
+			# só domínio público (CC0) ou atribuição simples (CC BY, com crédito)
+			if not ("CC0" in lic0 or lic0.strip() == "CC Attribution"):
 				continue
 			vistos.add(m["uid"])
 			n += 1
