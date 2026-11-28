@@ -33,6 +33,41 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-102 — Correção de cor e sombra de contato (2026-11-27)
+Ambiente com ajuste de contraste (1,07) e de cor (1,1). Paredes escurecem no
+pé (oclusão falsa, sem custo de SSAO, que a versão Web não tem) e ganham a
+faixa de umidade/barro comum nas casas do bairro.
+
+### D-101 — Detalhes das casas e coqueiros de verdade (2026-11-27)
+Fachada da frente com relógio de luz e fio, cano da calha, número, ar-condicionado
+no térreo, toldo listrado no comércio e parabólica na laje (não no Leve). Tudo
+entra nas mesmas duas malhas de detalhes (sem custo de desenho extra).
+Coqueiros: pacote CC0 do Yughues (OpenGameArt), 5 modelos, convertidos pelos
+OBJ (o FBX do pacote é antigo). O obstáculo da física segue o tronco e a copa
+de cada modelo. As casas do iagoDev e a Favela Modular esperam a chave do Sketchfab.
+
+### D-100 — Mata da serra em cartões (2026-11-27)
+As 1.400 bolas verdes viraram árvores do Poly Haven (CC0) fotografadas de 4
+lados no Blender e mostradas como cartões que olham para a câmera (2 triângulos
+cada; a árvore original tem até 3,9 milhões). Quantidade pela qualidade:
+Leve 1.400, Alto 2.000, Ultra 2.600. Sem os arquivos, voltam as bolas.
+
+### D-099 — Personagens Microsoft Rocketbox (2026-11-27)
+Os bonecos feitos por código foram trocados por 7 personagens Rocketbox (MIT,
+~7 mil triângulos, texturas 1K). Mesma interface do Boneco: o braço da linha
+vai até a mão da física com IK de dois ossos no esqueleto, a outra mão fica na
+barriga e abraça ao puxar, a cabeça segue a pipa. Bonés variados por cima.
+A física não muda. `--boneco-antigo` volta ao boneco antigo; sem os arquivos,
+ele também volta sozinho. Em primeira pessoa continuam só as duas mãos.
+
+### D-098 — Processo de recursos 3D no GitHub (2026-11-27)
+`.github/workflows/recursos.yml` baixa os recursos aprovados, converte no
+Blender (sem tela) e guarda só as versões leves no repositório; as prévias vão
+para o ramo `previas`. O passo do Sketchfab só roda se o segredo
+`SKETCHFAB_API_TOKEN` existir: a chave é lida do ambiente, usada só no cabeçalho
+da requisição e nunca impressa nem gravada. Backup antes de começar: ramo
+`backup-antes-graficos-v2` (versão 0.32.1).
+
 ### D-097 — Auditoria gráfica e pesquisa de recursos externos (2026-11-27)
 Pedido do Lucas (segunda etapa gráfica): auditar o que causa a aparência
 low-poly e buscar modelos gratuitos de verdade. Relatório completo no doc

@@ -210,7 +210,14 @@ def coqueiros():
 		if img.size[0] > 1024:
 			img.scale(1024, 1024)
 	dif = glob.glob(os.path.join(T, "coqueiros", "**", "diffuse.tga"), recursive=True)
-	for mat in bpy.data.materials:
+	# os OBJ vêm sem .mtl: um material só, com a textura do pacote, em todos
+	palma = bpy.data.materials.new("palma")
+	for o in bpy.context.scene.objects:
+		if o.type == "MESH":
+			o.data.materials.clear()
+			o.data.materials.append(palma)
+	relatorio.append({"tipo": "coqueiros_textura", "difusa": dif, "materiais": [m.name for m in bpy.data.materials]})
+	for mat in [palma]:
 		mat.use_nodes = True
 		nt = mat.node_tree
 		bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
