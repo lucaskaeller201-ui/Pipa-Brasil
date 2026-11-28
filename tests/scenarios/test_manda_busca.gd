@@ -340,3 +340,60 @@ func test_aparada_pela_linha_tambem_embola_pela_rabiola() -> void:
 		w.step(DT)
 		assert_true(b.caught_by_tail, "presa pela rabiola: vem rodando")
 	assert_true(w.is_finite_state())
+
+
+## D-105: mandando linha com a avoada no aparo, o embolo firma; aí dá para
+## trazer na braçada rápida (5,5 m/s) sem decepar.
+func test_embolo_firme_aguenta_puxada_rapida() -> void:
+	var w := _montagem()
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	assert_true(_embolar(w))
+	while b.cut_age < KiteCombatSystem.DECEPAR_GRACE + 0.1:
+		w.step(DT)
+	var f0 := w.combat.firmeza(b)
+	a.input.haul_speed = -1.0   # manda linha: a pipa gira e o embolo aperta
+	for i in roundi(2.5 / DT):
+		w.step(DT)
+	a.input.clear()
+	var f1 := w.combat.firmeza(b)
+	var avisos := _eventos_do_tipo(w.combat.take_events(), "embolo_firme").size()
+	a.input.haul_speed = 5.5
+	var decepou := 0
+	for i in roundi(2.0 / DT):
+		w.step(DT)
+		decepou += _eventos_do_tipo(w.combat.take_events(), "decepou").size()
+		if b.captured:
+			break
+	a.input.clear()
+	print("      [embolo firme] firmeza %.1f → %.1f; limite de decepar %.1f m/s; decepou %d; aparada %s" % [
+		f0, f1, w.combat.decepar_rapido(b) if not b.captured else 0.0, decepou, b.captured])
+	assert_true(f1 >= KiteCombatSystem.FIRMEZA_AVISO, "mandando linha o embolo firmou (%.1f)" % f1)
+	assert_eq(avisos, 1, "avisou que embolou firme")
+	assert_eq(decepou, 0, "embolo firme: a braçada rápida não decepa")
+	assert_true(b.caught_by == a or b.captured, "a avoada continua vindo")
+
+
+## D-105: a avoada desce pela linha até a mão, um pouco mais rápido que a
+## linha que entra (não precisa tirar a própria pipa do alto).
+func test_avoada_desce_pela_linha_mais_rapido_que_a_puxada() -> void:
+	var w := _montagem()
+	var a: Flyer = w.flyers[0]
+	var b: Flyer = w.flyers[1]
+	assert_true(_embolar(w))
+	while b.cut_age < KiteCombatSystem.DECEPAR_GRACE + 0.1:
+		w.step(DT)
+	var l: Dictionary = w.combat.links[0]
+	var falta0 := a.line.rest_total() - float(l["m"])
+	var linha0 := a.line_length()
+	a.input.haul_speed = 3.0
+	for i in roundi(2.0 / DT):
+		w.step(DT)
+		if b.captured:
+			break
+	a.input.clear()
+	var recolheu := linha0 - a.line_length()
+	var falta1 := 0.0 if b.captured else a.line.rest_total() - float(l["m"])
+	print("      [desce pela linha] faltava %.1f m até a mão, falta %.1f m; linha recolhida %.1f m" % [falta0, falta1, recolheu])
+	assert_true(falta0 - falta1 > recolheu * 1.25, "a avoada chega mais rápido que a linha que entra")
+	assert_true(falta0 - falta1 < recolheu * 2.0, "mas só um pouco mais rápido")

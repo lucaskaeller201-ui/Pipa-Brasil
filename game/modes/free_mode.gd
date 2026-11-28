@@ -510,7 +510,10 @@ func _evento(e: Dictionary) -> void:
 				if quem > 0:
 					_messages.append("Embolou na linha de %s!" % _nome_obj(quem))
 				else:
-					_messages.append("EMBOLOU! Puxe devagar para trazer.")
+					_messages.append("EMBOLOU! Mande linha para firmar, ou puxe devagar.")
+		"embolo_firme":
+			if _dono(int(e["catcher"])) == 0:
+				_messages.append("EMBOLO FIRME! Pode trazer rápido.")
 		"decepou":
 			var quem := _dono(int(e["catcher"]))
 			if quem >= 0:

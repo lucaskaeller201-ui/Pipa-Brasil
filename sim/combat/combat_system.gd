@@ -30,7 +30,16 @@ const CAPTURE_DISTANCE := 3.0  ## m da mão em que a pipa enroscada é considera
 const TANGLE_TIME := 0.25      ## s mandando linha em contato para embolar (D-029)
 const TANGLE_GAP := 0.3        ## s: encostou há menos que isso ainda conta como "em contato"
 const DECEPAR_METROS := 3.0   ## m de linha puxada rápido em contato para decepar (D-044)
-const DECEPAR_RAPIDO := 3.5   ## m/s: com a avoada no aparo, puxar acima disso vai decepando
+const DECEPAR_RAPIDO := 4.5   ## m/s: com o embolo fraco, puxar acima disso vai decepando (D-105; era 3,5)
+## D-105: embolo mais firme aguenta puxada mais rápida e mais longa.
+const FIRMEZA_RAPIDO := 0.9   ## m/s a mais no limite de decepar por ponto de firmeza
+const APERTA_POR_S := 0.6     ## firmeza ganha por segundo mandando linha (girando) com a avoada no aparo
+const FIRMEZA_MAX := 4.0      ## firmeza máxima de um embolo
+const FIRMEZA_AVISO := 2.0    ## a partir daqui avisa "embolou firme"
+## D-105: a avoada desce pela linha de quem aparou (vem um pouco mais rápido
+## que a própria pipa): metros de linha por segundo, e fração da puxada.
+const DESCE_BASE := 0.5
+const DESCE_PUXANDO := 0.4
 const FATIAR_METROS := 1.5    ## m puxados rápido (abraçando) em cima da rabiola do rival para fatiá-la (D-056)
 const SAIR_APARO := 3.0       ## s tenteando sem parar para a avoada sair do aparo (D-044)
 const PERDIDA_CHAO := 5.0     ## s com a pipa no chão até virar perdida (a linha ainda cai)
@@ -87,6 +96,7 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	_h = h
 	_clock += h
 	_advance_tangles(h)
+	_apertar_e_descer(h)
 	_chains.clear()
 	_owners.clear()
 	_groups.clear()
@@ -145,7 +155,7 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	# Puxada rápida com a avoada embolada: o embolo arrebenta.
 	for l in links:
 		var ct: Flyer = l["catcher"]
-		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > DECEPAR_RAPIDO:
+		if not bool(l["captured"]) and ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK and ct.line_rate > decepar_rapido(l["avoada"]):
 			_cut_want[l["avoada"]] = [l["chain"], maxi(0, int(l["idx"]) - 1), ct]
 	# Decepar (D-044): puxar devagar traz para a mão; puxar RÁPIDO e MUITOS
 	# metros (DECEPAR_METROS) arrebenta o embolo. Um tranco não decepa.
@@ -157,7 +167,7 @@ func solve(flyers: Array, loose: Array, h: float) -> void:
 	for av in _cut_want:
 		var quem: Flyer = (_cut_want[av] as Array)[2]
 		_cut_acc[av] = float(_cut_acc.get(av, 0.0)) + quem.line_rate * h
-		if float(_cut_acc[av]) >= DECEPAR_METROS:
+		if float(_cut_acc[av]) >= DECEPAR_METROS * firmeza(av):
 			var c: Array = _cut_want[av]
 			_pending_cuts.append([av, c[0], c[1], c[2]])
 			_cut_acc.erase(av)
@@ -277,10 +287,47 @@ func _advance_tangles(h: float) -> void:
 		if float(t["t"]) >= TANGLE_TIME:
 			_tangle.erase(chave)
 			links.append({"avoada": av, "chain": chain, "idx": clampi(int(t["idx"]), 0, chain.size() - 1),
-				"catcher": ct, "cchain": cchain, "m": float(t["m"]), "captured": false})
+				"catcher": ct, "cchain": cchain, "m": float(t["m"]), "captured": false, "forca": 1.0})
 			av.caught_by = ct
 			ct.holding += 1
 			events.append({"type": "enroscou", "flyer": av.id, "catcher": ct.id, "by_tail": cchain == ct.tail})
+
+
+## D-105: firmeza do aparo de uma avoada = soma da firmeza dos seus embolos
+## (embolada pela linha e pela rabiola conta os dois). 1 = embolo fraco.
+func firmeza(av: Flyer) -> float:
+	var f := 0.0
+	for l in links:
+		if l["avoada"] == av and not bool(l["captured"]):
+			f += float(l.get("forca", 1.0))
+	return maxf(f, 1.0)
+
+
+## Velocidade de puxada acima da qual o embolo desta avoada vai decepando.
+func decepar_rapido(av: Flyer) -> float:
+	return DECEPAR_RAPIDO + FIRMEZA_RAPIDO * (firmeza(av) - 1.0)
+
+
+## D-105: mandando linha (pipa girando) com a avoada no aparo, o embolo aperta;
+## e a avoada desce pela linha até a mão, um pouco mais rápido que a puxada.
+func _apertar_e_descer(h: float) -> void:
+	for l in links:
+		if bool(l["captured"]):
+			continue
+		var ct: Flyer = l["catcher"]
+		var av: Flyer = l["avoada"]
+		if ct.cut:
+			continue
+		if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_GIVE:
+			var antes := firmeza(av)
+			l["forca"] = minf(float(l.get("forca", 1.0)) + APERTA_POR_S * h, FIRMEZA_MAX)
+			if antes < FIRMEZA_AVISO and firmeza(av) >= FIRMEZA_AVISO:
+				events.append({"type": "embolo_firme", "flyer": av.id, "catcher": ct.id})
+		var cchain: ParticleChain = l["cchain"]
+		if cchain == ct.line:
+			var puxando := ct.line_rate if ct.kite.spin_mode == KiteBody.SpinMode.SPIN_LOCK else 0.0
+			var desce := (DESCE_BASE + DESCE_PUXANDO * puxando) * h
+			l["m"] = minf(float(l["m"]) + desce, cchain.rest_total() - 0.1)
 
 
 ## Decepa o pedaço da avoada (linha solta ou rabiola) no segmento indicado:
