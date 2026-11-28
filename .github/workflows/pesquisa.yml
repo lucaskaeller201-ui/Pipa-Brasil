@@ -1,0 +1,31 @@
+# Pesquisa de recursos 3D gratuitos (D-097): busca e baixa só as miniaturas
+# para avaliar. Publica no ramo "pesquisa". Não muda o jogo.
+
+name: Pesquisa de recursos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/pesquisar_recursos.py
+
+permissions:
+  contents: write
+
+jobs:
+  pesquisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pesquisar
+        run: python3 tools/pesquisar_recursos.py
+      - name: Publicar no ramo "pesquisa"
+        run: |
+          cd pesquisa
+          git init -q -b pesquisa
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Pesquisa de recursos ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pesquisa
