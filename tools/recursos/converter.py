@@ -106,8 +106,9 @@ def personagem(nome):
 		if os.path.exists(cand):
 			img.filepath = cand
 			img.reload()
-		if img.size[0] > 1024:
-			img.scale(1024, 1024)
+		# D-103: 512 px (com 1K a memória de vídeo subiu 126 MB; no celular pesa)
+		if img.size[0] > 512:
+			img.scale(512, 512)
 	# materiais: liga as fotos que o FBX não ligou; opacidade vira recorte
 	fotos = {os.path.basename(f).lower(): f for f in glob.glob(os.path.join(tex, "*"))}
 	for mat in bpy.data.materials:
@@ -117,7 +118,10 @@ def personagem(nome):
 		bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
 		if bsdf is None:
 			continue
-		usadas = [n.image.name.lower() for n in nt.nodes if n.type == "TEX_IMAGE" and n.image]
+		# brilho especular por foto não vale o custo: sai (fica a rugosidade fixa)
+		for n in list(nt.nodes):
+			if n.type == "TEX_IMAGE" and n.image and "specular" in n.image.name.lower():
+				nt.nodes.remove(n)
 		for n in nt.nodes:
 			if n.type == "TEX_IMAGE" and n.image and "opacity" in n.image.name.lower():
 				nt.links.new(n.outputs["Color"], bsdf.inputs["Alpha"])
@@ -128,8 +132,8 @@ def personagem(nome):
 			for k, f in fotos.items():
 				if "color" in k and (chave in k or k.split("_")[0] in chave):
 					img = bpy.data.images.load(f)
-					if img.size[0] > 1024:
-						img.scale(1024, 1024)
+					if img.size[0] > 512:
+						img.scale(512, 512)
 					no = nt.nodes.new("ShaderNodeTexImage")
 					no.image = img
 					nt.links.new(no.outputs["Color"], bsdf.inputs["Base Color"])

@@ -7,7 +7,7 @@ render_mode world_vertex_coords, cull_disabled;
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec3 tom : source_color = vec3(1.0);
-uniform float brilho = 1.35;
+uniform float brilho = 1.75;
 varying vec2 uv_atlas;
 varying float altura;
 
@@ -29,7 +29,10 @@ void vertex() {
 
 void fragment() {
 	vec4 c = texture(atlas, uv_atlas);
-	ALBEDO = c.rgb * tom * brilho * mix(1.0, 0.75, altura);
+	// a foto saiu escura (sol de lado no Blender): clareia e puxa para o verde
+	vec3 cor = c.rgb * tom * brilho * mix(1.08, 0.8, altura);
+	float cinza = dot(cor, vec3(0.3, 0.59, 0.11));
+	ALBEDO = mix(vec3(cinza), cor, 1.35) * vec3(0.95, 1.05, 0.88);
 	ALPHA = c.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.45;
 	ROUGHNESS = 0.95;
