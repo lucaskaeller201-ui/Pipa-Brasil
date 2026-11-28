@@ -157,14 +157,17 @@ func test_puxar_linha_com_a_mao_encurta_e_acelera() -> void:
 	assert_true(r[3] > 2.0, "a pipa ganha velocidade")
 
 
-## Gesto de deslizar para cima: dá linha no ritmo do dedo.
+## Gesto de deslizar para cima: dá linha no ritmo do dedo enquanto a pipa
+## puxa (D-104: com a linha frouxa ela não sai sobrando).
 func test_dar_linha_com_a_mao_alonga() -> void:
 	var w := _voo_estavel()
 	var l0 := w.line_length()
 	w.input.haul_speed = -2.0
-	_rodar(w, 2.0)
+	var r := _rodar(w, 2.0)
 	w.input.clear()
-	assert_near(w.line_length() - l0, 4.0, 0.1, "deu 4 m em 2 s")
+	print("      [dar linha 2 m/s, 2 s] linha %.1f → %.1f m, tensão máx %.2f N" % [l0, w.line_length(), r[0]])
+	assert_true(w.line_length() - l0 > 2.0, "a pipa levou linha (%.1f m)" % (w.line_length() - l0))
+	assert_true(w.line_length() - l0 <= 4.0 + 0.05, "nunca mais que o dedo deu")
 	w.input.haul_speed = -50.0
 	_rodar(w, 1.0)
 	assert_true(w.line_length() - l0 <= 4.0 + Pilot.HAUL_MAX_SPEED + 0.1, "a mão tem velocidade máxima")
