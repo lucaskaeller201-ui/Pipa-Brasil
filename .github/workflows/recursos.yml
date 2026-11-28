@@ -1,0 +1,74 @@
+# Recursos 3D gratuitos (D-098): baixa, converte no Blender e guarda as
+# versões leves no repositório (assets/personagens, assets/vegetacao).
+# As prévias renderizadas vão para o ramo "previas", para conferir.
+# O passo do Sketchfab só roda se o segredo SKETCHFAB_API_TOKEN existir; a
+# chave nunca é impressa nem gravada em arquivo.
+
+name: Recursos 3D
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/recursos/**
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: recursos
+  cancel-in-progress: true
+
+jobs:
+  recursos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender (em cache)
+        id: cache-blender
+        uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: blender-4.2.3
+      - name: Baixar o Blender
+        if: steps.cache-blender.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/blender
+          curl -fsSL --retry 3 -o b.tar.xz https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz
+          tar -xf b.tar.xz -C ~/blender --strip-components=1
+      - name: Baixar os recursos gratuitos
+        run: |
+          sudo apt-get install -y -qq p7zip-full > /dev/null
+          python3 tools/recursos/baixar.py
+      - name: Baixar do Sketchfab (só com a chave)
+        env:
+          SKETCHFAB_API_TOKEN: ${{ secrets.SKETCHFAB_API_TOKEN }}
+        run: |
+          if [ -z "$SKETCHFAB_API_TOKEN" ]; then echo "Sem chave do Sketchfab: pulando (casas iagoDev, mãos A, coqueiros CC BY)."; exit 0; fi
+          python3 tools/recursos/baixar_sketchfab.py
+      - name: Converter no Blender
+        run: |
+          sudo apt-get install -y -qq libxi6 libxkbcommon0 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 > /dev/null
+          ~/blender/blender -b -P tools/recursos/converter.py 2>&1 | grep -v "^Fra:" | tail -150
+      - name: Guardar no repositório
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add assets/personagens assets/vegetacao 2>/dev/null || true
+          if git diff --cached --quiet; then echo "Nada mudou."; else
+            git commit -q -m "Recursos 3D convertidos (personagens, vegetação)"
+            git pull -q --rebase origin main
+            git push -q origin HEAD:main
+          fi
+      - name: Prévias no ramo "previas"
+        run: |
+          cd previas
+          git init -q -b previas
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Prévias ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" previas
