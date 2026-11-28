@@ -246,6 +246,35 @@ def coqueiros():
 	render(os.path.join(PREVIAS, "coqueiros.png"), tam=(768, 512))
 
 
+# ---------------- Sketchfab (só existe se a chave estava nos segredos) ----------------
+def sketchfab(nome):
+	limpar()
+	pasta = os.path.join(T, "sketchfab", nome)
+	gltf = glob.glob(os.path.join(pasta, "**", "*.gltf"), recursive=True)
+	if not gltf:
+		return
+	bpy.ops.import_scene.gltf(filepath=gltf[0])
+	for img in bpy.data.images:
+		if img.size[0] > 1024:
+			img.scale(1024, max(1, int(1024 * img.size[1] / img.size[0])))
+	saida = os.path.join(SAIDA, "sketchfab", nome + ".glb")
+	os.makedirs(os.path.dirname(saida), exist_ok=True)
+	bpy.ops.export_scene.gltf(filepath=saida, export_format="GLB", export_image_format="JPEG", export_jpeg_quality=85, export_yup=True)
+	mn, mx = caixa()
+	relatorio.append({"tipo": "sketchfab", "nome": nome, "triangulos": triangulos(), "tamanho": [round(v, 2) for v in (mx - mn)],
+		"mb": round(os.path.getsize(saida) / 1e6, 2)})
+	render(os.path.join(PREVIAS, "sketchfab_" + nome + ".png"), tam=(768, 512))
+
+
+for n in sorted(os.listdir(os.path.join(T, "sketchfab"))) if os.path.isdir(os.path.join(T, "sketchfab")) else []:
+	try:
+		sketchfab(n)
+	except Exception as e:
+		relatorio.append({"erro": str(e), "etapa": "sketchfab", "args": n})
+if os.path.exists(os.path.join(T, "sketchfab_creditos.md")):
+	os.makedirs(os.path.join(SAIDA, "sketchfab"), exist_ok=True)
+	shutil.copy(os.path.join(T, "sketchfab_creditos.md"), os.path.join(SAIDA, "sketchfab", "CREDITOS.md"))
+
 for etapa, args in [(personagem, n) for n in ["Male_Adult_01", "Male_Adult_17", "Male_Adult_04", "Male_Adult_16", "Male_Adult_09", "Male_Adult_11", "Male_Adult_20"]] + \
 		[(arvore, n) for n in ["island_tree_01", "tree_small_02", "jacaranda_tree"]] + [(coqueiros, None)]:
 	try:
