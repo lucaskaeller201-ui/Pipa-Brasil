@@ -33,6 +33,12 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-103 — Medir o custo de desenho (2026-11-27)
+Nas capturas do CI (`--auto`) o jogo imprime chamadas de desenho, triângulos,
+objetos e memória de vídeo nos quadros 100, 200 e 300. O FPS do CI não vale
+(não tem placa de vídeo); esses números comparam versões de forma justa. O
+FPS real é o do contador do jogo no iPhone.
+
 ### D-102 — Correção de cor e sombra de contato (2026-11-27)
 Ambiente com ajuste de contraste (1,07) e de cor (1,1). Paredes escurecem no
 pé (oclusão falsa, sem custo de SSAO, que a versão Web não tem) e ganham a

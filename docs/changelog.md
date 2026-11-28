@@ -1,5 +1,14 @@
 # Histórico de alterações
 
+## 0.33.0 — 2026-11-27
+
+- Pipeiros de verdade: 7 personagens Microsoft Rocketbox (MIT) com roupas e cabelos diferentes, bonés variados; o braço segue a mão da física, a outra mão abraça a linha, a cabeça acompanha a pipa.
+- Mata da serra com árvores de verdade do Poly Haven (cartões de 4 lados) no lugar das bolas verdes; mais árvores no Ultra.
+- Coqueiros de verdade (CC0) na rua e na orla.
+- Casas com relógio de luz e fiação, cano da calha, número, ar-condicionado no térreo, toldo listrado no comércio e parabólica.
+- Cores com mais contraste; sombra no pé das paredes e faixa de umidade.
+- Processo automático de recursos 3D no GitHub (Blender), com o Sketchfab preparado para quando houver a chave.
+
 ## 0.32.1 — 2026-11-27
 
 - Olhar em volta com a pipa na mão: arrastar para cima olha para cima.

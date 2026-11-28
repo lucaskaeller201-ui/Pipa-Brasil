@@ -1,6 +1,20 @@
 # Progresso
 
-Atualizado em 2026-11-25 (versão 0.32.1).
+Atualizado em 2026-11-27 (versão 0.33.0).
+
+## Evolução gráfica (0.33.0, D-098 a D-103)
+
+| Item | Situação |
+| --- | --- |
+| Backup antes de começar (ramo `backup-antes-graficos-v2`) | Feito |
+| Processo de recursos 3D no GitHub (Blender) | Feito (D-098) |
+| Personagens Rocketbox nas cenas em terceira pessoa | Feito (D-099), aguardando teste do Lucas |
+| Mãos A (Sketchfab) em primeira pessoa | Preparado; espera a chave `SKETCHFAB_API_TOKEN` |
+| Casas iagoDev e Favela Modular (Sketchfab) | Preparado; espera a chave |
+| Mata da serra em cartões de árvores reais | Feito (D-100) |
+| Coqueiros reais, detalhes das fachadas | Feito (D-101) |
+| Correção de cor, sombra de contato | Feito (D-102) |
+| Medição do custo de desenho nas capturas | Feito (D-103) |
 
 ## Fase atual: 5 — Modo livre na laje (segunda versão, depois do teste no iPhone)
 
