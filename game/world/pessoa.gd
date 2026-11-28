@@ -42,11 +42,12 @@ func construir_pessoa(i: int, bone: bool, cor: Color) -> void:
 	if achados.is_empty():
 		return
 	_esq = achados[0] as Skeleton3D
-	for chave in {"ombro_d": "r upperarm", "cot_d": "r forearm", "mao_d": "r hand",
+	var nomes := {"ombro_d": "r upperarm", "cot_d": "r forearm", "mao_d": "r hand",
 			"ombro_e": "l upperarm", "cot_e": "l forearm", "mao_e": "l hand",
 			"cabeca": "head", "coluna": "spine1", "coluna2": "spine2",
-			"clav_d": "r clavicle", "clav_e": "l clavicle"}.items():
-		_ossos[chave[0]] = _achar_osso(chave[1])
+			"clav_d": "r clavicle", "clav_e": "l clavicle"}
+	for chave in nomes:
+		_ossos[chave] = _achar_osso(String(nomes[chave]))
 	for b in _esq.get_bone_count():
 		_repouso[b] = _esq.get_bone_pose_rotation(b)
 	if bone and _ossos["cabeca"] >= 0:

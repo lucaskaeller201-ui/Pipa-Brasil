@@ -489,7 +489,8 @@ static func _carregar_palmas() -> void:
 		var npe := 0
 		var ncopa := 0
 		for sup in malha.get_surface_count():
-			for v in (malha.surface_get_arrays(sup)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			var verts: PackedVector3Array = malha.surface_get_arrays(sup)[Mesh.ARRAY_VERTEX]
+			for v: Vector3 in verts:
 				var w := t * v
 				if w.y < caixa.position.y + caixa.size.y * 0.04:
 					pe += w
