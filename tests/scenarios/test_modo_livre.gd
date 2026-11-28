@@ -127,6 +127,13 @@ func test_pipa_na_mao_escolher_subir_e_recolher() -> void:
 	assert_true(modo.you_on_hand, "recolheu: pipa na mão")
 	assert_null(modo.you())
 	assert_eq(int(modo.players[0]["stock"]), 1, "a enroscada foi para o estoque")
+	# D-106: as duas vão para a animação de guardar no canto da laje
+	var g := modo.take_guardar()
+	assert_eq(g.size(), 2, "a aparada e a sua pipa para guardar")
+	assert_true(g[0][0] == av and not bool(g[0][2]), "primeiro a aparada (pela linha)")
+	assert_false(bool(g[0][1]), "embolada pela linha, não pela rabiola")
+	assert_true(g[1][0] == eu and bool(g[1][2]), "depois a sua")
+	assert_true(modo.take_guardar().is_empty(), "a fila esvazia")
 	for i in 120:
 		modo.update(DT)
 	assert_false(modo.world.flyers.has(av), "a avoada saiu do céu")

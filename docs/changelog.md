@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.33.3 — 2026-11-28
+
+- Animação de guardar: o pipeiro pega a pipa (aparada ou a sua), tira a linha ou a rabiola e põe no canto da laje, onde elas ficam empilhadas.
+- Parou de abraçar, as mãos param na hora.
+
 ## 0.33.2 — 2026-11-28
 
 - Aparo: mandando linha com a pipa embolada, o embolo firma e dá para trazer rápido sem decepar.

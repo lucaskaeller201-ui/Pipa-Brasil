@@ -75,7 +75,7 @@ var _corpos: Array = []         # boneco de cada participante
 var _dedos := {}                # índice -> {"ini": Vector2, "t0": float, "ult": Vector2}
 var _dy_quadro := 0.0           # pixels deslizados neste quadro (+ = para baixo)
 var _velocidade_mao := 0.0      # m/s (+ = puxando)
-var _puxada := Vector2.ZERO     # D-104: (média do dedo, puxada alisada) em m/s
+var _puxada := Vector3.ZERO     # D-104: (média do dedo, puxada alisada, tempo sem puxar)
 var _giro_carretilha := 0.0
 var _embalo := 0.0              # m/s de linha ainda saindo pelo embalo da carretilha
 var _toque_ate := -1.0          # até quando a mão recolhe a folga do desbico
@@ -363,20 +363,25 @@ func _physics_process(delta: float) -> void:
 
 const PUXADA_MEDIA := 0.08      ## s: janela da média do dedo (os toques chegam aos pulos)
 const PUXADA_QUEDA := 8.0       ## m/s²: quanto a puxada perde por segundo entre braçadas
+const PUXADA_PAUSA := 0.15      ## s sem o dedo puxar: parou de abraçar, a puxada para na hora (D-106)
 
 
-## D-104: puxada alisada. estado = (média do dedo, puxada). A média junta os
-## toques que chegam fora do ritmo dos quadros; entre uma braçada e outra
-## (dedo voltando) a puxada cai devagar, no embalo — na vida real a outra mão
-## está puxando nessa hora. Mandar linha corta na hora.
-static func suavizar_puxada(estado: Vector2, dedo: float, delta: float) -> Vector2:
+## D-104: puxada alisada. estado = (média do dedo, puxada, tempo sem puxar).
+## A média junta os toques que chegam fora do ritmo dos quadros; na volta do
+## dedo para a próxima braçada (menos de PUXADA_PAUSA) a puxada segue no
+## embalo. D-106: parou de abraçar (dedo parado ou fora da tela por mais que
+## isso), para na hora. Mandar linha corta na hora.
+static func suavizar_puxada(estado: Vector3, dedo: float, delta: float) -> Vector3:
 	if dedo < -0.3:
-		return Vector2.ZERO
+		return Vector3.ZERO
+	var sem := 0.0 if dedo > 0.3 else estado.z + delta
+	if sem > PUXADA_PAUSA:
+		return Vector3(0.0, 0.0, sem)
 	var media := lerpf(estado.x, maxf(dedo, 0.0), 1.0 - exp(-delta / PUXADA_MEDIA))
 	var puxada := media if media >= estado.y else maxf(media, estado.y - PUXADA_QUEDA * delta)
 	if puxada < 0.05:
 		puxada = 0.0
-	return Vector2(media, puxada)
+	return Vector3(media, puxada, sem)
 
 
 func _ler_comandos(eu: Flyer, delta: float) -> void:
@@ -503,6 +508,7 @@ func _process(delta: float) -> void:
 
 	tq = Time.get_ticks_usec()
 	_atualizar_vistas()
+	_guardar_passo(delta)
 	tq = _medir_tempo("vistas", tq)
 	_posicionar_camera(false)
 	_atualizar_maos(modo.you(), delta)
@@ -512,6 +518,8 @@ func _process(delta: float) -> void:
 	_linhas.call("limpar")
 	for f in modo.world.flyers:
 		var fl: Flyer = f
+		if _tomadas.has(fl):
+			continue   # D-106: está sendo guardada (a animação desenha o nó)
 		var cor: Color = CORES[fl.tag] if fl.tag >= 0 else Color(0.85, 0.85, 0.85)
 		if fl.tag == 0:
 			cor = Estilos.LINHAS[modo.you_line]["cor"]   # a linha que você escolheu
@@ -537,6 +545,22 @@ func _process(delta: float) -> void:
 			pts.append(cabresto + tp.basis * Vector3(cos(a) * 0.009, sin(a) * 0.009, -0.004 + 0.003 * float(k) / 10.0))
 		pts.append(cabresto)
 		_linhas.call("desenhar_cadeia", pts, Estilos.LINHAS[modo.you_line]["cor"], 0.0012, 1.0, 1)
+	if _guardar_ativo() and int(_guardando["fase"]) <= 2 and is_instance_valid(_guardando["v"]):
+		# D-106: as voltas da linha (ou da rabiola) no cabresto vão sumindo
+		var gv: Node3D = _guardando["v"]
+		var tp2 := gv.global_transform
+		var cab2 := tp2 * (_guardando["def"] as KiteDefinition).tow_point
+		var resta := 1.0 if int(_guardando["fase"]) == 1 else 1.0 - clampf(float(_guardando["t"]) / GUARDAR_TIRAR, 0.0, 1.0)
+		var pts2 := PackedVector3Array()
+		var n2 := int(30.0 * resta)
+		for k in n2:
+			var a2 := float(k) / 10.0 * TAU
+			pts2.append(cab2 + tp2.basis * Vector3(cos(a2) * 0.01, sin(a2) * 0.01, -0.004 + 0.003 * float(k) / 10.0))
+		if n2 > 1:
+			# a ponta solta pendurada
+			pts2.append(pts2[pts2.size() - 1] + Vector3(0.0, -0.25 * resta, 0.0))
+			var cor2: Color = Estilos.LINHAS[modo.you_line]["cor"] if bool(_guardando["sua"]) else (Color(0.95, 0.95, 0.95) if bool(_guardando["rabiola"]) else Color(0.85, 0.85, 0.85))
+			_linhas.call("desenhar_cadeia", pts2, cor2, 0.003 if bool(_guardando["rabiola"]) else 0.0012, 1.0, 1)
 	tq = _medir_tempo("linhas", tq)
 	var eu := modo.you()
 	_tratar_acontecimentos()
@@ -556,10 +580,14 @@ func _process(delta: float) -> void:
 
 
 func _atualizar_vistas() -> void:
+	for g in modo.take_guardar():
+		_tomar(g[0], bool(g[1]), bool(g[2]))
 	var vivos := {}
 	for f in modo.world.flyers:
 		var fl: Flyer = f
 		vivos[fl] = true
+		if _tomadas.has(fl):
+			continue
 		if not _vistas.has(fl):
 			var v: Node3D = KiteView.new()
 			add_child(v)
@@ -570,9 +598,106 @@ func _atualizar_vistas() -> void:
 		(_vistas[fl] as Node3D).call("atualizar", fl.kite)
 	for fl in _vistas.keys():
 		if not vivos.has(fl):
-			(_vistas[fl] as Node).queue_free()
+			if not _tomadas.has(fl):
+				(_vistas[fl] as Node).queue_free()
 			_vistas.erase(fl)
 			_estilo_de.erase(fl)
+	for fl in _tomadas.keys():
+		if not vivos.has(fl):
+			_tomadas.erase(fl)
+
+
+## D-106: a vista desta pipa passa para a animação de guardar.
+func _tomar(fl: Flyer, rabiola: bool, sua: bool) -> void:
+	if _tomadas.has(fl) or not _vistas.has(fl):
+		return
+	var v: Node3D = _vistas[fl]
+	_tomadas[fl] = true
+	_guardar_fila.append({"v": v, "def": fl.kite.definition, "rabiola": rabiola, "sua": sua, "origem": v.global_transform})
+
+
+## Onde a pipa fica segura na frente do pipeiro (como na largada).
+func _guardar_segura(na_mao: bool) -> Transform3D:
+	var base: Vector3 = modo.players[0]["base"]
+	var b := Basis.IDENTITY   # de frente para o vento (-Z), como na largada
+	var pos := base + b * (Vector3(0.0, 1.15, -0.45) if na_mao else Vector3(-0.45, 1.05, -0.35))
+	return Transform3D(b * Basis(Vector3.RIGHT, -0.55), pos)
+
+
+## Lugar da k-ésima pipa guardada: deitada no canto da sua laje.
+func _guardar_canto(k: int) -> Transform3D:
+	var base: Vector3 = modo.players[0]["base"]
+	var giro := Basis(Vector3.UP, 0.35 * float(k % 5) - 0.6)
+	var pos := base + Vector3(3.0 + 0.06 * float(k % 3), 0.04 + 0.03 * float(k), -2.3 + 0.05 * float(k % 2))
+	return Transform3D(giro * Basis(Vector3.RIGHT, -PI * 0.5), pos)
+
+
+func _guardar_ativo() -> bool:
+	return not _guardando.is_empty()
+
+
+func _guardar_passo(delta: float) -> void:
+	if _guardando.is_empty():
+		if _guardar_fila.is_empty():
+			return
+		_guardando = _guardar_fila.pop_front()
+		_guardando["t"] = 0.0
+		_guardando["fase"] = 1
+		# com a sua pipa na mão, o pipeiro usa as duas mãos (animação inteira)
+		_guardando["na_mao"] = modo.you_on_hand
+		var quem := "a sua pipa" if bool(_guardando["sua"]) else "a aparada"
+		_avisar("Pegando %s…" % quem)
+	var g := _guardando
+	var v: Node3D = g["v"]
+	if not is_instance_valid(v):
+		_guardando = {}
+		return
+	g["t"] = float(g["t"]) + delta
+	var t: float = g["t"]
+	var segura := _guardar_segura(bool(g["na_mao"]))
+	match int(g["fase"]):
+		1:
+			var k := smoothstep(0.0, 1.0, t / GUARDAR_CHEGAR)
+			var o: Transform3D = g["origem"]
+			v.global_transform = Transform3D(o.basis.orthonormalized().slerp(segura.basis, k), o.origin.lerp(segura.origin, k))
+			if t >= GUARDAR_CHEGAR:
+				g["fase"] = 2
+				g["t"] = 0.0
+				if bool(g["sua"]):
+					_avisar("Desamarrando a linha do cabresto…")
+				else:
+					_avisar("Tirando a rabiola do aparo…" if bool(g["rabiola"]) else "Tirando a linha do aparo…")
+		2:
+			v.global_transform = segura
+			v.rotate_object_local(Vector3.FORWARD, sin(t * 9.0) * 0.05)
+			if t >= GUARDAR_TIRAR:
+				g["fase"] = 3
+				g["t"] = 0.0
+				g["de"] = v.global_transform
+				g["slot"] = _pilha.size()
+				_avisar("Guardando no canto da laje…")
+		3:
+			var k := smoothstep(0.0, 1.0, t / GUARDAR_POR)
+			var de: Transform3D = g["de"]
+			var para := _guardar_canto(int(g["slot"]))
+			var pos := de.origin.lerp(para.origin, k) + Vector3(0.0, 0.35 * sin(k * PI), 0.0)
+			v.global_transform = Transform3D(de.basis.orthonormalized().slerp(para.basis, k), pos)
+			if t >= GUARDAR_POR:
+				v.global_transform = para
+				_pilha.append(v)
+				while _pilha.size() > PILHA_MAX:
+					var velha: Node3D = _pilha.pop_front()
+					if is_instance_valid(velha):
+						velha.queue_free()
+				_guardando = {}
+				if _guardar_fila.is_empty():
+					_avisar("Guardada no canto da laje! Estoque: %d" % int(modo.players[0]["stock"]))
+
+
+## Onde a pipa da animação está agora (para a câmera, as mãos e o boneco).
+func _guardar_ponto() -> Vector3:
+	var v: Node3D = _guardando.get("v")
+	return v.global_position if v != null and is_instance_valid(v) else (modo.players[0]["base"] as Vector3) + Vector3(0.0, 1.1, -0.5)
 
 
 # ---------------- câmera ----------------
@@ -662,6 +787,13 @@ func _posicionar_camera(imediato: bool) -> void:
 ## D-089: os olhos do pipeiro com a pipa na mão (e na largada).
 func _olhos_largada() -> Transform3D:
 	var base: Vector3 = modo.players[0]["base"]
+	if _guardar_ativo() and bool(_guardando["na_mao"]) and _lanc_fase == 0:
+		# D-106: olha a pipa que está guardando (e o canto da laje no fim)
+		var olho_g := base + Vector3(0.0, 1.62, 0.0)
+		var mira_g := _guardar_ponto()
+		if int(_guardando["fase"]) == 1:
+			mira_g = mira_g.lerp(_guardar_segura(true).origin, 0.5)
+		return Transform3D(Basis.looking_at(mira_g - olho_g + Vector3(0.0, 0.001, 0.0), Vector3.UP), olho_g)
 	if _lanc_fase >= 1 and _lanc_fase <= 3:
 		var pose := _pose_largada()
 		var olho: Vector3 = (pose["corpo"] as Vector3) + Vector3(0.0, 1.62, 0.0)
@@ -722,6 +854,23 @@ func _atualizar_maos(eu: Flyer, delta: float) -> void:
 			estado["pipa_t"] = inv * _pipa_mao.global_transform
 			estado["corpo"] = inv.basis * Basis(Vector3.UP, _corpos[0].rotation.y)
 			estado["cabresto"] = inv * (_pipa_mao.global_transform * modo.kite_for(modo.you_style).tow_point)
+	elif _guardar_ativo() and bool(_guardando["na_mao"]) and modo.you_on_hand:
+		# D-106: pega a pipa, desfaz o nó e põe no canto
+		var inv2 := _camera.global_transform.affine_inverse()
+		var gv2: Node3D = _guardando["v"]
+		var f2 := int(_guardando["fase"])
+		var tt: float = _guardando["t"]
+		var perto := inv2 * gv2.global_position
+		if f2 == 2:
+			estado = {"modo": "amarrar", "fase": 1.0 - clampf(tt / GUARDAR_TIRAR, 0.0, 1.0), "pipa": perto,
+				"pipa_t": inv2 * gv2.global_transform, "corpo": inv2.basis * Basis(Vector3.UP, _corpos[0].rotation.y),
+				"cabresto": inv2 * (gv2.global_transform * (_guardando["def"] as KiteDefinition).tow_point)}
+		elif perto.length() < 1.1:
+			# segurando pelos lados; no fim da fase 3 solta no chão
+			var solta := clampf(tt / GUARDAR_POR, 0.0, 0.999) if f2 == 3 else 0.0
+			estado = {"modo": "erguer" if f2 == 3 else "andar", "fase": solta, "pipa": perto}
+		else:
+			estado = {"modo": "mao"}
 	elif modo.you_on_hand or eu == null:
 		estado = {"modo": "mao"}
 	else:
@@ -1272,6 +1421,10 @@ func _animar_bonecos(delta: float) -> void:
 			continue
 		if i == 0:
 			corpo.position = base
+		if i == 0 and _guardar_ativo() and bool(_guardando["na_mao"]):
+			var gp := _guardar_ponto()
+			corpo.call("atualizar", gp, gp + Vector3(0.0, -0.3, -0.6), 0.0, delta)
+			continue
 		if fl == null or fl.cut or fl.line == null:
 			corpo.call("atualizar", base + Vector3(0.3, 1.0, -0.4), base + Vector3(0.0, 10.0, -20.0), 0.0, delta)
 			continue
@@ -1812,13 +1965,22 @@ func _fechar_selecao() -> void:
 const LARGADA_AMARRAR := 1.6
 const LARGADA_ANDAR := 1.2
 const LARGADA_ERGUER := 0.5
+## D-106: pipa chegando na mão → tirar a linha ou a rabiola → canto da laje.
+const GUARDAR_CHEGAR := 0.8
+const GUARDAR_TIRAR := 1.4
+const GUARDAR_POR := 1.0
+const PILHA_MAX := 12
+var _guardar_fila: Array = []     ## [{v, def, rabiola, sua, origem}]
+var _guardando := {}              ## a da vez (+ "t", "fase", "na_mao")
+var _tomadas := {}                ## Flyer -> true: a vista é da animação
+var _pilha: Array = []            ## vistas já guardadas no canto
 var _lanc_fase := 0         ## 0 parado · 1 amarrando · 2 indo para a beira · 3 erguendo · 4 subindo
 var _lanc_t := 0.0
 var _pipa_mao: Node3D
 
 
 func _colocar_no_alto_animado() -> void:
-	if not modo.you_on_hand or _lanc_fase != 0:
+	if not modo.you_on_hand or _lanc_fase != 0 or _guardar_ativo() or not _guardar_fila.is_empty():
 		return
 	_painel_mao.visible = false
 	_dedos.clear()

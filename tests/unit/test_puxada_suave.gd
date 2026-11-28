@@ -9,7 +9,7 @@ const Livre := preload("res://game/match/livre.gd")
 
 func test_bracadas_aos_pulos_viram_puxada_lisa() -> void:
 	var dt := 1.0 / 60.0
-	var e := Vector2.ZERO
+	var e := Vector3.ZERO
 	var lo := INF
 	var hi := -INF
 	var soma := 0.0
@@ -34,15 +34,21 @@ func test_bracadas_aos_pulos_viram_puxada_lisa() -> void:
 	assert_true(media > 3.0, "a puxada não fica lenta (%.2f m/s)" % media)
 
 
-func test_parou_de_puxar_a_puxada_acaba_logo() -> void:
-	var e := Vector2(6.0, 6.0)
+## D-106: parou de abraçar, as mãos e a pipa param na hora (0,15 s, o tempo
+## da volta do dedo entre braçadas).
+func test_parou_de_puxar_a_puxada_para_na_hora() -> void:
+	var e := Vector3(6.0, 6.0, 0.0)
+	var parou := -1
 	for k in 60:
 		e = Livre.suavizar_puxada(e, 0.0, 1.0 / 60.0)
-	assert_eq(e.y, 0.0, "em 1 s sem dedo a puxada para")
+		if e.y == 0.0 and parou < 0:
+			parou = k + 1
+	print("      [parou de abraçar] a puxada parou em %.2f s" % (parou / 60.0))
+	assert_true(parou > 0 and parou <= 11, "para em até 0,18 s (%.2f s)" % (parou / 60.0))
 
 
 func test_mandar_linha_corta_a_puxada_na_hora() -> void:
-	assert_eq(Livre.suavizar_puxada(Vector2(6.0, 6.0), -2.0, 1.0 / 60.0).y, 0.0)
+	assert_eq(Livre.suavizar_puxada(Vector3(6.0, 6.0, 0.0), -2.0, 1.0 / 60.0).y, 0.0)
 
 
 func test_dar_linha_so_corre_com_a_pipa_puxando() -> void:

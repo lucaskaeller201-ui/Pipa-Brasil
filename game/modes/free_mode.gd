@@ -42,6 +42,9 @@ var screen_events: Array = []
 ## Sua pipa está na mão, na laje: a tela mostra a escolha de pipa e linha e o
 ## botão de colocar no alto (D-037).
 var you_on_hand := false
+## D-106: pipas que chegaram na sua mão, para a animação de guardar no canto
+## da laje: [Flyer, pela rabiola (bool), sua (bool)]. A cena tira daqui.
+var guardar: Array = []
 var _coices_vistos := 0
 var you_kite := 0
 var you_line := 2
@@ -403,9 +406,12 @@ func _recolher() -> void:
 			players[0]["stock"] = int(players[0]["stock"]) + 1
 			screen_events.append({"type": "aparada", "quem": 0})
 		trouxe += 1
+		if not bool(l["captured"]):   # (as já aparadas foram para a fila no evento "aparada")
+			guardar.append([av, l["chain"] == av.tail, false])
 		av.captured = true
 		if not _agendada(av):
 			_remocoes.append([av, world.time])
+	guardar.append([eu, false, true])
 	world.remove_flyer(eu)
 	players[0]["flyer"] = null
 	you_on_hand = true
@@ -540,6 +546,11 @@ func _evento(e: Dictionary) -> void:
 				players[quem]["stock"] = int(players[quem]["stock"]) + 1
 				screen_events.append({"type": "aparada", "quem": quem})
 				_messages.append("MANDA BUSCA! %s aparou a pipa." % _nome(quem))
+				var idx := int(e["flyer"])
+				if quem == 0 and idx >= 0 and idx < world.flyers.size():
+					var av: Flyer = world.flyers[idx]
+					if not _ja_guardando(av):
+						guardar.append([av, av.caught_by_tail, false])
 
 
 func _nome(i: int) -> String:
@@ -548,6 +559,19 @@ func _nome(i: int) -> String:
 
 func _nome_obj(i: int) -> String:
 	return "você" if i == 0 else String(players[i]["name"])
+
+
+func _ja_guardando(f: Flyer) -> bool:
+	for g in guardar:
+		if g[0] == f:
+			return true
+	return false
+
+
+func take_guardar() -> Array:
+	var g := guardar
+	guardar = []
+	return g
 
 
 func take_screen_events() -> Array:

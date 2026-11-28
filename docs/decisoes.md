@@ -33,6 +33,25 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-106 — Guardar a pipa no canto da laje; braçada para na hora (2026-11-28)
+O Lucas: a pipa chegava perto da laje e sumia para o estoque; queria ver o
+pipeiro pegar a pipa, tirar a linha ou a rabiola (conforme o aparo) e pôr no
+cantinho da laje — a sua também, ao tirar do alto. E ao parar de abraçar, as
+mãos seguiam puxando ~1 s.
+- Animação (só visual, depois que a pipa saiu da física): a vista da pipa é
+  "tomada" quando chega na mão (aparada ou a sua recolhida, fila em
+  FreeMode.guardar). Chega até a frente do pipeiro (0,8 s), ele desfaz as
+  voltas no cabresto — linha da cor da sua, linha cinza da avoada ou a
+  rabiola branca, conforme o aparo (1,4 s) — e põe deitada no canto da frente
+  à direita da laje (1,0 s), uma por cima da outra (até 12 ficam à vista).
+  Em primeira pessoa os olhos acompanham e as mãos fazem o movimento; em
+  terceira, o boneco. Aparada chegando com a sua pipa ainda no alto: as mãos
+  continuam na linha e a aparada vai sozinha para o canto. Não dá para
+  colocar no alto no meio da animação.
+- Braçada: depois de 0,15 s sem o dedo puxar (o tempo da volta do dedo entre
+  braçadas), a puxada vai a zero na hora; as mãos param juntas.
+  test_puxada_suave e test_modo_livre (fila de guardar).
+
 ### D-105 — Aparo firme e avoada que desce pela linha (2026-11-28)
 O Lucas: trazendo a pipa para a mão sempre decepava; na vida real depende do
 aparo — embolada muito (na linha e na rabiola) quase não sai. E queria que a
