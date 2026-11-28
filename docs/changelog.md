@@ -1,5 +1,10 @@
 # Histórico de alterações
 
+## 0.33.2 — 2026-11-28
+
+- Aparo: mandando linha com a pipa embolada, o embolo firma e dá para trazer rápido sem decepar.
+- A pipa aparada desce pela sua linha um pouco mais rápido do que a linha que você recolhe.
+
 ## 0.33.1 — 2026-11-28
 
 - Braçada lisa: a pipa vem rápida e sem trancos; as mãos acompanham mais rápidas.

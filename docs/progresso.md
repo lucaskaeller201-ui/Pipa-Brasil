@@ -1,6 +1,6 @@
 # Progresso
 
-Atualizado em 2026-11-28 (versão 0.33.1: braçada lisa, menos barriga, sem boné — D-104).
+Atualizado em 2026-11-28 (versão 0.33.2: aparo firme e avoada descendo pela linha — D-105).
 
 ## Evolução gráfica (0.33.0, D-098 a D-103)
 

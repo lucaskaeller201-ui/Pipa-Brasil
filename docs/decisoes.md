@@ -33,6 +33,23 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-105 — Aparo firme e avoada que desce pela linha (2026-11-28)
+O Lucas: trazendo a pipa para a mão sempre decepava; na vida real depende do
+aparo — embolada muito (na linha e na rabiola) quase não sai. E queria que a
+aparada viesse um pouco mais rápido que a própria pipa, sem tirar a dele do alto.
+- Firmeza do embolo: começa em 1; mandando linha (pipa girando) com a avoada
+  no aparo, sobe 0,6 por segundo (até 4); embolada pela linha e pela rabiola
+  soma os dois. Decepa puxando acima de 4,5 m/s + 0,9 por ponto de firmeza,
+  depois de 3 m × firmeza puxados (era 3,5 m/s e 3 m fixos). Com firmeza 2
+  aguenta a braçada rápida; a 3,2 nem a puxada máxima (6 m/s) decepa. Embolo
+  fraco puxado rápido continua decepando (fatiar continua no jogo).
+- Aviso: "EMBOLOU! Mande linha para firmar, ou puxe devagar." e, quando
+  firma, "EMBOLO FIRME! Pode trazer rápido."
+- Desce pela linha: a avoada presa na linha corre para a mão 0,5 m/s + 40% da
+  puxada. Medido: com 3 m recolhidos ela andou 4,7 m (1,6 vez).
+- Bots usam as mesmas regras. Testes em test_manda_busca
+  (test_embolo_firme_aguenta_puxada_rapida, test_avoada_desce_pela_linha_mais_rapido_que_a_puxada).
+
 ### D-104 — Puxada lisa, mãos mais rápidas, linha sem sobra, sem boné (2026-11-28)
 Vídeo do Lucas (0.33.0, iPhone, 50–59 fps): a pipa dava trancos na braçada,
 os braços eram lentos, o boné não encaixava e a linha tinha barriga demais.
