@@ -33,6 +33,25 @@ topo da seção correspondente. A especificação original fica em
 
 ## Decisões técnicas
 
+### D-097 — Auditoria gráfica e pesquisa de recursos externos (2026-11-27)
+Pedido do Lucas (segunda etapa gráfica): auditar o que causa a aparência
+low-poly e buscar modelos gratuitos de verdade. Relatório completo no doc
+"PIPA BRASIL — Auditoria gráfica e recursos externos"
+(https://claude.ai/artifact/6Vtjvg9fo5Pya1idfT2Vaz).
+- Pesquisa feita no CI (.github/workflows/pesquisa.yml, tools/pesquisar_recursos.py):
+  busca pública do Sketchfab (só CC0 ou CC BY, baixáveis), API do Poly Haven e
+  arquivos CC0 do Quaternius no OpenGameArt; miniaturas no ramo "pesquisa".
+- Escolhidos para avaliar: casas do iagoDev (CC BY, ~1–3 mil faces), Modular
+  Slums; personagens scan in3D, MakeHuman/MPFB (CC0), Quaternius UBC (CC0);
+  animações Quaternius UAL 1 e 2 (CC0); mãos "Hands model rigged" e "Fists
+  (2025)" (CC BY); árvores e arbustos do Poly Haven (CC0); coqueiros (CC BY).
+- Mixamo descartado: o uso em jogo é livre, mas os arquivos não podem ficar
+  soltos para download, e o repositório é público.
+- Download do Sketchfab precisa de conta: o Lucas cria a chave e guarda como
+  segredo SKETCHFAB_API_TOKEN no GitHub.
+- Etapas: 0 Blender no CI · 1 casas · 2 personagens · 3 mãos · 4 vegetação ·
+  5 materiais · 6 luz e cor · 7 acabamento. Cada uma com capturas e fps.
+
 ### D-096 — Olhar em volta: arrastar para cima olha para cima (2026-11-27)
 O Lucas achou invertido (com a pipa na mão, arrastando para cima a vista
 descia). Agora o dedo para cima levanta a vista; o lado continua igual.
