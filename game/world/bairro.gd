@@ -57,6 +57,9 @@ static func _mata_cartoes(pai: Node3D, bases: Array, rng: RandomNumberGenerator,
 		por_especie[rng.randi() % 3].append(b)
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
+	var grupo := Node3D.new()
+	grupo.name = nome_no
+	pai.add_child(grupo)
 	for e in 3:
 		var info: Array = CARTOES[e]
 		var lista: Array = por_especie[e]
@@ -81,7 +84,7 @@ static func _mata_cartoes(pai: Node3D, bases: Array, rng: RandomNumberGenerator,
 		mat.set_shader_parameter("tom", [Color(0.95, 1.0, 0.9), Color(1.0, 1.0, 1.0), Color(0.9, 1.05, 0.9)][e])
 		no.material_override = mat
 		no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		pai.add_child(no)
+		grupo.add_child(no)
 
 
 static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
