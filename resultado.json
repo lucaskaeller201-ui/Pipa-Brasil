@@ -1,0 +1,970 @@
+{
+ "maos": [
+  {
+   "arq": "maos_01_547a4553",
+   "uid": "547a45535f0c4fe787948f7a7a6a88db",
+   "nome": "First Person hands rigged",
+   "faces": 8152,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-547a45535f0c4fe787948f7a7a6a88db",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_02_a348cf60",
+   "uid": "a348cf6087eb4fd98a83b026593823ad",
+   "nome": "Hand Rig",
+   "faces": 562964,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-a348cf6087eb4fd98a83b026593823ad",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_03_461e0d11",
+   "uid": "461e0d118d634f46917c418b231ad763",
+   "nome": "Rigged wooden puppet hand",
+   "faces": 9262,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-461e0d118d634f46917c418b231ad763",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_04_4a4a1ee2",
+   "uid": "4a4a1ee282394250baba501a0d4ff0fc",
+   "nome": "Rigged Lowpoly Hand",
+   "faces": 808,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-4a4a1ee282394250baba501a0d4ff0fc",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_05_dd05b697",
+   "uid": "dd05b69799a2438e97c90d166f6e416a",
+   "nome": "Godette (Rigged)",
+   "faces": 25488,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-dd05b69799a2438e97c90d166f6e416a",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_06_8e89510d",
+   "uid": "8e89510d963a4d6f99e863bd2742ab01",
+   "nome": "Lopwoly rigged hand in PSX/PS1 style",
+   "faces": 808,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-8e89510d963a4d6f99e863bd2742ab01",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_07_6341f588",
+   "uid": "6341f588ffdf48109fc1efefeee564d3",
+   "nome": "base_hands",
+   "faces": 23920,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-6341f588ffdf48109fc1efefeee564d3",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_08_cbefd9fe",
+   "uid": "cbefd9fe847541dd8192e3281adf1bce",
+   "nome": "Hands model rigged",
+   "faces": 6618,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-cbefd9fe847541dd8192e3281adf1bce",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_09_a9e99a47",
+   "uid": "a9e99a47d2a24957ab6c08c9e57ad48c",
+   "nome": "Viking/Medieval Game Character",
+   "faces": 68872,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-a9e99a47d2a24957ab6c08c9e57ad48c",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_10_c103842c",
+   "uid": "c103842c683148458f9330c69ab1768d",
+   "nome": "Hand Rigged Done",
+   "faces": 15646,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c103842c683148458f9330c69ab1768d",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_11_260d75af",
+   "uid": "260d75af076c42e1a2f2ff9a0c1957da",
+   "nome": "Hands",
+   "faces": 11812,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-260d75af076c42e1a2f2ff9a0c1957da",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_12_c2ec3fdf",
+   "uid": "c2ec3fdf8e344fe2891622b1cc2885b9",
+   "nome": "Wednesday's hand rigged",
+   "faces": 128528,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c2ec3fdf8e344fe2891622b1cc2885b9",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_13_26aec177",
+   "uid": "26aec177328d4d5bb4c644e827c523f3",
+   "nome": "Angel Devil",
+   "faces": 210775,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-26aec177328d4d5bb4c644e827c523f3",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_14_630778b9",
+   "uid": "630778b9c9984fa5aced67fd848034ba",
+   "nome": "Hand_ Rig_ Test_002-FreeDownlaod",
+   "faces": 14732,
+   "animacoes": 2,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-630778b9c9984fa5aced67fd848034ba",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_15_3b7584ef",
+   "uid": "3b7584efd0dd45538bc4c02261c1ce3f",
+   "nome": "Joint Hand BJD",
+   "faces": 487692,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-3b7584efd0dd45538bc4c02261c1ce3f",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_16_bee4147a",
+   "uid": "bee4147a048e41aeb70158f430178009",
+   "nome": "Hand for VR",
+   "faces": 9286,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-bee4147a048e41aeb70158f430178009",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_17_c0d32b85",
+   "uid": "c0d32b85e1ff4c4aa710d416545104b1",
+   "nome": "Rigged Low Poly FPS Hands",
+   "faces": 2148,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c0d32b85e1ff4c4aa710d416545104b1",
+   "termo": "hand rigged"
+  },
+  {
+   "arq": "maos_18_e3c42c05",
+   "uid": "e3c42c05b22944e5839deb8e003f0987",
+   "nome": "First Person arms",
+   "faces": 7240,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e3c42c05b22944e5839deb8e003f0987",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_19_9452ce4c",
+   "uid": "9452ce4cddde4110a4fd73e555a8e412",
+   "nome": "Fps arms",
+   "faces": 4760,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-9452ce4cddde4110a4fd73e555a8e412",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_20_06ee1407",
+   "uid": "06ee1407117d4e5ab343becb4ee44bb6",
+   "nome": "FP arms",
+   "faces": 9860,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-06ee1407117d4e5ab343becb4ee44bb6",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_21_b068ea25",
+   "uid": "b068ea256f9d4a8f874b8e6ae2049b63",
+   "nome": "Hands and Arms - (not rigged) Demo only",
+   "faces": 11136,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b068ea256f9d4a8f874b8e6ae2049b63",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_22_14770174",
+   "uid": "14770174f3d340158ce6ec4524a9394c",
+   "nome": "FPS Arms",
+   "faces": 14792,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-14770174f3d340158ce6ec4524a9394c",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_23_b6a8c3d0",
+   "uid": "b6a8c3d0ebd54ffcab0255ff891812c5",
+   "nome": "first-person arms",
+   "faces": 2248,
+   "animacoes": 11,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b6a8c3d0ebd54ffcab0255ff891812c5",
+   "termo": "first person arms"
+  },
+  {
+   "arq": "maos_24_c7e8f959",
+   "uid": "c7e8f959c4094be991b02213d4e66c20",
+   "nome": "Fists (2025) | First Person Animations",
+   "faces": 10646,
+   "animacoes": 16,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c7e8f959c4094be991b02213d4e66c20",
+   "termo": "first person arms"
+  }
+ ],
+ "personagens": [
+  {
+   "arq": "personagens_01_a46bc9f6",
+   "uid": "a46bc9f67aaa415bb4f3241eef900e7f",
+   "nome": "Eric Rigged 001 - Rigged 3D Business Man",
+   "faces": 20542,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-a46bc9f67aaa415bb4f3241eef900e7f",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_02_ae935d7b",
+   "uid": "ae935d7b05b943b3809c72a781cb074c",
+   "nome": "xander model character man rigged realisitc",
+   "faces": 18023,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-ae935d7b05b943b3809c72a781cb074c",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_03_a84d93e9",
+   "uid": "a84d93e9a85d4a09ac4794532c84286c",
+   "nome": "Rigged Spider-Man 3D model | Free download",
+   "faces": 18308,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-a84d93e9a85d4a09ac4794532c84286c",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_04_dbf9fe0c",
+   "uid": "dbf9fe0cb81d4758ad2525a56d10e2fc",
+   "nome": "Balthazar (rigged & animated)",
+   "faces": 110940,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-dbf9fe0cb81d4758ad2525a56d10e2fc",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_05_8293bad9",
+   "uid": "8293bad9869e4a4d8a5f864c58b25a40",
+   "nome": "Realistic Zombie Hitman",
+   "faces": 93271,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-8293bad9869e4a4d8a5f864c58b25a40",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_06_c659bd0a",
+   "uid": "c659bd0accab47c6bbe390cf822a2b92",
+   "nome": "Claudia Rigged 002 - 3D Rigged Business Women",
+   "faces": 21492,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c659bd0accab47c6bbe390cf822a2b92",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_07_acf520f4",
+   "uid": "acf520f450d14dd799f98a6fede3edf5",
+   "nome": "Carla Rigged 001 - Rigged 3D Business Women",
+   "faces": 19988,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-acf520f450d14dd799f98a6fede3edf5",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_08_e77a2677",
+   "uid": "e77a26778dc14b3c8f4838fe6a827dc3",
+   "nome": "Just man",
+   "faces": 44760,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e77a26778dc14b3c8f4838fe6a827dc3",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_09_b730b58e",
+   "uid": "b730b58e1ffa418daf84e10a822ec08b",
+   "nome": "Hight Quality Realistic Man Character",
+   "faces": 40436,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b730b58e1ffa418daf84e10a822ec08b",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_10_b90c5d2c",
+   "uid": "b90c5d2ca07c4d53a55c7197aac1c051",
+   "nome": "MILES REALISTIC MODEL BY ZAID",
+   "faces": 85968,
+   "animacoes": 2,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b90c5d2ca07c4d53a55c7197aac1c051",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_11_10cbeabe",
+   "uid": "10cbeabee635483fae932f9e49f3cf7b",
+   "nome": "Hight Quality Realistic Man Character",
+   "faces": 55490,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-10cbeabee635483fae932f9e49f3cf7b",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_12_2880a251",
+   "uid": "2880a251b89e4f0dba4e4c5ae161c0c4",
+   "nome": "Realistic kitchen scene",
+   "faces": 126545,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2880a251b89e4f0dba4e4c5ae161c0c4",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_13_ee5f9ead",
+   "uid": "ee5f9ead63c54b938efc619a7382f885",
+   "nome": "Violet Evergarden Realistic Outfit",
+   "faces": 1777281,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-ee5f9ead63c54b938efc619a7382f885",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_14_6b8009a6",
+   "uid": "6b8009a6e4f747f59ccadb121adc3679",
+   "nome": "Realistic Old Russian Guy (animated)",
+   "faces": 53891,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-6b8009a6e4f747f59ccadb121adc3679",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_15_932fe0c8",
+   "uid": "932fe0c820f245ab9f3e24fcef1203b1",
+   "nome": "spider man plushy rigged",
+   "faces": 48728,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-932fe0c820f245ab9f3e24fcef1203b1",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_16_6c0fab94",
+   "uid": "6c0fab94636e4c60b2c2f766fe7f477f",
+   "nome": "Realistic JDM Rim Pack",
+   "faces": 186958,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-6c0fab94636e4c60b2c2f766fe7f477f",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_17_b1597911",
+   "uid": "b159791188e04a6d83e4379f12ba10f5",
+   "nome": "Realistic building",
+   "faces": 3380,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b159791188e04a6d83e4379f12ba10f5",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_18_73e467df",
+   "uid": "73e467dfc8a04914bb314a9410077858",
+   "nome": "Human 3D model scanned with iPhone X",
+   "faces": 37210,
+   "animacoes": 1,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-73e467dfc8a04914bb314a9410077858",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_19_959e9362",
+   "uid": "959e9362c0174bc4a7f065f207524906",
+   "nome": "Mixed Adult Male",
+   "faces": 115308,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-959e9362c0174bc4a7f065f207524906",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_20_c9ded091",
+   "uid": "c9ded09156c244a6b0c3a29820e7f42a",
+   "nome": "Black Boy Rigged Ready For Ue4",
+   "faces": 18376,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c9ded09156c244a6b0c3a29820e7f42a",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_21_3cff4eb8",
+   "uid": "3cff4eb8fe204564aea0c1d1ebef92b6",
+   "nome": "Business man",
+   "faces": 17308,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-3cff4eb8fe204564aea0c1d1ebef92b6",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_22_cae1b75b",
+   "uid": "cae1b75bea294b6bae9ab5d06c086089",
+   "nome": "Base Mesh Female with Rig and Textures",
+   "faces": 155382,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-cae1b75bea294b6bae9ab5d06c086089",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_23_2b95ebfb",
+   "uid": "2b95ebfb5fc7440ab164420090bf1d14",
+   "nome": "Ben 10 Ripjaws Rigged",
+   "faces": 35138,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2b95ebfb5fc7440ab164420090bf1d14",
+   "termo": "realistic man rigged"
+  },
+  {
+   "arq": "personagens_24_19694d40",
+   "uid": "19694d408cff4085b0f34f3f7425ffe9",
+   "nome": "Mapinguari - Brazil Folklore - Base Mesh - WIP",
+   "faces": 913830,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-19694d408cff4085b0f34f3f7425ffe9",
+   "termo": "brazilian boy"
+  }
+ ],
+ "casas": [
+  {
+   "arq": "casas_01_c41f20fd",
+   "uid": "c41f20fd044a47768e9fa054d2ce817a",
+   "nome": "Favela",
+   "faces": 273280,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c41f20fd044a47768e9fa054d2ce817a",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_02_545c2cb0",
+   "uid": "545c2cb0b12b4f5db74d014b4ebd620b",
+   "nome": "Favela Cutaway",
+   "faces": 8884,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-545c2cb0b12b4f5db74d014b4ebd620b",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_03_b9797c38",
+   "uid": "b9797c38e4e645b39f0cda8c05bebd5f",
+   "nome": "Favela brasileira",
+   "faces": 780,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b9797c38e4e645b39f0cda8c05bebd5f",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_04_c87942d7",
+   "uid": "c87942d7d3ba43648920c7f7cd451afc",
+   "nome": "Favela brasileira 2",
+   "faces": 954,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c87942d7d3ba43648920c7f7cd451afc",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_05_9631e0ba",
+   "uid": "9631e0bae22343db82c44fe243af7c15",
+   "nome": "Street Scene Rio Favela",
+   "faces": 35895,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-9631e0bae22343db82c44fe243af7c15",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_06_e38dd3b1",
+   "uid": "e38dd3b18165420a8a6a34897ba9aad0",
+   "nome": "favelas",
+   "faces": 62295,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e38dd3b18165420a8a6a34897ba9aad0",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_07_1bb28ed3",
+   "uid": "1bb28ed30a9844778674872f813582f3",
+   "nome": "Favela House (Made in Roblox)",
+   "faces": 1726,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-1bb28ed30a9844778674872f813582f3",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_08_1f2e19fe",
+   "uid": "1f2e19fe125f4aabbf43b793248c9f77",
+   "nome": "Cafe Brazil / Favela Chic NOLA",
+   "faces": 452754,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-1f2e19fe125f4aabbf43b793248c9f77",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_09_03a03568",
+   "uid": "03a03568eb0d4c9cbae9b1ce4091b059",
+   "nome": "Favelas",
+   "faces": 7500,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-03a03568eb0d4c9cbae9b1ce4091b059",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_10_214dedb8",
+   "uid": "214dedb8fda5464396688ae56f2bcefa",
+   "nome": "Max Payne_favelas",
+   "faces": 16316,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-214dedb8fda5464396688ae56f2bcefa",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_11_789cd0b9",
+   "uid": "789cd0b9c4644a01adc3ace61573baf1",
+   "nome": "Pack of old houses 2",
+   "faces": 2678,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-789cd0b9c4644a01adc3ace61573baf1",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_12_2541efe5",
+   "uid": "2541efe5cd5e49bd885386c7a3fb8ed1",
+   "nome": "Funky Favela",
+   "faces": 188644,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2541efe5cd5e49bd885386c7a3fb8ed1",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_13_be4a54f6",
+   "uid": "be4a54f622a14f8b8bb8df70046f1dc1",
+   "nome": "Pack of old houses",
+   "faces": 2240,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-be4a54f622a14f8b8bb8df70046f1dc1",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_14_2e238fa4",
+   "uid": "2e238fa40a9844cb85374ea2d9715617",
+   "nome": "Slum island, Favela-morro",
+   "faces": 9213,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2e238fa40a9844cb85374ea2d9715617",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_15_e2b6f532",
+   "uid": "e2b6f532e1fe4f7280890971d78183f4",
+   "nome": "Modular Slums",
+   "faces": 17328,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e2b6f532e1fe4f7280890971d78183f4",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_16_f6548caa",
+   "uid": "f6548caa15d04a3d987540ac2de486a1",
+   "nome": "Old House",
+   "faces": 226,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-f6548caa15d04a3d987540ac2de486a1",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_17_cffb6839",
+   "uid": "cffb6839da9943d1a93525ddbe779009",
+   "nome": "maquete favela (em construção)",
+   "faces": 4954,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-cffb6839da9943d1a93525ddbe779009",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_18_a11f5936",
+   "uid": "a11f593600c944cfad8323b3d2908cd7",
+   "nome": "Sopa de Macaco (Monkey Soup)",
+   "faces": 2207,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-a11f593600c944cfad8323b3d2908cd7",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_19_c5489f40",
+   "uid": "c5489f405b4c430890270c86268fd449",
+   "nome": "BANDIDO MAL",
+   "faces": 26,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-c5489f405b4c430890270c86268fd449",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_20_b95001b4",
+   "uid": "b95001b4f4244ce5ad34860338cc4e9c",
+   "nome": "Tche tche",
+   "faces": 1297563,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b95001b4f4244ce5ad34860338cc4e9c",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_21_8efe3281",
+   "uid": "8efe328142e4409891bf3699a1cb93dd",
+   "nome": "''Morro da Favela'' Tarsila do Amaral",
+   "faces": 78475,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-8efe328142e4409891bf3699a1cb93dd",
+   "termo": "favela"
+  },
+  {
+   "arq": "casas_22_e5e7aac6",
+   "uid": "e5e7aac667844ee2803bafcf384c08a0",
+   "nome": "Colonial House",
+   "faces": 11824,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e5e7aac667844ee2803bafcf384c08a0",
+   "termo": "brazilian house"
+  },
+  {
+   "arq": "casas_23_88fbd157",
+   "uid": "88fbd157729b44fdb44637f715d88d77",
+   "nome": "scan_country_house",
+   "faces": 1525963,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-88fbd157729b44fdb44637f715d88d77",
+   "termo": "brazilian house"
+  },
+  {
+   "arq": "casas_24_4253bf02",
+   "uid": "4253bf020b174522afe9d39452fdcecc",
+   "nome": "Brazil Flag",
+   "faces": 21104,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-4253bf020b174522afe9d39452fdcecc",
+   "termo": "brazilian house"
+  }
+ ],
+ "vegetacao": [
+  {
+   "arq": "vegetacao_01_95cd1a77",
+   "uid": "95cd1a77789241ee82a960bad5dfe809",
+   "nome": "Palm tree",
+   "faces": 571,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-95cd1a77789241ee82a960bad5dfe809",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_02_b84b7348",
+   "uid": "b84b734847344cb6a81b9102a64ac63b",
+   "nome": "Stylized Palm tree set",
+   "faces": 27528,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b84b734847344cb6a81b9102a64ac63b",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_03_45a74e13",
+   "uid": "45a74e13bdcb433fa77a24b7113c189d",
+   "nome": "Palm Tree",
+   "faces": 658,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-45a74e13bdcb433fa77a24b7113c189d",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_04_22c3a3d3",
+   "uid": "22c3a3d3fb7146cfa22850fa31390e5d",
+   "nome": "Stylized Palm Tree",
+   "faces": 376,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-22c3a3d3fb7146cfa22850fa31390e5d",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_05_58cd53de",
+   "uid": "58cd53de211e4a97b6172c43b82aafca",
+   "nome": "Palm Tree",
+   "faces": 960,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-58cd53de211e4a97b6172c43b82aafca",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_06_fd439b0f",
+   "uid": "fd439b0f82c34497aabb21c68ad2fb34",
+   "nome": "Palm Tree Pack LOWPOLY",
+   "faces": 8921,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-fd439b0f82c34497aabb21c68ad2fb34",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_07_7075afbf",
+   "uid": "7075afbfe4444606ab9f4984d08e76c4",
+   "nome": "PALM LEAF",
+   "faces": 76480,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-7075afbfe4444606ab9f4984d08e76c4",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_08_dade6a63",
+   "uid": "dade6a6307ff411492b205a388a77719",
+   "nome": "PALM",
+   "faces": 1162649,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-dade6a6307ff411492b205a388a77719",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_09_d05c8ffb",
+   "uid": "d05c8ffb6ec64a7184c4b673e21f7224",
+   "nome": "Realistic Palm Tree 2 Free",
+   "faces": 60764,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-d05c8ffb6ec64a7184c4b673e21f7224",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_10_39052ea7",
+   "uid": "39052ea764c945858449e699318efa53",
+   "nome": "Realistic Palm Tree Free",
+   "faces": 27152,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-39052ea764c945858449e699318efa53",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_11_b9922dd1",
+   "uid": "b9922dd105ee4536b9ca983c26f58e66",
+   "nome": "Palm Tree",
+   "faces": 3532,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-b9922dd105ee4536b9ca983c26f58e66",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_12_2517eb62",
+   "uid": "2517eb623aea48c4b4cc5e96e1e3f971",
+   "nome": "Young Palm",
+   "faces": 1512,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2517eb623aea48c4b4cc5e96e1e3f971",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_13_dc894acc",
+   "uid": "dc894acc16544bc69630e9a5232cf74c",
+   "nome": "Realistic Palm Tree Low Poly",
+   "faces": 6340,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-dc894acc16544bc69630e9a5232cf74c",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_14_ced3b31f",
+   "uid": "ced3b31f14f940d0b7480a83e6f8c9c0",
+   "nome": "Palm Tree Realistic",
+   "faces": 1812,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-ced3b31f14f940d0b7480a83e6f8c9c0",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_15_e8c0ea53",
+   "uid": "e8c0ea53410947b0b7f20d33702f4098",
+   "nome": "Plant Series – Palm Tree",
+   "faces": 3392,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-e8c0ea53410947b0b7f20d33702f4098",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_16_55690379",
+   "uid": "55690379305145488e20afb05fc687e6",
+   "nome": "Palm Trees",
+   "faces": 2857,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-55690379305145488e20afb05fc687e6",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_17_102cabf0",
+   "uid": "102cabf0155243e094282c0cd74e79e0",
+   "nome": "Palm Tree",
+   "faces": 2340,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-102cabf0155243e094282c0cd74e79e0",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_18_557ea8d4",
+   "uid": "557ea8d4527f47e8bbc657e2764b7cab",
+   "nome": "Palm Tree tall",
+   "faces": 1964,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-557ea8d4527f47e8bbc657e2764b7cab",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_19_28328631",
+   "uid": "28328631321a45c89991c876eed07eec",
+   "nome": "Palm Tree Model",
+   "faces": 146732,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-28328631321a45c89991c876eed07eec",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_20_86891ba3",
+   "uid": "86891ba31b5d475c980e2cc6a022e410",
+   "nome": "FNAF SB Palm Tree",
+   "faces": 14716,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-86891ba31b5d475c980e2cc6a022e410",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_21_61df9f8b",
+   "uid": "61df9f8be11a45c0b7048790db2569e8",
+   "nome": "Washingtonia Robusta Palm_02",
+   "faces": 201622,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-61df9f8be11a45c0b7048790db2569e8",
+   "termo": "palm tree"
+  },
+  {
+   "arq": "vegetacao_22_2f093afb",
+   "uid": "2f093afb792742438f0f7ba7eaab90f0",
+   "nome": "Tropical Plants Pack M02P",
+   "faces": 46575,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-2f093afb792742438f0f7ba7eaab90f0",
+   "termo": "tropical tree"
+  },
+  {
+   "arq": "vegetacao_23_69978145",
+   "uid": "6997814540f14929bf13cf3828b5dc90",
+   "nome": "Tropical Mango Trees",
+   "faces": 754911,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-6997814540f14929bf13cf3828b5dc90",
+   "termo": "tropical tree"
+  },
+  {
+   "arq": "vegetacao_24_d6bd064e",
+   "uid": "d6bd064e5ccd4fbd8dabce8c77ca1852",
+   "nome": "Tropical tree stem with complex structure",
+   "faces": 0,
+   "animacoes": 0,
+   "licenca": "CC Attribution",
+   "url": "https://sketchfab.com/3d-models/none-d6bd064e5ccd4fbd8dabce8c77ca1852",
+   "termo": "tropical tree"
+  }
+ ]
+}
