@@ -17,6 +17,7 @@ const BuildInfo := preload("res://game/main/build_info.gd")
 const Ambiente := preload("res://game/world/ambiente.gd")
 const Bairro := preload("res://game/world/bairro.gd")
 const Boneco := preload("res://game/world/boneco.gd")
+const Pessoa := preload("res://game/world/pessoa.gd")
 const PELES := [Color(0.55, 0.36, 0.24), Color(0.85, 0.64, 0.48), Color(0.4, 0.26, 0.18), Color(0.72, 0.5, 0.35)]
 const BERMUDAS := [Color(0.15, 0.25, 0.55), Color(0.2, 0.2, 0.22), Color(0.5, 0.42, 0.3), Color(0.1, 0.45, 0.25)]
 const KiteView := preload("res://game/views/kite_view.gd")
@@ -66,6 +67,7 @@ var _largada_arg := false
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
 var _estilo_de := {}            # Flyer -> estilo (desenho e fitinhas)
+var _boneco_antigo := false   ## D-099: --boneco-antigo volta ao boneco feito por código
 var _corpos: Array = []         # boneco de cada participante
 
 # gestos
@@ -155,6 +157,8 @@ func _ready() -> void:
 			_inicio_arg = true
 		elif arg == "--escolha":
 			_escolha_arg = true
+		elif arg == "--boneco-antigo":
+			_boneco_antigo = true
 		elif arg == "--largada":
 			_largada_arg = true    # D-089: captura da largada pelos olhos
 		elif arg == "--vitrine-maos":
@@ -190,9 +194,13 @@ func _ready() -> void:
 	_aplicar_graficos()
 	_montar_cenario()
 	for i in modo.players.size():
-		var corpo: Node3D = Boneco.new()
+		# D-099: personagens Rocketbox quando estão no jogo; senão o Boneco
+		var corpo: Node3D = Pessoa.new() if Pessoa.disponivel() and not _boneco_antigo else Boneco.new()
 		add_child(corpo)
-		corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
+		if corpo.has_method("construir_pessoa"):
+			corpo.call("construir_pessoa", i, i % 3 != 2, CORES[(i + 2) % CORES.size()].darkened(0.2))
+		else:
+			corpo.call("construir", PELES[i % PELES.size()], CORES[i % CORES.size()].darkened(0.15), BERMUDAS[i % BERMUDAS.size()], i % 3 != 2)
 		if i > 0:
 			# D-083: os bonecos dos bots não fazem sombra (cada um tem ~45 peças
 			# e cada faixa de sombra desenharia todas de novo)
