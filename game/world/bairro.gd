@@ -227,6 +227,8 @@ static func _casa(pai: Node3D, base: Vector3, tamanho: Vector3, cor: Color, tijo
 		_caixa_dagua(pai, topo + Vector3(rng.randf_range(-1.5, 1.5), 0.0, rng.randf_range(-2.0, 2.0)))
 	if rng.randf() < 0.3:
 		_antena(pai, topo + Vector3(-tamanho.x * 0.3, 0.0, 0.0))
+	elif qualidade != "leve" and rng.randf() < 0.3:
+		_parabolica(pai, topo + Vector3(tamanho.x * 0.3, 0.0, rng.randf_range(-1.0, 1.0)), rng)
 	if rng.randf() < 0.25:
 		_varal(pai, topo + Vector3(0.0, 0.0, tamanho.z * 0.2), tamanho.x * 0.7, rng)
 
@@ -325,6 +327,14 @@ static func _cilindro(pai: Node3D, base: Vector3, raio_baixo: float, raio_topo: 
 	m.position = base + Vector3(0.0, altura * 0.5, 0.0)
 	pai.add_child(m)
 	return m
+
+
+## D-101: antena parabólica (prato inclinado num pé).
+static func _parabolica(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> void:
+	_cilindro(pai, base, 0.03, 0.03, 0.9, Color(0.3, 0.3, 0.32), 6)
+	var prato := _cilindro(pai, base + Vector3(0.0, 0.85, 0.0), 0.32, 0.4, 0.06, Color(0.82, 0.82, 0.8), 14)
+	prato.rotation = Vector3(0.9, rng.randf() * TAU, 0.0)
+	prato.position = base + Vector3(0.0, 1.0, 0.0)
 
 
 static func _caixa_dagua(pai: Node3D, base: Vector3) -> void:
@@ -455,8 +465,60 @@ static func _arvore(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> v
 		pai.add_child(m)
 
 
+## D-101: coqueiros de verdade (Yughues, CC0): [malha, ajuste, altura, topo].
+static var _palmas: Array = []
+
+
+static func _carregar_palmas() -> void:
+	if not _palmas.is_empty() or not ResourceLoader.exists("res://assets/vegetacao/coqueiros.glb"):
+		return
+	var cena := (load("res://assets/vegetacao/coqueiros.glb") as PackedScene).instantiate()
+	for mi in cena.find_children("*", "MeshInstance3D", true, false):
+		var t := (mi as Node3D).transform
+		var no := (mi as Node).get_parent()
+		while no != null and no != cena:
+			if no is Node3D:
+				t = (no as Node3D).transform * t
+			no = no.get_parent()
+		var malha := (mi as MeshInstance3D).mesh
+		var caixa := t * malha.get_aabb()
+		# pé do tronco = média dos vértices mais baixos; copa = dos mais altos
+		# (nos coqueiros tortos o pé não fica no meio da caixa)
+		var pe := Vector3.ZERO
+		var copa := Vector3.ZERO
+		var npe := 0
+		var ncopa := 0
+		for sup in malha.get_surface_count():
+			for v in (malha.surface_get_arrays(sup)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+				var w := t * v
+				if w.y < caixa.position.y + caixa.size.y * 0.04:
+					pe += w
+					npe += 1
+				elif w.y > caixa.position.y + caixa.size.y * 0.8:
+					copa += w
+					ncopa += 1
+		pe = pe / maxf(npe, 1) if npe > 0 else caixa.get_center()
+		copa = copa / maxf(ncopa, 1) if ncopa > 0 else caixa.get_center() + Vector3(0.0, caixa.size.y * 0.35, 0.0)
+		var ajuste := Transform3D(Basis(), Vector3(-pe.x, -caixa.position.y, -pe.z)) * t
+		_palmas.append([malha, ajuste, caixa.size.y, Vector3(copa.x - pe.x, copa.y - caixa.position.y, copa.z - pe.z)])
+	cena.free()
+
+
 ## Coqueiro (D-065): tronco curvado em gomos e folhas de palha que vergam.
 static func _coqueiro(pai: Node3D, base: Vector3, rng: RandomNumberGenerator) -> void:
+	_carregar_palmas()
+	if not _palmas.is_empty():
+		var info: Array = _palmas[rng.randi() % _palmas.size()]
+		var mi := MeshInstance3D.new()
+		mi.mesh = info[0]
+		var esc := rng.randf_range(7.0, 9.5) / float(info[2])
+		var giro := Basis(Vector3.UP, rng.randf() * TAU)
+		mi.transform = Transform3D(giro.scaled(Vector3.ONE * esc), base) * (info[1] as Transform3D)
+		pai.add_child(mi)
+		var topo_r := base + giro * (info[3] as Vector3) * esc
+		obstaculos.add_haste(base, topo_r, 0.22, 0.5)
+		obstaculos.add_bola(topo_r, 2.4, 0.15)
+		return
 	_materiais_arvore()
 	var altura := rng.randf_range(6.0, 9.0)
 	var inclina := Vector3(rng.randf_range(-0.6, 0.6), 0.0, rng.randf_range(-0.6, 0.6))
@@ -964,6 +1026,36 @@ static func _fachada(base: Vector3, tamanho: Vector3, tijolo: bool, frente: floa
 				_na_parede(_det, p, 0.0, yv - 0.05, 0.02, l + 0.04, 0.22, 0.06, COR_CONCRETO)
 			elif f < andares:
 				_na_parede(_det, p, 0.0, yv, 0.02, l, 0.08, 0.04, Color(0.82, 0.8, 0.76))
+	# D-101: mais coisa de bairro de verdade na fachada da frente
+	var pf: Dictionary = paredes[0]
+	var lf: float = pf["l"]
+	# relógio de luz (caixa cinza com visor) perto da porta
+	var ur := rng.randf_range(-0.35, 0.35) * lf
+	_na_parede(_det, pf, ur, 1.5, 0.08, 0.32, 0.42, 0.16, Color(0.62, 0.63, 0.6))
+	_na_parede(_vid, pf, ur, 1.58, 0.165, 0.18, 0.12, 0.01, Color.WHITE)
+	# fio de luz saindo do relógio até o alto da parede
+	_na_parede(_det, pf, ur + 0.1, 1.72 + (tamanho.y - 1.9) * 0.5, 0.05, 0.025, tamanho.y - 1.9, 0.025, Color(0.08, 0.08, 0.08))
+	# cano de descida da calha num canto (PVC claro ou ferro escuro)
+	if laje or rng.randf() < 0.6:
+		var lado_cano := (0.5 if rng.randf() < 0.5 else -0.5) * lf - signf(rng.randf() - 0.5) * 0.25
+		var cor_cano := Color(0.85, 0.85, 0.82) if rng.randf() < 0.6 else Color(0.25, 0.25, 0.26)
+		_na_parede(_det, pf, lado_cano, tamanho.y * 0.5, 0.09, 0.09, tamanho.y, 0.09, cor_cano)
+		_na_parede(_det, pf, lado_cano, 0.15, 0.2, 0.12, 0.06, 0.28, cor_cano)
+	# ar-condicionado também no térreo de algumas casas
+	if not comercio and rng.randf() < 0.3:
+		_na_parede(_det, pf, rng.randf_range(-0.4, 0.4) * lf, 2.35, 0.16, 0.75, 0.45, 0.3, Color(0.9, 0.89, 0.85))
+	# número da casa (plaquinha)
+	if rng.randf() < 0.6:
+		_na_parede(_det, pf, ur - 0.55, 2.0, 0.025, 0.22, 0.14, 0.02, [Color(0.1, 0.25, 0.6), Color(0.95, 0.95, 0.92), Color(0.6, 0.15, 0.1)][rng.randi() % 3])
+	# toldo listrado no comércio
+	if comercio:
+		var c1: Color = [Color(0.85, 0.15, 0.12), Color(0.1, 0.45, 0.25), Color(0.15, 0.3, 0.7), Color(0.95, 0.7, 0.1)][rng.randi() % 4]
+		var faixas := maxi(4, int(lf * 0.7 / 0.35))
+		var largura_t := lf * 0.7
+		for k in faixas:
+			var uk := -largura_t * 0.5 + (k + 0.5) * largura_t / faixas
+			_na_parede(_det, pf, uk, 2.75, 0.5, largura_t / faixas, 0.05, 1.0, c1 if k % 2 == 0 else Color(0.95, 0.94, 0.9))
+		_na_parede(_det, pf, 0.0, 2.65, 1.0, largura_t, 0.22, 0.03, c1)
 	if tijolo:
 		for sx in [-0.5, 0.5]:
 			for sz in [-0.5, 0.5]:
