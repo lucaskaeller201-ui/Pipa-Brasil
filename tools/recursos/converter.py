@@ -189,8 +189,17 @@ def coqueiros():
 	relatorio.append({"tipo": "coqueiros_arquivos", "arquivos": [os.path.relpath(f, T) for f in cand]})
 	if not cand:
 		return
-	f = sorted(cand, key=lambda x: (not x.lower().endswith(".fbx"), x))[0]
+	# os FBX deste pacote são da versão 6100 (o Blender lê só 7100+): usa os OBJ
+	objs = sorted(f for f in cand if f.lower().endswith(".obj"))
+	relatorio.append({"tipo": "coqueiros_lidos", "arquivos": [os.path.basename(f) for f in objs]})
 	limpar()
+	for k, f in enumerate(objs):
+		bpy.ops.wm.obj_import(filepath=f, forward_axis="NEGATIVE_Z", up_axis="Y")
+		for o in bpy.context.selected_objects:
+			o.location.x += k * 8.0
+			o.name = os.path.splitext(os.path.basename(f))[0] + "_" + o.name
+	f = objs[0] if objs else cand[0]
+	if False:
 	if f.lower().endswith(".fbx"):
 		bpy.ops.import_scene.fbx(filepath=f)
 	elif f.lower().endswith(".obj"):
@@ -203,7 +212,6 @@ def coqueiros():
 		for o in dst.objects:
 			if o is not None:
 				bpy.context.scene.collection.objects.link(o)
-	pasta = os.path.dirname(f)
 	for img in bpy.data.images:
 		base = os.path.basename(img.filepath.replace("\\", "/"))
 		achado = glob.glob(os.path.join(T, "coqueiros", "**", base), recursive=True)
@@ -212,11 +220,22 @@ def coqueiros():
 			img.reload()
 		if img.size[0] > 1024:
 			img.scale(1024, 1024)
+	dif = glob.glob(os.path.join(T, "coqueiros", "**", "diffuse.tga"), recursive=True)
 	for mat in bpy.data.materials:
-		if mat.use_nodes:
-			for n in mat.node_tree.nodes:
-				if n.type == "TEX_IMAGE":
-					mat.blend_method = "CLIP"
+		mat.use_nodes = True
+		nt = mat.node_tree
+		bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+		if bsdf is not None and not bsdf.inputs["Base Color"].is_linked and dif:
+			img = bpy.data.images.load(dif[0])
+			if img.size[0] > 1024:
+				img.scale(1024, 1024)
+			no = nt.nodes.new("ShaderNodeTexImage")
+			no.image = img
+			nt.links.new(no.outputs["Color"], bsdf.inputs["Base Color"])
+			nt.links.new(no.outputs["Alpha"], bsdf.inputs["Alpha"])
+		mat.blend_method = "CLIP"
+		if bsdf is not None:
+			bsdf.inputs["Roughness"].default_value = 0.8
 	saida = os.path.join(SAIDA, "vegetacao", "coqueiros.glb")
 	bpy.ops.export_scene.gltf(filepath=saida, export_format="GLB", export_image_format="AUTO", export_apply=True, export_yup=True)
 	mn, mx = caixa()
@@ -226,7 +245,7 @@ def coqueiros():
 
 
 for etapa, args in [(personagem, n) for n in ["Male_Adult_01", "Male_Adult_17", "Male_Adult_04", "Male_Adult_16", "Male_Adult_09", "Male_Adult_11", "Male_Adult_20"]] + \
-		[(arvore, n) for n in ["island_tree_01", "tree_small_02", "jacaranda_tree", "shrub_04", "shrub_01"]] + [(coqueiros, None)]:
+		[(arvore, n) for n in ["island_tree_01", "tree_small_02", "jacaranda_tree"]] + [(coqueiros, None)]:
 	try:
 		etapa(args) if args is not None else etapa()
 	except Exception as e:

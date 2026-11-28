@@ -18,7 +18,7 @@ T = "trabalho"
 os.makedirs(T, exist_ok=True)
 
 PERSONAGENS = ["Male_Adult_01", "Male_Adult_17", "Male_Adult_04", "Male_Adult_16", "Male_Adult_09", "Male_Adult_11", "Male_Adult_20"]
-ARVORES = ["island_tree_01", "tree_small_02", "jacaranda_tree", "shrub_04", "shrub_01"]
+ARVORES = ["island_tree_01", "tree_small_02", "jacaranda_tree"]
 
 
 def pegar(url, destino):
@@ -53,5 +53,6 @@ try:
 	for raiz, _, arqs in os.walk(os.path.join(T, "coqueiros")):
 		for a in arqs:
 			print("coqueiro:", os.path.join(raiz, a))
+	print(open(os.path.join(T, "coqueiros", "readme.txt"), errors="replace").read()[:1500])
 except Exception as e:
 	print("coqueiros: erro", e)
