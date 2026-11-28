@@ -387,13 +387,12 @@ func test_avoada_desce_pela_linha_mais_rapido_que_a_puxada() -> void:
 	var falta0 := a.line.rest_total() - float(l["m"])
 	var linha0 := a.line_length()
 	a.input.haul_speed = 3.0
-	for i in roundi(2.0 / DT):
+	for i in roundi(1.0 / DT):   # 1 s: ainda longe da mão (a 3 m ela já conta como aparada)
 		w.step(DT)
-		if b.captured:
-			break
 	a.input.clear()
+	assert_false(b.captured, "em 1 s ainda não chegou")
 	var recolheu := linha0 - a.line_length()
-	var falta1 := 0.0 if b.captured else a.line.rest_total() - float(l["m"])
+	var falta1 := a.line.rest_total() - float(l["m"])
 	print("      [desce pela linha] faltava %.1f m até a mão, falta %.1f m; linha recolhida %.1f m" % [falta0, falta1, recolheu])
 	assert_true(falta0 - falta1 > recolheu * 1.25, "a avoada chega mais rápido que a linha que entra")
 	assert_true(falta0 - falta1 < recolheu * 2.0, "mas só um pouco mais rápido")
