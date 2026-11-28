@@ -64,6 +64,7 @@ var _painel_pausa: PanelContainer
 var _botao_alto: Button
 var _banner_ini := 0.0
 var _largada_arg := false
+var _guardar_arg := 0       ## D-106: captura: 1 põe uma aparada na linha, 2 recolhe, 3 feito
 var _linhas: MeshInstance3D
 var _vistas := {}               # Flyer -> KiteView
 var _estilo_de := {}            # Flyer -> estilo (desenho e fitinhas)
@@ -163,6 +164,8 @@ func _ready() -> void:
 			_boneco_antigo = true
 		elif arg == "--largada":
 			_largada_arg = true    # D-089: captura da largada pelos olhos
+		elif arg == "--guardar":
+			_guardar_arg = 1       # D-106: captura da animação de guardar
 		elif arg == "--vitrine-maos":
 			_vitrine_maos = true   # D-089: captura das mãos em cada movimento
 	ThemeDB.fallback_font = Visual.fonte(600)   # D-094: Baloo 2 em toda a interface
@@ -487,6 +490,18 @@ func _process(delta: float) -> void:
 		_passos = 0
 		_quadros = 0
 	_quadros += 1
+	if _guardar_arg == 1 and modo.you() != null and modo.world.time > 2.5:
+		# captura: uma avoada enroscada na sua linha (como em test_modo_livre)
+		var eu_g: Flyer = modo.you()
+		var av_g := modo.world.add_flyer(KiteDefinition.pipa_rio(), eu_g.kite.position + Vector3(2.0, -1.0, 3.0), 10.0)
+		av_g.cut = true
+		av_g.tag = -1
+		av_g.caught_by = eu_g
+		modo.world.combat.links.append({"avoada": av_g, "catcher": eu_g, "chain": av_g.line if av_g.line != null else eu_g.line, "idx": 1, "cchain": eu_g.line, "m": 1.0, "captured": false, "forca": 1.0})
+		_guardar_arg = 2
+	elif _guardar_arg == 2 and modo.world.time > 3.0:
+		modo._recolher()
+		_guardar_arg = 3
 	if _largada_arg and _lanc_fase == 0 and modo.you_on_hand and modo.world.time > 1.0:
 		_colocar_no_alto_animado()   # captura: coloca no alto sozinho
 	var tq := Time.get_ticks_usec()
