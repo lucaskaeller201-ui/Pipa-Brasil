@@ -38,6 +38,50 @@ static var _ruas: Array = RUAS
 ## D-079: as formas que a linha e a pipa não atravessam, montadas junto com o
 ## cenário (a cena passa para SimWorld.obstacles).
 static var obstaculos := Obstacles.new()
+## D-100: qualidade dos gráficos ("ultra", "alto", "leve"), definida pela partida.
+static var qualidade := "ultra"
+## Árvores de verdade (Poly Haven, CC0) em cartões: [nome, altura, largura,
+## escala no jogo]. Altura e largura vêm do relatório do converter.py.
+const CARTOES := [["island_tree_01", 5.03, 4.82, 1.9], ["tree_small_02", 4.56, 4.29, 2.1], ["jacaranda_tree", 19.47, 24.42, 0.45]]
+
+
+static func _cartoes_existem() -> bool:
+	return ResourceLoader.exists("res://assets/vegetacao/%s_cartoes.png" % CARTOES[0][0])
+
+
+## Mata em cartões (D-100): uma MultiMesh por espécie; cada posição é a base
+## da árvore no chão e o tamanho, um fator.
+static func _mata_cartoes(pai: Node3D, bases: Array, rng: RandomNumberGenerator, nome_no: String) -> void:
+	var por_especie: Array = [[], [], []]
+	for b in bases:
+		por_especie[rng.randi() % 3].append(b)
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE
+	for e in 3:
+		var info: Array = CARTOES[e]
+		var lista: Array = por_especie[e]
+		if lista.is_empty():
+			continue
+		var lado := maxf(info[1], info[2]) * 1.05
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = quad
+		mm.instance_count = lista.size()
+		for k in lista.size():
+			var base: Vector3 = lista[k][0]
+			var f: float = float(info[3]) * float(lista[k][1])
+			var t := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * lado * f), base + Vector3(0.0, float(info[1]) * 0.5 * f - 0.3, 0.0))
+			mm.set_instance_transform(k, t)
+		var no := MultiMeshInstance3D.new()
+		no.name = "%s_%s" % [nome_no, info[0]]
+		no.multimesh = mm
+		var mat := ShaderMaterial.new()
+		mat.shader = load("res://game/world/shaders/arvore_cartao.gdshader")
+		mat.set_shader_parameter("atlas", load("res://assets/vegetacao/%s_cartoes.png" % info[0]))
+		mat.set_shader_parameter("tom", [Color(0.95, 1.0, 0.9), Color(1.0, 1.0, 1.0), Color(0.9, 1.05, 0.9)][e])
+		no.material_override = mat
+		no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		pai.add_child(no)
 
 
 static func criar(pai: Node3D, lajes := 2, semente := 7, mapa := "bairro") -> void:
@@ -729,8 +773,9 @@ static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
 	bola.rings = 6
 	ma.mesh = bola
 	var arvores: Array = []
-	for k in 6000:
-		if arvores.size() >= 1400:
+	var maximo := 1400 if qualidade == "leve" or not _cartoes_existem() else (2600 if qualidade == "ultra" else 2000)
+	for k in 9000:
+		if arvores.size() >= maximo:
 			break
 		var x := rng.randf_range(-700.0, 700.0)
 		var z := rng.randf_range(-740.0, -390.0)
@@ -741,6 +786,13 @@ static func _favela(pai: Node3D, ruido: FastNoiseLite) -> void:
 		if not na_mata and rng.randf() > 0.15:
 			continue
 		arvores.append(Transform3D(Basis().scaled(Vector3.ONE * rng.randf_range(3.0, 6.0)), Vector3(x, h + 1.5, z)))
+	if _cartoes_existem():
+		# D-100: árvores de verdade (cartões) no lugar das bolas verdes
+		var bases: Array = []
+		for t in arvores:
+			bases.append([(t as Transform3D).origin - Vector3(0.0, 1.5, 0.0), (t as Transform3D).basis.get_scale().x / 4.5])
+		_mata_cartoes(pai, bases, rng, "MataDaSerra")
+		return
 	ma.instance_count = arvores.size()
 	for k in arvores.size():
 		ma.set_instance_transform(k, arvores[k])

@@ -249,6 +249,7 @@ func _montar_cenario() -> void:
 ## D-066: suavização das bordas (antisserrilhado), sombras nítidas e
 ## texturas nítidas de longe. É isso que tira o "pixelado"/serrilhado.
 func _aplicar_graficos() -> void:
+	Bairro.qualidade = _graficos   # D-100: quantas árvores e detalhes no cenário
 	var vp := get_viewport()
 	if vp == null:
 		return
