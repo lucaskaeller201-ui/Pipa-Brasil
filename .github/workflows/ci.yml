@@ -299,7 +299,8 @@ jobs:
             timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . \
               --rendering-method gl_compatibility --resolution 1280x720 \
               --fixed-fps 15 --quit-after 330 --write-movie "quadros_$vista/q.png" \
-              -- --auto $extra 2>&1 | tail -5 || true
+              -- --auto $extra 2>&1 | tee "log_$vista.txt" | tail -5 || true
+            grep "^DESENHO" "log_$vista.txt" | sed "s/^/[$vista] /" || true
             quadros="00000030 00000150 00000329"
             # mãos (D-089): parado, puxando, mandando, desbicando, amarrando, erguendo
             if [ "$vista" = maos ]; then quadros="00000045 00000090 00000105 00000150 00000165 00000182 00000190 00000260 00000320"; fi

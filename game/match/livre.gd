@@ -53,6 +53,7 @@ var modo: FreeMode
 
 var _semente := 1
 var _automatico := false
+var _quadros_medidos := 0
 var _primeira_pessoa := true
 var _camera: Camera3D
 var _maos: Node3D               # D-089: as duas mãos em primeira pessoa
@@ -420,6 +421,15 @@ func _conferir_versao_nova() -> void:
 
 
 func _process(delta: float) -> void:
+	# D-103: custo de desenho (chamadas, triângulos, objetos) para comparar
+	# versões nas capturas do CI (o FPS de lá não vale: não tem placa de vídeo)
+	_quadros_medidos += 1
+	if _automatico and _quadros_medidos % 100 == 0 and _quadros_medidos <= 300:
+		print("DESENHO quadro=%d chamadas=%d triangulos=%d objetos=%d memoria_video_mb=%.0f" % [_quadros_medidos,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0])
 	# D-082: quadros por segundo ao lado da versão (para ver se está travando)
 	_fps_t += delta
 	if _versao != null and _fps_t > 0.5:
